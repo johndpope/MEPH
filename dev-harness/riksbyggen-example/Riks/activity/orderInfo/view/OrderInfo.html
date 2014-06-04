@@ -1,0 +1,49 @@
+﻿<div class="meph-view meph-view-remove">
+    <panel cls="meph-panel-basic meph-layout-grid-column-a">
+        <header>Operative</header>
+        <panelbody>
+            <search labelText="Name"></search>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-b  meph-grid-layout-flex-height">
+        <header>Service order information</header>
+        <panelbody>
+                <div class="meph-layout-grid-column-a">
+                    <text labelText="Service order" value="m$.serviceOrder.workOrder"></text>
+                    <text labelText="Object" value="m$.serviceOrder.objectRef"></text>
+                    <span></span>
+                </div>
+                <div class="meph-layout-grid-column-a">
+                    <text labelText="CusomterID"></text>
+                    <span></span>
+                </div>
+                <div class="meph-layout-grid-column-a">
+                    <text labelText="Responsible operative" value="m$.serviceOrder.operative" bind-data="disabled : m$.serviceOrders | p$.dosomethingonserver | m$.isdisabled"></text>
+                    <text labelText="Event status" value="m$.serviceOrder.eventStatus"></text>
+                    <span></span>
+                </div>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-c  meph-grid-layout-flex-height">
+        <header>Work description and classification</header>
+        <panelbody>
+                <div class="meph-layout-grid-column-a">
+                    <text labelText="Error code"></text>
+                    <multilinetext labeText="Work description" rows="4"  inputCls="meph-stretch"></multilinetext>
+                    <text labelText="Priority"></text>
+                </div>
+                <div class="meph-layout-grid-column-a">
+                    <text labelText="CusomterID"></text>
+                    <span></span>
+                </div>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-c  meph-grid-layout-flex-height">
+        <header>Internal Message</header>
+        <panelbody>
+                <div class="meph-layout-grid-column-b">
+                    <multilinetext rows="10" inputCls="meph-stretch"></multilinetext>
+                </div>
+        </panelbody>
+    </panel>
+</div>

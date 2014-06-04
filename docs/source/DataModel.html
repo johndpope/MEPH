@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-util-DataModel'>/**
+</span> * @class MEPH.util.DataModel
+ * String
+ */
+MEPH.define(&#39;MEPH.util.DataModel&#39;, {
+    requires: [&#39;MEPH.util.Validatable&#39;],
+    statics: {
+<span id='MEPH-util-DataModel-method-model'>        /**
+</span>         * Adds validation rules to a model.
+         **/
+        model: function (model, rules) {
+            if (Array.isArray(model)) {
+                model.foreach(function (x) {
+                    MEPH.util.DataModel.model(x, rules);
+                })
+            }
+            else {
+                var Validatable = MEPH.util.Validatable;
+                if (!Validatable.isValidatable(model)) {
+                    Validatable.validatable(model);
+                }
+
+                if (!Array.isArray(rules)) {
+                    rules = [rules];
+                }
+
+                rules = rules.where(function (x) {
+                    return !Validatable.getRulesOnPath(model, x.path).some(function (y) {
+                        return y.test === x.rule;
+                    });;
+                });
+
+                rules.foreach(function (ruleConfig) {
+                    Validatable.addValidationRule(model, ruleConfig.path, ruleConfig.rule);
+                });
+            }
+            return model;
+        }
+    }
+});</pre>
+</body>
+</html>

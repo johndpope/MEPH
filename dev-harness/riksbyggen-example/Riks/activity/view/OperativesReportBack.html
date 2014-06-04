@@ -1,0 +1,25 @@
+﻿<div class="meph-view meph-view-remove">
+
+    <activityview
+        MEPHId="activityview">
+        <div>
+            <iconbutton icon="search" size="X2" data-events='"click" : "v$.showSearch"'>
+            </iconbutton>
+            <iconbutton icon="calculator" size="X2" data-events='"click" : "v$.showOrderInfo"'>
+            </iconbutton>
+            <iconbutton icon="menu" size="X2" data-events='"click" : "v$.showFeeback"'>
+            </iconbutton>
+            <iconbutton icon="screen" size="X2" data-events='"click" : "v$.showProduct"'>
+            </iconbutton>
+            <iconbutton icon="keyboard" size="X2" data-events='"click" : "v$.showTimeSheet"'>
+            </iconbutton>
+        </div>
+        <div class="operativesreportback">
+            <searchserviceorders MEPHId="searchserviceorders"></searchserviceorders>
+            <orderinfo MEPHId="orderinfo"></orderinfo>
+            <feedback MEPHId="feedback"></feedback>
+            <products MEPHId="products"></products>
+            <timesheet MEPHId="timesheet"></timesheet>
+        </div>
+    </activityview>
+</div>

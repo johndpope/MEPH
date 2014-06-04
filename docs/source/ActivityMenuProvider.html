@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-mobile-application-menu-ActivityMenuProvider'>/**
+</span> * @class MEPH.mobile.application.menu.ActivityMenuProvider
+ * An activity menu provider.
+ */
+MEPH.define(&#39;MEPH.mobile.application.menu.ActivityMenuProvider&#39;, {
+    requires: [&#39;MEPH.util.Observable&#39;, &#39;MEPH.Constants&#39;],
+    properties: {
+        name: &#39;Activity&#39;,
+        type: &#39;activity&#39;,
+        source: null
+    },
+    initialize: function () {
+        var me = this;
+        me.source = MEPH.util.Observable.observable([]);
+        MEPH.subscribe(MEPH.Constants.ActivityStarted, me.onActivityStarted.bind(me));
+        me.onActivityStarted();
+    },
+    onActivityStarted: function () {
+        var me = this;
+        me.source.removeWhere(function (x) { return true; });
+        MEPH.ActivityController.getActivities().foreach(function (activity) {
+            me.source.push(MEPH.util.Observable.observable({
+                name: activity.activity.getPath() || activity.activity.getActivityId(),
+                id: activity.activity.getActivityId(),
+                type: MEPH.mobile.application.menu.ApplicationMenu.activityinstance
+            }));
+        });
+        if (me.updateCallback) {
+            me.updateCallback();
+        }
+    },
+    getItems: function (data, toplevel) {
+        var me = this;
+        if (data === null) {
+            return [{
+                topmenu: true,
+                name: &#39;Activities&#39;
+            }]
+        }
+        return me.source;
+    },
+    ownsData: function (data) {
+        var me = this;
+        return me.source.contains(function (x) { return x === data; });
+    },
+<span id='MEPH-mobile-application-menu-ActivityMenuProvider-method-itemClicked'>    /**
+</span>     * Handles an item clicked event.
+     * @param {Object} data
+     * @param {Boolean} getparentdata, If true, the parents data should be retrieve. If no data exists,
+     * then return false;
+     */
+    itemClicked: function (data, getparentdata) {
+        var me = this;
+        if (getparentdata) {
+            return false;
+        }
+        if (data.topmenu) {
+            return me.source;
+        }
+        return MEPH.ActivityController.showActivity(data.id).then(function () {
+            return true;
+        });
+    }
+});</pre>
+</body>
+</html>

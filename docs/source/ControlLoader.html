@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-dom-ControlLoader'>/**
+</span> * @class MEPH.dom.ControlLoader
+ * Reads controls from the dom which should be created, and associated with there js objects. 
+ **/
+MEPH.define(&#39;MEPH.dom.ControlLoader&#39;, {
+    requires: [&#39;MEPH.util.Dom&#39;, &#39;MEPH.bind.Binder&#39;],
+    statics: {
+<span id='MEPH-dom-ControlLoader-static-method-getTemplateDom'>        /**
+</span>         * @static
+         * Gets the dom nodes of the template.
+         * @param {Object} templateInfo
+         * @param {String} templateInfo.template
+         **/
+        getTemplateDom: function (templateInfo) {
+            var me = this,
+                div = me.getUnattachedDiv(),
+                nodes;
+
+            div.innerHTML = templateInfo.template;
+
+            nodes = MEPH.util.Array.convert(div.childNodes);
+            return nodes;
+        },
+<span id='MEPH-dom-ControlLoader-static-method-getUnattachedDiv'>        /**
+</span>         * @static
+         * Generates an attached div.
+         * @returns {Object}
+         */
+        getUnattachedDiv: function () {
+            return document.createElement(&#39;div&#39;);
+        }
+    },
+    properties: {
+        MEPHUniqueId: &#39;mephuniqueid&#39;,
+        MEPHId: &#39;mephid&#39;
+    },
+    initialize: function () {
+        var me = this;
+    },
+<span id='MEPH-dom-ControlLoader-method-generateBoundControls'>    /**
+</span>     * Generates bound controls
+     * @param {Array} packages
+     **/
+    generateBoundControls: function (packages) {
+        var me = this;
+        MEPH.Array(packages);
+        return packages.select(function (x) {
+            return me.generateBoundControl(x);
+        });
+    },
+<span id='MEPH-dom-ControlLoader-method-generateBoundControl'>    /**
+</span>     * Generates a bound control
+     * @param {Object} controlPackage
+     * @param {Object} controlPackage.controlObject
+     * @param {Object} controlPackage.templateNode
+     * @param {Object} controlPackage.classInstance
+     **/
+    generateBoundControl: function (controlPackage) {
+        var me = this;
+        MEPH.Binder.bindObject(controlPackage.classInstance, controlPackage.templateNode);
+        MEPH.Binder.bindControlPackage(controlPackage);
+        return controlPackage;
+    },
+<span id='MEPH-dom-ControlLoader-method-loadSubControls'>    /**
+</span>     * Loads the sub controls of the control packages, and merges the results.
+     * @param {Array} controlPackages
+     * @param {MEPH.application.Application} application
+     * @returns {Promise}
+     */
+    loadSubControls: function (controlPackages, application) {
+        var me = this,
+            results,
+            promises;
+        promises = MEPH.Array(controlPackages).select(function (controlPackage) {
+            //return Promise.resolve()
+            //    .then(me.loadSubControl.bind(me, controlPackage, application))
+            //    .then(me.appendResultsToControl.bind(me, controlPackage, application))
+            //    .then(me.processSubControls.bind(me, controlPackage, application))
+            results = (me.loadSubControl(controlPackage, application));
+            results = (me.appendResultsToControl(controlPackage, application, results));
+            return (me.processSubControls(controlPackage, application, results));
+        });
+        //return Promise.all(promises).then(function () {
+        var classInstance = controlPackages.classInstance;
+        if (classInstance &amp;&amp; classInstance.fire) {
+            classInstance.fire(&#39;subcontrolsloaded&#39;);
+        }
+        return controlPackages;
+        //});
+    },
+<span id='MEPH-dom-ControlLoader-method-processSubControls'>    /**
+</span>     * @private 
+     * Processes the subcontrols 
+     * @param {Object} controlPackage
+     * @param {MEPH.application.Application} application
+     * @param {Array} subcontrolPackages
+     **/
+    processSubControls: function (controlPackage, application, subcontrolPackages) {
+        var me = this,
+            promises;
+        //promises = MEPH.Array(subcontrolPackages).select(function (subcontrolPackage) {
+        //    controlPackage.classInstance.addSubControl(subcontrolPackage.classInstance);
+        //    return Promise.resolve().then(me.processSubControl.bind(me, controlPackage, application, subcontrolPackage));
+        //});
+        promises = MEPH.Array(subcontrolPackages).select(function (subcontrolPackage) {
+            controlPackage.classInstance.addSubControl(subcontrolPackage.classInstance);
+            return (me.processSubControl(controlPackage, application, subcontrolPackage));
+        });
+        //return Promise.all(promises);
+        return promises;
+    },
+<span id='MEPH-dom-ControlLoader-method-processSubControl'>    /**
+</span>     * @private 
+     * Processes a subcontrol.
+     * @param {Object} controlPackage
+     * @param {MEPH.application.Application} application
+     * @param {Object} subcontrolPackages
+     **/
+    processSubControl: function (controlPackage, application, subcontrolPackage) {
+        var me = this,
+            nodes;
+        return (me.loadSubControls([subcontrolPackage], application));//Promise.resolve().then
+    },
+
+<span id='MEPH-dom-ControlLoader-method-appendResultsToControl'>    /**
+</span>     * Append subcontrols to control package
+     **/
+    appendResultsToControl: function (controlPackage, application, subcontrolPackages) {
+        var me = this,
+            promises;
+
+        promises = MEPH.Array(subcontrolPackages).select(function (subControlPackage) {
+            return (me.appendResultToControl(controlPackage, application, subControlPackage));//Promise.resolve().then;
+        });
+        //return Promise.all(promises).then(function () {
+        return subcontrolPackages;
+        //});
+    },
+<span id='MEPH-dom-ControlLoader-method-appendResultToControl'>    /**
+</span>     * Append result to control.
+     * @param {Object} controlPackage
+     * @param {MEPH.application.Application} application
+     * @param {Object} subcontrolPackage
+     * @param {Object} subcontrolPackage.controlObject
+     * @param {Object} subcontrolPackage.templateNode
+     * @param {Object} subcontrolPackage.classInstance
+     * @returns {Promise}
+     **/
+    appendResultToControl: function (controlPackage, application, subcontrolPackage) {
+        var me = this,
+            found,
+            sco,
+            subNode;
+
+        if (subcontrolPackage &amp;&amp; subcontrolPackage.controlObject &amp;&amp; subcontrolPackage.controlObject.node) {
+            sco = subcontrolPackage.controlObject;
+            subNode = sco.node;
+            found = controlPackage.templateNode.where(function (parentNode) {
+                if (parentNode.nodeType === MEPH.util.Dom.textType) { return false; }
+                return true;
+            }).select(function (parentNode) {
+                return (parentNode.querySelector(sco.alias +
+                    &#39;[&#39; + me.MEPHUniqueId + &#39;=&quot;&#39; + subcontrolPackage.classInstance.getUniqueId() + &#39;&quot;]&#39;));
+
+            }).first();
+
+            if (found === null) {
+                found = controlPackage.templateNode.first(function (parentNode) {
+                    return parentNode.getAttribute(me.MEPHUniqueId) === subcontrolPackage.classInstance.getUniqueId();
+                });
+            }
+            if (found) {
+                me.manageConnectionBetween(controlPackage, subcontrolPackage, subNode);
+                MEPH.Binder.bindControl(controlPackage.classInstance, subcontrolPackage.classInstance, subNode);
+                MEPH.Binder.bindDomControl(controlPackage, subcontrolPackage, subNode);
+                subcontrolPackage.templateNode.foreach(function (packNode) {
+                    MEPH.util.Dom.insertBefore(subNode, packNode);
+                });
+                MEPH.util.Dom.removeFromDom(subNode);
+            }
+            else {
+                throw &#39;subnode not found: MEPH.dom.ControlLoader.js&#39;
+            }
+            //Replacing the subNode with the generated template nodes will permanantly distore the parents template.
+            //So everything should be done by now.
+        }
+        else {
+            throw &#39;cannot append result to control if custom tag node is gone&#39;;
+        }
+        return controlPackage;
+    },
+<span id='MEPH-dom-ControlLoader-method-manageConnectionBetween'>    /**
+</span>     * Manages the connectiosn between the control and subcontrol.
+     * @param {Object} controlPackage
+     * @param {Object} subcontrolPackage
+     * @param {Object} subNode
+     **/
+    manageConnectionBetween: function (controlPackage, subcontrolPackage, subNode) {
+        var me = this,
+            subClassInstance = subcontrolPackage.classInstance,
+            classInstance = controlPackage.classInstance,
+            attribute;
+        subClassInstance.addReferenceConnection(MEPH.control.Control.connectables.subcontrol, classInstance);
+        attribute = subNode.getAttribute(me.MEPHId);
+        if (attribute) {
+
+            Object.defineProperty(classInstance, attribute, {
+                enumerable: false,
+                writable: false,
+                configurable: false,
+                value: subClassInstance
+            });
+
+            Object.defineProperty(classInstance, MEPH.privatePropertyPrefix + MEPH.privateClassPrefix + attribute, {
+                enumerable: false,
+                writable: false,
+                configurable: false,
+                value: subClassInstance
+            });
+
+            Object.defineProperty(classInstance, MEPH.privatePropertyPrefix + attribute, {
+                enumerable: false,
+                writable: false,
+                configurable: false,
+                value: subcontrolPackage.templateNode
+            });
+        }
+    },
+
+<span id='MEPH-dom-ControlLoader-method-loadSubControl'>    /**
+</span>     * Load the sub controls of a contrl package, and merge the results.
+     * @param {Object} controlPackage
+     * @param {MEPH.application.Application} application
+     * @returns {Promise}
+     **/
+    loadSubControl: function (controlPackage, application) {
+        var me = this,
+            loadControlsResult,
+            generatedBoundControlsResult,
+            templateNode = controlPackage.templateNode,
+            nodes;
+        nodes = MEPH.Binder.getSubObjects(templateNode, 1).select(function (x) {
+            var templateInfo = MEPH.getTemplateByNode(x);
+            return {
+                node: x,
+                alias: templateInfo.alias
+            }
+        });;
+        //return me.loadControls(nodes, controlPackage.classInstance, application)
+        //            .then(me.generateBoundControls.bind(me))
+        //.then(function (results) {
+        //    return me.loadSubControls(results, application);
+        //});
+        loadControlsResult = me.loadControls(nodes, controlPackage.classInstance, application)
+        generatedBoundControlsResult = me.generateBoundControls(loadControlsResult);
+        //.then(function (results) {
+        return me.loadSubControls(generatedBoundControlsResult, application);
+        //});
+    },
+<span id='MEPH-dom-ControlLoader-method-loadControls'>    /**
+</span>     * Loads the controls
+     * @param {Array} controlObjects
+     * @returns {Promise}
+     */
+    loadControls: function (controlObjects, parentControl, application) {
+        var me = this,
+            promises;
+        promises = MEPH.util.Array.create(controlObjects).select(function (controlObject) {
+            //return Promise.resolve().then(me.loadControl.bind(me, controlObject, parentControl, application));
+            return (me.loadControl(controlObject, parentControl, application));
+        })
+
+        //return Promise.all(promises).then(function (result) {
+        return me.bindObjectReferences(parentControl, application, promises)
+        //});
+    },
+<span id='MEPH-dom-ControlLoader-method-bindObjectReferences'>    /**
+</span>     * Binds control objects with references
+     * @param {Object} parentControl
+     * @param {MEPH.application.Application} application
+     * @param {Array} controlPackage
+     * @returns {Promise}
+     */
+    bindObjectReferences: function (parentControl, application, controlPackages) {
+        var me = this,
+            promises;
+
+        promises = MEPH.Array(controlPackages).select(function (controlPackage) {
+            //return Promise.resolve().then(me.bindObjectReference.bind(me, parentControl, application, controlPackage))
+            //.then(function (result) {
+            //    return result;
+            //});
+            return me.bindObjectReference(parentControl, application, controlPackage);
+        });
+
+        //return Promise.all(promises);
+        return promises;
+    },
+<span id='MEPH-dom-ControlLoader-method-bindObjectReference'>    /**
+</span>     * Binds control object with references
+     * @param {Object} parentControl
+     * @param {MEPH.application.Application} application
+     * @param {Object} controlPackage
+     * @returns {Promise}
+     */
+    bindObjectReference: function (parentControl, application, controlPackage) {
+        var me = this,
+            promise = Promise.resolve(),
+            parentReferences,
+            controlObject = controlPackage.controlObject,
+            referencePacks = [], references
+        templateNode = controlPackage.templateNode,
+        classInstance = controlPackage.classInstance;
+
+        if (controlObject &amp;&amp; templateNode &amp;&amp; classInstance) {
+            parentReferences = parentControl ? parentControl.getReferenceConnections() : [];
+            references = me.getObjectReferences(controlObject.node);//.then(function (references) {
+
+            parentReferences.foreach(function (x) {
+                classInstance.addReferenceConnectionObj(x);
+
+                if (!referencePacks.some(function (y) { return x.type === y.type; }) &amp;&amp; x.type !== &#39;control&#39; &amp;&amp; x.type !== &#39;subcontrol&#39;) {
+                    referencePacks.push({ type: x.type, instance: x.obj });
+                }
+            });
+            if (references) {
+                MEPH.Array(references);
+                references.foreach(function (x) {
+                    classInstance.removeReferenceConnection(x.type);
+                });
+
+                references.foreach(function (ref) {
+                    var instance = new ref.classDefinition();
+                    if (application) {
+                        application.addInstance(instance);
+                    }
+                    if (!referencePacks.some(function (x) { return x.type === ref.type; }) &amp;&amp; ref.type !== &#39;control&#39; &amp;&amp; ref.type !== &#39;subcontrol&#39;) {
+                        referencePacks.push({ type: ref.type.type, instance: instance });
+                    }
+                    classInstance.addReferenceConnection(ref.type, instance, true);
+                });
+            }
+            referencePacks.foreach(function (x) {
+                referencePacks.foreach(function (y) {
+
+                    if (x.instance.isReferrerable) {
+                        x.instance.addReferenceConnection(y.type, y.instance);
+                    }
+                });
+                if (x.instance.fire) {
+                    x.instance.fire(&#39;referencesbound&#39;);
+                }
+            });
+
+            if (classInstance.fire) {
+                classInstance.fire(&#39;referencesbound&#39;);
+            }
+
+            return controlPackage;
+            //});
+        }
+        else {
+            throw &#39;missing argument : ControlLoader.bindObjectReference&#39;;
+        }
+        // return promise;
+    },
+<span id='MEPH-dom-ControlLoader-method-hasReferences'>    /**
+</span>     * Returns true if the dom object indicates whether or not it will reference an object.
+     * @param {Object} dom
+     * @returns {Boolean}
+     **/
+    hasReferences: function (dom) {
+        var dataObjectReferenceAttribute = dom.getAttribute(MEPH.dataObjectReferenceAttribute);
+        return dataObjectReferenceAttribute !== null &amp;&amp; dataObjectReferenceAttribute !== undefined;
+    },
+<span id='MEPH-dom-ControlLoader-method-getObjectReferences'>    /**
+</span>     * Gets the object references from a dom object which is considered a view.
+     * @param {Object} dom
+     * @returns {Promise}
+     */
+    getObjectReferences: function (dom) {
+        var me = this,
+            Dom = MEPH.util.Dom,
+            json,
+            prefixObj,
+            i,
+            template,
+            classPathOrAlias,
+            json,
+            promises = [],
+            classInformation,
+            types,
+            $class,
+            type,
+            key,
+            promise = Promise.resolve(),
+            dataObjectReferenceAttribute;
+        dataObjectReferenceAttribute = dom.getAttribute(MEPH.dataObjectReferenceAttribute);
+        if (dataObjectReferenceAttribute) {
+            json = Dom.tryParseAttributeJson(dataObjectReferenceAttribute);
+            for (i in json) {
+                if (json.hasOwnProperty(i)) {
+                    prefixObj = MEPH.getBindPrefixShortCut(i);
+                    classPathOrAlias = json[i];
+                    classInformation = MEPH.getDefinedClassInformation(classPathOrAlias);
+                    $class = MEPH.getPathValue(classInformation ? classInformation.classifiedName : classPathOrAlias);
+                    key = i;
+                    type = MEPH.getBindPrefixShortCut(key);
+                    if (type) {
+                        type = type.type;
+                    }
+                    promises.push({
+                        key: key,
+                        type: type,
+                        classDefinition: $class
+                    });
+                    //promises.push(Promise.resolve().then(function (information, classPathOrAlias, key) {
+                    //    return MEPH.create(information ? information.classifiedName : classPathOrAlias)
+                    //    .then(function (key, $class) {
+                    //        var type = MEPH.getBindPrefixShortCut(key);
+                    //        if (type) {
+                    //            type = type.type;
+                    //        }
+                    //        return {
+                    //            key: key,
+                    //            type: type,
+                    //            classDefinition: $class
+                    //        };
+                    //    }.bind(me, key));
+                    //}.bind(me, classInformation, classPathOrAlias, i)));
+
+                }
+            }
+            //promise = promise.then(function () {
+            return (promises)
+            //});
+        }
+        else {
+            json = null;
+            // promise = promise.then(function () { return null; });
+            return null;
+        }
+
+        return promise
+    },
+<span id='MEPH-dom-ControlLoader-method-loadControl'>    /**
+</span>     * Loads a control.
+     * @param {Object} controlObject
+     * @param {Object} controlObject.node
+     * @param {Object} controlObject.alias
+     * @param {MEPH.control.Control} parentControl
+     */
+    loadControl: function (controlObject, parentControl, application) {
+        var me = this,
+            result,
+            templateInfo = MEPH.getDefinedClassInformation(controlObject.alias) || MEPH.getTemplate(controlObject.alias),
+            // templateNodes,
+            // templateNode,
+            templateDom,
+            classInstance,
+            promise = Promise.resolve(),
+            definedClass;
+
+        if (templateInfo) {
+            definedClass = MEPH.getDefinedClass(templateInfo.classifiedName);
+            //templateNode = me.getTemplateDom(templateInfo);
+            if (definedClass) {
+                classInstance = new definedClass();
+                classInstance.setUniqueId(MEPH.GUID());
+
+                if (controlObject.view) {
+                    classInstance.addReferenceConnection(&#39;view&#39;, classInstance, true)
+                }
+
+                if (application) {
+                    classInstance.setApplication(application);
+                    application.addControl(classInstance);
+                }
+                if (classInstance.fire) {
+                    classInstance.fire(&#39;init&#39;);
+                }
+                controlObject.node.setAttribute(me.MEPHUniqueId, classInstance.getUniqueId());
+
+                if (classInstance.setInstanceTemplate) {
+                    classInstance.setInstanceTemplate(controlObject.node);
+                    if (classInstance.fire) {
+                        classInstance.fire(&#39;setinstancetemplate&#39;);
+                    }
+                }
+
+                //promise = classInstance.getGeneratedTemplateDom().then(function (result) {
+                templateDom = classInstance.getGeneratedTemplateDom();
+                classInstance.setDomTemplate(templateDom);
+
+                if (classInstance.fire) {
+                    classInstance.fire(&#39;setdomtemplate&#39;);
+                }
+
+                result = {
+                    controlObject: controlObject,
+                    templateNode: templateDom,
+                    classInstance: classInstance
+                };
+                classInstance.setControlObject(result);
+                return result;
+                // });
+                //return promise;
+            }
+            else {
+                //generate a class definition is the template specifies nocode
+                throw &#39;unhandled occurence in ControlLoader.js&#39;;
+            }
+        }
+        else {
+            throw &#39;Template information not found&#39;;
+        }
+    },
+<span id='MEPH-dom-ControlLoader-method-getTemplateDom'>    /**
+</span>     * Gets the dom nodes of the template.
+     * @param {Object} templateInfo
+     * @param {String} templateInfo.template
+     **/
+    getTemplateDom: function (templateInfo) {
+        var me = this,
+            div = me.getUnattachedDiv(),
+            nodes;
+
+        div.innerHTML = templateInfo.template;
+
+        nodes = MEPH.util.Array.convert(div.childNodes);
+
+        return nodes;
+    },
+<span id='MEPH-dom-ControlLoader-method-getUnattachedDiv'>    /**
+</span>     * Generates an attached div.
+     * @returns {Object}
+     */
+    getUnattachedDiv: function () {
+        return document.createElement(&#39;div&#39;);
+    }
+});</pre>
+</body>
+</html>

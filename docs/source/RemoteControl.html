@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id=''>/**
+</span> * @class
+ * The class instance will listen on the channel for synchronization messages.
+ **/
+MEPH.define(&#39;MEPH.mixins.RemoteControl&#39;, {
+    requires: [&#39;MEPH.mobile.services.MobileServices&#39;],
+    statics: {
+        remoteControlFunctions: {
+            handleRemoteControlRequestCompletions: function (type, args) {
+                var me = this,
+                    viewpath = me[MEPH.nonEnumerablePropertyPrefix + &#39;$path&#39;],
+                    remoteViews;
+                remoteViews = MEPH.getPathValue(viewpath, me);//me.remoteViews.push(obs);
+                if (remoteViews) {
+                    var i = me.remoteViews.first(function (x) {
+                        return x.remoteInstanceId === args.message.remoteInstanceId;
+                    });
+                    if (i) {
+                        i.ready = true;
+                    }
+                }
+            },
+<span id='-method-openRemoteView'>            /**
+</span>             * Opens a remote view.
+             * @param {String} viewid
+             * @param {String} remoteInstanceId
+             * @param {String} path
+             * @param {String} remoteUser
+             * @param {String} channel
+             ***/
+            openRemoteView: function (viewid, remoteInstanceId, path, remoteUser, id, name, channel) {
+                var me = this,
+                    viewpath = me[MEPH.nonEnumerablePropertyPrefix + &#39;$path&#39;],
+                    value;
+                return MEPH.MobileServices.get(&#39;signalService&#39;).then(function (signalService) {
+                    if (signalService) {
+                        obs = MEPH.util.Observable.observable({
+                            remoteInstanceId: remoteInstanceId,
+                            viewId: viewid,
+                            path: path,
+                            ready: false
+                        });
+                        value = MEPH.getPathValue(viewpath, me);//me.remoteViews.push(obs);
+                        if (value &amp;&amp; value.push) {
+                            value.push(obs);
+                        }
+                        signalService.sendMessage({
+                            type: MEPH.Constants.RemoteControlRequest,
+                            viewId: viewid,
+                            slave: true,
+                            remoteInstanceId: remoteInstanceId,
+                            from: id,
+                            fromName: name
+                        }, remoteUser, channel || MEPH.Constants.ACTIVITY_CONTROLLER_CHANNEL);
+                    }
+                });
+            }
+        }
+    },
+    init: function (path) {
+        var me = this,
+            i,
+            referrerFunctions = MEPH.mixins.RemoteControl.remoteControlFunctions;
+        me[MEPH.nonEnumerablePropertyPrefix + &#39;$path&#39;] = path;
+        for (i in referrerFunctions) {
+            me[i] = referrerFunctions[i].bind(me);
+        }
+        MEPH.subscribe(MEPH.Constants.RemoteControlRequestComplete, me.handleRemoteControlRequestCompletions.bind(me));
+    }
+});</pre>
+</body>
+</html>

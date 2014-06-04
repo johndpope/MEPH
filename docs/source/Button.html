@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-button-Button'>/**
+</span> * @class MEPH.button.Button
+ * Buton
+ */
+MEPH.define(&#39;MEPH.button.Button&#39;, {
+    alias: &#39;mephbutton&#39;,
+    requires: [&#39;MEPH.util.Dom&#39;],
+    templates: true,
+    statics: {
+        buttonClickEvent: &#39;buttonClickEvent&#39;
+    },
+    properties: {
+        injectControls: {
+            location: &#39;insidebutton&#39;
+        },
+        defaultCls: &#39;&#39;
+    },
+    extend: &#39;MEPH.control.Control&#39;,
+    initialize: function () {
+        var me = this;
+        me.buttonClsProperties = me.buttonClsProperties || [];
+        me.buttonClsProperties.push(&#39;defaultCls&#39;);
+        me.callParent.apply(me, arguments);
+        me.addTransferableAttribute(&#39;class&#39;, {
+            selector: &#39;button&#39;
+        });
+        me.on(&#39;load&#39;, me.initializeDomEvents.bind(me));
+        me.defineButtonDependentProperties();
+    },
+    initializeDomEvents: function () {
+        var me = this, button;
+        button = me.getButtonDom();
+        me.don(&#39;click&#39;, button, me.fireButtonClicked.bind(me, &#39;click&#39;));
+    },
+    defineButtonDependentProperties: function () {
+        var me = this;
+        MEPH.util.Observable.defineDependentProperty(&#39;buttonCls&#39;, me, me.buttonClsProperties, function () {
+            var result = [];
+            me.buttonClsProperties.foreach(function (x) {
+                if (me[x] &amp;&amp; me.handleButtonClsChange) {
+                    result.push(me.handleButtonClsChange(x));
+                }
+            });
+            return result.join(&#39; &#39;);
+        });
+    },
+    handleButtonClsChange: function (x) {
+        var me = this;
+        return me[x];
+    },
+    getButtonDom: function () {
+        var me = this;
+        return me.getDomTemplate().first(function (x) { return x.nodeType === Dom.elementType; });
+    },
+    fireButtonClicked: function (type, evnt) {
+        var me = this,
+            button = me.getButtonDom();
+        evnt.stopPropagation();
+        button.dispatchEvent(MEPH.createEvent(MEPH.button.Button.buttonClickEvent, { evt: evnt }));
+    }
+});</pre>
+</body>
+</html>

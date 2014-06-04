@@ -1,0 +1,50 @@
+﻿body {
+	margin: 0px;
+}
+div {
+	box-sizing: border-box;
+}
+$button-padding-left: 14px;
+$button-padding-right: 14px;
+$button-padding-bottom: 8px;
+$button-padding-top: 8px;
+$button-border-radius: 3px;
+$button-pressed-color: #94d3f7; //color
+
+button {
+	padding-left: $button-padding-left;
+	padding-right: $button-padding-right;
+	padding-top: $button-padding-top;
+	padding-bottom: $button-padding-bottom;
+	background-color: $meph-color-white;
+	border: solid 1px $meph-border-color;
+	border-radius: $button-border-radius;
+	outline-color: $meph-color-transparent;
+	&.clickedOver,
+	&:hover {
+		background-color: $button-pressed-color;
+		border-color:  $meph-border-color-hover;
+	}
+	&.clicked,
+	&:active {
+		background-color: $meph-selected;
+		border-color:  $meph-border-color-active;
+	}
+}
+button.blue {
+	background-color: $meph-button-main;
+	color: $meph-color-white;
+	&.clickedOver,
+	&:hover {
+		background-color:  $meph-color-primary-1;
+	}
+	&.clicked,
+	&:active {
+		background-color: $meph-border-color-active;
+	}
+}
+
+iframe.u4-iframe {
+	height: 640px;
+	width: 100%;
+}

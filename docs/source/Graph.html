@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-graph-Graph'>/**
+</span>* @class MEPH.graph.Graph
+* Creates a graph.
+*/
+MEPH.define(&#39;MEPH.graph.Graph&#39;, {
+    //pgx.Graph = Class.extend(&quot;pgx.Graph&quot;, {
+    requires: [&#39;MEPH.util.Observable&#39;,
+                &#39;MEPH.graph.Node&#39;],
+    properties: {
+    },
+    on: function (evt, func) {
+        var me = this;
+        me.addListener(evt, func);
+    },
+    addNodes: function (nodes) {
+        var me = this;
+        return nodes.select(function (x) {
+            return me.addNode(x);
+        });
+    },
+    addConnection: function (connection) {
+        var me = this;
+        me.connections.push(connection);
+    },
+    getConnections: function () {
+        var me = this;
+        return me.connections;
+    },
+    getViewport: function () {
+        var me = this;
+        return me.$viewport;
+    },
+    removeConnections: function (connections) {
+        var me = this;
+        connections.foreach(function (x) {
+            me.removeConnection(x);
+        });
+    },
+    save: function () {
+        var me = this;
+        var result = {
+            nodes: me.nodes.select(function (node) { return node.save(); }),
+            connections: me.connections.select(function (connection) { return connection.save(); })
+        };
+        return result;
+    },
+    load: function (result) {
+        var me = this;
+        result = JSON.parse(JSON.stringify(result));
+        var nodes = result.nodes.select(function (nodeinfo) {
+            var node = new MEPH.graph.Node();
+            node.setId(nodeinfo.id);
+            node.setPosition(nodeinfo.position.x, nodeinfo.position.y, nodeinfo.position.z);
+            node.appendData(nodeinfo.data);
+            me.addNode(node);
+            return node;
+        });
+        me.$loadedGraph = result;
+        if (!me.addVewportListener &amp;&amp; me.$viewport) {
+            me.$viewport.on(&#39;newactivezone&#39;, function (options) {
+                var id = options.id,
+                    zone = options.zone;
+                me.getConnections().where(function (conn) {
+                    return me.$loadedGraph.connections.contains(function (x) {
+                        return x.id === conn.getId();
+                    });
+                }).foreach(function (conn) {
+                    var conninfo = me.$loadedGraph.connections.first(function (x) { return x.id === conn.getId() });
+                    var zoneInfo = conninfo.zones.first(function (x) { return x === id });
+                    if (zoneInfo) {
+                        conn.addZone(zone);
+                    }
+                });
+            });
+            me.addedViewportListener = true
+        }
+        var connections = result.connections.select(function (connection) {
+            var newconnection = new MEPH.graph.Connection();
+            newconnection.setId(connection.id);
+            nodes.where(function (x) {
+                return connection.nodes.contains(function (y) { return y == x.getId(); })
+            })
+            .foreach(function (x) {
+                newconnection.addNodes(x);
+            });;
+            newconnection.getNodes().foreach(function (x) {
+                x.getZones().where(function (z) {
+                    return connection.contains(z.getId());
+                }).foreach(function (zones) {
+                    newconnection.addZone(zones);
+                });;
+            });
+            me.addConnection(newconnection)
+        });
+    },
+    clearConnections: function () {
+        var me = this,
+            connections = me.getConnections().select(function (x) { return x; });
+        me.removeConnections(connections);
+    },
+    removeConnection: function (connection) {
+        var me = this;
+        var result = me.connections.removeWhere(function (x) { return x === connection; });
+        result.foreach(function (x) {
+            if (x.removed) {
+                x.removed();
+            }
+        });
+        return result;
+    },
+    removeSelectedConnections: function () {
+        var me = this;
+        var connections = me.$viewport.removeSelectedConnections();
+        connections.foreach(function (x) {
+            me.removeConnection(x);
+        })
+    },
+    addNode: function (node) {
+        var me = this;
+        node.on(&#39;click&#39;, me.onNodeClicked.bind(me, node));
+        node.on(&#39;move&#39;, me.onNodeMove.bind(me, node));
+        me.nodes.push(node);
+        return node;
+    },
+    onNodeClicked: function (node) {
+        var me = this;
+        if (me.selectedNode !== node) {
+            me.selectedNode = node;
+            me.fire(&#39;nodeselected&#39;, node);
+        }
+    },
+    onNodeMove: function (node) {
+        var me = this;
+        me.fire(&#39;change&#39;, {});
+    },
+    clear: function () {
+        var me = this;
+        me.removeConnections(me.getConnections().select(function (x) { return x; }));
+        me.removeNodes(me.getNodes().select(function (x) { return x; }));
+        me.$viewport.clear();
+    },
+    removeNodes: function (nodes) {
+        var me = this;
+        nodes.foreach(function (node) {
+            me.removeNode(node);
+        });
+    },
+    removeNode: function (node) {
+        var me = this;
+        var result = me.nodes.removeWhere(function (x) { return x === node; });
+        result.foreach(function (x) {
+            if (x.removed) {
+                x.removed();
+            }
+        });
+        return result;
+    },
+    getNodes: function () {
+        var me = this;
+        return me.nodes;
+    },
+    getNode: function (id) {
+        var me = this;
+        return me.nodes.first(function (x) { return x.getId() == id; });
+    },
+    initialize: function (options) {
+        var me = this;
+        MEPH.Events(me);
+        me.nodes = MEPH.util.Observable.observable([])
+            .on(&#39;beforepush&#39;, me.fire.bind(me, &#39;beforenodeadded&#39;))
+            .on(&#39;afterpush&#39;, me.fire.bind(me, &#39;afternodeadded&#39;))
+            .on(&#39;onpush&#39;, me.fire.bind(me, &#39;nodeadded&#39;))
+        .on(&#39;beforesplice&#39;, me.fire.bind(me, &#39;beforenoderemoved&#39;))
+        .on(&#39;aftersplice&#39;, me.fire.bind(me, &#39;afternoderemoved&#39;))
+        .on(&#39;onremove&#39;, me.fire.bind(me, &#39;noderemoved&#39;))
+        .on(&#39;onpush&#39;, me.fire.bind(me, &#39;change&#39;))
+        .on(&#39;onremove&#39;, me.fire.bind(me, &#39;change&#39;));
+        me.connections = MEPH.util.Observable.observable([])
+            .on(&#39;beforepush&#39;, me.fire.bind(me, &#39;beforeconnectionadded&#39;))
+        .on(&#39;afterpush&#39;, me.fire.bind(me, &#39;afterconnectionadded&#39;))
+        .on(&#39;onpush&#39;, me.fire.bind(me, &#39;connectionadded&#39;))
+        .on(&#39;beforesplice&#39;, me.fire.bind(me, &#39;beforeconnectionremoved&#39;))
+        .on(&#39;aftersplice&#39;, me.fire.bind(me, &#39;afterconnectionremoved&#39;))
+        .on(&#39;onremove&#39;, me.fire.bind(me, &#39;connectionremoved&#39;))
+        .on(&#39;onpush&#39;, me.fire.bind(me, &#39;change&#39;))
+        .on(&#39;onremove&#39;, me.fire.bind(me, &#39;change&#39;));
+        me.on(&#39;connectionadded&#39;, function (type,anothertye, args) {
+            var connection = args.added;
+            connection[0].on(&#39;emptyconnection&#39;, function (conn) {
+                me.removeConnection(conn);
+            });
+        });
+    }
+});</pre>
+</body>
+</html>

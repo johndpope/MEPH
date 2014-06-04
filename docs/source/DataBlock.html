@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+  Ported to JavaScript by Lazar Laszlo 2011 
+  
+  lazarsoft@gmail.com, www.lazarsoft.info
+  
+*/
+
+/*
+*
+* Copyright 2007 ZXing authors
+*
+* Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+
+MEPH.define(&#39;MEPH.qrcode.DataBlock&#39;, {
+    initialize: function (numDataCodewords, codewords) {
+        var me = this;
+        me.numDataCodewords = numDataCodewords;
+        me.codewords = codewords;
+        Object.defineProperty(me, &#39;NumDataCodewords&#39;, {
+            get: function () {
+                return me.numDataCodewords;
+            }
+        });
+        Object.defineProperty(me, &#39;Codewords&#39;, {
+            get: function () {
+                return me.codewords;
+            }
+        });
+    },
+    statics: {
+        getDataBlocks: function (rawCodewords, version, ecLevel) {
+            var DataBlock = MEPH.qrcode.DataBlock;
+            if (rawCodewords.length != version.TotalCodewords) {
+                throw &quot;ArgumentException&quot;;
+            }
+
+            // Figure out the number and size of data blocks used by this version and
+            // error correction level
+            var ecBlocks = version.getECBlocksForLevel(ecLevel);
+
+            // First count the total number of data blocks
+            var totalBlocks = 0;
+            var ecBlockArray = ecBlocks.getECBlocks();
+            for (var i = 0; i &lt; ecBlockArray.length; i++) {
+                totalBlocks += ecBlockArray[i].Count;
+            }
+
+            // Now establish DataBlocks of the appropriate size and number of data codewords
+            var result = new Array(totalBlocks);
+            var numResultBlocks = 0;
+            for (var j = 0; j &lt; ecBlockArray.length; j++) {
+                var ecBlock = ecBlockArray[j];
+                for (var i = 0; i &lt; ecBlock.Count; i++) {
+                    var numDataCodewords = ecBlock.DataCodewords;
+                    var numBlockCodewords = ecBlocks.ECCodewordsPerBlock + numDataCodewords;
+                    result[numResultBlocks++] = new DataBlock(numDataCodewords, new Array(numBlockCodewords));
+                }
+            }
+
+            // All blocks have the same amount of data, except that the last n
+            // (where n may be 0) have 1 more byte. Figure out where these start.
+            var shorterBlocksTotalCodewords = result[0].codewords.length;
+            var longerBlocksStartAt = result.length - 1;
+            while (longerBlocksStartAt &gt;= 0) {
+                var numCodewords = result[longerBlocksStartAt].codewords.length;
+                if (numCodewords == shorterBlocksTotalCodewords) {
+                    break;
+                }
+                longerBlocksStartAt--;
+            }
+            longerBlocksStartAt++;
+
+            var shorterBlocksNumDataCodewords = shorterBlocksTotalCodewords - ecBlocks.ECCodewordsPerBlock;
+            // The last elements of result may be 1 element longer;
+            // first fill out as many elements as all of them have
+            var rawCodewordsOffset = 0;
+            for (var i = 0; i &lt; shorterBlocksNumDataCodewords; i++) {
+                for (var j = 0; j &lt; numResultBlocks; j++) {
+                    result[j].codewords[i] = rawCodewords[rawCodewordsOffset++];
+                }
+            }
+            // Fill out the last data block in the longer ones
+            for (var j = longerBlocksStartAt; j &lt; numResultBlocks; j++) {
+                result[j].codewords[shorterBlocksNumDataCodewords] = rawCodewords[rawCodewordsOffset++];
+            }
+            // Now add in error correction blocks
+            var max = result[0].codewords.length;
+            for (var i = shorterBlocksNumDataCodewords; i &lt; max; i++) {
+                for (var j = 0; j &lt; numResultBlocks; j++) {
+                    var iOffset = j &lt; longerBlocksStartAt ? i : i + 1;
+                    result[j].codewords[iOffset] = rawCodewords[rawCodewordsOffset++];
+                }
+            }
+            return result;
+        }
+    }
+});</pre>
+</body>
+</html>

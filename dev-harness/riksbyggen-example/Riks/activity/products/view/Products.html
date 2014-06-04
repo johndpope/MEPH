@@ -1,0 +1,47 @@
+﻿<div class="meph-view meph-view-remove">
+    <panel cls="meph-panel-basic meph-layout-grid-column-b">
+        <header>Service Order</header>
+        <panelbody>
+            <div>
+                <label>Service order ID</label>
+                <span></span>
+            </div>
+            <div>
+                <label>Description</label>
+                <span></span>
+            </div>
+            <div>
+                <label>Object</label>
+                <span></span>
+            </div>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-b  meph-grid-layout-flex-height">
+        <header>Product information</header>
+        <panelbody>
+            <list data-bind='"source": "m$.serviceOrders"'>
+                <template
+                    name="u4m_controls_examples_list">
+                    <div class="meph-application-menu-categories-item">
+                        <div class="meph-application-menu-categories-item-details">
+                            <span>Work Order</span>
+                            <span data-bind='"innerHTML": "c$.data.workOrder"'></span>
+                            <br />
+                            <span>Description</span>
+                            <span data-bind='"innerHTML": "c$.data.description"'></span>
+                            <br />
+                            <span>Address</span>
+                            <span data-bind='"innerHTML": "c$.data.address"'></span>
+                        </div>
+                    </div>
+                </template>
+            </list>
+            <mephbutton>
+                Edit
+            </mephbutton>
+            <mephbutton>
+                Remove
+            </mephbutton>
+        </panelbody>
+    </panel>
+</div>

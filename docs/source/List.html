@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-list-List'>/**
+</span> * @class MEPH.list.List
+ * List
+ */
+MEPH.define(&#39;MEPH.list.List&#39;, {
+    extend: &#39;MEPH.control.Control&#39;,
+    requires: [&#39;MEPH.util.Dom&#39;],
+    templates: true,
+    alias: &#39;list&#39;,
+    properties: {
+        templateNodeName: &#39;template&#39;,
+        listTemplates: null,
+        listspace: &#39;[listspace]&#39;,
+        namespacePrefix: &#39;MEPH.generated.template&#39;,
+        boundSource: null,
+        source: null,
+        updateQueue: null,
+        updatePromise: null,
+        renderingInProgress: false
+    },
+    initialize: function () {
+        var me = this;
+        me.callParent.apply(me, arguments);
+        me.listTemplates = [];
+        me.boundSource = [];
+        me.updateQueue = [];
+        me.templateSelectionFunctions = [];
+        me.setupEventHandlers();
+        me.updatePromise = Promise.resolve();
+    },
+<span id='MEPH-list-List-method-setupEventHandlers'>    /**
+</span>     * @private
+     * Sets up event handlers.
+     **/
+    setupEventHandlers: function () {
+        var me = this;
+        me.on(&#39;altered&#39;, function (type, options) {
+
+            if (options.path === &#39;source&#39;) {
+                me.removeListListeners(options.old);
+                me.addListListeners(options.value);
+                me.renderList();
+            }
+        }, me);
+        //me.on(&#39;setinstancetemplate&#39;, me.handleInstanceTemplate.bind(me));
+        me.$templatesCreated;
+        me.templateCreationPromise = new Promise(function (resolve, fail) {
+            me.$templatesCreated = resolve;
+        });
+    },
+    addListListeners: function (obj) {
+        var me = this;
+        if (obj &amp;&amp; Array.isArray(obj) &amp;&amp; obj.on) {
+            obj.on(&#39;changed&#39;, me.updateList.bind(me), me);
+        }
+    },
+<span id='MEPH-list-List-method-removeListListeners'>    /**
+</span>     * Remove list listeners.
+     * @param {Object} obj
+     **/
+    removeListListeners: function (obj) {
+        var me = this;
+        if (obj &amp;&amp; Array.isArray(obj) &amp;&amp; obj.un) {
+            obj.un(null, me);
+        }
+    },
+<span id='MEPH-list-List-method-handleDomTemplate'>    /**
+</span>     * @private
+     * Handles the dom template.
+     */
+    handleDomTemplate: function () {
+    },
+<span id='MEPH-list-List-method-itemClicked'>    /**
+</span>     * @private
+     * Item clicked handler
+     **/
+    itemClicked: function (value, dom, prop, eventType, instructions, obj, eventargs) {
+        var me = this,
+            result,
+            target;
+
+        target = eventargs.domEvent.srcElement || eventargs.domEvent.target;
+        result = me.boundSource.first(function (info) {
+            return me.getDomElements(info).first(function (node) {
+                return node === target || Dom.isDomDescendant(node, target) || Dom.isDomDescendant(target, node);
+            });
+        });
+        if (result) {
+            me.getListSpace().dispatchEvent(MEPH.createEvent(&#39;itemclicked&#39;, {
+                data: result.dataItem
+            }));
+        }
+    },
+<span id='MEPH-list-List-method-handleInstanceTemplate'>    /**
+</span>     * @private
+     * Handles the set of an instance template, and will scrape for templates.
+     */
+    handleInstanceTemplate: function () {
+        var me = this,
+            nodes,
+            created = 0,
+            promise = Promise.resolve(),
+            template = me.getInstanceTemplate();
+        MEPH.Array(me.listTemplates).removeWhere(function (x) { return x; })
+        nodes = MEPH.Array(template.childNodes).where(function (x) {
+            return x.nodeName.toLowerCase() === me.templateNodeName.toLowerCase();
+        }).foreach(function (x) {
+            created++;
+            promise = promise.then(function () {
+                return me.generateClassForTemplate(x);
+            });
+            me.listTemplates.push(x);
+        });
+        if (created) {
+            promise = promise.then(function () { me.$templatesCreated(); });
+        }
+        return promise
+    },
+<span id='MEPH-list-List-method-getNameSpace'>    /**
+</span>     * Gets the name space of the node.
+     * @param {Object} node
+     * @returns {String}
+     **/
+    getNameSpace: function (node) {
+        var me = this,
+            namespace,
+            name = node.getAttribute(&#39;name&#39;),
+        namespace = me.namespacePrefix.split(&#39;.&#39;);
+        namespace.push(name);
+        return namespace;
+
+    },
+<span id='MEPH-list-List-method-generateClassForTemplate'>    /**
+</span>     * Generate clas for template.
+     * @param {String} name
+     * @returns {Promise}
+     ***/
+    generateClassForTemplate: function (node) {
+        var me = this, template,
+            name = node.getAttribute(&#39;name&#39;),
+            namespace,
+            $class;
+
+        namespace = me.getNameSpace(node);
+
+        $class = MEPH.getDefinedClass(namespace.join(&#39;.&#39;));
+        template = MEPH.getTemplate(namespace.join(&#39;.&#39;));
+        if (!template) {
+            template = {
+                alias: name,
+                classifiedName: namespace.join(&#39;.&#39;),
+                path: namespace.join(&#39;.&#39;),
+                template: node.innerHTML,
+                type: MEPH.templateType
+            };
+            MEPH.addTemplateInformation(template);
+        }
+        if (!$class) {
+            return MEPH.createClass(namespace.join(&#39;.&#39;), MEPH.GUID(), &#39;MEPH.control.Control&#39;, true, {
+                initialize: function () {
+                    var template = this;
+                    Object.defineProperty(template, &#39;list&#39;, {
+                        get: function () {
+                            return me;
+                        },
+                        set: function () {
+                        }
+                    });
+                    template.callParent.apply(template, arguments);
+                }
+            });
+        }
+        return Promise.resolve().then(function () {
+            return $class;
+        });
+    },
+<span id='MEPH-list-List-method-getBoundSourceInfo'>    /**
+</span>     * @private
+     * Gets information associated with the data item.
+     * @param {Object} dataItem
+     **/
+    getBoundSourceInfo: function (dataItem) {
+        var me = this,
+            foundItem = me.boundSource.first(function (x) { return x.dataItem === dataItem; });
+        return foundItem;
+    },
+    getBoundSourceIndex: function (dataItem) {
+        var me = this,
+            source = me.getBoundSourceInfo(dataItem);
+        return me.boundSource.indexOf(source);
+    },
+<span id='MEPH-list-List-method-getPreviousBoundSource'>    /**
+</span>     * Gets previous bound source.
+     * @param {Object} boundSource
+     * @return {Object}
+     **/
+    getPreviousBoundSource: function (boundSource) {
+        var me = this,
+            previous,
+            currentIndex;
+
+        currentIndex = me.source.indexOf(boundSource.dataItem);
+        if (currentIndex === -1 || currentIndex === 0) {
+            return null;
+        }
+        previous = me.source[currentIndex - 1];
+
+        return me.getBoundSourceInfo(previous);
+    },
+<span id='MEPH-list-List-method-updateList'>    /**
+</span>     * Updates the list.
+     * @param {String} type
+     * @param {Object} options
+     * @param {Array} options.added
+     * @param {Array} options.removed
+     **/
+    updateList: function (type, options) {
+        var me = this,
+            nextUpdate;
+
+        //if (!me.renderinginprogress) {
+        //    me.renderinginprogress = true;
+        options.removed.foreach(function (removeDataItem) {
+            var foundItem = me.boundSource.first(function (x) { return x.dataItem === removeDataItem; });
+            if (foundItem) {
+                me.updatePromise = me.updatePromise.then(function () {
+                    return me.removeItem(foundItem).then(function (x) {
+                        x.renderResult.foreach(function (y) {
+                            y.classInstance.destroy();
+                        });
+                    }).then(function (x) {
+                        me.boundSource.removeWhere(function (t) {
+                            return t === foundItem;
+                        });
+                    });
+                });
+            }
+        });
+        options.added.foreach(function (addedDataItem) {
+            me.updatePromise = me.updatePromise.then(function () {
+                return me.renderItem(addedDataItem);
+            }).then(function (item) {
+                return me.positionAddDataItem(addedDataItem);
+            });;
+        });
+
+        me.updatePromise = me.updatePromise.then(function () {
+            me.renderinginprogress = false;
+            if (me.updateQueue.length) {
+                nextUpdate = me.updateQueue.pop();
+                return me.updateList(null, nextUpdate);
+            }
+            else {
+                me.fire(&#39;updatecomplete&#39;, me);
+            }
+        });
+    },
+<span id='MEPH-list-List-method-getLastDomElement'>    /**
+</span>     * Get last dom element.
+     * @param {Object} boundSource
+     **/
+    getLastDomElement: function (boundSource) {
+        var me = this;
+        return me.getDomElements(boundSource).last();
+    },
+<span id='MEPH-list-List-method-getDomElements'>    /**
+</span>     * Gets the dom elements.
+     * @param {Object} boundSource
+     * @returns {Array}
+     **/
+    getDomElements: function (boundSource) {
+        return boundSource.renderResult.first().templateNode;
+    },
+<span id='MEPH-list-List-method-positionAddDataItem'>    /**
+</span>     * Positions the added dataitem in the list dom.
+     * @param {Object} addedDataItem
+     * @returns {Promise}
+     **/
+    positionAddDataItem: function (addedDataItem) {
+        var sourceIndex, me = this,
+                       info,
+                       previousSource,
+                       lastelement,
+                       index = me.getBoundSourceIndex(addedDataItem);
+        sourceIndex = me.source.indexOf(addedDataItem);
+
+        if (index !== sourceIndex) {
+
+            info = me.getBoundSourceInfo(addedDataItem);
+            previousSource = me.getPreviousBoundSource(info);
+            lastelement = me.getLastDomElement(previousSource);
+            me.getDomElements(info).foreach(function (el) {
+                Dom.insertAfter(lastelement, el);
+                lastelement = el;
+            });
+            me.boundSource.removeWhere(function (x) { return x === info; });
+            me.boundSource.splice(sourceIndex, 0, info);
+        }
+
+        return Promise.resolve().then(function () { return addedDataItem; });
+    },
+<span id='MEPH-list-List-method-renderList'>    /**
+</span>     * Renders the list.
+     * @returns {Promise}
+     **/
+    renderList: function () {
+        var me = this,
+            promise = Promise.resolve();
+        promise = me.clearList().then(function () {
+            promise = me.render().then(function () {
+                me.renderingInProgress = false;
+            });
+            return promise;
+        });
+        me.fire(&#39;render&#39;, {
+            renderComplete: promise
+        });
+
+        return promise;
+    },
+<span id='MEPH-list-List-method-render'>    /**
+</span>     * @private
+     * Render the list. Do not execute this directly.
+     * @returns {Promise}
+     **/
+    render: function () {
+        var me = this;
+
+        return me.templateCreationPromise.then(function () {
+            var promise = Promise.resolve();
+            MEPH.Array(me.source).foreach(function (item) {
+                promise = promise.then(function () {
+                    return me.renderItem(item);
+                });
+            });
+            me.source.foreach(function (item) {
+                promise = promise.then(function (item) {
+                    return me.positionAddDataItem(item);
+                });;
+            });
+            return promise;
+        });
+    },
+<span id='MEPH-list-List-method-clearList'>    /**
+</span>     * Clears the list.
+     * @returns {Promise}
+     **/
+    clearList: function () {
+        var me = this,
+            promise = Promise.resolve();
+        me.boundSource.foreach(function (item) {
+            promise = promise.then(function () {
+                return me.removeItem(item).then(function (x) {
+                    x.renderResult.foreach(function (y) {
+                        y.classInstance.destroy();
+                    });
+                });
+            })
+        });
+
+        return promise.then(function () {
+            me.boundSource.removeWhere(function () {
+                return true;
+            })
+        });;
+    },
+<span id='MEPH-list-List-method-removeItem'>    /**
+</span>     * Removes an item visually.
+     * @returns {Promise}
+     **/
+    removeItem: function (item) {
+        var me = this;
+        return Promise.resolve().then(function () {
+            return item;
+        });
+    },
+<span id='MEPH-list-List-method-renderItem'>    /**
+</span>     * Renders an item.
+     * @protected
+     * @param {Object} dataItem
+     * @returns {Promise}
+     */
+    renderItem: function (dataItem) {
+        var me = this,
+            dataTemplate,
+            listspace;
+        listspace = me.getListSpace();
+        dataTemplate = me.getTemplateForDataItem(dataItem);
+        if (typeof (dataTemplate) === &#39;string&#39;) {
+            namespace = dataTemplate.split(&#39;.&#39;);
+        }
+        else {
+            namespace = me.getNameSpace(dataTemplate);
+        }
+        return me.renderControl(namespace.join(&#39;.&#39;), listspace, me).then(function (result) {
+
+            me.boundSource.push({ renderResult: result, dataItem: dataItem });
+            return result;
+        }).then(function (result) {
+            result.first().classInstance.data = dataItem;
+            result.first().classInstance.fire(&#39;databound&#39;);
+            return result;
+        });
+    },
+    clickedItem: function () {
+        var me = this;
+    },
+<span id='MEPH-list-List-method-getTemplateForDataItem'>    /**
+</span>     * Gets the template for dataitem.
+     * @param {Object} data
+     * @returns {Object}
+     **/
+    getTemplateForDataItem: function (data) {
+        var me = this,
+            outsideFunction,
+            template;
+        me.templateSelectionFunctions.first(function (x) {
+            outsideFunction = x(data);
+            return outsideFunction;
+        });
+        if (outsideFunction) {
+            return outsideFunction;
+        }
+        template = me.getListTemplates().first(function (x) {
+            return x;
+        });
+        return template;
+    },
+    appendTemplateSelectionFunction: function (tempSelect) {
+        var me = this;
+        return me.templateSelectionFunctions.push(tempSelect);
+    },
+    removeTemplateSelectionFunction: function (tempSelect) {
+        var me = this;
+        return me.templateSelectionFunctions.removeWhere(function (x) {
+            return x === tempSelect;
+        });
+    },
+<span id='MEPH-list-List-method-getListSpace'>    /**
+</span>     * Gets list space.
+     * @returns {Object}
+     */
+    getListSpace: function () {
+        var me = this;
+        return me.getDomTemplate().first(function (x) {
+            return x.querySelector &amp;&amp; x.querySelector(me.listspace);
+        }).querySelector(me.listspace);
+    },
+<span id='MEPH-list-List-method-getListTemplates'>    /**
+</span>     * Gets the list templates.
+     * @returns {Array}
+     **/
+    getListTemplates: function () {
+        var me = this;
+        return me.listTemplates;
+    }
+});</pre>
+</body>
+</html>

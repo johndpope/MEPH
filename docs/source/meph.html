@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='Promise'>/**
+</span> * @class Promise
+ * built in  Promise.
+ */
+<span id='MEPH'>/**
+</span> * @class MEPH
+ * MEPH is the framework.
+ */
+var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
+
+    if ($promise) {
+        Promise = $promise;
+    }
+    var createClassPath = function (_class, offset) {
+        var namespaceSplit = _class.split(&quot;.&quot;);
+        offset = offset || window;
+        var previous = null;
+        for (var i = 0 ; i &lt; namespaceSplit.length ; i++) {
+            if (!offset[namespaceSplit[i]]) {
+                previous = offset;
+                offset[namespaceSplit[i]] = {};
+                offset = offset[namespaceSplit[i]];
+            }
+            else {
+                previous = offset;
+                offset = offset[namespaceSplit[i]];
+            }
+        }
+        return { previous: previous, name: namespaceSplit[i - 1] };
+    }
+    var meph;
+    if (typeof $meph === &#39;string&#39;) {
+        meph = createClassPath($meph);
+        meph = meph.previous[meph.name];
+    }
+    meph.DebugMode = true;
+<span id='MEPH-method-define'>    /**
+</span>     * Defines a class.
+     * @param {String} className
+     * @param {Object} config
+     */
+    meph.define = function (className, config) {
+        var definedClass = getDefinedClass(className),
+            undefinedClasses = [],
+            undefinedTemplates = [],
+            undefinedRequirements,
+            requirements = [],
+            requiredClasses;
+        if (!definedClass) {
+            requiredClasses = getRequiredClasses(config);
+            requiredTemplates = getRequiredTemplates(config, className);
+            if (requiredClasses.length &gt; 0) {
+                undefinedClasses = requiredClasses.where(function (x) {
+                    return getDefinedClass(x) === null;
+                }).select(function (x) {
+                    return {
+                        classifiedName: x,
+                        path: getClassPath(x) + jsPostFix,
+                        type: javascriptType
+                    }
+                });
+            }
+            if (requiredTemplates.length &gt; 0) {
+                undefinedTemplates = requiredTemplates.where(function (x) {
+                    return getDefinedTemplate(x) === null;
+                }).select(function (x) {
+                    return {
+                        classifiedName: x,
+                        path: getClassPath(x) + templatePostFix,
+                        type: templateType
+                    }
+                });
+            }
+            undefinedRequirements = undefinedClasses.concat(undefinedTemplates);
+            if (undefinedRequirements.length &gt; 0) {
+                requirements = meph.Array(undefinedRequirements)
+                                    .select(function (details) {
+                                        return retrieveRequiredClass(details);
+                                    });;
+            }
+            if (requirements.length === 0) {
+                requirements.push(Promise.resolve());
+            }
+
+            return Promise.all(requirements).then(function (results) {
+                return meph.beforeResourceDefined(className, results)
+            }).then(function (results) {
+                var addNoTemplateInfo = false;
+                if (results.results &amp;&amp; results.results[0]) {
+                    meph.Array(results.results)
+                        .where(function (x) {
+                            if (!x || !x.details) {
+                                addNoTemplateInfo = true;
+                            }
+                            return x &amp;&amp; x.details;
+                        })
+                        .select(function (x) {
+                            x.details.template = x.result;
+                            x.details.alias = config.alias.toLowerCase();
+
+                            return x.details;
+                        })
+                        .foreach(function (templateInfo) {
+                            addTemplateInformation(templateInfo);
+                            meph.fire(meph.events.definedClass + templateInfo.classifiedName + templateInfo.type, templateInfo);
+                        });
+                }
+
+                if (config.alias &amp;&amp; addNoTemplateInfo) {
+                    addTemplateInformation({
+                        template: null,
+                        alias: config.alias,
+                        classifiedName: className
+                    });
+                }
+
+
+
+                var superclass = getExtendingClass(config);
+                var nameAndSpace = createClassPath(className);
+                nameAndSpace.previous[nameAndSpace.name] = superclass.extend(className, config);
+                meph.fire(meph.events.definedClass, className);
+                meph.fire(meph.events.definedClass + className + javascriptType, className);
+                config.alternateNames = config.alternateNames &amp;&amp; Array.isArray(config.alternateNames) ? config.alternateNames : (config.alternateNames ? [config.alternateNames] : []);
+                addDefinedClassInformation({
+                    alias: config.alias ? config.alias.toLowerCase() : className,
+                    alternateNames: config.alternateNames,
+                    classifiedName: className,
+                    config: config
+                });
+
+                return getDefinedClass(className);
+            });
+        }
+        return Promise.resolve().then(function () {
+            return definedClass;
+        });
+    }
+<span id='MEPH-method-undefine'>    /**
+</span>    * @method undefine
+    * Removes the definition of the class
+    * @param {String} className
+    */
+    meph.undefine = function (className) {
+        var definedClass = getDefinedClass(className),
+            result;
+        if (definedClass) {
+            result = createClassPath(className);
+            result.previous[result.name] = undefined;
+        }
+    }
+
+    var pubsubevents = [];
+<span id='MEPH-method-subscribe'>    /**
+</span>     * @method subscribe
+     * Subscibe to an event.
+     * @param {String} event
+     * @param {Function} func
+     **/
+    meph.subscribe = function (event, func) {
+        var guid = meph.GUID();
+        pubsubevents.push({ event: event, func: func, reference: guid });
+    }
+    meph.Log = function (error) {
+        //log stuff.
+        console.log(error);
+
+    };
+<span id='MEPH-method-createClass'>    /**
+</span>     * @method createClass
+     * Creates a class
+     **/
+    meph.createClass = function (namespace, alias, extend, templates, functions) {
+        var $class = meph.getDefinedClass(namespace),
+            config,
+            templates = templates || false;
+        if ($class) {
+            return Promise.resolve().then(function () {
+                return $class;
+            });
+        }
+        else {
+            config = {
+                alias: alias,
+                templates: templates,
+                extend: extend
+            }
+            meph.applyIf(functions, config);
+            return meph.define(namespace, config);
+        }
+    }
+    //(namespace.join(&#39;.&#39;), MEPH.GUID(), &#39;MEPH.control.Control&#39;);
+
+<span id='MEPH-method-unsubscribe'>    /**
+</span>     * @method unsubscribe
+     * Unsubscribe.
+     * @param {Array/string} ids
+     */
+    meph.unsubscribe = function (ids) {
+        ids = Array.isArray(ids) ? ids : [ids];
+        meph.Array(ids).foreach(function (id) {
+            meph.Array(pubsubevents).removeWhere(function (x) { return x === id; });
+        });
+    }
+
+<span id='MEPH-method-publish'>    /**
+</span>     * @method publish
+     * Publish an event.
+     * @param {String} event
+     **/
+    meph.publish = function (event) {
+        var args = arguments;
+        meph.Array(pubsubevents).where(function (x) {
+            return x.event === event;
+        }).foreach(function (x) {
+            x.func.apply(null, args);
+        });
+    }
+
+<span id='MEPH-method-create'>    /**
+</span>     * @method create
+     * Create an instance of the classname.
+     */
+    meph.create = function (className) {
+        var definedClass = getDefinedClass(className);
+        if (definedClass) {
+            return Promise.resolve().then(function () { return definedClass; });
+        }
+        else {
+            return meph.retrieveRequiredClass({
+                classifiedName: className,
+                path: getClassPath(className) + jsPostFix,
+                type: javascriptType
+            }).then(function () {
+                nodejs.log(&#39;wait for class to define &#39; + definedClass);
+                definedClass = getDefinedClass(className);
+                if (definedClass) {
+                    nodejs.log(&#39;returning defined class &#39; + definedClass);
+                    return definedClass;
+                }
+                var eventResolve,
+                    listenForClassDefining = function (className, name) {
+                        if (className === name) {
+                            definedClass = getDefinedClass(className);
+                            eventResolve(definedClass);
+                            meph.removeListeners(meph.events.definedClass, listenForClassDefining);
+                        }
+                    }.bind(meph, className),
+                    promise = new Promise(function (resolve, result) {
+                        eventResolve = resolve;
+                    });
+                meph.on(meph.events.definedClass, listenForClassDefining, listenForClassDefining);
+                return promise;
+            });
+        }
+    }
+<span id='MEPH-method-requires'>    /**
+</span>     * @method requires
+     * Gets the required classes.
+     * @returns {Promise}
+     */
+    meph.requires = function () {
+        var args = meph.Array();
+        for (i = 0 ; i &lt; arguments.length ; i++) {
+            args.push(arguments[i]);
+        }
+        return Promise.all(args.select(function (x) {
+            return meph.create(x);
+        }));
+    }
+
+<span id='MEPH-method-beforeResourceDefined'>    /**
+</span>     * @method beforeResourceDefined
+     * Executes before resources are defined
+     */
+    meph.beforeResourceDefined = function (resourceName, results) {
+        return {
+            resourceName: resourceName,
+            results: results
+        };
+    }
+<span id='MEPH-method-get'>    /**
+</span>     * @method get
+     * Makes a request via the url
+     * @param {String} url
+     * @param {Object} options
+     */
+    meph.get = function (url, options) {
+        // Return a new promise.
+        return new Promise(function (resolve, reject) {
+            // Do the usual XHR stuff
+            var req = new XMLHttpRequest();
+
+
+            req.open(&#39;GET&#39;, url);
+
+            req.onload = function () {
+                // This is called even on 404 etc
+                // so check the status
+                if (req.status == 200) {
+                    // Resolve the promise with the response text
+                    resolve(req.response);
+                }
+                else {
+                    // Otherwise reject with the status text
+                    // which will hopefully be a meaningful error
+                    reject(Error(req.statusText));
+                }
+            };
+
+            // Handle network errors
+            req.onerror = function () {
+                reject(Error(&quot;Network Error&quot;));
+            };
+
+            // Make the request
+            req.send();
+        });
+    }
+
+<span id='MEPH-method-getExtendingClass'>    /**
+</span>     * @method getExtendingClass
+     * Gets the extending class, based on the configuration.
+     * @param {Object} config
+     * @returns {Object}
+     */
+    var getExtendingClass = function (config) {
+        if (config.extend) {
+            return getDefinedClass(config.extend) || Class;
+        }
+        return Class;
+    }
+
+<span id='MEPH-method-namespace'>    /**
+</span>     * @method namespace
+     * Creates a namespace.
+     * @param {String} namespace A period delimited string.
+     */
+    meph.namespace = function (namespace) {
+        createClassPath(namespace);
+    }
+<span id='MEPH-method-retrieveRequiredClass'>    /**
+</span>     * @method retrieveRequiredClass
+     * Retrieves the required class or file using the provided details.
+     * @param {Object} details
+     * @param {String} details.path
+     * @param {String} details.type
+     **/
+    meph.retrieveRequiredClass = function (details) {
+        var promise,
+            resolutionReached,
+            retrieving = meph.Array(listeners).contains(function (x) {
+                return x.type === meph.events.definedClass + details.classifiedName + details.type
+            }),
+            definedClass;
+
+        if (templateType === details.type) {
+            definedClass = getDefinedTemplate(details.classifiedName);
+        }
+        else {
+            definedClass = getDefinedClass(details.classifiedName);
+        }
+
+        promise = new Promise(function (resolve, reject) {
+            resolutionReached = resolve;
+        });
+
+        if (definedClass) {
+            resolutionReached();
+            return promise.then(function () { return definedClass; });
+        }
+        else if (retrieving) {
+            meph.on(meph.events.definedClass + details.classifiedName + details.type, function () {
+                meph.un(meph.events.definedClass + details.classifiedName + details.type, details);
+                resolutionReached.apply(details, arguments);
+            }, details);
+            return promise;
+        }
+        else {
+            if (details.type === javascriptType) {
+                meph.on(meph.events.definedClass + details.classifiedName + details.type, function () {
+                    meph.un(meph.events.definedClass + details.classifiedName + details.type, details);
+                    resolutionReached.apply(details, arguments);
+                }, details);
+                meph.loadJSCssFile(details.path, javascriptType, function () {
+                    nodejs.log(&#39;loaded class &#39;);
+
+                }).then(function () {
+                    nodejs.log(&#39;fire class retrieval event&#39;);
+
+                    meph.fire(retrievalEventPrefix + details.path, {});
+                });
+                return promise;
+            }
+            else {
+                return meph.get(details.path).then(function (result) {
+                    return {
+                        result: result,
+                        details: details
+                    };
+                });
+            }
+        }
+    }
+
+
+    var retrieveRequiredClass = meph.retrieveRequiredClass;
+<span id='MEPH-method-getClassPath'>    /**
+</span>     * Gets the classes path.
+     * @param {String} path
+     **/
+    meph.getClassPath = function (path) {
+        var closestMatch = paths.max(function (x) {
+            if (path.startsWith(x.prefix)) {
+                return x.prefix.length;
+            }
+            return -1;
+        }),
+        offset;
+        offset = closestMatch.prefix.length + classPathSepartor.length;
+        classPath = path.substring(offset, path.length).split(&#39;.&#39;).join(folderPathSeparator);
+        return closestMatch.path + folderPathSeparator + classPath;
+    }
+    meph.emptyFunction = function () { };
+    meph.ajax = function (path, configure) {
+        var promiseResolution,
+            failureResolution,
+            promise = new Promise(function (resolve, failure) {
+                promiseResolution = resolve;
+                failureResolution = failure;
+            });
+        configure = configure || {};
+        configure = meph.applyIf({
+            method: &#39;GET&#39;,
+            async: true,
+            requestHeaders: []
+        }, configure);
+        var xmlhttp = new XMLHttpRequest();
+
+
+        configure.requestHeaders.push({ header: &quot;Cache-Control&quot;, value: &quot;no-cache&quot; })
+        if (!configure.requestHeaders.some(function (x) { return x.header === &#39;Authorization&#39;; }) &amp;&amp; meph.getAuthorizationToken()) {
+            configure.requestHeaders.push({ header: &#39;Authorization&#39;, value: &#39;Bearer &#39; + meph.getAuthorizationToken() });
+        }
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 &amp;&amp; xmlhttp.status == 200) {
+
+                promiseResolution({
+                    responseText: xmlhttp.responseText
+                });
+            } else if (xmlhttp.readyState == 4) {
+
+                switch (status) {
+                    default:
+                        failureResolution({ status: status, path: path, configuration: configure });
+                        break;
+                }
+            }
+        }
+        xmlhttp.onerror = function () {
+            debugger
+        }
+        xmlhttp.addEventListener(&quot;error&quot;, function () {
+            debugger
+        }, false);
+        xmlhttp.open(configure.method, path, configure.async);
+        meph.Array(configure.requestHeaders).foreach(function (x) {
+            xmlhttp.setRequestHeader(x.header, x.value);
+        });
+        xmlhttp.send();
+        return promise;
+    };
+    //function sendFoodRequest() {
+    //    var xhr = new XMLHttpRequest();
+
+    //    xhr.open(&quot;POST&quot;, &#39;http://localhost:7777/services/rest/foods/2013/06/25&#39;, true);
+
+    //    var boundary = &#39;---------------------------&#39;;
+    //    boundary += Math.floor(Math.random() * 32768);
+    //    boundary += Math.floor(Math.random() * 32768);
+    //    boundary += Math.floor(Math.random() * 32768);
+    //    xhr.setRequestHeader(&quot;Content-Type&quot;, &#39;multipart/mixed; boundary=&#39; + boundary);
+    //    var body = &#39;&#39;;
+    //    body += &#39;--&#39; + boundary + &#39;\r\n&#39; + &#39;Content-Disposition: form-data; name=&quot;foodList&quot;&#39; + &#39;\r\n&#39;;
+    //    body += &quot;Content-Type: application/json\r\n\r\n&quot;;
+    //    body += &#39;[   {&quot;id&quot;:null,&quot;name&quot;:&quot;Spinach&quot;,&quot;recipe&quot;:null}   ]&#39;;
+    //    body += &#39;\r\n&#39;
+    //    body += &#39;--&#39; + boundary + &#39;--&#39;;
+    //    xhr.setRequestHeader(&#39;Content-length&#39;, body.length);
+    //    xhr.onload = function () { }
+    //    xhr.send(body);
+    //}
+    var authtoken;
+    meph.setAuthorizationToken = function (token) {
+        authtoken = token;
+    }
+    meph.getAuthorizationToken = function () {
+        return authtoken;
+    }
+
+    meph.requestAuthentication = function (path, clientId, returnUri, scope, token, state, client_secret) {
+        path = path || &#39;http://localhost:52154/OAuth/Authorize&#39;;
+        scope = scope || &#39;agresso&#39;;
+        client_secret = client_secret || &#39;secret&#39;;
+        token = token || &#39;token&#39;;
+        state = state || &#39;state&#39;;
+        clientId = clientId || &#39;AgressoMobile&#39;;
+        var configure = {};
+        configure.method = &#39;OPTIONS&#39;
+        var uri = meph.addQueryString(path + &#39;&#39;, {
+            &#39;client_id&#39;: clientId ? clientId : &#39;Demo&#39;,
+            &#39;redirect_uri&#39;: returnUri,
+            &#39;state&#39;: state,
+            &#39;scope&#39;: scope,
+            &#39;client_secret&#39;: client_secret,
+            &#39;response_type&#39;: token,
+        });
+
+        var toresolve,
+            promise = new Promise(function (resolve, failure) {
+                toresolve = resolve;
+                tofail = failure;
+            });
+
+        try {
+            var iframe = meph.createIframe(uri);
+        }
+        catch (error) {
+            alert(error);
+            if (error &amp;&amp; error.message) {
+                alert(error.message)
+            }
+        }
+
+        var interval = setInterval(function () {
+            try {
+                if (iframe &amp;&amp; iframe.contentWindow.location) {
+                    var options = {},
+                        hash = iframe.contentWindow.location.hash,
+                        args = MEPH.Array(hash.split(&#39;&amp;&#39;)).select(function (x) {
+                            return {
+                                key: x.split(&#39;=&#39;)[0],
+                                value: x.split(&#39;=&#39;)[1]
+                            }
+                        }).foreach(function (x) {
+                            options[x.key.replace(&#39;#&#39;, &#39;&#39;)] = x.value;
+                        });
+                    if (options.access_token) {
+                        toresolve(options);
+                        iframe.parentNode.removeChild(iframe);
+                        clearInterval(interval);
+                    }
+                }
+            } catch (e) {
+            }
+        }, 100);
+
+        return promise;
+    }
+    meph.createIframe = function (uri) {
+        var iframe = document.createElement(&#39;iframe&#39;);
+
+        iframe.setAttribute(&#39;src&#39;, uri);
+        iframe.classList.add(&#39;u4-iframe&#39;);
+        document.body.appendChild(iframe);
+        return iframe;
+    }
+
+    meph.createWindow = function (uri) {
+        var myWindow = window.open(uri || &#39;&#39;, &#39;_blank&#39;, &#39;location=yes&#39;);
+        alert(&#39;myWindow &#39; + myWindow);
+        myWindow.document.write(&quot;&lt;p&gt;This window&#39;s name is: &quot; + myWindow.name + &quot;&lt;/p&gt;&quot;);
+        return myWindow;
+    }
+
+    meph.addQueryString = function (uri, parameters) {
+        var delimiter = (uri.indexOf(&#39;?&#39;) == -1) ? &#39;?&#39; : &#39;&amp;&#39;;
+        for (var parameterName in parameters) {
+            var parameterValue = parameters[parameterName];
+            uri += delimiter + encodeURIComponent(parameterName) + &#39;=&#39; + encodeURIComponent(parameterValue);
+            delimiter = &#39;&amp;&#39;;
+        }
+        return uri;
+    }
+
+    meph.preflight = function (path, configure) {
+        configure = configure || {};
+        configure.method = &#39;OPTIONS&#39;
+        //configure.requestHeaders = configure.requestHeaders || [];
+        //configure.requestHeaders.push({
+        //    header: &#39;Origin&#39;,
+        //    value: window.location.origin
+        //})
+        //configure.requestHeaders.push({ header: &#39;Access-Control-Request-Method&#39;, value: &#39;PUT&#39; });
+        //configure.requestHeaders.push({ header: &#39;Access-Control-Request-Headers&#39;, value: &#39;X-Custom-Header&#39; });
+        return meph.ajax(path, configure);
+    }
+    meph.ajaxJSON = function (path, configure) {
+        return meph.ajax(path, configure).then(function (response) {
+            try {
+                var responseJSON = JSON.parse(response.responseText);
+                response.responseJSON = responseJSON;
+                return response;
+            }
+            catch (error) {
+                response.responseText = response.responseText.replace(/\&quot;/g, &quot;&#39;&quot;);
+                response.responseText = response.responseText.replace(/&#39;/g, &quot;\&quot;&quot;);
+                response.responseJSON = JSON.parse(response.responseText);
+                return response;
+            }
+        });
+    }
+<span id='MEPH-method-loadJSCssFile'>    /**
+</span>     * @method loadJSCssFile
+     * Loads a javascript or css file.
+     * @param {String} filename
+     * @param {String} filetype
+     * @param {Function} callback
+     **/
+    meph.loadJSCssFile = function (filename, filetype, callback) {
+        callback = callback || meph.emptyFunction;
+        var toResolve,
+            toReject,
+            promise = new Promise(function (resolve, reject) {
+                toReject = reject;
+                toResolve = resolve;
+            });
+        if (filetype == javascriptType) {
+
+            if ((!document) || ((document) &amp;&amp; !document.getElementsByTagName)) {
+                nodejs.log(&#39;NOT RUNNING IN THE DOM.&#39;);
+                nodejs.log(&#39;importing file : &#39; + filename);
+                var importScripts = importScripts || null;
+                if (global.importScripts) {
+                    global.importScripts(filename);
+                    nodejs.log(&#39;execute callback: &#39; + callback);
+                    setTimeout(function () {
+                        try {
+                            callback();
+                            toResolve();
+                        }
+                        catch (error) {
+
+                            console.log(&#39;something went wrong&#39;)
+                        }
+                        finally {
+                        }
+                    }, 10);
+                }
+                else {
+                    nodejs.log(&#39;readFile : &#39; + filename);
+                    fs.readFile(filename, &#39;utf8&#39;, function (err, data) {
+                        nodejs.log(&#39;create script&#39; + data)
+                        var script = vm.createScript(data, filename);
+                        nodejs.log(&#39;run script&#39;)
+                        script.runInThisContext();
+                        setTimeout(function () {
+                            nodejs.log(&#39;execute callback&#39;)
+                            callback();
+                            toResolve();
+                            nodejs.log(&#39;executed callback&#39;)
+                        }, 19);
+                    })
+                }
+            }
+            else {
+                var head = document.getElementsByTagName(&#39;head&#39;)[0];
+                var script = document.createElement(&#39;script&#39;);
+                script.type = &#39;text/javascript&#39;;
+                script.onreadystatechange = function () {
+                    if (this.readyState == &#39;complete&#39;) callback();
+                }
+                script.onload = callback;
+                script.src = filename// &#39;helper.js&#39;;
+                head.appendChild(script);
+            }
+            toResolve(filename, filetype);
+        }
+        else if (filetype == &quot;css&quot;) { //if filename is an external CSS file
+            var fileref = document.createElement(&quot;link&quot;)
+            fileref.setAttribute(&quot;rel&quot;, &quot;stylesheet&quot;)
+            fileref.setAttribute(&quot;type&quot;, &quot;text/css&quot;)
+            fileref.setAttribute(&quot;href&quot;, filename)
+        }
+        if (typeof fileref != &quot;undefined&quot;) {
+            document.getElementsByTagName(&quot;head&quot;)[0].appendChild(fileref);
+        }
+        return promise;
+    }
+
+<span id='MEPH-method-loadScript'>    /**
+</span>     * @method loadScript
+     * Loads a script.
+     * @param {Array} scripts
+     * @return {Promise}
+     */
+    meph.loadScript = function (file) {
+        var toresolve;
+        var promise = new Promise(function (resolve, fail) {
+            toresolve = resolve;
+        });
+        meph.loadJSCssFile(file, javascriptType, function () {
+            toresolve.apply(this, arguments);
+        });
+        return promise;
+    }
+
+<span id='MEPH-method-loadScripts'>    /**
+</span>     * @method loadScripts
+     * Loads scripts.
+     * @param {Array} scripts
+     * @return {Promise}
+     */
+    meph.loadScripts = function (scripts) {
+        var i = 0;
+        var promise = Promise.resolve();
+        for (i = 0; i &lt; scripts.length ; i++) {
+            promise = promise.then(function () {
+                nodejs.log(&#39;loading script :&#39; + scripts[this]);
+                return meph.loadScript(scripts[this]);
+            }.bind(i))
+        }
+        return promise;
+    }
+
+    meph.namespace(&#39;MEPH.Loader&#39;);
+    MEPH.Loader.loadScript = meph.loadScript;
+    MEPH.Loader.loadScripts = meph.loadScripts;
+    var bindPrefixShortCuts = [],
+        classPathSepartor = &#39;.&#39;,
+        retrievalEventPrefix = &#39;onRetrival&#39;,
+        folderPathSeparator = &#39;/&#39;,
+        templatePostFix = &#39;.html&#39;,
+        jsPostFix = &#39;.js&#39;,
+        getClassPath = meph.getClassPath,
+        templateType = &#39;.html.template&#39;,
+        javascriptType = &#39;.js&#39;,
+        paths = [],
+        nonEnumerablePropertyPrefix = &#39; &#39;,
+        jsync = nonEnumerablePropertyPrefix + &#39;j&#39;,
+        dataBindPrefixes = [],
+        reverseBindingPrefixes = [],
+        eventDataBindingPrefixes = [],
+        defaultBindPrefix = &#39;data-bind&#39;,
+        defaultReversePrefix = &#39;data-push&#39;,
+        defaultEventPrefix = &#39;data-events&#39;,
+        listenersPropertyKey = nonEnumerablePropertyPrefix + &#39;listeners&#39;,
+        domListenersPropertyKey = nonEnumerablePropertyPrefix + &#39;domlisteners&#39;,
+        dataObjectReferenceAttribute = &#39;data-reference&#39;,
+        privatePropertyPrefix = &#39;$&#39;,
+        privateClassPrefix = &#39;$&#39;,
+        bindPrefixDelimiter = &#39;-&#39;,
+        pipeString = &#39;|&#39;,
+        pathDelimiter = &#39;.&#39;,
+        isObservablePropertyKey = nonEnumerablePropertyPrefix + &#39;isObservable&#39;,
+        isValidatablePropertyKey = nonEnumerablePropertyPrefix + &#39;isValidatable&#39;,
+        connectableTypes = [
+            { type: &#39;control&#39;, shortCut: &#39;c$&#39; },
+            { type: &#39;control&#39;, shortCut: &#39;control&#39; },
+            { type: &#39;view&#39;, shortCut: &#39;v$&#39; },
+            { type: &#39;view&#39;, shortCut: &#39;view&#39; },
+            { type: &#39;subcontrol&#39;, shortCut: &#39;s$&#39; },
+            { type: &#39;parentcontrol&#39;, shortCut: &#39;pc$&#39; },
+            { type: &#39;html&#39;, shortCut: &#39;html&#39; },
+            { type: &#39;presenter&#39;, shortCut: &#39;p$&#39; },
+            { type: &#39;presenter&#39;, shortCut: &#39;presenter&#39; },
+            { type: &#39;viewmodel&#39;, shortCut: &#39;vm$&#39; },
+            { type: &#39;viewmodel&#39;, shortCut: &#39;viewmodel&#39; },
+            { type: &#39;model&#39;, shortCut: &#39;m$&#39; },
+            { type: &#39;model&#39;, shortCut: &#39;model&#39; },
+            { type: &#39;controller&#39;, shortCut: &#39;controller&#39; },
+            { type: &#39;controller&#39;, shortCut: &#39;ct$&#39; }
+        ];
+    meph.patternTypes = [&#39;presenter&#39;, &#39;controller&#39;, &#39;view&#39;, &#39;model&#39;, &#39;viewmodel&#39;];
+    meph.templateType = templateType;
+    meph.folderPathSeparator = folderPathSeparator;
+    meph.privatePropertyPrefix = privatePropertyPrefix;
+    meph.defaultEventPrefix = defaultEventPrefix;
+    meph.listenersPropertyKey = listenersPropertyKey;
+    meph.nonEnumerablePropertyPrefix = nonEnumerablePropertyPrefix;
+    meph.isObservablePropertyKey = isObservablePropertyKey;
+    meph.isValidatablePropertyKey = isValidatablePropertyKey;
+    meph.connectableTypes = connectableTypes;
+    meph.dataObjectReferenceAttribute = dataObjectReferenceAttribute;
+    meph.bindPrefixDelimiter = bindPrefixDelimiter;
+    meph.defaultDataBindString = defaultBindPrefix;
+    meph.defaultReversePrefix = defaultReversePrefix;
+    meph.pathDelimiter = pathDelimiter;
+    meph.pipeString = pipeString;
+    meph.jsync = jsync;
+    meph.prefixes = {
+        retrievalEventPrefix: retrievalEventPrefix,
+        templatePostFix: templatePostFix
+    };
+    meph.paths = paths;
+<span id='MEPH-method-setPath'>    /**
+</span>     * @method setPath
+     * Set the path that corresponds to the prefix.
+     * @param {String} path
+     * @param {String} prefix
+     **/
+    meph.setPath = function (path, prefix) {
+        meph.Array(meph.paths);
+        if (meph.paths.length &gt; 0) {
+            meph.paths.removeWhere(function (x) { return x.prefix === prefix; });
+        }
+        meph.paths.push({
+            path: path,
+            prefix: prefix
+        });
+    };
+    meph.setInterval = function () {
+        return setInterval.apply(null, arguments);
+    }
+<span id='MEPH-method-getPath'>    /**
+</span>     * @method getPath
+     * Get the path.
+     * @param {String} path
+     **/
+    meph.getPath = function (prefix) {
+        meph.Array(paths);
+        var path = paths.first(function (x) { return x.prefix === prefix; });
+        if (path) {
+            return path.path;
+        }
+        return null;
+    }
+<span id='MEPH-method-addBindPrefixShortCuts'>    /**
+</span>     * @method addBindPrefixShortCuts
+     * Adds binding prefixes to the library.
+     * @param {String} prefix
+     * @param {String} type
+     **/
+    meph.addBindPrefixShortCuts = function addBindPrefixShortCuts(prefix, type) {
+        var has = bindPrefixShortCuts.some(function (x) {
+            return x.prefix === prefix;
+        });
+        if (!has) {
+            bindPrefixShortCuts.push({ prefix: prefix, type: type });
+        }
+    };
+
+<span id='MEPH-method-getBindPrefixShortCuts'>    /**
+</span>     * @method getBindPrefixShortCuts
+     * Gets the binding prefixes.
+     * @returns {Array}
+     **/
+    meph.getBindPrefixShortCuts = function () {
+        return meph.Array(bindPrefixShortCuts);
+    }
+
+<span id='MEPH-method-getBindPrefixShortCut'>    /**
+</span>     * @method getBindPrefixShortCut
+     * Gets a prefix short cut
+     * @param {String} prefix
+     * @returns {Object}
+     */
+    meph.getBindPrefixShortCut = function (prefix) {
+        return meph.getBindPrefixShortCuts().first(function (x) { return x.prefix === prefix; });
+    }
+
+<span id='MEPH-method-addDataBindPrefix'>    /**
+</span>     * @method addDataBindPrefix
+     * Adds a data-bind prefix.
+     * @param {String} prefix
+     */
+    meph.addDataBindPrefix = function (prefix) {
+        var has = meph.Array(dataBindPrefixes).some(function (x) { return x === prefix; });
+        if (!has) {
+            dataBindPrefixes.push(prefix);
+        }
+    }
+<span id='MEPH-method-removeDataBindPrefix'>    /**
+</span>     * @method removeDataBindPrefix
+     * Removes the data bind prefix.
+     * @param {String} prefix
+     **/
+    meph.removeDataBindPrefix = function (prefix) {
+        return meph.Array(dataBindPrefixes).removeWhere(function (x) { return x === prefix; });
+    }
+
+<span id='MEPH-method-addReverseDataBindPrefx'>    /**
+</span>     * @method addReverseDataBindPrefx
+     * Adds a data-bind prefix for reverse binding.
+     * @param {String} prefix
+     **/
+    meph.addReverseDataBindPrefx = function (prefix) {
+        var has = reverseBindingPrefixes.some(function (x) { return x === prefix; });
+
+        if (has) {
+            reverseBindingPrefixes.push(prefix);
+        }
+    }
+
+<span id='MEPH-method-addEventDataBindingPrefixes'>    /**
+</span>     * @method addEventDataBindingPrefixes
+     * Adds a data-bind prefix for event binding.
+     * @param {String} prefix
+     **/
+    meph.addEventDataBindingPrefixes = function (prefix) {
+        var has = eventDataBindingPrefixes.some(function (x) { return x === prefix; });
+        if (has) {
+            eventDataBindingPrefixes.push(prefix);
+        }
+    }
+
+<span id='MEPH-method-getEventDataBindingPrefixes'>    /**
+</span>     * @method getEventDataBindingPrefixes
+     * Gets Event databinding prefixes;
+     **/
+    meph.getEventDataBindingPrefixes = function () {
+        return meph.Array(eventDataBindingPrefixes.concat([defaultEventPrefix]));
+    }
+
+<span id='MEPH-method-removeEventDataBindingPrefix'>    /**
+</span>     * @method removeEventDataBindingPrefix
+     * Remove event data-binding prefix.
+     * @param {String} prefix;
+     **/
+    meph.removeEventDataBindingPrefix = function (prefix) {
+    }
+<span id='MEPH-method-removeReverseDataBindPrefix'>    /**
+</span>     * @method removeReverseDataBindPrefix
+     * Removes the reverse data bind prefix.
+     * @param {String} prefix
+     **/
+    meph.removeReverseDataBindPrefix = function (prefix) {
+        return meph.Array(reverseBindingPrefixes).removeWhere(function (x) { return x === prefix; });
+    }
+
+<span id='MEPH-method-getReverseDataBindingPrefixes'>    /**
+</span>     * @method getReverseDataBindingPrefixes
+     * Gets Reverse databinding prefixes;
+     **/
+    meph.getReverseDataBindingPrefixes = function () {
+        return meph.Array(reverseBindingPrefixes.concat([defaultReversePrefix]));
+    }
+<span id='MEPH-method-getDataBindPrefixes'>    /**
+</span>     * @method getDataBindPrefixes
+     * Gets the data-bind prefixes.
+     * @returns {Array}
+     */
+    meph.getDataBindPrefixes = function () {
+        return meph.Array(dataBindPrefixes.concat([defaultBindPrefix]));
+    }
+
+<span id='MEPH-method-createEvent'>    /**
+</span>     * @method createEvent
+     * Creates a DOM Event.
+     * @param {String} type
+     * @param {Object} config
+     **/
+    meph.createEvent = function createEvent(type, config) {
+        var evnt,
+            i;
+        if (document.createEvent) {
+            evnt = document.createEvent(&#39;Event&#39;);
+            evnt.initEvent(type, true, true);
+
+            for (i in config) {
+                if (config.hasOwnProperty(i)) {
+                    evnt[i] = config[i];
+                }
+            }
+        }
+        else {
+            evnt = new Event(type);
+            for (i in config) {
+                if (config.hasOwnProperty(i)) {
+                    evnt[i] = config[i];
+                }
+            }
+        }
+        return evnt;
+    };
+
+<span id='MEPH-method-getRequiredClasses'>    /**
+</span>     * Gets the required classe paths
+     * @param {Object} config
+     * @param {String} config.extend
+     * @param {Array} config.requires
+     */
+    meph.getRequiredClasses = function (config) {
+        if (config.extend || (config.requires)) {
+            return meph.Array(((config.extend ? [config.extend] : [])
+                                .concat(config.requires || [])))
+                        .where(function (x) { return x; });
+        }
+        return [];
+    }
+    var getRequiredClasses = meph.getRequiredClasses;
+
+<span id='MEPH-method-getRequiredTemplates'>    /**
+</span>     * Gets the required template paths.
+     * @param {Object} config
+     * @param {String} config.extend
+     * @param {Array} config.requires
+     */
+    meph.getRequiredTemplates = function (config, className) {
+        if ((config.templates &amp;&amp; config.templates.length &gt; 0)) {
+            return meph.Array(config.templates)
+                        .where(function (x) { return x; });
+        }
+        else if (config.templates === true) {
+            return meph.Array([className]);
+        }
+        return [];
+    }
+    var getRequiredTemplates = meph.getRequiredTemplates;
+<span id='MEPH-method-Array'>    /**
+</span>     * @method Array
+     * Adds additional functionality to an array.
+     * @param {Array} array
+     * @return {Array}
+     */
+    meph.Array = function (array) {
+        array = array || [];
+        if (MEPH &amp;&amp; MEPH.util &amp;&amp; MEPH.util.Array) {
+            MEPH.util.Array.create(array);
+        }
+        return array;
+    }
+<span id='MEPH-method-createTemplateNode'>    /**
+</span>     * @method createTemplateNode
+     * Creates a template node.
+     * @param {String} classifiedName
+     * @returns {Object}
+     */
+    meph.createTemplateNode = function (classifiedName) {
+        var templateinfo = getTemplate(classifiedName);
+        return {
+            alias: templateinfo.alias,
+            node: document.createElement(templateinfo.alias)
+        }
+    }
+<span id='MEPH-method-Convert'>    /**
+</span>     * @method Convert
+     * Converts an object into an array.
+     **/
+    meph.Convert = function (arrayLike) {
+        if (MEPH &amp;&amp; MEPH.util &amp;&amp; MEPH.util.Array) {
+            return MEPH.util.Array.convert(arrayLike);
+        }
+        return arrayLike;
+    }
+    //var Array;
+    meph.IsObject = function (object) {
+        if ((typeof object === &quot;object&quot;) &amp;&amp; (object !== null) &amp;&amp; !Array.isArray(object) &amp;&amp;
+    !(isNode(object) || isElement(object))) {
+            return true;
+        }
+        return false;
+    }
+    //Returns true if it is a DOM node
+    function isNode(o) {
+        return (
+          typeof Node === &quot;object&quot; ? o instanceof Node :
+          o &amp;&amp; typeof o === &quot;object&quot; &amp;&amp; typeof o.nodeType === &quot;number&quot; &amp;&amp; typeof o.nodeName === &quot;string&quot;
+        );
+    }
+
+    //Returns true if it is a DOM element    
+    function isElement(o) {
+        return (
+          typeof HTMLElement === &quot;object&quot; ? o instanceof HTMLElement : //DOM2
+          o &amp;&amp; typeof o === &quot;object&quot; &amp;&amp; o !== null &amp;&amp; o.nodeType === 1 &amp;&amp; typeof o.nodeName === &quot;string&quot;
+      );
+    }
+<span id='MEPH-method-getDefinedClass'>    /**
+</span>    * Gets a defined class
+    * @param {String} _class The requested class path.
+    * @param {Object} offset An optional parameter.
+    * @return {Object}
+    */
+    meph.getDefinedClass = function (_class, offset) {
+        var namespaceSplit = _class.split(&quot;.&quot;);
+
+        var offset = offset || window;
+        for (var i = 0; i &lt; namespaceSplit.length; i++) {
+            if (!offset[namespaceSplit[i]]) {
+                return null;
+            }
+            else {
+                offset = offset[namespaceSplit[i]];
+            }
+        }
+        return offset;
+    };
+
+<span id='MEPH-method-getPathValue'>    /**
+</span>     * @method getPathValue
+     * Gets the value from the object
+     * @param {String} path
+     * @param {Object} object
+     */
+    meph.getPathValue = meph.getDefinedClass;
+
+<span id='MEPH-method-setPathValue'>    /**
+</span>     * @method setPathValue
+     * Sets the value on the path.
+     * @param {Object} offset
+     * @param {String} path
+     * @param {Object} value
+     * @returns {Boolean}
+     **/
+    meph.setPathValue = function (offset, path, value) {
+        var pathSplit = path.split(&quot;.&quot;);
+        var previous = null;
+        for (var i = 0 ; i &lt; pathSplit.length ; i++) {
+            if (!offset || !meph.mephHasOwnProperty(offset, pathSplit[i]) &amp;&amp; (pathSplit.length - 1 &gt; i)) {
+                return false;
+            }
+            else {
+                previous = offset;
+                offset = offset[pathSplit[i]];
+            }
+        }
+        if (previous) {
+            previous[pathSplit[i - 1]] = value;
+        }
+        return true;
+    }
+<span id='MEPH-method-mephHasOwnProperty'>    /**
+</span>     * @method mephHasOwnProperty
+     **/
+    meph.mephHasOwnProperty = function (obj, property) {
+        var i;
+        if (obj.hasOwnProperty(property)) {
+            return true;
+        }
+
+        for (i in obj) {
+            if (property === i) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+<span id='MEPH-method-apply'>    /**
+</span>     * @method apply
+     * Applies the properties of object1 on to object2.
+     * @param {Object} object1
+     * @param {Object} object2
+     **/
+    meph.apply = function (object1, object2) {
+        var i;
+        for (i in object1) {
+            if (meph.mephHasOwnProperty(object1, i)) {
+                object2[i] = object1[i];
+            }
+        }
+        return object2;
+    }
+
+<span id='MEPH-method-applyIf'>    /**
+</span>     * @method applyIf
+     * Applies the properties of object1 on to object2.
+     * @param {Object} object1
+     * @param {Object} object2
+     **/
+    meph.applyIf = function (object1, object2) {
+        var i;
+        for (i in object1) {
+            if (meph.mephHasOwnProperty(object1, i) &amp;&amp; !meph.mephHasOwnProperty(object2, i)) {
+                object2[i] = object1[i];
+            }
+        }
+        return object2;
+    }
+
+    var templates = [];
+<span id='MEPH-method-getDefinedTemplate'>    /**
+</span>     * Gets a defined template
+     * @param {String} templateNameSpace The requested template path.
+     * @return {Object}
+     **/
+    meph.getDefinedTemplate = function (templateNameSpace) {
+        return meph.Array(templates).first(function (x) { return x.classifiedName === templateNameSpace; });
+    }
+
+    meph.getTemplates = function () {
+        return templates.select();
+    }
+
+<span id='MEPH-method-getTemplateByAlias'>    /**
+</span>     * @method getTemplateByAlias
+     * Gets template information by alias.
+     * @param {String} name
+     * @returns {Object}
+     */
+    meph.getTemplateByAlias = function (alias) {
+        return meph.Array(templates).first(function (x) { return x.alias === alias; });
+    }
+
+<span id='MEPH-method-getAllAliases'>    /**
+</span>     * @method getAllAliases
+     * Gets all the alias names registerd in the framework.
+     * @returns {Array}
+     */
+    meph.getAllAliases = function (alias) {
+        return meph.Array(templates).select(function (x) { return x.alias; }).where(function (x) { return x; });
+    }
+
+<span id='MEPH-method-getTemplateByNode'>    /**
+</span>     * @method getTemplateByNode
+     * Gets the template information based on the node name.
+     * @param {Object} node
+     * @returns {Object}
+     */
+    meph.getTemplateByNode = function (node) {
+        var nodename = node.nodeName.toLowerCase();
+        return getTemplateByAlias(nodename);
+    }
+
+    var getTemplateByAlias = meph.getTemplateByAlias;
+    var getDefinedTemplate = meph.getDefinedTemplate;
+<span id='MEPH-method-getTemplate'>    /**
+</span>     * Gets template information by classified name or by alias.
+     * @param {String} name
+     */
+    meph.getTemplate = function (name) {
+        return getDefinedTemplate(name) || getTemplateByAlias(name);
+    }
+    var getTemplate = meph.getTemplate;
+<span id='MEPH-method-addTemplateInformation'>    /**
+</span>     * Adds template information to the global collection.
+     * @param {Object} templateInfo
+     */
+    meph.addTemplateInformation = function (templateInfo) {
+        var definedTemplate = getDefinedTemplate(templateInfo.classifiedName);
+        if (!definedTemplate) {
+            templates.push(templateInfo);
+            meph.fire(meph.events.definedTemplate, templateInfo);
+        }
+    }
+    var addTemplateInformation = meph.addTemplateInformation;
+
+    var classes = [];
+<span id='MEPH-method-addDefinedClassInformation'>    /**
+</span>     * @method addDefinedClassInformation
+     * Adds defined class information
+     **/
+    meph.addDefinedClassInformation = function (classInformation) {
+        var info = getDefinedClassInformation(classInformation.alias);
+        if (!info) {
+            meph.Array(classInformation.alternateNames).foreach(function (name) {
+                var info = createClassPath(name);
+                info.previous[info.name] = getDefinedClass(classInformation.classifiedName);
+            });
+            classes.push(classInformation);
+        }
+    }
+    var addDefinedClassInformation = meph.addDefinedClassInformation;
+<span id='MEPH-method-getDefinedClasses'>    /**
+</span>     * @method getDefinedClasses
+     * Get defined classes.
+     **/
+    meph.getDefinedClasses = function () {
+        return classes.select(function (x) { return x; });
+    }
+<span id='MEPH-method-getDefinedClassInformation'>    /**
+</span>     * @method getDefinedClassInformation
+     * Get defined class information.
+     * @param {String} alias
+     * @returns {Object}
+     **/
+    meph.getDefinedClassInformation = function (alias) {
+        return meph.Array(classes).first(function (x) {
+            return x.alias === alias || x.classifiedName === alias || x.alternateNames.some(function (x) { return x === alias; });
+        });
+    }
+
+    meph.generateCustomVisualStudioTags = function () {
+        var newline = &#39;\r\n&#39;;
+        var result = &#39;&lt;xsd:group name=&quot;flowContent&quot;&gt;&#39; + newline + &#39;\t\t&lt;xsd:choice&gt;&#39; + newline;
+        meph.Array(classes).where(function (x) { return x.alias; }).select(function (x) {
+            if (x.alias.indexOf(&#39;.&#39;) === -1 &amp;&amp; x.alias.indexOf(&#39;-&#39;) === -1) {
+                result += &#39;\t\t\t&lt;xsd:element ref=&quot;&#39; + x.alias + &#39;&quot; /&gt;&#39; + newline;
+            }
+        });
+        result += &#39;\t\t&lt;/xsd:choice&gt;&#39; + newline;
+        result += &#39;&lt;/xsd:group&gt;&#39; + newline;
+
+        meph.Array(classes).where(function (x) { return x.alias; }).select(function (x) {
+            if (x.alias.indexOf(&#39;.&#39;) === -1 &amp;&amp; x.alias.indexOf(&#39;-&#39;) === -1) {
+                result += &#39;\t\t\t&lt;xsd:element name=&quot;&#39; + x.alias + &#39;&quot; type=&quot;simpleFlowContentElement&quot; /&gt;&#39; + newline;
+            }
+        });
+        return result;
+    }
+    var getDefinedClassInformation = meph.getDefinedClassInformation;
+
+<span id='MEPH-method-removeTemplateInformation'>    /**
+</span>     * Removes the template information.
+     * @param {String} templateAlias
+     * @returns {Array}
+     */
+    meph.removeTemplateInformation = function (templateAlias) {
+        var definedTemplate = getTemplate(templateAlias);
+        return meph.Array(templates).removeWhere(function (x) { return x === definedTemplate; });
+    }
+    var removeTemplateInformation = meph.removeTemplateInformation;
+<span id='MEPH-method-clone'>    /**
+</span>     * Creates a deep clone of an object.
+     * @param {Object} obj
+     * @return {Object}
+     */
+    meph.clone = function (obj, skip) {
+        skip = skip || [];
+        // Handle the 3 simple types, and null or undefined
+        if (null == obj || &quot;object&quot; != typeof obj) return obj;
+
+        // Handle Date
+        if (obj instanceof Date) {
+            var copy = new Date();
+            copy.setTime(obj.getTime());
+            return copy;
+        }
+        if (obj instanceof String) {
+            return obj;
+        }
+        if (obj instanceof Number) {
+            return obj;
+        }
+        // Handle Array
+        if (obj instanceof Array) {
+            var copy = [];
+            for (var i = 0, len = obj.length; i &lt; len; i++) {
+                copy[i] = clone(obj[i]);
+            }
+            return copy;
+        }
+
+        // Handle Object
+        if (obj instanceof Object) {
+            var copy = {};
+            for (var attr in obj) {
+                if (!skip.some(function (x) { return x === attr; })) {
+                    if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+                }
+            }
+            return copy;
+        }
+
+        throw new Error(&quot;Unable to copy obj! Its type isn&#39;t supported.&quot;);
+    };
+    var clone = meph.clone;
+
+<span id='MEPH-method-GUID'>    /**
+</span>     * @method
+     * Generates a globally unique identifier.
+     **/
+    meph.GUID = function () {
+        var guid = &#39;xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx&#39;.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == &#39;x&#39; ? r : (r &amp; 0x3 | 0x8);
+            return v.toString(16);
+        });
+        return guid;
+    }
+
+    meph.Events = function (object) {
+        if (object[privateVariablePrefix + &#39;listeners&#39;]) {
+            return;
+        }
+        Object.defineProperty(object, listenersPropertyKey, {
+            enumerable: false,
+            configurable: false,
+            writeable: true,
+            get: function () {
+                return this[privateVariablePrefix + &#39;listeners&#39;];
+            }.bind(object)
+        });
+        Object.defineProperty(object, domListenersPropertyKey, {
+            enumerable: false,
+            configurable: false,
+            writeable: true,
+            get: function () {
+                return this[privateVariablePrefix + &#39;domlisteners&#39;];
+            }.bind(object)
+        });
+
+        Object.defineProperty(object, privateVariablePrefix + &#39;listeners&#39;, {
+            enumerable: false,
+            configurable: false,
+            writeable: true,
+            value: []
+        });
+
+        Object.defineProperty(object, privateVariablePrefix + &#39;domlisteners&#39;, {
+            enumerable: false,
+            configurable: false,
+            writeable: true,
+            value: []
+        });
+
+        Object.defineProperty(object, privateVariablePrefix + &#39;setProperty&#39;, {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function (propName, value) {
+                this[privateVariablePrefix + propName] = value;
+            }
+        });
+
+        Object.defineProperty(object, &#39;_pause&#39;, {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function (context) {
+                if (context) {
+                    var pauseContext = this[privateVariablePrefix + &#39;context_paused&#39;].first(function (x) {
+                        return x.context === context;
+                    });
+                    if (!pauseContext) {
+                        pauseContext = { context: context, paused: 0 };
+                        this[privateVariablePrefix + &#39;context_paused&#39;].push(pauseContext);
+                    }
+                    pauseContext.paused++;
+                }
+                else {
+                    this[privateVariablePrefix + &quot;paused&quot;]++;
+                }
+            }
+        });
+
+        Object.defineProperty(object, &#39;is_paused&#39;, {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function (context) {
+                if (context) {
+                    var pausecontext = this[privateVariablePrefix + &#39;context_paused&#39;].first(function (x) {
+                        return x.context === context;
+                    });
+                    if (pausecontext) {
+                        return pausecontext.paused;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                return this[privateVariablePrefix + &#39;paused&#39;];
+            }
+        });
+
+        Object.defineProperty(object, privateVariablePrefix + &#39;paused&#39;, {
+            enumerable: false,
+            writable: true,
+            configurable: false,
+            value: 0
+        });
+
+        Object.defineProperty(object, &#39;_start&#39;, {
+            enumerable: false,
+            writable: false,
+            configurable: false,
+            value: function (context) {
+                if (context) {
+                    var pauseContext = this[privateVariablePrefix + &#39;context_paused&#39;].first(function (x) {
+                        return x.context === context;
+                    });
+                    if (!pauseContext) {
+                        pauseContext = { context: context, paused: 0 };
+                        this[privateVariablePrefix + &#39;context_paused&#39;].push(pauseContext);
+                    }
+                    pauseContext.paused--;
+                    if (pauseContext.paused &lt; 0) {
+                        pauseContext.paused = 0;
+                    }
+                }
+                else {
+                    this[privateVariablePrefix + &#39;paused&#39;]--;
+                    if (this[privateVariablePrefix + &#39;paused&#39;] &lt; 0) {
+                        this[privateVariablePrefix + &#39;paused&#39;] = 0;
+                    }
+                }
+            }
+        });
+
+        Object.defineProperty(object, privateVariablePrefix + &#39;context_paused&#39;, {
+            enumerable: false,
+            writable: true,
+            configurable: false,
+            value: []
+        });
+
+        Object.defineProperty(object, &#39;don&#39;, {
+            enumerable: false,
+            configurable: true,
+            writeable: true,
+            value: function (type, dom, func, reference, capture) {
+                dom.addEventListener(type, func);
+                meph.Array(this[domListenersPropertyKey]).push({
+                    type: type,
+                    dom: dom,
+                    func: func,
+                    reference: reference || this,
+                    capture: capture || false
+                });
+            }.bind(object)
+        });
+
+        Object.defineProperty(object, &#39;dun&#39;, {
+            enumerable: false,
+            configurable: true,
+            writeable: true,
+            value: function (reference, type, dom, func) {
+                if (arguments.length === 0) {
+                    reference = this;
+                }
+                meph.Array(this[domListenersPropertyKey]).removeWhere(function (x) {
+                    if (func &amp;&amp; type) {
+                        return x.func = func &amp;&amp; type === x.type;
+                    }
+                    else if (func) {
+                        return x.func = func;
+                    }
+                    else if (reference &amp;&amp; type) {
+                        return x.type === type &amp;&amp; reference === x.reference;
+                    }
+                    else if (type) {
+                        return x.type === type;
+                    }
+                    else if (reference) {
+                        return x.reference === reference;
+                    }
+                    return true;
+                }).foreach(function (ops) {
+                    ops.dom.removeEventListener(ops.type, ops.func, ops.capture);
+                })
+            }.bind(object)
+        });
+
+
+        Object.defineProperty(object, &#39;on&#39;, {
+            enumerable: false,
+            configurable: true,
+            writeable: true,
+            value: function (type, func, reference, pausekey) {
+                meph.Array(this[listenersPropertyKey]).push({
+                    type: type,
+                    func: func,
+                    pausekey: pausekey || null,
+                    reference: reference || this
+                })
+                return this;
+            }.bind(object)
+        });
+        Object.defineProperty(object, &#39;hasOn&#39;, {
+            enumerable: false,
+            configurable: true,
+            writeable: true,
+            value: function (type, reference) {
+                return meph.Array(this[listenersPropertyKey]).contains(function (x) {
+                    if (reference &amp;&amp; type) {
+                        return x.type === type &amp;&amp; reference === x.reference;
+                    }
+                    else if (type) {
+                        return x.type === type;
+                    }
+                    else if (reference) {
+                        return x.reference === reference;
+                    }
+                    return true;
+                });
+            }.bind(object)
+        });
+        Object.defineProperty(object, &#39;onIf&#39;, {
+            enumerable: false,
+            configurable: true,
+            writeable: true,
+            value: function (type, reference) {
+                if (!this.hasOn(type, reference)) {
+                    this.on(type, reference);
+                }
+            }
+        });
+        Object.defineProperty(object, &#39;un&#39;, {
+            enumerable: false,
+            configurable: true,
+            writeable: true,
+            value: function (type, reference) {
+                meph.Array(this[listenersPropertyKey]).removeWhere(function (x) {
+                    if (reference &amp;&amp; type) {
+                        return x.type === type &amp;&amp; reference === x.reference;
+                    }
+                    else if (type) {
+                        return x.type === type;
+                    }
+                    else if (reference) {
+                        return x.reference === reference;
+                    }
+                    return true;
+                });
+            }.bind(object)
+        });
+
+        Object.defineProperty(object, &#39;fire&#39;, {
+            enumerable: false,
+            configurable: false,
+            writable: true,
+            value: function (type) {
+                var args = meph.Convert(arguments);
+                if (this.is_paused()) {
+                    return this;
+                }
+                meph.Array(this[listenersPropertyKey]).where(function (x) {
+                    return x.type === type;
+                }).where(function (x) {
+                    if (x.reference &amp;&amp; x.reference.is_paused &amp;&amp; x.pausekey) {
+                        return !x.reference.is_paused(x.pausekey);
+                    }
+                    return true;
+                }).foreach(function (x) {
+                    x.func.apply(x.reference || null, args);
+                })
+                return this;
+            }.bind(object)
+        });
+    }
+    var clone = meph.clone;
+    var getDefinedClass = meph.getDefinedClass;
+    var privateVariablePrefix = &#39; $ &#39;;
+    (function () {
+        var initializing = false, fnTest = /xyz/.test(function () {
+            xyz;
+        }) ? /\b_super\b/ : /.*/;
+
+        // The base Class implementation (does nothing)
+        this.Class = function () {
+        };
+        var extractPropsAndFunc = function (definedMixin) {
+            var funcs = {};
+            for (var f in definedMixin.prototype) {
+                if (definedMixin.prototype.hasOwnProperty(f)) {
+                    funcs[f] = definedMixin.prototype[f];
+                }
+            }
+            return funcs;
+        }
+        // Create a new Class that inherits from this class
+        Class.extend = function (type, prop) {
+            var _super = this.prototype;
+
+            // Instantiate a base class (but only create the instance,
+            // don&#39;t run the init constructor)
+            initializing = true;
+            var prototype = new this();
+            initializing = false;
+            var mixins = {};
+
+            prototype.mixins = prototype.mixins || _super.mixins || {};
+            if (prop.mixins &amp;&amp; !Array.isArray(prop.mixins)) {
+                for (var mixin in prop.mixins) {
+                    if (prop.mixins.hasOwnProperty(mixin)) {
+                        mixins[mixin] = prop.mixins[mixin];
+                    }
+                }
+            }
+            else if (prop.mixins &amp;&amp; Array.isArray(prop.mixins)) {
+                meph.Array(prop.mixins);
+                prop.mixins.foreach(function (mixin) {
+                    var definedMixin = getDefinedClass(mixin);
+                    if (definedMixin) {
+                        var funcs = extractPropsAndFunc(definedMixin);
+                        for (var name in funcs) {
+                            if (name === &#39;requires&#39; ||
+                                   name === &#39;statics&#39; ||
+                                    name === &#39;constructor&#39; ||
+                                   name === &#39;extend&#39; ||
+                                   name === &#39;templates&#39; ||
+                                   name === &#39;mixins&#39; ||
+                                   name === &#39;observable&#39; ||
+                                   name === &#39;properties&#39;)
+                                continue;
+                            prototype[name] = funcs[name];
+                        }
+                    }
+                });
+            }
+
+
+            for (var mixin in mixins) {
+                var definedMixin = getDefinedClass(mixins[mixin]);
+                if (definedMixin &amp;&amp; definedMixin.prototype) {
+                    var funcs = extractPropsAndFunc(definedMixin);
+                    prototype.mixins[mixin] = funcs;
+                }
+            }
+            // Copy the properties over onto the new prototype
+            for (var name in prop) {
+                if (name === &#39;requires&#39; ||
+                    name === &#39;statics&#39; ||
+                    name === &#39;extend&#39; ||
+                    name === &#39;templates&#39; ||
+                    name === &#39;mixins&#39; ||
+                    name === &#39;observable&#39; ||
+                    name === &#39;properties&#39;)
+                    continue;
+                // Check if we&#39;re overwriting an existing function
+                prototype[name] = typeof prop[name] == &quot;function&quot; &amp;&amp;
+                typeof _super[name] == &quot;function&quot; &amp;&amp; fnTest.test(prop[name]) ?
+                (function (name, fn) {
+                    return function () {
+                        var tmp = this.callParent;
+
+                        // Add a new ._super() method that is the same method
+                        // but on the super-class
+                        this.callParent = _super[name];
+
+                        // The method only need to be bound temporarily, so we
+                        // remove it when we&#39;re done executing
+                        var ret = fn.apply(this, arguments);
+                        this.callParent = tmp;
+
+                        return ret;
+                    };
+                })(name, prop[name]) :
+                prop[name];
+                if (typeof prototype[name] == &quot;function&quot;) {
+                    var _addsuper = typeof prop[name] === &quot;function&quot; &amp;&amp;
+                    typeof _super[name] === &quot;function&quot;;
+                    // &#39;script.soundfont.chunks.SoundFontChunk&#39;
+                    prototype[name] = (function (name, fn, requires, addsuper, _extends) {
+                        return function () {
+                            var t = 1;
+                            var temp = {};
+                            var longtemp = {};
+                            var tempclassnames = requires.slice().concat(_extends.slice()).concat(type.slice());
+                            if (addsuper) {
+                                var tmp = this.callParent;
+                                // Add a new ._super() method that is the same method
+                                // but on the super-class
+                                this.callParent = _super[name];
+                            }
+                            //for (var i = 0; i &lt; tempclassnames.length; i++) {
+                            MEPH.Array(tempclassnames).foreach(function (t, i) {
+                                var c = getDefinedClass(tempclassnames[i]);
+                                var namespaceSplit = tempclassnames[i].split(&quot;.&quot;);
+                                var cname = namespaceSplit[namespaceSplit.length - 1];
+                                temp[cname] = window[cname];
+                                longtemp[tempclassnames[i]] = window[tempclassnames[i]];
+                                window[cname] = c;
+                                window[tempclassnames[i]] = c; // longtemp[tempclassnames[i]] =
+                            });
+                            try {
+                                var ret = fn.apply(this, arguments);
+                            }
+                            catch (ee) {
+                                var error = ee;
+                                if (!(ee instanceof Error)) {
+                                    ee = new Error(ee);
+                                }
+                                if (meph.DebugMode) {
+                                    console.log(ee.stack);
+                                }
+                                throw error;
+                            }
+                            finally {
+                                for (var i in temp) {
+                                    window[i] = temp[i];
+                                }
+                                for (var i in longtemp) {
+                                    window[i] = longtemp[i];
+                                }
+                                if (addsuper) {
+                                    this.callParent = tmp;
+                                }
+
+                            }
+                            return ret;
+                        }
+                    })(name, prop[name], prop.requires || [], _addsuper, prop[&#39;extend&#39;] || []);
+                }
+            }
+            if (prop.templates) {
+                var templates = prop.templates === true ? [type] : prop.templates;
+                prototype.templates = _super.templates ? _super.templates.concat(templates) : templates;
+
+            }
+            if (prop.properties) {
+                prop.properties.____type = type;
+            }
+
+            if (prop.properties) {
+                for (var i in prop.properties) {
+                    prototype[i] = clone(prop.properties[i]);
+                }
+            }
+
+            if (prop.observable) {
+                var observables = [];
+                for (var i in prop.observable) {
+                    prototype[i] = clone(prop.observable[i]);
+                    observables.push(i);
+                }
+                prototype.$__observables = prototype.$__observables || [];
+                observables.foreach(function (x) {
+                    if (!prototype.$__observables.contains(function (y) {
+                        return x == y;
+                    })) {
+                        prototype.$__observables.push(x);
+                    }
+                });
+            }
+            // The dummy class constructor
+            function Class() {
+
+                if (!this.$window) {
+                    Object.defineProperty(this, &#39;$window&#39;, {
+                        enumerable: false,
+                        writeable: true,
+                        configurable: true,
+                        get: function () {
+                            return window;
+                        }
+                    })
+                }
+                this.____type = type;
+                // All construction is actually done in the init method
+                if (!initializing &amp;&amp; this.initialize)
+                    this.initialize.apply(this, arguments);
+            }
+
+            // Populate our constructed prototype object
+            Class.prototype = prototype;
+
+            // Enforce the constructor to be what we expect
+            Class.prototype.constructor = Class;
+
+            // And make this class extendable
+            Class.extend = arguments.callee;
+
+            if (prop.statics) {
+                for (var i in prop.statics) {
+                    Class[i] = prop.statics[i];
+                }
+            }
+
+            return Class;
+        };
+    })();
+
+    meph.events = {
+        frameworkReady: &#39;frameworkReady&#39;,
+        definedClass: &#39;definedClass&#39;,
+        definedTemplate: &#39;definedTemplate&#39;
+    }
+    meph.listeners = meph.listeners || [];
+
+    var listeners = meph.listeners;
+
+    meph.on = function (type, func, scope) {
+        meph.listeners.push({
+            type: type,
+            func: func,
+            scope: scope
+        });
+    }
+    meph.fire = function (type, args) {
+        meph.Array(meph.listeners).where(function (listener) {
+            return listener.type === type;
+        }).foreach(function (listener) {
+            listener.func.apply(listener.scope, meph.Array([args]));
+        });
+    }
+    meph.removeListeners = function (type, reference) {
+        meph.listeners.removeWhere(function (listeners) {
+            if (type &amp;&amp; reference) {
+                return listeners.type == type &amp;&amp; listeners.scope === reference;
+            }
+            else if (reference) {
+                return listeners.scope === reference;
+            }
+            else if (type) {
+                return listeners.type == type;
+            }
+            return true;
+        });
+    }
+    meph.un = meph.removeListeners;
+
+    var frameworkReady;
+    meph.ready = function () {
+        return new Promise(function (resolve, failed) {
+            frameworkReady = resolve;
+        }).then(function () {
+            meph.Array(meph.connectableTypes).foreach(function (x) {
+                meph.addBindPrefixShortCuts(x.shortCut, x.type);
+            });
+        });
+    }
+    meph.on(meph.events.definedClass, function (className) {
+        if (getDefinedClass(&#39;util.Array&#39;, meph)) {
+            meph.fire(meph.events.frameworkReady);
+            meph.removeListeners(meph.events.definedClass, meph);
+        }
+    }, meph);
+    meph.on(meph.events.frameworkReady, function () {
+        frameworkReady();
+    });
+    var loadpromise = null;
+    if (getDefinedClass(&#39;util.Array&#39;, meph)) {
+        meph.fire(meph.events.frameworkReady);
+    }
+    else {
+        nodejs.log(&#39;loading scripts &#39;);
+        loadpromise = meph.loadScripts([
+                $frameWorkPath + &#39;/util/String.js&#39;,
+                $frameWorkPath + &#39;/util/Dom.js&#39;,
+                $frameWorkPath + &#39;/util/Template.js&#39;,
+                $frameWorkPath + &#39;/util/Observable.js&#39;,
+                $frameWorkPath + &#39;/util/Array.js&#39;]);
+    }
+    return { framework: meph, promise: loadpromise };
+});
+
+var exports = exports || null;
+var nodejs = {
+    log: function () {
+    }
+}
+if (exports) {
+
+    var vm = require(&quot;vm&quot;);
+    window = global;
+    var document = null;
+    nodejs.log = function () {
+        console.log(arguments);
+    }
+
+    exports.mephFrameWork = mephFrameWork;
+}</pre>
+</body>
+</html>

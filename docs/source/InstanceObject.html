@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">MEPH.define(&#39;MEPH.synchronization.util.InstanceObject&#39;, {
+    alernateNames: [&#39;InstanceObject&#39;],
+    requires: [&#39;MEPH.util.Observable&#39;],
+    statics: {
+        set: function (obj) {
+            return (function () {
+                var lead = MEPH.nonEnumerablePropertyPrefix;
+                if (!this[lead + &#39;id&#39;]) {
+
+                    Object.defineProperty(this, lead + &#39;id&#39;, {
+                        enumerable: true,
+                        writable: true,
+                        configurable: true,
+                        value: synctarget || MEPH.GUID()
+                    });
+                    this.fire(&#39;created&#39;, { value: this });
+                }
+                return this[lead + &#39;id&#39;];
+            }).bind(obj)();
+        },
+        instify: function (obj) {
+            if (!obj.instanceObj) {
+                MEPH.util.Observable.observable(obj);
+                Object.defineProperty(obj, &#39;instanceObj&#39;, {
+                    enumerable: false,
+                    writable: false,
+                    configurable: false,
+                    value: function (lead, synctarget) {
+                        lead = MEPH.nonEnumerablePropertyPrefix;
+                        if (!this[lead + &#39;id&#39;]) {
+
+                            Object.defineProperty(this, lead + &#39;id&#39;, {
+                                enumerable: true,
+                                writable: true,
+                                configurable: true,
+                                value: synctarget || MEPH.GUID()
+                            });
+                            this.fire(&#39;created&#39;, { value: this });
+                        }
+                        return this[lead + &#39;id&#39;];
+                    }
+                });
+                Object.defineProperty(obj, &#39;jsyncId&#39;, {
+                    enumerable: false,
+                    writable: false,
+                    configurable: false,
+                    value: function (lead) {
+                        lead = MEPH.nonEnumerablePropertyPrefix;
+                        return this[lead + &#39;id&#39;];
+                    }
+                });
+            }
+            return obj;
+        }
+    }
+});</pre>
+</body>
+</html>

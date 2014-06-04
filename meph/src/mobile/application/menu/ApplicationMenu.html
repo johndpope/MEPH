@@ -1,0 +1,23 @@
+﻿<div class="meph-application-menu">
+    <div class="meph-application-menu-button-container">
+        <iconbutton icon="-th-large" color="White" size="X2" data-events='"buttonClickEvent" : "c$.openFlyoutMenu"'></iconbutton>
+    </div>
+
+    <flyoutpanel
+        mephid="flyoutPanel"
+        data-events='"itemclicked": "c$.menuItemClicked"'
+        data-bind='"list.source": "c$.menusource"'
+        cls="meph-application-flyout-menu"
+        position="left">
+        <list MEPHId="list" >
+            <template name="u4m_applicationmenuitem">
+                <div class="meph-application-menu-categories-item">
+                    <div class="meph-application-menu-categories-item-details">
+                        <h3 class="meph-appliation-menu-categories-item-title" data-bind='"innerHTML": "c$.data.name"'></h3>
+                    </div>
+                </div>
+            </template>
+        </list>
+    </flyoutpanel>
+
+</div>

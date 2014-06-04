@@ -1,0 +1,69 @@
+﻿<div class="meph-view meph-view-remove">
+    <panel cls="meph-panel-basic meph-layout-grid-column-b">
+        <header>Service Order</header>
+        <panelbody>
+            <div>
+                <label>Service order ID</label>
+                <span></span>
+            </div>
+            <div>
+                <label>Description</label>
+                <span></span>
+            </div>
+            <div>
+                <label>Object</label>
+                <span></span>
+            </div>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-f  meph-layout-grid-row-absolute-a  meph-grid-layout-flex-height ">
+        <header>Feedback information</header>
+        <panelbody>
+            <dropdown></dropdown>
+            <text labeltext="Action taken"></text>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-g meph-layout-grid-row-absolute-a  meph-grid-layout-flex-height">
+        <header>Object feedback notification</header>
+        <panelbody>
+            <div>Edit the notification with changed information for the next service. Remove the notification if it is not relevant.</div>
+            <mephbutton>
+                Edit
+            </mephbutton>
+            <mephbutton>
+                Remove
+            </mephbutton>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-c  meph-grid-layout-flex-height">
+        <header>Additional Information</header>
+        <panelbody>
+            <div>
+                <text labeltext="Info template"></text>
+            </div>
+        </panelbody>
+    </panel>
+    <panel cls="meph-panel-basic meph-layout-grid-column-b  meph-grid-layout-flex-height">
+        <header>Technical information</header>
+        <panelbody>
+            <list data-bind='"source": "ct$.listsource"'>
+            <template 
+                name="u4m_controls_examples_list">
+                <div class="meph-application-menu-categories-item">
+                    
+                    <div class="meph-application-menu-categories-item-details" >
+                        <span>Technical information</span>
+                        <span data-bind='"innerHTML": "c$.data.name"'></span>
+                        <br />
+                        <span>History</span>
+                        <span  data-bind='"innerHTML": "c$.data.property"'></span>
+                        <br />
+                        <span>Date</span>
+                        <span data-bind='"innerHTML": "c$.data.address"'></span>
+                    </div>
+                </div>
+            </template>
+        </list>
+        </panelbody>
+    </panel>
+</div>

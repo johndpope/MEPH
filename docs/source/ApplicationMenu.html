@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-mobile-application-menu-ApplicationMenu'>/**
+</span> * @class MEPH.mobile.application.menu.ApplicationMenu
+ * String
+ */
+MEPH.define(&#39;MEPH.mobile.application.menu.ApplicationMenu&#39;, {
+    alias: &#39;applicationmenu&#39;,
+    templates: true,
+    extend: &#39;MEPH.control.Control&#39;,
+    statics: {
+        activity: &#39;activity&#39;,
+        activityinstance: &#39;activityinstance&#39;,
+        onlineusers: &#39;onlineusers&#39;
+    },
+    requires: [&#39;MEPH.panel.flyout.FlyoutPanel&#39;,
+                &#39;MEPH.button.IconButton&#39;,
+                &#39;MEPH.mobile.services.MobileServices&#39;,
+                &#39;MEPH.list.List&#39;,
+                &#39;MEPH.util.Observable&#39;,
+                &#39;MEPH.util.Dom&#39;],
+    properties: {
+        openMenu: false,
+        opening: false,
+        mode: null,
+        $topMenu: null,
+        $menuPromise: null,
+        opened: false,
+        $menuProviders: null,
+        menusource: null,
+        $applicationMenuPromise: null
+    },
+    initialize: function () {
+        var me = this;
+        me.lastDataClicked = null;
+        me.callParent.apply(me, arguments);
+        me.$applicationMenuPromise = Promise.resolve();
+        me.setUpEventListeners();
+        me.$menuPromise = Promise.resolve();
+        me.on(&#39;afterload&#39;, me.loadMenu.bind(me));
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-getMenuProviders'>    /**
+</span>     * Gets the menu providers
+     * @returns {Promise}
+     **/
+    getMenuProviders: function () {
+        var me = this, promise = Promise.resolve();
+        promise = promise.then(function () {
+            return MEPH.MobileServices.get(&#39;applicationMenuProvider&#39;).then(function (provider) {
+                return provider.getMenuItemProviders();
+            });
+        });
+        return promise;
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-getMenuItems'>    /**
+</span>     * Gets the menu item associated with the data. 
+     * If data is null, the assumption is that it is requesting top level items.
+     * @param {Object} provider
+     * @param {Object} data
+     **/
+    getMenuItems: function (provider, data) {
+        return Promise.resolve().then(function (x) {
+            return provider.getItems(data, data === null);
+        });
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-loadMenu'>    /**
+</span>     * Loads the menu.
+     * @returns {Promise}
+     */
+    loadMenu: function () {
+        var me = this, menusource = [], promise = Promise.resolve();
+        me.menusource = MEPH.util.Observable.observable([]);
+        //menusource.push({ name: &#39;Activities&#39;, type: MEPH.mobile.application.menu.ApplicationMenu.activity });
+        //menusource.push({ name: &#39;Online Users&#39;, type: MEPH.mobile.application.menu.ApplicationMenu.onlineusers });
+
+        //me.menusource = MEPH.util.Observable.observable([]);
+        //menusource.foreach(function (x) {
+        //    me.menusource.push(MEPH.util.Observable.observable(x));
+        //});
+        //MEPH.subscribe(MEPH.Constants.ActivityStarted, me.onActivityStarted.bind(me))
+        //me.$topMenu = menusource;
+        me.getDataTemplatesHandler = me.getDataTemplates.bind(me);
+        if (me.flyoutPanel &amp;&amp; me.flyoutPanel.list) {
+            me.flyoutPanel.list.appendTemplateSelectionFunction(me.getDataTemplatesHandler);
+        }
+        return promise.then(function () {
+            return me.getMenuProviders();
+        }).then(function (providers) {
+            me.$menuProviders = providers;
+            return Promise.all(providers.select(function (provider) {
+                return me.getMenuItems(provider, null).then(function (provider, items) {
+                    return {
+                        provider: provider,
+                        items: items
+                    };
+                }.bind(me, provider));
+            }));
+        }).then(function (providersAnItems) {
+            me.$providersAndItems = providersAnItems;
+            me.menusource.removeWhere(function () { return true; });
+            me.$providersAndItems.foreach(function (x) {
+                x.provider.updateCallback = me.updateCallBack.bind(me, x.provider);
+                x.items.foreach(function (y) {
+                    me.menusource.push(MEPH.util.Observable.observable(y));
+                });
+            });
+        });
+    },
+    getDataTemplates: function (data) {
+        var me = this;
+        return me.$providersAndItems.selectFirst(function (x) {
+            if (x.provider.getTemplate) {
+                return x.provider.getTemplate(data);
+            }
+            return false;
+        }) || false;
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-updateCallBack'>    /**
+</span>     * When a provider updates its source, it call this function to update the current values for the menu source.
+     * @param {Object} provider
+     **/
+    updateCallBack: function (provider) {
+        var me = this;
+        if (me.lastDataClicked) {
+            if (me.getProviderByData(me.lastDataClicked) === provider) {
+                me.retrieveAndApplyMenuSource(provider, me.lastDataClicked);
+            }
+        }
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-getProviderByData'>    /**
+</span>     * Gets the provider which the data originates from.
+     */
+    getProviderByData: function (data) {
+        var me = this, providerAndItems;
+        providerAndItems = me.$providersAndItems.first(function (x) {
+            return x.items.some(function (y) { return y === data; })
+            || (x.provider.ownsData ? x.provider.ownsData(data) : false);
+        });
+        return providerAndItems ? providerAndItems.provider : null;
+    },
+    onActivityStarted: function () {
+        var me = this;
+        switch (me.mode) {
+            case MEPH.mobile.application.menu.ApplicationMenu.activityinstance:
+            case MEPH.mobile.application.menu.ApplicationMenu.activity:
+                me.setActivitesAsMenuSource();
+                break
+        }
+    },
+    setActivitesAsMenuSource: function () {
+        var me = this;
+        me.menusource.removeWhere(function (x) { return true; });
+        MEPH.ActivityController.getActivities().where(function (activity) {
+            return activity.activity.getActivityId() !== null;
+        }).foreach(function (activity) {
+            me.menusource.push(MEPH.util.Observable.observable({
+                name: activity.activity.getPath(),
+                id: activity.activity.getActivityId(),
+                type: MEPH.mobile.application.menu.ApplicationMenu.activityinstance
+            }));
+        });
+    },
+
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-menuItemClicked'>    /**
+</span>     * @private
+     * Handles menu item clicked.
+     * @returns {Promise}
+     **/
+    menuItemClicked: function (a, b, c, d, e, f, evnt) {
+
+        var me = this,
+            provider, clickResult,
+            handler,
+            promise = Promise.resolve();
+        provider = me.getProviderByData(evnt.domEvent.data);
+        if (provider) {
+            me.lastDataClicked = evnt.domEvent.data;
+            me.lastProvider = provider;
+            return me.retrieveAndApplyMenuSource(provider, evnt.domEvent.data);
+        }
+        else if (evnt.domEvent.data.backbutton) {
+            return me.retrieveAndApplyMenuSource(me.lastProvider, me.lastDataClicked, true);
+
+        }
+        else {
+            throw new Error(&#39;ApplicationMenu : no provider found with data.&#39;);
+        }
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-retrieveAndApplyMenuSource'>    /** 
+</span>     * Applies the retrieve values from the provider to the menu source.
+     **/
+    retrieveAndApplyMenuSource: function (provider, data, getparentdata) {
+        var me = this,
+            clickResult;
+        clickResult = provider.itemClicked(data, getparentdata);
+        handler = function handler(clickResult) {
+            if (!clickResult) {
+                me.$menuPromise = me.$menuPromise.then(function () {
+                    return me.loadMenu();
+                });
+                return me.$menuPromise;
+            }
+            else if (Array.isArray(clickResult)) {
+                me.menusource.removeWhere(function (x) { return true; });
+                me.menusource.push({ backbutton: true, name: &#39;Back&#39; });
+                clickResult.foreach(function (x) {
+                    me.menusource.push(x);
+                });
+                return me.$menuPromise;
+
+            }
+        }
+        if (clickResult instanceof Promise) {
+            return clickResult.then(function (result) {
+                return handler(result);
+            }).catch(function (error) {
+                MEPH.Log(error);
+            });;
+        }
+        else {
+            return handler(clickResult);
+        }
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-setUpEventListeners'>    /**
+</span>     * Sets up event listeners.
+     **/
+    setUpEventListeners: function () {
+        var me = this, Dom = MEPH.util.Dom;
+        me.don(&#39;click&#39;, me.$window.document.body, function (type, evnt) {
+            var source = Dom.getEventSource(evnt), anscestor, domTemplate = me.getDomTemplate();
+            if (domTemplate) {
+                anscestor = domTemplate.first(function (x) {
+                    return Dom.isDomDescendant(source, x)
+                });
+            }
+            if (me.opened &amp;&amp; !anscestor &amp;&amp; !me.opening) {
+                me.close();
+            }
+        }.bind(me, &#39;click&#39;));
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-open'>    /**
+</span>     * Opens the flyout menu.
+     * @returns {Promise}
+     */
+    open: function () {
+        var me = this;
+        if (!me.opened) {
+            me.opening = true;
+            me.$applicationMenuPromise = me.$applicationMenuPromise.then(function () {
+                return me.flyoutPanel.open().then(function () {
+                    me.opened = true;
+                    me.opening = false;
+                });
+            });
+        }
+        return me.$applicationMenuPromise;
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-close'>    /**
+</span>    * Opens the flyout menu.
+    * @returns {Promise}
+    */
+    close: function () {
+        var me = this;
+        if (me.opened) {
+            me.$applicationMenuPromise = me.$applicationMenuPromise.then(function () {
+                return me.flyoutPanel.close().then(function () {
+                    me.opened = false;
+                });
+            });
+        }
+        return me.$applicationMenuPromise;
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-isOpen'>    /**
+</span>     * Returns true if opened.
+     */
+    isOpen: function () {
+        var me = this;
+        return me.opened;
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenu-method-openFlyoutMenu'>    /**
+</span>     * Opens the flyout menu.
+     */
+    openFlyoutMenu: function () {
+        var me = this;
+
+        if (!me.opening) {
+            me.opening = true;
+            me.$applicationMenuPromise = me.open().then(function () {
+                me.opening = false;
+            });
+        }
+    }
+
+});</pre>
+</body>
+</html>

@@ -1,0 +1,68 @@
+﻿{
+    'views': [{
+            'viewId': '4UHP001',
+            'view': 'U4.desktop.widgets.homepage.HomePageView',
+            'singleton': true,
+            'namespace': 'U4homePage'
+        },{
+			'viewId': 'MEPH002',
+			'view': 'MEPHControls.list.view.List',
+			'controller': 'MEPHControls.list.controller.ListController',
+            'path': '/list/List'
+		},{
+			'viewId': 'MEPH003',
+			'view': 'MEPHControls.button.view.Button',
+            'path': '/button/Button'
+		},{
+			'viewId': 'MEPH004',
+			'view': 'MEPHControls.iconbutton.view.IconButton',
+			'controller': 'MEPHControls.iconbutton.controller.IconButtonController',
+            'path': '/button/IconButton'
+		},{
+			'viewId': 'MEPH010',
+			'view': 'MEPHControls.remoting.view.Remoting',
+			'controller': 'MEPHControls.remoting.controller.RemotingController',
+            'path': '/remoting/Remoting'
+		},{
+			'viewId': 'MEPH011',
+			'view': 'MEPHControls.remoteview.view.RemoteView',
+			'controller': 'MEPHControls.remoteview.controller.RemoteViewController',
+			'model': 'MEPHControls.remoteview.model.RemoteViewModel',
+            'path': '/remoteview/RemoteView'
+		},{
+			'viewId': 'MEPH013',
+			'view': 'MEPHControls.graph.view.Graph',
+            'path': '/graph/Graph'
+		},{
+			'viewId': 'MEPH012',
+			'view': 'MEPHControls.qrcode.view.Qrcode',
+            'path': '/qrcode/Qrcode'
+		},{
+			'viewId': 'MEPH005',
+			'view': 'MEPHControls.tree.view.Tree',
+			'controller': 'MEPHControls.tree.controller.TreeController',
+            'path': '/tree/Tree'
+		},{
+			'viewId': 'MEPH006',
+			'view': 'MEPHControls.fields.view.Text',
+			'controller': 'MEPHControls.fields.controller.TextController',
+            'path': '/text/Text'
+		},{
+			'viewId': 'MEPH007',
+			'view': 'MEPHControls.panel.view.Panel',
+            'path': '/panel/Panel'
+		},{
+			'viewId': 'MEPH001',
+			'view' : 'MEPH.mobile.view.HomePageView',
+            'path': '/mobile/home'
+		},{
+			'viewId': 'MEPH009',
+			'view': 'MEPHControls.communication.view.Communication',
+			'controller': 'MEPHControls.communication.controller.CommunicationController',
+            'path': '/communication/Communication'
+		},{
+			'viewId': 'MEPH008',
+			'view': 'MEPHControls.drawing.view.DrawingSurface',
+			'path': '/mobile/drawingsurface'
+		}]
+}

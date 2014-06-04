@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-mobile-application-menu-ApplicationMenuProvider'>/**
+</span> * @class MEPH.mobile.application.menu.ApplicationMenuProvider
+ * An application menu provider.
+ */
+MEPH.define(&#39;MEPH.mobile.application.menu.ApplicationMenuProvider&#39;, {
+    initialize: function (config) {
+        var me = this;
+        me.config = config;
+        me.providers = [];
+
+    },
+<span id='MEPH-mobile-application-menu-ApplicationMenuProvider-method-getMenuItemProviders'>    /**
+</span>     * Gets the menu providers
+     * @returns {Promise}
+     */
+    getMenuItemProviders: function () {
+        var me = this;
+        if (me.providers.length &gt; 0) {
+            return Promise.resolve().then(function () { return me.providers; });
+        }
+
+        return Promise.all(me.config.providers.select(function (provider) {
+            return MEPH.MobileServices.get(provider).then(function (instance) {
+                me.providers.push(instance);
+            });
+        })).then(function () {
+            return me.providers;
+        });;
+    }
+});</pre>
+</body>
+</html>

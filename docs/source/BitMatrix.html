@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+  Ported to JavaScript by Lazar Laszlo 2011 
+  
+  lazarsoft@gmail.com, www.lazarsoft.info
+  
+*/
+
+/*
+*
+* Copyright 2007 ZXing authors
+*
+* Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+
+MEPH.define(&#39;MEPH.qrcode.BitMatrix&#39;, {
+    requires: [&#39;MEPH.qrcode.Util&#39;],
+    defineGetters: function () {
+        var me = this;
+        Object.defineProperty(me, &#39;Width&#39;, {
+            get: function () {
+                return me.width;
+            }
+        });
+        Object.defineProperty(me, &#39;Height&#39;, {
+            get: function () {
+                return me.height;
+            }
+        });
+
+        Object.defineProperty(me, &#39;Dimension&#39;, {
+            get: function () {
+                if (me.width != me.height) {
+                    throw &quot;Can&#39;t call getDimension() on a non-square matrix&quot;;
+                }
+                return me.width;
+            }
+        });
+    },
+    get_Renamed: function (x, y) {
+        var me = this, offset;
+        offset = y * me.rowSize + (x &gt;&gt; 5);
+        return ((MEPH.qrcode.Util.URShift(me.bits[offset], (x &amp; 0x1f))) &amp; 1) != 0;
+    },
+    set_Renamed: function (x, y) {
+        var me = this,
+            offset = y * me.rowSize + (x &gt;&gt; 5);
+        me.bits[offset] |= 1 &lt;&lt; (x &amp; 0x1f);
+    },
+    flip: function (x, y) {
+        var me = this,
+            offset = y * me.rowSize + (x &gt;&gt; 5);
+        me.bits[offset] ^= 1 &lt;&lt; (x &amp; 0x1f);
+    },
+    clear: function () {
+        var me = this,
+            max = me.bits.length;
+        for (var i = 0; i &lt; max; i++) {
+            me.bits[i] = 0;
+        }
+    },
+    setRegion: function (left, top, width, height) {
+        if (top &lt; 0 || left &lt; 0) {
+            throw &quot;Left and top must be nonnegative&quot;;
+        }
+        if (height &lt; 1 || width &lt; 1) {
+            throw &quot;Height and width must be at least 1&quot;;
+        }
+        var me = this,
+            right = left + width,
+            bottom = top + height;
+        if (bottom &gt; me.height || right &gt; me.width) {
+            throw &quot;The region must fit inside the matrix&quot;;
+        }
+        for (var y = top; y &lt; bottom; y++) {
+            var offset = y * me.rowSize;
+            for (var x = left; x &lt; right; x++) {
+                me.bits[offset + (x &gt;&gt; 5)] |= 1 &lt;&lt; (x &amp; 0x1f);
+            }
+        }
+    },
+    initialize: function (width, height) {
+        var me = this;
+        if (!height)
+            height = width;
+        if (width &lt; 1 || height &lt; 1) {
+            throw &quot;Both dimensions must be greater than 0&quot;;
+        }
+        me.width = width;
+        me.height = height;
+        var rowSize = width &gt;&gt; 5;
+        if ((width &amp; 0x1f) != 0) {
+            rowSize++;
+        }
+        me.rowSize = rowSize;
+        me.bits = new Array(rowSize * height);
+        for (var i = 0; i &lt; me.bits.length; i++)
+            me.bits[i] = 0;
+
+        me.defineGetters();
+    }
+});</pre>
+</body>
+</html>
