@@ -1,13 +1,13 @@
 ﻿# Binding, not Bondage
 
-A guide abount binding in U4M.
+A guide abount binding in MEPH.
 
 
 ## Binding is what?
-[Wikipedia](http://en.wikipedia.org/wiki/Data_binding) describes data binding as a "process that establishes a connection between the application UI(User Interface) and business logic. ...". In U4M this is also the case. 
+[Wikipedia](http://en.wikipedia.org/wiki/Data_binding) describes data binding as a "process that establishes a connection between the application UI(User Interface) and business logic. ...". In MEPH this is also the case. 
 
-## U4M Binding
-In U4M, a view can have an associated presenter, controller, model, viewmodel or whatever in any combination that the mind can imagine. To support the single responsibility portion of the [SOLID](http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)) principles, U4M has a particularly unique way of establishing data-binding.
+## MEPH Binding
+In MEPH, a view can have an associated presenter, controller, model, viewmodel or whatever in any combination that the mind can imagine. To support the single responsibility portion of the [SOLID](http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)) principles, MEPH has a particularly unique way of establishing data-binding.
 
 ### Example 1
 
@@ -22,16 +22,16 @@ The simplest situation which can exist is a view which has no presenter/controll
 
 -  Definition of App.view.View
 
-		U4M.define('App.view.View', {
+		MEPH.define('App.view.View', {
 			alias: 'app_view_view',
 			templates: true,
-			extend: 'U4M.mobile.activity.container.Container',
+			extend: 'MEPH.mobile.activity.container.Container',
 			properties: {
 				name: null
 			},
 			afterLoaded: function() {
 				var me= this;
-				me.name = 'U4M Framework';
+				me.name = 'MEPH Framework';
 			}
 		})
 
@@ -70,7 +70,7 @@ The attribute-property combination, __data-events='"change" : "c$.inputfield.val
 
 #### The Pipe
 
-The pipe is a powerful tool in U4M. It allows developers to call multiple procedures and set multiple properties in all available contexts with ease. In the previous example __"c$.inputfield.value | c$.value"__, the inputfield's value will be set on the context's value property automatically.
+The pipe is a powerful tool in MEPH. It allows developers to call multiple procedures and set multiple properties in all available contexts with ease. In the previous example __"c$.inputfield.value | c$.value"__, the inputfield's value will be set on the context's value property automatically.
 
 That's nice, but can it do more. __Yes!__.
 
@@ -103,16 +103,16 @@ a class should have only a single responsibility (i.e. only one potential change
 
 -  Definition of App.view.View
 
-		U4M.define('App.view.View', {
+		MEPH.define('App.view.View', {
 			alias: 'app_view_view',
 			templates: true,
-			extend: 'U4M.mobile.activity.container.Container',
+			extend: 'MEPH.mobile.activity.container.Container',
 			properties: {
 				name: null
 			},
 			afterLoaded: function() {
 				var me= this;
-				me.name = 'U4M Framework';
+				me.name = 'MEPH Framework';
 			}
 		});
 
@@ -131,9 +131,9 @@ a class should have only a single responsibility (i.e. only one potential change
 
 -  Definition of App.controller.Controller
 
-		U4M.define('App.controller.Controller', {
-			requires: ['U4M.controller.Controller'],
-			extend: 'U4M.controller.Controller',
+		MEPH.define('App.controller.Controller', {
+			requires: ['MEPH.controller.Controller'],
+			extend: 'MEPH.controller.Controller',
 			properties: {
 				name: null
 			},
@@ -145,9 +145,9 @@ a class should have only a single responsibility (i.e. only one potential change
 
 -  Definition of App.model.Model
 
-		U4M.define('App.model.Model', {
-			requires: ['U4M.model.Model'],
-			extends: ['U4M.model.Model'],
+		MEPH.define('App.model.Model', {
+			requires: ['MEPH.model.Model'],
+			extends: ['MEPH.model.Model'],
 			properties: {
 				name: null,
 				value: null,
@@ -159,9 +159,9 @@ a class should have only a single responsibility (i.e. only one potential change
 			}
 		});
 
-With a model, controller and view defined the power of u4m binding is now visible for all to see. 
+With a model, controller and view defined the power of meph binding is now visible for all to see. 
 
-To reference models, controllers and etc, U4M has built in short cuts :
+To reference models, controllers and etc, MEPH has built in short cuts :
 
 -  __m$__, __model__ model, References the model associated with the view
 -  __v$__, __view__ view, References the view

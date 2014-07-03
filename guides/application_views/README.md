@@ -10,11 +10,11 @@ If you don't know, you are probably in the wrong place, but try [here](http://en
 
 ## What do I need to know?
 
-This guide is in no way required, but if you work in a company that uses this style of menu system it maybe useful. The [MobileViewProvider](#!/U4M.mobile.providers.viewprovider.MobileViewProvider) is used to retrieve view configurations which are used for showing a view instance. Within the config property of the configuration these properties are used to retrieve the views which can be expected to be loaded at any given time during the life of the application.
+This guide is in no way required, but if you work in a company that uses this style of menu system it maybe useful. The [MobileViewProvider](#!/MEPH.mobile.providers.viewprovider.MobileViewProvider) is used to retrieve view configurations which are used for showing a view instance. Within the config property of the configuration these properties are used to retrieve the views which can be expected to be loaded at any given time during the life of the application.
 
 					viewProvider: {
 							static: true,
-							type: 'U4M.mobile.providers.viewprovider.MobileViewProvider',
+							type: 'MEPH.mobile.providers.viewprovider.MobileViewProvider',
 							config: {
 								viewsResource: {
 									uri: 'Views.json',

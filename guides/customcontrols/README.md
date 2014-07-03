@@ -1,12 +1,12 @@
 ﻿# Custom Control
 
-A guide about custom controls, which are the meat and potatoes of U4M.
+A guide about custom controls, which are the meat and potatoes of MEPH.
 
 
 
 ## Why should I care
 
-Well, most developers would agree that modularization is key in the development of enterprise level software. Also, because everything in a U4M application is a custom control, even the views are controls.
+Well, most developers would agree that modularization is key in the development of enterprise level software. Also, because everything in a MEPH application is a custom control, even the views are controls.
 
 
 ## My first control
@@ -29,10 +29,10 @@ Ok, lets do this.
 
 -  __Step 2__:  Define the PageHeader class.(PageHeader.js)
 
-			U4M.define('U4M.pageheader.PageHeader', {
+			MEPH.define('MEPH.pageheader.PageHeader', {
 				alias: 'pageheader',
 				templates: true,
-				extends: 'U4M.control.Control',
+				extends: 'MEPH.control.Control',
 				properties : {
 					title: '',
 					subtitle: '',
@@ -57,24 +57,24 @@ That's it.
 
 You may have notice a few properties of the class configuration that haven't been explain, don't worry its about to happen.
 
-				U4M.define('U4M.pageheader.PageHeader', {
+				MEPH.define('MEPH.pageheader.PageHeader', {
 					alias: 'pageheader',
 					templates: true,
 					...
 
 -  __alias__ 
 
-Alias tells U4M that when it see a html object with the node name __pageheader__, that it is referencing the U4M.pageheader.PageHeader. This also means that the alias must be unique throughout the system.
+Alias tells MEPH that when it see a html object with the node name __pageheader__, that it is referencing the MEPH.pageheader.PageHeader. This also means that the alias must be unique throughout the system.
 
 If alias was __candycrushercontrol__ , then 
 		
 				<candycrushercontrol></candycrushercontrol>
 
-would be handled by U4M, and would output whatever the template says.
+would be handled by MEPH, and would output whatever the template says.
 
 -  __templates__
 
-In the example __templates__ equals __true__, this is a convention of U4M. That when the templates is set to true, the template is assumed to be located in a file in the same directory as the class with a __.html__ extension instead of the __.js__ extention. The templates property can be set in multiple ways like :
+In the example __templates__ equals __true__, this is a convention of MEPH. That when the templates is set to true, the template is assumed to be located in a file in the same directory as the class with a __.html__ extension instead of the __.js__ extention. The templates property can be set in multiple ways like :
 
 The most common and easiest.
 
@@ -85,19 +85,19 @@ The most common and easiest.
 This is the equivalent of the previous convention.
 
 				...
-				templates: 'U4M.pageheader.PageHeader'
+				templates: 'MEPH.pageheader.PageHeader'
 				...
 
 or
 
 				...
-				templates : ['U4M.pageheader.PageHeader']
+				templates : ['MEPH.pageheader.PageHeader']
 				...
 
 or
 
 				...
-				templates : ['U4M.pageheader.PageHeader', 'U4M.pageheader.ExtraPart']
+				templates : ['MEPH.pageheader.PageHeader', 'MEPH.pageheader.ExtraPart']
 				...
 
 The last example shows a way of setting the template, and additional resources which can be utilized by the control.

@@ -1,12 +1,12 @@
 ﻿# Getting Started
 
-A guide about getting started with U4M.
+A guide about getting started with MEPH.
 
 ## Requirements
 
 ### Web Browsers
 
-U4M supports all the major web browsers from Internet Explorer 10 to the latest Google Chrome.
+MEPH supports all the major web browsers from Internet Explorer 10 to the latest Google Chrome.
 
 *   Internet Explorer 10+
 *   Firefox
@@ -15,7 +15,7 @@ U4M supports all the major web browsers from Internet Explorer 10 to the latest 
 This tutuorial assumes that you are using the latest version of Google Chrome. If you don't already have teh latest version, please take a moment and install it, and familiarize yourself wi the [chrome developer tools](https://developer.chrome.com/devtools/index).
 
 ### Web Server
-Although it is not considered an explicity requirement to use U4M, it is still highly recommended to develop your application at the root of your server, because of a dependency of [SignalR](http://signalr.net/).
+Although it is not considered an explicity requirement to use MEPH, it is still highly recommended to develop your application at the root of your server, because of a dependency of [SignalR](http://signalr.net/).
 - some
 - bulleted
 - list
@@ -23,7 +23,7 @@ Although it is not considered an explicity requirement to use U4M, it is still h
 ## Application Structure
 
 ### Basic Structure
-Definitely not required, but it is suggested best practice guideline for keeping your application well orgainized, extensiable and maintainable. The following is the recommended directory structure for a U4M application.
+Definitely not required, but it is suggested best practice guideline for keeping your application well orgainized, extensiable and maintainable. The following is the recommended directory structure for a MEPH application.
 
 		- appname
 			-app
@@ -63,7 +63,7 @@ Definitely not required, but it is suggested best practice guideline for keeping
 
 
 ### Meat and Potatoes
-This is the 1,2,3 steps to creating your first U4M application.
+This is the 1,2,3 steps to creating your first MEPH application.
 
 1.  Create a index.html
 
@@ -71,11 +71,11 @@ This is the 1,2,3 steps to creating your first U4M application.
 		<html xmlns="http://www.w3.org/1999/xhtml">
 		<head>
 			// This is here for backwards compatibility.
-			<script src="../../u4m/polyfills/Promise.js"></script>
-			<title>U4M App</title>
-			<script src="../../u4m/src/u4m.js"></script>
+			<script src="../../meph/polyfills/Promise.js"></script>
+			<title>MEPH App</title>
+			<script src="../../meph/src/meph.js"></script>
 			<script src="app.js"></script>
-			<link href="../../u4m/resources/css/u4m-debug.css" rel="stylesheet" />
+			<link href="../../meph/resources/css/meph-debug.css" rel="stylesheet" />
 			<link href="resources/css/u4-mobile-example.css" rel="stylesheet" />
 		</head>
 		<body>
@@ -86,9 +86,9 @@ This is the 1,2,3 steps to creating your first U4M application.
 #### Required steps.
 
 	- Add the required resources
-		- u4m.js
+		- meph.js
 		- app.js
-		- u4m-debug.css / u4m.css
+		- meph-debug.css / meph.css
 		- any more  resources you require.
 
 
@@ -96,10 +96,10 @@ This is the 1,2,3 steps to creating your first U4M application.
 	- Set up the frame work.
 
 
-		The 'U4M' defines the path from the global window object where the framework functions and properties will reside.
+		The 'MEPH' defines the path from the global window object where the framework functions and properties will reside.
 	
-				var path = 'u4m/src';
-				u4mFrameWork('U4M', path);
+				var path = 'meph/src';
+				u4mFrameWork('MEPH', path);
 
 
 	- Setting up application paths.
@@ -108,47 +108,47 @@ This is the 1,2,3 steps to creating your first U4M application.
 		 The application will need to be able to find resources. To meet that requirement, setting up paths are an easy way to manage it application wide. Paths can be added or removed at any point in the lifecylce of application. The most of the time, all the paths should be defined before the application is started.
 		 
 				var rel = '/'
-				var path = rel + 'u4m/src';
+				var path = rel + 'meph/src';
 				var U4MControlsPath = rel +  'controlExamples';
 				var ProvidersPath = rel +  'providerExamples';
-				U4M.setPath(path, 'U4M');
-				U4M.setPath(U4MControlsPath, 'U4MControls'); 
-				U4M.getPath('U4MControls'); // returns /u4m/src/controlExamples
+				MEPH.setPath(path, 'MEPH');
+				MEPH.setPath(U4MControlsPath, 'U4MControls'); 
+				MEPH.getPath('U4MControls'); // returns /meph/src/controlExamples
 				
-				U4M.setPath(ProvidersPath, 'Providers');
-				U4M.getPath('Providers'); // returns /u4m/src/providerExamples
+				MEPH.setPath(ProvidersPath, 'Providers');
+				MEPH.getPath('Providers'); // returns /meph/src/providerExamples
 
 	- Creating your application
 		 
 				...
-				U4M.ready().then(function () {
+				MEPH.ready().then(function () {
 					//Set paths here.
-					U4M.create('U4M.mobile.MobileApplication').then(function () {
+					MEPH.create('MEPH.mobile.MobileApplication').then(function () {
 						
-						var app = U4M.MobileApp.mobileApplication({
+						var app = MEPH.MobileApp.mobileApplication({
 						}).ready().then(function (x) {
 
 						}).catch(function (error) {
-							U4M.Log(error);
+							MEPH.Log(error);
 						});
 					});
-					U4M.loadScripts(['/signalr/hubs']);
+					MEPH.loadScripts(['/signalr/hubs']);
 
 				});
 
 
 	The most interesting parts of the code above are:
 			
-				U4M.ready().then(function () { ...})
+				MEPH.ready().then(function () { ...})
 				
-	When U4M has loaded all the required framework dependencies, it will execute the code with in the callback function.
+	When MEPH has loaded all the required framework dependencies, it will execute the code with in the callback function.
 
-				U4M.create('U4M.mobile.MobileApplication').then(function () { });
+				MEPH.create('MEPH.mobile.MobileApplication').then(function () { });
 
-	U4M.mobile.MobileApplication is the default application class, which includes a basic structure for a mobile application, when the requirements are finished loading it will execute its callback function.
+	MEPH.mobile.MobileApplication is the default application class, which includes a basic structure for a mobile application, when the requirements are finished loading it will execute its callback function.
 
 
-				  var app = U4M.MobileApp.mobileApplication({
+				  var app = MEPH.MobileApp.mobileApplication({
 							product: 'UNIT4',
 							applicationName: 'Agresso Platform Mobile',
 							applicationSelector: 'agreesmobileplatform',
@@ -170,18 +170,18 @@ This is the 1,2,3 steps to creating your first U4M application.
 
 					var index = location.pathname.indexOf('dev-harness')
 					var rel = location.pathname.substr(0, index);
-					var path = rel + 'u4m/src';
+					var path = rel + 'meph/src';
 					var mobileexample = 'dev-harness/u4-mobile-example/';
 					var U4MControlsPath = rel + mobileexample + 'controlExamples';
 					var ProvidersPath = rel + mobileexample + 'providerExamples';
-					u4mFrameWork('U4M', path);
-					U4M.ready().then(function () {
-						U4M.setPath(path, 'U4M');
-						U4M.setPath(U4MControlsPath, 'U4MControls');
-						U4M.setPath(ProvidersPath, 'Providers');
-						U4M.setPath(rel + mobileexample + 'data', 'dataviews');
-						U4M.create('U4M.mobile.MobileApplication').then(function () {
-							var app = U4M.MobileApp.mobileApplication({
+					u4mFrameWork('MEPH', path);
+					MEPH.ready().then(function () {
+						MEPH.setPath(path, 'MEPH');
+						MEPH.setPath(U4MControlsPath, 'U4MControls');
+						MEPH.setPath(ProvidersPath, 'Providers');
+						MEPH.setPath(rel + mobileexample + 'data', 'dataviews');
+						MEPH.create('MEPH.mobile.MobileApplication').then(function () {
+							var app = MEPH.MobileApp.mobileApplication({
 								product: 'UNIT4',
 								applicationName: 'Agresso Platform Mobile',
 								applicationSelector: 'agreesmobileplatform',
@@ -219,7 +219,7 @@ This is the 1,2,3 steps to creating your first U4M application.
 							}).ready().then(function (x) {
 
 							}).catch(function (error) {
-								U4M.Log(error);
+								MEPH.Log(error);
 							});
 
 						});

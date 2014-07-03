@@ -6,7 +6,7 @@
  *               <list data-bind='"source": "ct$.listsource"'>
  *                   <template 
  *                       name="u4m_controls_examples_list">
- *                           <div class="u4m-application-menu-categories-item-details" >
+ *                           <div class="meph-application-menu-categories-item-details" >
  *                               <span>Name</span>
  *                               <span data-bind='"innerHTML": "c$.data.name"'></span>
  *                           </div>

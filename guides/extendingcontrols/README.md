@@ -9,12 +9,12 @@ As a developer, you have received a request for new functionality, and you have 
 
 Here is the implementation of the PageHeader control that will be used for this example.
 
-U4M.pageheader.PageHeader
+MEPH.pageheader.PageHeader
 
-			U4M.define('U4M.pageheader.PageHeader', {
+			MEPH.define('MEPH.pageheader.PageHeader', {
 				alias: 'pageheader',
 				templates: true,
-				extends: 'U4M.control.Control',
+				extends: 'MEPH.control.Control',
 				properties : {
 					title: '',
 					subtitle: '',
@@ -28,7 +28,7 @@ U4M.pageheader.PageHeader
 				}
 			});
 
-U4M.pageheader.PageHeader template
+MEPH.pageheader.PageHeader template
 
 			<!-- "name":"beforetitle" -->
 			<h1 data-bind='"innerHTML" : "c$.title"'></h1>
@@ -41,12 +41,12 @@ U4M.pageheader.PageHeader template
 This is how we would extend the PageHeader class to include this new functionality.
 
 
-U4M.pageheader.PageHeaderExtended
+MEPH.pageheader.PageHeaderExtended
 
-			U4M.define('U4M.pageheader.PageHeaderExtended', {
+			MEPH.define('MEPH.pageheader.PageHeaderExtended', {
 				alias:'pageheader_extended',
 				templates: true,
-				extends : 'U4M.pageheader.PageHeader',
+				extends : 'MEPH.pageheader.PageHeader',
 				properties : {
 					author: null,
 					date: null,
@@ -61,7 +61,7 @@ U4M.pageheader.PageHeaderExtended
 			});
 
 
-U4M.pageheader.PageHeaderExtended template
+MEPH.pageheader.PageHeaderExtended template
 
 			<!-- "instruction": true, "name" : "author", "operation" : "inject" , "position" : "beforedescription", "before" : false -->
 			<h2 data-bind='"innerHTML" : "c$.author"'></h2>
@@ -91,7 +91,7 @@ In the PageHeader template there are four html comments, these are apart of the 
 
 __A close look__
 
-If you look carefully you will see that the comments specify some information which is useful to U4M.
+If you look carefully you will see that the comments specify some information which is useful to MEPH.
 
 			<!-- "name":"beforetitle" -->
 

@@ -11,10 +11,10 @@ If you don't know, you are probably in the wrong place, but try [here](http://en
 
 ## What do I need to know?
 
-This guide is in no way required, but if you work in a company that uses this style of menu system it maybe useful. The [MenuProvider](#!/U4M.mobile.providers.menuprovider.MenuProvider) is used to retrieve the menu configuration. 
+This guide is in no way required, but if you work in a company that uses this style of menu system it maybe useful. The [MenuProvider](#!/MEPH.mobile.providers.menuprovider.MenuProvider) is used to retrieve the menu configuration. 
 
 					 menuProvider: {
-						type: 'U4M.mobile.providers.menuprovider.MenuProvider',
+						type: 'MEPH.mobile.providers.menuprovider.MenuProvider',
 						config: {
 							viewsResource: {
 								uri: '/Menu.json',

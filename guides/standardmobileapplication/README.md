@@ -7,28 +7,28 @@ A guide about setting up a minimal mobile application
 
 			var index = location.pathname.indexOf('dev-harness')
 			var rel = location.pathname.substr(0, index);
-			var path = rel + 'u4m/src';
+			var path = rel + 'MEPH/src';
 			var mobileexample = 'dev-harness/u4-mobile-example/';
-			var U4MControlsPath = rel + mobileexample + 'controlExamples';
-			u4mFrameWork('U4M', path);
-			U4M.ready().then(function () {
-				U4M.setPath(path, 'U4M');
-				U4M.setPath(U4MControlsPath, 'U4MControls');
-				U4M.setPath(rel + mobileexample + 'data', 'dataviews');
-				U4M.create('U4M.mobile.MobileApplication').then(function () {
-					var app = U4M.MobileApp.mobileApplication({
+			var MEPHControlsPath = rel + mobileexample + 'controlExamples';
+			MEPHFrameWork('MEPH', path);
+			MEPH.ready().then(function () {
+				MEPH.setPath(path, 'MEPH');
+				MEPH.setPath(MEPHControlsPath, 'MEPHControls');
+				MEPH.setPath(rel + mobileexample + 'data', 'dataviews');
+				MEPH.create('MEPH.mobile.MobileApplication').then(function () {
+					var app = MEPH.MobileApp.mobileApplication({
 						product: 'UNIT4',
 						applicationName: 'Riksbyggen Agresso Pro',
 						applicationSelector: 'agreesmobileplatform',
 						appPath: rel + mobileexample + '/index.html?',
 						homeView: {
-							viewId: 'U4M001',
+							viewId: 'MEPH001',
 							'path': '/mobile/home'
 						},
 						ioc: {
 							viewProvider: {
 								'static': true,
-								type: 'U4M.mobile.providers.viewprovider.MobileViewProvider',
+								type: 'MEPH.mobile.providers.viewprovider.MobileViewProvider',
 								config: {
 									viewsResource: {
 										uri: 'Views.json',
@@ -40,7 +40,7 @@ A guide about setting up a minimal mobile application
 							},
 							menuProvider: {
 								'static': true,
-								type: 'U4M.mobile.providers.menuprovider.MenuProvider',
+								type: 'MEPH.mobile.providers.menuprovider.MenuProvider',
 								config: {
 									viewsResource: {
 										uri: '/Menu.json',
@@ -52,14 +52,14 @@ A guide about setting up a minimal mobile application
 							},
 							applicationMenuProvider: {
 								'static': true,
-								type: 'U4M.mobile.application.menu.ApplicationMenuProvider',
+								type: 'MEPH.mobile.application.menu.ApplicationMenuProvider',
 								config: {
 									providers: ['activityMenuProvider']
 								}
 							},
 							activityMenuProvider: {
 								'static': true,
-								type: 'U4M.mobile.application.menu.ActivityMenuProvider',
+								type: 'MEPH.mobile.application.menu.ActivityMenuProvider',
 								config: {
 								}
 							}

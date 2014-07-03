@@ -2,15 +2,15 @@
 
 A guide about session management.
 
-## U4M and sessions
+## MEPH and sessions
 
-In U4M session management is pretty "straight forward", either a login is required or it is not.  Currently, the session manager is geared towards the public api web services created by the Platform team. So, in the future expect  more development in this area.
+In MEPH session management is pretty "straight forward", either a login is required or it is not.
 
 This is an example where login is required.
 
 				sessionManager: {
                     'static': true,
-                    type: 'U4M.session.SessionManager',
+                    type: 'MEPH.session.SessionManager',
                     config: {
                         loginRequired: true,
                         'authorizationPath': authorizationPath,
@@ -28,7 +28,7 @@ An example of no login required.
 
 				sessionManager: {
                     'static': true,
-                    type: 'U4M.session.SessionManager',
+                    type: 'MEPH.session.SessionManager',
                     config: {
                         loginRequired: false
                     }

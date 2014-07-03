@@ -1,13 +1,13 @@
 ﻿# Class System
 
-A guide about the U4M class system.
+A guide about the MEPH class system.
 
 
 ## What's in a class
 
-The following is an example of a basic class in U4M. It describes a class called __Class__. __Class__ is located in the __./control/Class.js__ file. 
+The following is an example of a basic class in MEPH. It describes a class called __Class__. __Class__ is located in the __./control/Class.js__ file. 
  
-			U4M.define('System.control.Class', {
+			MEPH.define('System.control.Class', {
 				extend : 'System.control.base.Control'
 				requires: ['System.util.Requirement'],
 				properties : {
@@ -28,10 +28,10 @@ The following is an example of a basic class in U4M. It describes a class called
 
 			...
 			var SystemPath = '/system';
-			u4mFrameWork('U4M', path);
-			U4M.ready().then(function () {
+			u4mFrameWork('MEPH', path);
+			MEPH.ready().then(function () {
 			...
-				U4M.setPath(SystemPath, 'System');
+				MEPH.setPath(SystemPath, 'System');
 			...
 
 After System comes the __control__ which describes the relative path from the System to the Class.js file.
@@ -40,7 +40,7 @@ After System comes the __control__ which describes the relative path from the Sy
 
 	In this case, the System.control.Class extends from a base class called System.control.base.Control.
 
-			U4M.define('System.control.Class', {
+			MEPH.define('System.control.Class', {
 				extend : 'System.control.base.Control'
 				...
 
@@ -50,14 +50,14 @@ After System comes the __control__ which describes the relative path from the Sy
 
 -  __properties : { ... __
 
-	Is the set of properties which will be applied to the instances of the System.control.Class. __Special note__, properties which start with a __$__ will not be considered observable when the U4M.util.Observable mixin is applied.
+	Is the set of properties which will be applied to the instances of the System.control.Class. __Special note__, properties which start with a __$__ will not be considered observable when the MEPH.util.Observable mixin is applied.
 
 -  __mixins: {...}/[...]__
 
 If you don't know what a mixin is [an explanation can be found here](#!/guide/mixins).
 
 			 mixins: {
-				observable: 'U4M.mixins.Observable',
-				referrerable: 'U4M.mixins.Referrerable'
+				observable: 'MEPH.mixins.Observable',
+				referrerable: 'MEPH.mixins.Referrerable'
 			 },
 
