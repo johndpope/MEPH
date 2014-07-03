@@ -42,6 +42,7 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
         me.activities = [];
         me.tokens.push(MEPH.subscribe(MEPH.Constants.startView, me.onStartView.bind(me)));
         me.tokens.push(MEPH.subscribe(MEPH.Constants.showView, me.onShowView.bind(me)));
+        me.tokens.push(MEPH.subscribe(MEPH.Constants.closeView, me.onCloseActivity.bind(me)));
         me.listenToStatePop();
         //window.history.pushState({ activityId: null, initial: true }, &#39;&#39;, &#39;&#39;);
     },
@@ -73,8 +74,38 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
             if (activity) {
                 return me.showActivity(activity);
             }
+            else {
+                return me.startActivityFromPath(state.path, false)
+            }
         }
         return Promise.resolve();
+    },
+
+    startActivityFromPath: function (querystring, replacestate) {
+        var me = this;
+        if (!querystring) {
+            return Promise.resolve();
+        }
+        return MEPH.MobileServices.get(MEPH.mobile.activity.ActivityController.viewProvider).then(function (viewProvider) {
+            if (viewProvider) {
+                return viewProvider.getViews().then(function (views) {
+                    var view = views.first(function (x) { return x.path === querystring; })
+                    if (view) {
+                        return me.startActivity(view).then(function (result) {
+                            if (replacestate) {
+                                var activity = result.classInstance;
+                                me.pushState(me.$window, { activityId: activity.getActivityId(), path: activity.getPath() }, &#39;&#39;, me.getCombinedPath(activity.getPath()))
+                            }
+                            return result;
+                        });
+                    }
+                    return Promise.resolve();
+                });
+            }
+        });
+    },
+    replaceState: function (window, state, pageName, pagePath) {
+        window.history.replaceState((state), pageName, pagePath);
     },
 <span id='MEPH-mobile-activity-ActivityController-method-pushState'>    /**
 </span>     * @private
@@ -154,20 +185,63 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
             return me.startActivity(options).catch(function () {
                 MEPH.Log.apply(MEPH, arguments);
             });
+        }).catch(function (e) {
+            MEPH.Log(e);
         });
     },
+    //onShowView: function (type, options) {
+    //    var me = this;
+    //    me.activityControllerPromise = me.activityControllerPromise.then(function () {
+    //        return me.showActivity(options.activity);
+    //    }).catch(function (e) {
+    //        MEPH.Log(e);
+    //    });
+    //},
     onShowView: function (type, options) {
         var me = this;
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
-            return me.showActivity(options.activity);
+            return me.showActivity(options.activity).then(function (result) {
+                if (options.activity.getActivityPath()) {
+                    me.pushState(me.$window, {
+                        activityId: options.activity.getActivityId(),
+                        path: options.activity.getActivityPath()
+                    }, &#39;&#39;, me.getCombinedPath(options.activity.getActivityPath()));
+                }
+                return result;
+            });;
+        }).catch(function (e) {
+            MEPH.Log(e);
         });
+        return me.activityControllerPromise;
+    },
+    onCloseActivity: function (type, options) {
+        var me = this;
+        me.activityControllerPromise = me.activityControllerPromise.then(function () {
+            return me.closeActivity(options.activity);
+        }).catch(function (e) {
+            MEPH.Log(e);
+        }).then(function () {
+            me.setCurrentActivity(null);
+        });
+    },
+    getCombinedPath: function (path) {
+        var me = this;
+        try {
+            return &#39;/&#39; + MEPH.Array(me.getAppPath().split(&#39;/&#39;).concat(path.split(&#39;/&#39;))).where(function (x) {
+                return x;
+            }).join(&#39;/&#39;);
+        } catch (error) {
+            MEPH.Log(error);
+            return &#39;&#39;;
+        }
     },
 <span id='MEPH-mobile-activity-ActivityController-method-startActivity'>    /**
 </span>     * Starts an activity
      * @param {Object} activityConfig
      * @param {Object} activityConfig.viewId
+     * @param {String} querystring
      **/
-    startActivity: function (activityConfig) {
+    startActivity: function (activityConfig, querystring) {
         var me = this, currentActivity = me.getCurrentActivity();
 
         return Promise.resolve().then(function () {
@@ -191,10 +265,9 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
                     combinedPath = &#39;&#39;,
                     path = me.getPath(activityConfig);
                 if (path !== null) {
-                    combinedPath = MEPH.Array(me.getAppPath().split(&#39;/&#39;).concat(path.split(&#39;/&#39;))).where(function (x) {
-                        return x;
-                    }).join(&#39;/&#39;);
-                    me.pushState(me.$window, { activityId: activity.getActivityId() }, me.getActivityName(activityConfig, activity), &#39;/&#39; + combinedPath);
+                    combinedPath = me.getCombinedPath(querystring || path);
+                    activity.setPath(querystring || path);
+                    me.pushState(me.$window, { activityId: activity.getActivityId(), path: querystring || path }, me.getActivityName(activityConfig, activity), combinedPath);
                 }
                 MEPH.publish(MEPH.Constants.ActivityStarted, { activity: activity });
                 return result;
@@ -232,7 +305,7 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
                 throw &#39;no view config passed&#39;;
             }
             patterns = patterns || [];
-            
+
             return MEPH.requires.apply(MEPH, patterns).then(function () {
                 if (viewConfig) {
                     var info = MEPH.getDefinedClassInformation(viewConfig.view);
@@ -390,10 +463,21 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
         if (activity.isActivity() &amp;&amp; !me.activities.some(function (x) {
             return x.activity.getActivityId() === activity.getActivityId();
         })) {
+            if (MEPH.IsEventable(activity)) {
+                activity.on(&#39;destroy&#39;, me.onActivityDestroy.bind(me, activity));
+            }
             me.activities.push({
                 activity: activity,
                 parent: parentActivity ? parentActivity : null
             });
+        }
+    },
+    onActivityDestroy: function (activity, type) {
+        var me = this,
+            removed;
+        removed = me.removeActivity(activity);
+        if (removed.length) {
+            MEPH.publish(MEPH.Constants.ActivityDestroyed, {});
         }
     },
 <span id='MEPH-mobile-activity-ActivityController-method-setActivityParent'>    /**
@@ -408,6 +492,12 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
         if (first) {
             first.parent = parentActivity;
         }
+    },
+    removeActivity: function (activity) {
+        var me = this;
+        return me.activities.removeWhere(function (x) {
+            return x.activity === activity;
+        });
     },
 <span id='MEPH-mobile-activity-ActivityController-method-getActivity'>    /**
 </span>     * Gets the activity by id.

@@ -13,6 +13,7 @@ MEPH.define('MEPH.mobile.application.menu.ActivityMenuProvider', {
         var me = this;
         me.source = MEPH.util.Observable.observable([]);
         MEPH.subscribe(MEPH.Constants.ActivityStarted, me.onActivityStarted.bind(me));
+        MEPH.subscribe(MEPH.Constants.ActivityDestroyed, me.onActivityStarted.bind(me));
         me.onActivityStarted();
     },
     onActivityStarted: function () {

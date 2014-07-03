@@ -62,6 +62,23 @@
         });
     });
 
+    it('can get all the ref from the node', function (done) {
+        var dom = createDomObjects('deephelpercomposite');
+        dom.setAttribute('ref-controller', 'value1');
+        dom.setAttribute('ref-something', 'value2');
+        MEPH.create('MEPH.dom.ControlLoader').then(function ($class) {
+            var loader = new $class();
+            var references = loader.getNodeInstanceReferences(dom);
+
+            expect(references).toBeTruthy();;
+            expect(references.length === 2).toBeTruthy();
+        }).catch(function (error) {
+            expect(error).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
     it('when a control is being loaded, events will fire at key points in the process', function (done) {
         ///Arrange
         var classInstances = [],

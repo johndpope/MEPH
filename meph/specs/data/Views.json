@@ -1,7 +1,7 @@
 ﻿{
     'views': [{
             'viewId': '4UHP001',
-            'view': 'U4.desktop.widgets.homepage.HomePageView',
+            'view': 'MEPH.mobile.view.HomePageView',
             'singleton': true,
             'namespace': 'U4homePage',
             'path': 'homeView'

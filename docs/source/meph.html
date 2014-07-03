@@ -438,6 +438,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
         classPath = path.substring(offset, path.length).split(&#39;.&#39;).join(folderPathSeparator);
         return closestMatch.path + folderPathSeparator + classPath;
     }
+
+    meph.getSource = function (name, extension) {
+        var path = meph.getClassPath(name);
+        return meph.get(path + extension);
+    }
+
     meph.emptyFunction = function () { };
     meph.ajax = function (path, configure) {
         var promiseResolution,
@@ -598,6 +604,13 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
             delimiter = &#39;&amp;&#39;;
         }
         return uri;
+    }
+
+    meph.IsEventable = function (object) {
+        if (object &amp;&amp; object[privateVariablePrefix + &#39;listeners&#39;]) {
+            return true;
+        }
+        return false
     }
 
     meph.preflight = function (path, configure) {
@@ -804,6 +817,8 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
     meph.defaultReversePrefix = defaultReversePrefix;
     meph.pathDelimiter = pathDelimiter;
     meph.pipeString = pipeString;
+    meph.MaxTransitionTime = 500;
+    meph.ParameterDelimiter = &#39;,&#39;;
     meph.jsync = jsync;
     meph.prefixes = {
         retrievalEventPrefix: retrievalEventPrefix,
@@ -1094,7 +1109,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
 
         var offset = offset || window;
         for (var i = 0; i &lt; namespaceSplit.length; i++) {
-            if (!offset[namespaceSplit[i]]) {
+            if (offset[namespaceSplit[i]] === null || offset[namespaceSplit[i]] === undefined) {
                 return null;
             }
             else {
@@ -1635,6 +1650,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
                 return this;
             }.bind(object)
         });
+        return object;
     }
     var clone = meph.clone;
     var getDefinedClass = meph.getDefinedClass;

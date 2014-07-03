@@ -9,6 +9,7 @@
         RemoteControlRequestComplete: 'MEPH.RemoteControlRequestComplete',
         RequestControllAccess: 'MEPH.RequestControllAccess',
         ActivityStarted: 'ActivityStarted',
-        ACTIVITY_HEART_BEAT: 'MEPH.ACTIVITY_HEART_BEAT'
+        ACTIVITY_HEART_BEAT: 'MEPH.ACTIVITY_HEART_BEAT',
+        closeView: 'MEPH.events.closeView'
     }
 });

@@ -110,6 +110,21 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
+            if (!array.trim) {
+                Object.defineProperty(array, 'trim', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function () {
+                        var result = [];
+                        var collection = this;
+                        for (var i = 0 ; i < collection.length; i++) {
+                            result.push(collection[i].trim());
+                        }
+                        return result;
+                    }
+                });
+            }
 
             if (!array.indexWhere) {
                 Object.defineProperty(array, 'indexWhere', {

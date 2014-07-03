@@ -9,6 +9,9 @@ $meph-activity-body-padding: 2px;
 .meph-activity-view-header {
 	background-color: $meph-color-white;
 	height: $activity-header-height;
+	position: absolute;
+	width: 100%;
+	z-index: 1000;
 }
 .meph-activity-view-footer {
 	position: absolute;
@@ -22,8 +25,8 @@ $meph-activity-body-padding: 2px;
 	padding-top: $activity-header-height;
 	padding-bottom: $activity-footer-height;
 	position: absolute;
-	background-color: $meph-color-white;
-	top: 0px;
+	background-color: $meph-color-transparent;
+	top: 0px; 
 	width: 100%;
 	box-sizing: border-box;
 	padding-left: $meph-activity-body-padding;

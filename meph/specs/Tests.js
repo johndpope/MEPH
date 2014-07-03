@@ -65,6 +65,7 @@
                         'dom/ControlLoader.spec.js',
                         'dom/ControlReader.spec.js',
                         'field/FormField.spec.js',
+                        'gpu/Context.spec.js',
                         'graph/ActiveZone.spec.js',
                         'graph/ConnectionHandler.spec.js',
                         'graph/Graph.spec.js',
@@ -115,7 +116,9 @@
                         'util/Observable.spec.js',
                         'util/Renderer.spec.js',
                         'util/Validatable.spec.js',
-                        'util/Template.spec.js'
+                        'util/Template.spec.js',
+                        'query/QueryableWorker.spec.js',
+                        'webgl/Context.spec.js'
                     ];
 
                 promise = Promise.resolve();

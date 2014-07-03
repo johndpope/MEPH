@@ -277,8 +277,8 @@ MEPH.define('MEPH.control.Control', {
                 };
             me.don('webkitTransitionEnd', view, animationComplete);
             me.don('transitionend', view, animationComplete);
-            if (options.maxTime) {
-                timoutRef = setTimeout(animationComplete, options.maxTime);
+            if (options.maxTime || MEPH.MaxTransitionTime) {
+                timoutRef = setTimeout(animationComplete, options.maxTime || MEPH.MaxTransitionTime);
             }
             if (options.remove) {
                 MEPH.Array(options.remove.split(' ')).foreach(function (remove) {
@@ -427,12 +427,20 @@ MEPH.define('MEPH.control.Control', {
      * Destroys the control.
      */
     destroy: function () {
-        var me = this,
-            domTemplaate = me.getDomTemplate();
+        var me = this, i,
+               domTemplaate = me.getDomTemplate();
+        if (me.$isDestroyed) {
+            return;
+        }
+        me.fire('beforedestroy', me);
         if (!Array.isArray(domTemplaate)) {
             domTemplaate = ([domTemplaate]);
         }
         MEPH.Array(domTemplaate);
+        me.$controls.removeWhere(function (control) {
+            control.destroy();
+            return true;
+        });
         me.$isDestroyed = true;
         domTemplaate.foreach(function (x) {
             if (x && x.parentNode && x.parentNode.removeChild) {
@@ -440,6 +448,19 @@ MEPH.define('MEPH.control.Control', {
             }
         });
         me.fire('destroy', me);
+        for (i in me) {
+            if (MEPH.IsEventable(me[i])) {
+                me[i].un(null, me);
+            }
+        }
+        me.$referenceConnections.foreach(function (x) {
+            if (MEPH.IsEventable(x)) {
+                x.obj.un(null, me);
+                x.obj.dun(null, me);
+            }
+        });
+        me.un();
+        me.dun();
     },
     getApplication: function () {
         var me = this;

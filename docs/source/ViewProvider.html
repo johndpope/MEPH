@@ -62,6 +62,8 @@ MEPH.define(&#39;MEPH.mobile.providers.viewprovider.ViewProvider&#39;, {
         }
         return promise.then(function () {
             return MEPH.Array(me.viewlibrary[me.libraryRoot] || me.viewlibrary.views)
+        }).catch(function(e){
+            MEPH.Log(e);
         });
     },
 <span id='MEPH-mobile-providers-viewprovider-ViewProvider-method-load'>    /**

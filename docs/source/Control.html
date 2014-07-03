@@ -294,8 +294,8 @@ MEPH.define(&#39;MEPH.control.Control&#39;, {
                 };
             me.don(&#39;webkitTransitionEnd&#39;, view, animationComplete);
             me.don(&#39;transitionend&#39;, view, animationComplete);
-            if (options.maxTime) {
-                timoutRef = setTimeout(animationComplete, options.maxTime);
+            if (options.maxTime || MEPH.MaxTransitionTime) {
+                timoutRef = setTimeout(animationComplete, options.maxTime || MEPH.MaxTransitionTime);
             }
             if (options.remove) {
                 MEPH.Array(options.remove.split(&#39; &#39;)).foreach(function (remove) {
@@ -444,12 +444,20 @@ MEPH.define(&#39;MEPH.control.Control&#39;, {
 </span>     * Destroys the control.
      */
     destroy: function () {
-        var me = this,
-            domTemplaate = me.getDomTemplate();
+        var me = this, i,
+               domTemplaate = me.getDomTemplate();
+        if (me.$isDestroyed) {
+            return;
+        }
+        me.fire(&#39;beforedestroy&#39;, me);
         if (!Array.isArray(domTemplaate)) {
             domTemplaate = ([domTemplaate]);
         }
         MEPH.Array(domTemplaate);
+        me.$controls.removeWhere(function (control) {
+            control.destroy();
+            return true;
+        });
         me.$isDestroyed = true;
         domTemplaate.foreach(function (x) {
             if (x &amp;&amp; x.parentNode &amp;&amp; x.parentNode.removeChild) {
@@ -457,6 +465,19 @@ MEPH.define(&#39;MEPH.control.Control&#39;, {
             }
         });
         me.fire(&#39;destroy&#39;, me);
+        for (i in me) {
+            if (MEPH.IsEventable(me[i])) {
+                me[i].un(null, me);
+            }
+        }
+        me.$referenceConnections.foreach(function (x) {
+            if (MEPH.IsEventable(x)) {
+                x.obj.un(null, me);
+                x.obj.dun(null, me);
+            }
+        });
+        me.un();
+        me.dun();
     },
     getApplication: function () {
         var me = this;

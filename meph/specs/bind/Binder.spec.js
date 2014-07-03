@@ -38,6 +38,9 @@
                 getConnection: function (type) {
                     return object;
                 },
+                getReferenceConnections: function () {
+                    return [{ type: 'control', obj: object }];
+                },
                 getConnectableTypes: function () {
                     return MEPH.Array([MEPH.control.Control.connectables.control, 'view']);
                 }
@@ -72,6 +75,9 @@
                 },
                 getConnection: function (type) {
                     return object;
+                },
+                getReferenceConnections: function () {
+                    return [{ type: 'control', obj: object }];
                 },
                 getConnectableTypes: function () {
                     return MEPH.Array([MEPH.control.Control.connectables.control, 'view']);
@@ -111,6 +117,9 @@
                 },
                 getConnection: function (type) {
                     return object;
+                },
+                getReferenceConnections: function () {
+                    return [{ type: 'control', obj: object }];
                 },
                 getConnectableTypes: function () {
                     return MEPH.Array([MEPH.control.Control.connectables.control, 'view']);
@@ -255,6 +264,9 @@
                 propertyAltered,
                 object = {
                     getConnection: function () { return object; },
+                    getReferenceConnections: function () {
+                        return [{ type: 'control', obj: object }];
+                    },
                     getConnectableTypes: function () {
                         return MEPH.Array([MEPH.control.Control.connectables.control]);
                     }
@@ -317,6 +329,9 @@
                     getConnection: function (type) {
                         return object;
                     },
+                    getReferenceConnections: function () {
+                        return [{ type: 'control', obj: object }];
+                    },
                     getConnectableTypes: function () {
                         return MEPH.Array([MEPH.control.Control.connectables.control]);
                     }
@@ -377,6 +392,9 @@
                         else {
                             return object;
                         }
+                    },
+                    getReferenceConnections: function () {
+                        return [{ type: 'control', obj: object }];
                     },
                     getConnectableTypes: function () {
                         return MEPH.Array([MEPH.control.Control.connectables.control, 'view']);
@@ -982,6 +1000,114 @@
             });
         });
     });
+
+
+    it('a binder can parse an instruction string with parameters', function (done) {
+        var instructionstring = 'c$.value | c$.transform, c$.param1, c$.param2 | c$.transformgain';
+        MEPH.create('MEPH.bind.Binder').then(function ($class) {
+            var binder = new $class(), result;
+            result = binder.parseInstructionString(instructionstring);
+            expect(result.length === 3).toBeTruthy();
+            expect(result.nth(2).params.length === 2).toBeTruthy();
+        }).catch(function (error) {
+            expect(error).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('a binder will execute an instruction chain, and parameters will passed along .', function (done) {
+        //Arrange
+        MEPH.requires('MEPH.control.Control').then(function () {
+            var passedvalues, dom = createDomObjectWithDataBind('div', '"innerHTML":"c$.prop"'),
+                propertyAltered,
+                object = {
+                    value: 'value',
+                    transform: function (p, p2) { passedvalues = [p, p2]; return p; },
+                    transformAgain: null,
+                    getConnection: function (type) {
+                        return object;
+                    },
+                    getConnectableTypes: function () {
+                        return MEPH.Array([MEPH.control.Control.connectables.control]);
+                    }
+                };
+            MEPH.Events(object);
+            MEPH.addDataBindPrefix('d-binder');
+            dom.setAttribute('data-bind-value', 'c$.value | c$.transform');
+            dom.setAttribute('d-binder-tutut', 'c$.value | c$.transform');
+            return MEPH.create('MEPH.bind.Binder').then(function ($class) {
+                var binder = new $class(),
+                    instructionstring,
+                    instructions;
+                instructionstring = 'c$.value | c$.transform, param1, param2 | c$.transformAgain';
+                instructions = binder.parseInstructionString(instructionstring);
+
+                //Act
+                return binder.executeInstructions(dom, 'value', 'Changed', instructions, object, 'value')
+                   .then(function () {
+                       //Assert
+                       expect(passedvalues.first() === 'param1').toBeTruthy();
+                       expect(passedvalues.nth(2) === 'param2').toBeTruthy();
+                       expect(object.transformAgain === 'param1').toBeTruthy();
+
+                   });
+
+            })
+        }).catch(function (error) {
+            expect(error).caught();
+        }).then(function () {
+            done();
+        });;
+    });
+
+    it('a binder will execute an instruction chain, and parameters will passed along, even if the are also binding parameters .', function (done) {
+        //Arrange
+        MEPH.requires('MEPH.control.Control').then(function () {
+            var passedvalues, dom = createDomObjectWithDataBind('div', '"innerHTML":"c$.prop"'),
+                propertyAltered,
+                object = {
+                    value: 'value',
+                    anotherparam: 123,
+                    transform: function (p, p2) { passedvalues = [p, p2]; return p; },
+                    transformAgain: null,
+                    getConnection: function (type) {
+                        return object;
+                    },
+                    getConnectableTypes: function () {
+                        return MEPH.Array([MEPH.control.Control.connectables.control]);
+                    }
+                };
+            MEPH.Events(object);
+            MEPH.addDataBindPrefix('d-binder');
+            dom.setAttribute('data-bind-value', 'c$.value | c$.transform');
+            dom.setAttribute('d-binder-tutut', 'c$.value | c$.transform');
+            return MEPH.create('MEPH.bind.Binder').then(function ($class) {
+                var binder = new $class(),
+                    instructionstring,
+                    instructions;
+                instructionstring = 'c$.value | c$.transform, c$.anotherparam, param2 | c$.transformAgain';
+                instructions = binder.parseInstructionString(instructionstring);
+
+                //Act
+                return binder.executeInstructions(dom, 'value', 'Changed', instructions, object, 'value')
+                   .then(function () {
+                       //Assert
+                       expect(passedvalues.first() === 123).toBeTruthy();
+                       expect(passedvalues.nth(2) === 'param2').toBeTruthy();
+                       expect(object.transformAgain === 123).toBeTruthy();
+
+                   });
+
+            })
+        }).catch(function (error) {
+            expect(error).caught();
+        }).then(function () {
+            done();
+        });;
+    });
+
+
     it('a control can have attributes on a custom tag that will be bound ie; <custom customAttr="p$.value"></custom', function (done) {
         //Arrange
         MEPH.requires('MEPH.control.Control', 'MEPH.bind.Binder').then(function () {
@@ -1027,7 +1153,7 @@
                 result = binder.parseDomAttributes(dom, null, null, object);
                 expect(result).theTruth('parsing didnt work as expected');
                 expect(result['invalid']).theTruth('parsing didnt yield a customAttr rule');
-                
+
             }).catch(function (error) {
                 expect(error).caught();
             }).then(function () {
