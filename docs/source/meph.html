@@ -23,7 +23,8 @@
 </span> * @class MEPH
  * MEPH is the framework.
  */
-var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
+var window = window || self;
+var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
 
     if ($promise) {
         Promise = $promise;
@@ -47,7 +48,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
     }
     var meph;
     if (typeof $meph === &#39;string&#39;) {
-        meph = createClassPath($meph);
+        meph = createClassPath($meph, $offset);
         meph = meph.previous[meph.name];
     }
     meph.DebugMode = true;
@@ -656,42 +657,21 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
                 toResolve = resolve;
             });
         if (filetype == javascriptType) {
-
             if ((!document) || ((document) &amp;&amp; !document.getElementsByTagName)) {
-                nodejs.log(&#39;NOT RUNNING IN THE DOM.&#39;);
-                nodejs.log(&#39;importing file : &#39; + filename);
-                var importScripts = importScripts || null;
-                if (global.importScripts) {
-                    global.importScripts(filename);
-                    nodejs.log(&#39;execute callback: &#39; + callback);
-                    setTimeout(function () {
-                        try {
-                            callback();
-                            toResolve();
-                        }
-                        catch (error) {
+                meph.Log(&#39;Load js css file &#39;);
 
-                            console.log(&#39;something went wrong&#39;)
-                        }
-                        finally {
-                        }
-                    }, 10);
-                }
-                else {
-                    nodejs.log(&#39;readFile : &#39; + filename);
-                    fs.readFile(filename, &#39;utf8&#39;, function (err, data) {
-                        nodejs.log(&#39;create script&#39; + data)
-                        var script = vm.createScript(data, filename);
-                        nodejs.log(&#39;run script&#39;)
-                        script.runInThisContext();
-                        setTimeout(function () {
-                            nodejs.log(&#39;execute callback&#39;)
-                            callback();
-                            toResolve();
-                            nodejs.log(&#39;executed callback&#39;)
-                        }, 19);
-                    })
-                }
+                meph.Log(&#39;import script &#39;);
+                importScripts(filename);
+                nodejs.log(&#39;execute callback: &#39; + callback);
+                setTimeout(function () {
+                    try {
+                        callback();
+                        toResolve();
+                    }
+                    catch (error) {
+                        console.log(&#39;something went wrong&#39;)
+                    }
+                }, 1);
             }
             else {
                 var head = document.getElementsByTagName(&#39;head&#39;)[0];
@@ -746,7 +726,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
         var promise = Promise.resolve();
         for (i = 0; i &lt; scripts.length ; i++) {
             promise = promise.then(function () {
-                nodejs.log(&#39;loading script :&#39; + scripts[this]);
+                meph.Log(&#39;loading script :&#39; + scripts[this]);
                 return meph.loadScript(scripts[this]);
             }.bind(i))
         }
@@ -1915,17 +1895,23 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
     meph.un = meph.removeListeners;
 
     var frameworkReady;
+    var frameworkPromise;
     meph.ready = function () {
-        return new Promise(function (resolve, failed) {
+        if (frameworkPromise) {
+            return frameworkPromise;
+        }
+        frameworkPromise = new Promise(function (resolve, failed) {
             frameworkReady = resolve;
         }).then(function () {
             meph.Array(meph.connectableTypes).foreach(function (x) {
                 meph.addBindPrefixShortCuts(x.shortCut, x.type);
             });
         });
+        return frameworkPromise;
     }
     meph.on(meph.events.definedClass, function (className) {
         if (getDefinedClass(&#39;util.Array&#39;, meph)) {
+            console.log(&#39;framework ready when array defined&#39;);
             meph.fire(meph.events.frameworkReady);
             meph.removeListeners(meph.events.definedClass, meph);
         }
@@ -1936,18 +1922,73 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise) {
     var loadpromise = null;
     if (getDefinedClass(&#39;util.Array&#39;, meph)) {
         meph.fire(meph.events.frameworkReady);
+
     }
     else {
-        nodejs.log(&#39;loading scripts &#39;);
-        loadpromise = meph.loadScripts([
+        meph.Log(&#39;loading scripts &#39;);
+        meph.requiredFiles = [
                 $frameWorkPath + &#39;/util/String.js&#39;,
                 $frameWorkPath + &#39;/util/Dom.js&#39;,
                 $frameWorkPath + &#39;/util/Template.js&#39;,
                 $frameWorkPath + &#39;/util/Observable.js&#39;,
-                $frameWorkPath + &#39;/util/Array.js&#39;]);
+                $frameWorkPath + &#39;/util/Array.js&#39;];
+        meph.Log(meph.requiredFiles.join(&#39;, &#39;));
+        loadpromise = meph.loadScripts(meph.requiredFiles);
     }
+
+    meph.frameWorkPath = $frameWorkPath;
+    meph.frameWorkPathSource = $frameWorkPath + &#39;/meph.js&#39;;
+
+
+
+
+
     return { framework: meph, promise: loadpromise };
 });
+if (self) {
+    console.log(&#39;self&#39;);
+    self.onmessage = function (oEvent) {
+        console.log(&#39;onmessage&#39;);
+        debugger
+        console.log(&#39;oEvent.data.func : &#39; + JSON.stringify(oEvent.data));
+
+        switch (oEvent.data.func) {
+            case &#39;start&#39;:
+                console.log(&#39;start meph.js&#39;);
+                console.log(oEvent.data.src);
+                eval(oEvent.data.src);
+                //self[oEvent.data.framework].ready().then(function () {
+                //    postMessage({ &quot;success&quot;: true });
+                //});
+                break;
+            case &#39;import&#39;:
+                importScripts(oEvent.data.src);
+                postMessage({ &quot;success&quot;: true });
+                break;
+            case &#39;load&#39;:
+                console.log(&#39;load meph.js&#39;);
+                console.log(oEvent.data.framework);
+                console.log(Promise);
+                console.log(oEvent.data.script);
+                self[oEvent.data.framework].requires(oEvent.data.script).then(function () {
+                    postMessage({ &quot;success&quot;: true });
+                });
+                break;
+            case &#39;exec&#39;:
+                Promise.resolve().then(function () {
+                    eval(&#39;var work = &#39; + oEvent.data.work);
+                    console.log(work);
+                    return work();
+                }).then(function (result) {
+                    postMessage(result);
+                });
+                break;
+        }
+
+    };
+    //if (self === window)
+    //    postMessage({ &quot;success&quot;: true });
+}
 
 var exports = exports || null;
 var nodejs = {

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">MEPH.define(&#39;MEPH.query.QueryableWorker&#39;, {
+    properties: {
+        $worker: null,
+        $promise: null
+    },
+    initialize: function () {
+        var me = this;
+        me.$worker = new Worker(MEPH.frameWorkPathSource);
+        var src = &#39;console.log(&quot;executing framework&quot;);&#39; +
+            &#39;var t=  mephFrameWork(\&#39;MEPH\&#39;, &quot;&#39; + MEPH.frameWorkPath + &#39;&quot;,null, self);&#39; +
+            &#39;debugger;      t.framework.ready().then(function(){  MEPH.Log(&quot;ready&quot;);&#39; +
+            &#39;MEPH.setPath(&quot;&#39; + MEPH.frameWorkPath + &#39;&quot;,&quot;MEPH&quot;);&#39; +
+            &#39;postMessage({ &quot;success&quot;: true });});&#39;
+        //me.$worker.postMessage(&#39;&#39;);
+        me.$promise = Promise.resolve().then(function () {
+            return me.post({
+                func: &#39;start&#39;,
+                src: src,
+                framework: &#39;MEPH&#39;
+            }).then(function () {
+                MEPH.Log(&#39;started meph&#39;);
+            })
+        });
+    },
+    ready: function () {
+        var me = this;
+        return me.$promise.then(function () { return me; });
+    },
+    post: function (message) {
+        var me = this,
+            toresolve,
+            tofail,
+            promise = new Promise(function (r, f) {
+                toresolve = r;
+                tofail = f;
+            });
+        return Promise.resolve().then(function () {
+
+            var handler = function (oEvent) {
+                me.$worker.removeEventListener(handler);
+                toresolve(oEvent.data);
+            };
+            me.$worker.addEventListener(&quot;message&quot;, handler, false);
+            MEPH.Log(message);
+            me.$worker.postMessage(message)
+            return promise;
+        });
+    },
+    execute: function (code) {
+        var me = this;
+        return me.post({
+            work: code.toString(),
+            func: &#39;exec&#39;
+        });
+    },
+    load: function (script) {
+        var me = this;
+        return me.post({
+            func: &#39;load&#39;,
+            script: script,
+            framework: &#39;MEPH&#39;
+        }).then(function (result) {
+            me.loaded = true;
+            MEPH.Log(&#39;loaded&#39;)
+            return result;
+        });
+
+    }
+});</pre>
+</body>
+</html>
