@@ -2,7 +2,7 @@
 
 A guide abount binding in MEPH.
 
-
+ 
 ## Binding is what?
 [Wikipedia](http://en.wikipedia.org/wiki/Data_binding) describes data binding as a "process that establishes a connection between the application UI(User Interface) and business logic. ...". In MEPH this is also the case. 
 

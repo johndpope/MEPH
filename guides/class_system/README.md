@@ -2,7 +2,7 @@
 
 A guide about the MEPH class system.
 
-
+ 
 ## What's in a class
 
 The following is an example of a basic class in MEPH. It describes a class called __Class__. __Class__ is located in the __./control/Class.js__ file. 

@@ -5,7 +5,7 @@ A guide about session management.
 ## MEPH and sessions
 
 In MEPH session management is pretty "straight forward", either a login is required or it is not.
-
+  
 This is an example where login is required.
 
 				sessionManager: {

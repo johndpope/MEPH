@@ -8,7 +8,7 @@ A guide about the menu provider.
 
 If you don't know, you are probably in the wrong place, but try [here](http://en.wikipedia.org/wiki/JSON).
 
-
+ 
 ## What do I need to know?
 
 This guide is in no way required, but if you work in a company that uses this style of menu system it maybe useful. The [MenuProvider](#!/MEPH.mobile.providers.menuprovider.MenuProvider) is used to retrieve the menu configuration. 

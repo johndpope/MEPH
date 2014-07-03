@@ -6,7 +6,7 @@ Let's talk about IOC, let's talk about you and me, let's talk about all the good
 
 In software engineering, inversion of control(IOC), describes a design in which custom written portions of a computer program receives the flow of control from a generic, reusable library. That's straight from [wikipedia](http://en.wikipedia.org/wiki/Inversion_of_control), read about it there.
 
-
+ 
 ## How do I set up my IOC
 
 As seen in the [getting started with MEPH](#!/guide/getting_started) guide, ioc is a critical portion of the MEPH framework. Setting up your IOC container is pretty straightforward. In the ioc section of the configuration, add your keys that will be used to fetch an instance or instances of your "interface".

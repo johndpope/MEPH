@@ -2,7 +2,7 @@
 
 A guide about setting up a minimal mobile application
 
-
+ 
 ## I'm lazy, what's the least I have to do
 
 			var index = location.pathname.indexOf('dev-harness')

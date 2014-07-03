@@ -4,7 +4,7 @@ A guide about getting started with MEPH.
 
 ## Requirements
 
-### Web Browsers
+### Web Browsers 
 
 MEPH supports all the major web browsers from Internet Explorer 10 to the latest Google Chrome.
 

@@ -6,7 +6,7 @@ A guide about mixins.
 ## What's a mixin
 If you don't know what a mixin, [check here](http://en.wikipedia.org/wiki/Mixin).
 
-
+ 
 ## Mixins
 
 In MEPH, a mixin can be set two different ways, either has an array of string references to the mixin source, or as a literal object.
