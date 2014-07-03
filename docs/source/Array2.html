@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">var $array = Array
+<span id='MEPH-util-Array'>/**
+</span> * @class MEPH.util.Array
+ * A static class used to add extra functions to arrays.
+ **/
+MEPH.define(&#39;MEPH.util.Array&#39;, {
+    alternateNames: [&#39;MEPHArray&#39;],
+    statics: {
+        isArray: function () {
+            $array.isArray.apply(null, arguments);
+        },
+<span id='MEPH-util-Array-method-create'>        /**
+</span>         * Adds extension function to an array.
+         **/
+        create: function (array, neveragain) {
+            array = array || [];
+            if (window.appliedToAllArrays &amp;&amp; Array.isArray(array)) {
+                return array;
+            }
+            if (!array.where) {
+                Object.defineProperty(array, &#39;where&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = MEPH.util.Array.create();
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                result.push(collection[i]);
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            //if (!array.observable) {
+            //    object.defineproperty(array, &#39;observable&#39;, {
+            //        enumerable: false,
+            //        writable: true,
+            //        configurable: true,
+            //        value: function () {
+            //            var collection = this;
+            //            return meph.util.observable.observable(collection);
+            //        }
+            //    });
+            //}
+
+            if (!array.orderBy) {
+                Object.defineProperty(array, &#39;orderBy&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this.select(function (x) { return x; });
+                        return collection.sort(func);
+                    }
+                });
+            }
+
+            if (!array.maxSelection) {
+                Object.defineProperty(array, &#39;maxSelection&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = null;
+                        var _result = null;
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length; i++) {
+                            if (result == null || func(collection[i]) &gt; result) {
+                                result = func(collection[i]);
+                                _result = collection[i];
+                            }
+                        }
+                        return _result;
+                    }
+                });
+            }
+            if (!array.intersection) {
+                Object.defineProperty(array, &#39;intersection&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (othercollection, func) {
+                        var collection = this;
+                        var result = [];
+                        for (var i = collection.length; i--;/**/) {
+                            for (var j = othercollection.length; j--;/**/) {
+                                if ((func(othercollection[j], collection[i]))) {
+                                    result.push(collection[i]);
+                                    break;
+                                }
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.count) {
+                Object.defineProperty(array, &#39;count&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        return this.where(func).length;
+                    }
+                });
+            }
+
+            if (!array.trim) {
+                Object.defineProperty(array, &#39;trim&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function () {
+                        var result = [];
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length; i++) {
+                            result.push(collection[i].trim());
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.indexWhere) {
+                Object.defineProperty(array, &#39;indexWhere&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = [];
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                result.push(i);
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.relativeCompliment) {
+                var extrasection_relativeCompliment = {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (othercollection) {
+                        var collection = this;
+                        var result = [];
+                        for (var i = collection.length; i--;/**/) {
+                            if (othercollection.count(function (x) { return x == collection[i]; }) == 0) {
+                                result.push(collection[i]);
+                            }
+                        }
+                        return result;
+                    }
+                }
+                if (!array.relativeCompliment) {
+                    Object.defineProperty(array, &#39;relativeCompliment&#39;, extrasection_relativeCompliment);
+                }
+            }
+            if (!array.random) {
+                Object.defineProperty(array, &#39;random&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function () {
+                        var result = [];
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length; i++) {
+                            result.splice(Math.floor(Math.random(0) * result.length), 0, (collection[i]));
+                        }
+                        return result;
+                    }
+                });
+            }
+
+
+            if (!array.all) {
+                Object.defineProperty(array, &#39;all&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (!func(collection[i])) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                });
+            }
+            if (!array.removeWhere) {
+                Object.defineProperty(array, &#39;removeWhere&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = collection.where(func);
+                        for (var i = 0 ; i &lt; result.length; i++) {
+                            collection.splice(collection.indexOf(result[i]), 1);
+                        }
+                        return result;
+                    }
+                });
+            }
+            if (!array.remove) {
+                Object.defineProperty(array, &#39;remove&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (from, to) {
+                        var collection = this,
+                            rest = collection.slice((to || from) + 1 || collection.length);
+                        collection.length = from &lt; 0 ? collection.length + from : from;
+                        return collection.push.apply(collection, rest);
+                    }
+                });
+            }
+
+            if (!array.max) {
+                Object.defineProperty(array, &#39;max&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = null,
+                            resultValue = null;
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length; i++) {
+                            if (resultValue == null || func(collection[i]) &gt; resultValue) {
+                                result = (collection[i]);
+                                resultValue = func(collection[i]);
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
+            if (!array.foreach) {
+                Object.defineProperty(array, &#39;foreach&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        for (var i = 0; i &lt; collection.length; i++) {
+                            func(collection[i], i);
+                        }
+                        return this;
+                    }
+                });
+            }
+
+            if (!array.select) {
+                Object.defineProperty(array, &#39;select&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = MEPH.util.Array.create();
+                        func = func || function (x) { return x; };
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            result.push(func(collection[i], i));
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.contains) {
+                Object.defineProperty(array, &#39;contains&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        return this.first(func) != null;
+                    }
+                });
+            }
+
+
+            if (!array.first) {
+                Object.defineProperty(array, &#39;first&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this.select(function (x) { return x });
+                        func = func || function () { return true; };
+                        if (typeof (func) !== &#39;function&#39;) {
+                            var temp = func;
+                            func = function (x) {
+                                return temp === x;
+                            }
+                        }
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                return (collection[i]);
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
+
+            if (!array.selectFirst) {
+                Object.defineProperty(array, &#39;selectFirst&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this.select(function (x) { return x });
+                        func = func || function () { return true; };
+                        if (typeof (func) !== &#39;function&#39;) {
+                            var temp = func;
+                            func = function (x) {
+                                return temp === x;
+                            }
+                        }
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                return func(collection[i]);
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
+
+            if (!array.last) {
+                Object.defineProperty(array, &#39;last&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        func = func || function () { return true; };
+                        if (typeof (func) !== &#39;function&#39;) {
+                            var temp = func;
+                            func = function (x) {
+                                return temp === x;
+                            }
+                        }
+                        var collection = MEPH.Array(this.select(function (x) {
+                            return x
+                        }).reverse());
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                var result = (collection[i])
+                                return result;
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
+
+            if (!array.interpolate) {
+                Object.defineProperty(array, &#39;interpolate&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (start, stop, func) {
+                        var collection = this;
+                        for (var i = start; i &lt; stop ; i++) {
+                            collection.push(func(i));
+                        }
+                        return collection;
+                    }
+                });
+            }
+            if (!array.groupBy) {
+                Object.defineProperty(array, &#39;groupBy&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = {};
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            var t = func(collection[i]);
+                            result[t] = result[t] || [];
+                            result[t].push(collection[i]);
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.second) {
+                Object.defineProperty(array, &#39;second&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this.select(function (x) { return x });
+                        var metcriteria = 0;
+                        func = func || function () { return true; };
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                metcriteria++;
+                            }
+                            if (metcriteria == 2) {
+                                return (collection[i]);
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
+
+            if (!array.min) {
+                Object.defineProperty(array, &#39;min&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = null;
+                        var collection = this;
+                        func = func || function (x) { return x; }
+                        for (var i = 0 ; i &lt; collection.length; i++) {
+                            if (result == null || func(collection[i]) &lt; result) {
+                                result = func(collection[i]);
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.nth) {
+                Object.defineProperty(array, &#39;nth&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (nth, func) {
+                        var collection = this.select(function (x) { return x });
+                        var metcriteria = 0;
+                        func = func || function () { return true; };
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            if (func(collection[i])) {
+                                metcriteria++;
+                            }
+                            if (metcriteria == nth) {
+                                return (collection[i]);
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
+
+            if (!array.unique) {
+                Object.defineProperty(array, &#39;unique&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = MEPH.util.Array.create();
+                        var finalresult = MEPH.util.Array.create();
+                        var collection = this;
+                        for (var i = 0 ; i &lt; collection.length ; i++) {
+                            //if (func(collection[i])) {
+                            if (result.indexOf(func(collection[i])) === -1) {
+                                result.push(func(collection[i]));
+                                finalresult.push(collection[i]);
+                            }
+                            //}
+                        }
+                        return finalresult;
+                        //return result;
+                    }
+                });
+            }
+            if (!array.summation) {
+                Object.defineProperty(array, &#39;summation&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result;
+                        var collection = this;
+                        for (var i = collection.length ; i--;) {
+                            result = func(collection[i], result, i);
+                        }
+                        return result;
+                    }
+                });
+            }
+            if (!array.minSelect) {
+                Object.defineProperty(array, &#39;minSelect&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = null;
+                        var selection = null
+                        var collection = this;
+                        func = func || function (x) { return x; }
+                        for (var i = 0 ; i &lt; collection.length; i++) {
+                            if (result == null || func(collection[i]) &lt; result) {
+                                result = func(collection[i]);
+                                selection = collection[i];
+                            }
+                        }
+                        return selection;
+                    }
+                });
+            }
+            if (!array.concatFluent) {
+                Object.defineProperty(array, &#39;concatFluent&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = MEPH.util.Array.create();
+                        for (var i = collection.length; i--;/**/) {
+                            result = MEPH.util.Array.create(result.concat(func(collection[i], i)));
+                        }
+                        return result;
+                    }
+                });
+            }
+
+            if (!array.subset) {
+                Object.defineProperty(array, &#39;subset&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (start, stop) {
+                        var collection = this;
+                        var result = [];
+                        stop = Math.min(collection.length, stop === undefined || stop === null ? collection.length : stop);
+                        for (var i = start ; i &lt; stop ; i++) {
+                            result.push(collection[i]);
+                        }
+                        return MEPH.util.Array.create(result);
+                    }
+                });
+            }
+
+            if (neveragain) {
+                window.appliedToAllArrays = true;
+            }
+            return array;
+        },
+        convert: function (obj) {
+            var array = MEPH.util.Array.create(),
+                i;
+            for (i = 0 ; i &lt; obj.length ; i++) {
+                array.push(obj[i]);
+            }
+            return array;
+        },
+<span id='MEPH-util-Array-method-convertObject'>        /**
+</span>         * Converts the object into an array.
+         * @param {Object} obj;
+         **/
+        convertObject: function (obj) {
+            var i, result = [];
+            if (Array.isArray(obj)) {
+                return MEPH.Array(obj);
+            }
+            for (i in obj) {
+                result.push(obj[i]);
+            }
+            return result;
+        }
+    }
+}).then(function () {
+    MEPH.util.Array.create(Array.prototype, true);
+})</pre>
+</body>
+</html>

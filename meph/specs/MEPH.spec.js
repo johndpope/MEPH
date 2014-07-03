@@ -15,6 +15,12 @@
         fake = null;
     });
 
+    it('can et ther required files for meph.js', function () {
+        mephFrameWork('tEMP', '../src');
+
+        expect(tEMP.requiredFiles.length).toBeTruthy();
+    });
+
     it('mephFrameWork create a frame work', function () {
         //Arrange
 
@@ -25,6 +31,17 @@
         expect(FakeFramework.loadScript).toBeTruthy();
         expect(FakeFramework.Array).toBeTruthy();
     });
+
+    it('can get source ', function (done) {
+
+        MEPH.getSource('MEPHTests.helper.viewmodel.HelperViewModel', '.js').then(function (result) {
+            expect(result).toBeTruthy();
+        }).catch(function (er) {
+            expect(er).caught();
+        }).then(function () {
+            done();
+        });
+    })
     it('define a class', function (done) {
         //Arrange
         var className = 'Fake.Class',
@@ -52,7 +69,7 @@
     });
 
     it('can set a authorization token to be used as default in all ajax calles', function () {
-        
+
         MEPH.setAuthorizationToken('token');
         expect(MEPH.getAuthorizationToken() === 'token');
 

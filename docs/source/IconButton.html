@@ -25,6 +25,7 @@ MEPH.define(&#39;MEPH.button.IconButton&#39;, {
     templates: true,
     requires: [&#39;MEPH.util.Observable&#39;,
                 &#39;MEPH.iconfont.enums.Color&#39;,
+                &#39;MEPH.iconfont.enums.Icon&#39;,
                 &#39;MEPH.iconfont.enums.Size&#39;],
     extend: &#39;MEPH.button.Button&#39;,
     properties: {
@@ -104,7 +105,7 @@ MEPH.define(&#39;MEPH.button.IconButton&#39;, {
             var result = [];
 
             if (me.icon) {
-                result.push(me.iconPrefix + me.icon);
+                result.push(me.iconPrefix + (Icons[me.icon] ? Icons[me.icon] : me.icon));
             }
 
             if (me.color) {

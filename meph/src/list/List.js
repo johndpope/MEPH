@@ -1,6 +1,18 @@
 ﻿/**
  * @class MEPH.list.List
- * List
+ * @extends MEPH.control.Control
+ *  Example
+ *   
+ *               <list data-bind='"source": "ct$.listsource"'>
+ *                   <template 
+ *                       name="u4m_controls_examples_list">
+ *                           <div class="u4m-application-menu-categories-item-details" >
+ *                               <span>Name</span>
+ *                               <span data-bind='"innerHTML": "c$.data.name"'></span>
+ *                           </div>
+ *                   </template>
+ *               </list>
+ *   
  */
 MEPH.define('MEPH.list.List', {
     extend: 'MEPH.control.Control',
@@ -453,5 +465,24 @@ MEPH.define('MEPH.list.List', {
     getListTemplates: function () {
         var me = this;
         return me.listTemplates;
+    },
+    /**
+     * @inheritdoc
+     */
+    destroy: function () {
+        var me = this;
+
+
+        if (me.boundSource) {
+
+            me.boundSource.foreach(function (item) {
+                item.dataItem.un(null, me);
+                item.dataItem.dun(null, me);
+                item.renderResult.foreach(function (result) {
+                    result.classInstance.destroy();
+                });
+            });
+        }
+        me.callParent.apply(me, arguments);
     }
 });

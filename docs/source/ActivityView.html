@@ -18,7 +18,11 @@
   <pre class="prettyprint lang-js">MEPH.define(&#39;MEPH.mobile.activity.view.ActivityView&#39;, {
     alias: &#39;activityview&#39;,
     templates: true,
+    requires: [&#39;MEPH.button.IconButton&#39;],
     extend: &#39;MEPH.control.Control&#39;,
+    statics: {
+        CloseActivity: &#39;ActivityView : CloseActivity&#39;
+    },
     properties: {
         activityName: null,
         injectControls: {
@@ -28,6 +32,13 @@
     initialize: function () {
         var me = this;
         me.callParent.apply(me, arguments);
+    },
+    onButtonClicked: function (a, b, c, d, e, f, evt) {
+        var me = this;
+        me.getFirstElement().dispatchEvent(MEPH.createEvent(MEPH.mobile.activity.view.ActivityView.CloseActivity, {}));
+        evt.domEvent.preventDefault();
+        evt.domEvent.stopPropagation();
+        return false;
     }
 });</pre>
 </body>

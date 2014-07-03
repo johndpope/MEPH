@@ -25,6 +25,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         me.activities = [];
         me.tokens.push(MEPH.subscribe(MEPH.Constants.startView, me.onStartView.bind(me)));
         me.tokens.push(MEPH.subscribe(MEPH.Constants.showView, me.onShowView.bind(me)));
+        me.tokens.push(MEPH.subscribe(MEPH.Constants.closeView, me.onCloseActivity.bind(me)));
         me.listenToStatePop();
         //window.history.pushState({ activityId: null, initial: true }, '', '');
     },
@@ -56,8 +57,38 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             if (activity) {
                 return me.showActivity(activity);
             }
+            else {
+                return me.startActivityFromPath(state.path, false)
+            }
         }
         return Promise.resolve();
+    },
+
+    startActivityFromPath: function (querystring, replacestate) {
+        var me = this;
+        if (!querystring) {
+            return Promise.resolve();
+        }
+        return MEPH.MobileServices.get(MEPH.mobile.activity.ActivityController.viewProvider).then(function (viewProvider) {
+            if (viewProvider) {
+                return viewProvider.getViews().then(function (views) {
+                    var view = views.first(function (x) { return x.path === querystring; })
+                    if (view) {
+                        return me.startActivity(view).then(function (result) {
+                            if (replacestate) {
+                                var activity = result.classInstance;
+                                me.pushState(me.$window, { activityId: activity.getActivityId(), path: activity.getPath() }, '', me.getCombinedPath(activity.getPath()))
+                            }
+                            return result;
+                        });
+                    }
+                    return Promise.resolve();
+                });
+            }
+        });
+    },
+    replaceState: function (window, state, pageName, pagePath) {
+        window.history.replaceState((state), pageName, pagePath);
     },
     /**
      * @private
@@ -137,20 +168,63 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             return me.startActivity(options).catch(function () {
                 MEPH.Log.apply(MEPH, arguments);
             });
+        }).catch(function (e) {
+            MEPH.Log(e);
         });
     },
+    //onShowView: function (type, options) {
+    //    var me = this;
+    //    me.activityControllerPromise = me.activityControllerPromise.then(function () {
+    //        return me.showActivity(options.activity);
+    //    }).catch(function (e) {
+    //        MEPH.Log(e);
+    //    });
+    //},
     onShowView: function (type, options) {
         var me = this;
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
-            return me.showActivity(options.activity);
+            return me.showActivity(options.activity).then(function (result) {
+                if (options.activity.getActivityPath()) {
+                    me.pushState(me.$window, {
+                        activityId: options.activity.getActivityId(),
+                        path: options.activity.getActivityPath()
+                    }, '', me.getCombinedPath(options.activity.getActivityPath()));
+                }
+                return result;
+            });;
+        }).catch(function (e) {
+            MEPH.Log(e);
         });
+        return me.activityControllerPromise;
+    },
+    onCloseActivity: function (type, options) {
+        var me = this;
+        me.activityControllerPromise = me.activityControllerPromise.then(function () {
+            return me.closeActivity(options.activity);
+        }).catch(function (e) {
+            MEPH.Log(e);
+        }).then(function () {
+            me.setCurrentActivity(null);
+        });
+    },
+    getCombinedPath: function (path) {
+        var me = this;
+        try {
+            return '/' + MEPH.Array(me.getAppPath().split('/').concat(path.split('/'))).where(function (x) {
+                return x;
+            }).join('/');
+        } catch (error) {
+            MEPH.Log(error);
+            return '';
+        }
     },
     /**
      * Starts an activity
      * @param {Object} activityConfig
      * @param {Object} activityConfig.viewId
+     * @param {String} querystring
      **/
-    startActivity: function (activityConfig) {
+    startActivity: function (activityConfig, querystring) {
         var me = this, currentActivity = me.getCurrentActivity();
 
         return Promise.resolve().then(function () {
@@ -174,10 +248,9 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                     combinedPath = '',
                     path = me.getPath(activityConfig);
                 if (path !== null) {
-                    combinedPath = MEPH.Array(me.getAppPath().split('/').concat(path.split('/'))).where(function (x) {
-                        return x;
-                    }).join('/');
-                    me.pushState(me.$window, { activityId: activity.getActivityId() }, me.getActivityName(activityConfig, activity), '/' + combinedPath);
+                    combinedPath = me.getCombinedPath(querystring || path);
+                    activity.setPath(querystring || path);
+                    me.pushState(me.$window, { activityId: activity.getActivityId(), path: querystring || path }, me.getActivityName(activityConfig, activity), combinedPath);
                 }
                 MEPH.publish(MEPH.Constants.ActivityStarted, { activity: activity });
                 return result;
@@ -215,7 +288,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                 throw 'no view config passed';
             }
             patterns = patterns || [];
-            
+
             return MEPH.requires.apply(MEPH, patterns).then(function () {
                 if (viewConfig) {
                     var info = MEPH.getDefinedClassInformation(viewConfig.view);
@@ -373,10 +446,21 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         if (activity.isActivity() && !me.activities.some(function (x) {
             return x.activity.getActivityId() === activity.getActivityId();
         })) {
+            if (MEPH.IsEventable(activity)) {
+                activity.on('destroy', me.onActivityDestroy.bind(me, activity));
+            }
             me.activities.push({
                 activity: activity,
                 parent: parentActivity ? parentActivity : null
             });
+        }
+    },
+    onActivityDestroy: function (activity, type) {
+        var me = this,
+            removed;
+        removed = me.removeActivity(activity);
+        if (removed.length) {
+            MEPH.publish(MEPH.Constants.ActivityDestroyed, {});
         }
     },
     /**
@@ -391,6 +475,12 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         if (first) {
             first.parent = parentActivity;
         }
+    },
+    removeActivity: function (activity) {
+        var me = this;
+        return me.activities.removeWhere(function (x) {
+            return x.activity === activity;
+        });
     },
     /**
      * Gets the activity by id.

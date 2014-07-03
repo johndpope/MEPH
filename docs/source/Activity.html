@@ -29,6 +29,18 @@ MEPH.define(&#39;MEPH.mobile.mixins.Activity&#39;, {
         me.$activityId = me.$activityId || MEPH.GUID();
         return me.$activityId;
     },
+    setPath: function (path) {
+        var me = this;
+        me.$activityPath = path;
+    },
+    getPath: function () {
+        var me = this;
+        return me.$activityPath;
+    },
+    getActivityPath: function () {
+        var me = this;
+        return me.$activityPath;
+    },
 
 <span id='MEPH-mobile-mixins-Activity-method-addChildDomActivity'>    /**
 </span>     * Adds an activity to the list of child dom activities.
@@ -279,7 +291,17 @@ MEPH.define(&#39;MEPH.mobile.mixins.Activity&#39;, {
         element.dispatchEvent(MEPH.createEvent(&#39;activityload&#39;, { activity: me }));
         me.getDomTemplate().foreach(function (dom) {
             me.don(&#39;activityload&#39;, dom, function (evnt) {
+                if (evnt.parentset) {
+                    evnt.preventDefault();
+                    return false;
+                }
                 me.addChildDomActivity(evnt.activity);
+                evnt.parentset = true
+                evnt.preventDefault();
+                return false;
+            }, me);
+            me.don(MEPH.mobile.activity.view.ActivityView.CloseActivity, dom, function (evnt) {
+                MEPH.publish(MEPH.Constants.closeView, { activity: me });
             }, me);
         });
     },

@@ -145,6 +145,7 @@
                                          return $window;
                                      }
                                  });
+                                 
                                  return activityController.startActivity({
                                      viewId: fakeActivityId,
                                      path: 'path/is/right'

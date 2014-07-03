@@ -28,7 +28,9 @@ MEPH.define('MEPH.mobile.activity.container.Container', {
             dom;
         dom = me.getDomTemplate();
         view = dom.first();
-        return me.viewTransition(view, { remove: me.$removeHomePageCls });
+        return me.viewTransition(view, { remove: me.$removeHomePageCls }).then(function (x) {
+            me.fire('show', {});
+        });;
     },
     /**
      * Hides the container.
@@ -40,12 +42,18 @@ MEPH.define('MEPH.mobile.activity.container.Container', {
             dom = me.getDomTemplate();
 
         view = dom.first();
-        return me.viewTransition(view, { add: me.$removeHomePageCls });
+        return me.viewTransition(view, { add: me.$removeHomePageCls }).then(function (x) {
+            me.fire('hide', {});
+        });
     },
     close: function () {
         var me = this;
+        return me.hide().then(function () {
+            me.destroy();
+        });
     },
     open: function () {
         var me = this;
+        return me.show();
     }
 });

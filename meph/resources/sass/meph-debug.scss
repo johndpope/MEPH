@@ -37,11 +37,11 @@ $image-search-path: './' !default;
 // or a string, of where the path is
 //$relative-image-path-for-uis: true; // defaults to "../images/" when true
 
+@import "variables";
+@import "bootstrap";
 @import 'meph-default/all';
 
 
-@import "variables";
-@import "bootstrap";
 .graphwrap{
 	height: 500px;
 	width: 100%;

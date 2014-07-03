@@ -324,27 +324,76 @@ MEPH.define('MEPH.bind.Binder', {
         if (!bindingInformation) {
             return;
         }
+        var objectsToList = [];
+        for (var b in bindingInformation) {
+            var instruction = me.parseInstructionString(bindingInformation[b], obj);
+            if (instruction) {
+                var firstinstruction = instruction.first();
+                if (firstinstruction) {
+                    var type = firstinstruction.shortCut.type;
+                    var ref = obj.getReferenceConnections().first(function (x) { return x.type === type; });
+                    if (!ref) {
+                        continue;
+                    }
+                    if (!objectsToList.some(function (x) { return x.type === type; })) {
+                        objectsToList.push({ type: type, ref: ref.obj, bindingInformation: {} });
+                    }
+                    var temp = objectsToList.first(function (x) { return x.type === type; });
+                    temp.bindingInformation[b] = bindingInformation[b];
+                }
+            }
+        }
+        if (objectsToList.length === 0) {
+            objectsToList.push({ ref: obj, bindingInformation: bindingInformation });
+        }
+        objectsToList.foreach(function (temp) {
+            //var obj = temp.ref;
+            var bindingInformation = temp.bindingInformation;
+            temp.ref.on(altered, function (eventType, args) {
+                var instructionPath;
+                for (i in bindingInformation) {
+                    if (bindingInformation.hasOwnProperty(i)) {
+                        bi = bindingInformation[i];
+                        instructions = me.parseInstructionString(bi, obj);
+                        instruction = instructions.first();
 
-        obj.on(altered, function (eventType, args) {
-            var instructionPath;
-            for (i in bindingInformation) {
-                if (bindingInformation.hasOwnProperty(i)) {
-                    bi = bindingInformation[i];
-                    instructions = me.parseInstructionString(bi, obj);
-                    instruction = instructions.first();
-
-                    if (connectables.some(function (x) {
-                        return x === instruction.shortCut.type;
-                    })) {
-                        target = me.getConnection(obj, instruction.shortCut.type);
-                        instructionPath = instruction.path.subset(1).join('.');
-                        if (target && Binder.isOnPath(instructionPath, args.path)) {
-                            me.executeInstructions(dom, instructionPath, altered, instructions, obj, i, false, args);//me, ;
+                        if (connectables.some(function (x) {
+                            return x === instruction.shortCut.type;
+                        })) {
+                            target = me.getConnection(obj, instruction.shortCut.type);
+                            instructionPath = instruction.path.subset(1).join('.');
+                            if (target && Binder.isOnPath(instructionPath, args.path)) {
+                                me.executeInstructions(dom, instructionPath, altered, instructions, obj, i, false, args);//me, ;
+                            }
                         }
                     }
                 }
+            }, temp.ref);
+        })
+    },
+    /**
+     * Gets values of the parameters from the obj
+     * @param {Array} parameters
+     * @param {Object} obj
+     ***/
+    getValuesOfParameter: function (parameters, obj) {
+        var me = this, results;
+
+        return (parameters || []).select(function (param) {
+            var value;
+            if (param && param.shortCut && me.getConnection(obj, param.shortCut.type)) {
+                if (param.shortCut.type === 'subcontrol') {
+                    value = MEPH.getPathValue(param.path.subset(1).join('.'), obj);
+                }
+                else {
+                    value = MEPH.getPathValue(param.path.subset(1).join('.'), me.getConnection(obj, param.shortCut.type));// obj);
+                }
+                return value;
             }
-        }, obj);
+            else {
+                return param.value;
+            }
+        });
     },
     /**
      * Executes instrucions and applies the results to the dom object.
@@ -364,7 +413,12 @@ MEPH.define('MEPH.bind.Binder', {
                 value,
                 instruction = instructions.first()
             //target = me.getConnection(obj, instruction.shortCut.type);
-            value = MEPH.getPathValue(instruction.path.subset(1).join('.'), obj);
+            if (instruction.shortCut.type === 'subcontrol') {
+                value = MEPH.getPathValue(instruction.path.subset(1).join('.'), obj);
+            }
+            else {
+                value = MEPH.getPathValue(instruction.path.subset(1).join('.'), me.getConnection(obj, instruction.shortCut.type));// obj);
+            }
             return value;
         });
 
@@ -376,7 +430,9 @@ MEPH.define('MEPH.bind.Binder', {
                     path = instruction.path.subset(1).join('.');
                 value = MEPH.getPathValue(path, target);
                 if (typeof (value) === 'function') {
-                    return value.bind(target)(result, dom, prop, eventType, instructions, obj, eventargs);
+                    var paramValues = me.getValuesOfParameter(instruction.params, obj);
+                    paramValues = paramValues.concat([result, dom, prop, eventType, instructions, obj, eventargs]);
+                    return value.apply(target, paramValues);
                 }
                 else {
                     if (numOfInstructions > 1) {
@@ -533,7 +589,9 @@ MEPH.define('MEPH.bind.Binder', {
              .select(function (x) {
                  return x.trim();
              })
-             .select(function (x) {
+             .select(function (t) {
+                 var x = t.split(MEPH.ParameterDelimiter).trim().first();
+                 var parameters = t.split(MEPH.ParameterDelimiter).trim().subset(1);
                  var splitPath = MEPH.Array(x.split(MEPH.pathDelimiter)),
                      prefixShortCut,
                      shortCut;
@@ -563,10 +621,55 @@ MEPH.define('MEPH.bind.Binder', {
                  return {
                      path: splitPath,
                      uniqueId: uniqueId,
-                     shortCut: prefixShortCut
+                     shortCut: prefixShortCut,
+                     params: me.getParameters(t, object)
                  }
              });
         return instructions;
+    },
+    /**
+     * Takes a raw instruction and an object, and will retrieve the parameters.
+     * @param {String} rawInstruction
+     * @param {Object} object
+     **/
+    getParameters: function (rawInstruction, object) {
+        var me = this, splitPath, uniqueId,
+            subcontrol = MEPH.getBindPrefixShortCuts().first(function (x) {
+                return x.type === 'subcontrol';
+            }),
+            results = [],
+            parameters = rawInstruction.split(MEPH.ParameterDelimiter).trim().subset(1);
+
+        return parameters.select(function (param) {
+            splitPath = param.split(MEPH.pathDelimiter);
+            shortCut = splitPath.first();
+
+            if (shortCut.startsWith(subcontrol.prefix)) {
+                uniqueId = shortCut.substr(subcontrol.prefix.length, shortCut.length);
+                shortCut = shortCut.substr(0, subcontrol.prefix.length);
+                splitPath = MEPH.Array([shortCut].concat(splitPath.subset(1)));
+            }
+            prefixShortCut = MEPH.getBindPrefixShortCuts().first(function (x) {
+                return x.prefix === shortCut;
+            });
+
+            if (object && object.getReferenceConnections) {
+                reference = object.getReferenceConnections().first(function (x) {
+                    return x.type === shortCut;
+                });
+                if (reference) {
+                    prefixShortCut = reference;
+                }
+            }
+
+            return {
+                path: splitPath,
+                uniqueId: uniqueId,
+                shortCut: prefixShortCut,
+                value: param
+            }
+
+        });
     },
     /**
      * Parses the dom attributes and pulls a object that contains the binding information.

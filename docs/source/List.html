@@ -17,7 +17,19 @@
 <body onload="prettyPrint(); highlight();">
   <pre class="prettyprint lang-js"><span id='MEPH-list-List'>/**
 </span> * @class MEPH.list.List
- * List
+ * @extends MEPH.control.Control
+ *  Example
+ *   
+ *               &lt;list data-bind=&#39;&quot;source&quot;: &quot;ct$.listsource&quot;&#39;&gt;
+ *                   &lt;template 
+ *                       name=&quot;u4m_controls_examples_list&quot;&gt;
+ *                           &lt;div class=&quot;u4m-application-menu-categories-item-details&quot; &gt;
+ *                               &lt;span&gt;Name&lt;/span&gt;
+ *                               &lt;span data-bind=&#39;&quot;innerHTML&quot;: &quot;c$.data.name&quot;&#39;&gt;&lt;/span&gt;
+ *                           &lt;/div&gt;
+ *                   &lt;/template&gt;
+ *               &lt;/list&gt;
+ *   
  */
 MEPH.define(&#39;MEPH.list.List&#39;, {
     extend: &#39;MEPH.control.Control&#39;,
@@ -470,6 +482,25 @@ MEPH.define(&#39;MEPH.list.List&#39;, {
     getListTemplates: function () {
         var me = this;
         return me.listTemplates;
+    },
+<span id='MEPH-list-List-method-destroy'>    /**
+</span>     * @inheritdoc
+     */
+    destroy: function () {
+        var me = this;
+
+
+        if (me.boundSource) {
+
+            me.boundSource.foreach(function (item) {
+                item.dataItem.un(null, me);
+                item.dataItem.dun(null, me);
+                item.renderResult.foreach(function (result) {
+                    result.classInstance.destroy();
+                });
+            });
+        }
+        me.callParent.apply(me, arguments);
     }
 });</pre>
 </body>

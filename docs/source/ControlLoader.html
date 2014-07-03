@@ -218,6 +218,16 @@ MEPH.define(&#39;MEPH.dom.ControlLoader&#39;, {
             classInstance = controlPackage.classInstance,
             attribute;
         subClassInstance.addReferenceConnection(MEPH.control.Control.connectables.subcontrol, classInstance);
+
+        if (!subClassInstance.parent) {
+            Object.defineProperty(subClassInstance, &#39;parent&#39;, {
+                enumerable: false,
+                writable: true,
+                configurable: true,
+                value: classInstance
+            });
+        }
+
         attribute = subNode.getAttribute(me.MEPHId);
         if (attribute) {
 
@@ -340,12 +350,26 @@ MEPH.define(&#39;MEPH.dom.ControlLoader&#39;, {
                     referencePacks.push({ type: x.type, instance: x.obj });
                 }
             });
+            if (controlObject.node) {
+
+                var instanceReferences = me.getNodeInstanceReferences(controlObject.node);
+                if (instanceReferences.length) {
+                    references = references || [];
+                    instanceReferences.foreach(function (ref) {
+                        references.removeWhere(function (x) {
+                            return x.type === ref.type;
+                        });
+                    });
+                    instanceReferences.foreach(function (ref) {
+                        references.push(ref);
+                    });
+                }
+            }
             if (references) {
                 MEPH.Array(references);
                 references.foreach(function (x) {
                     classInstance.removeReferenceConnection(x.type);
                 });
-
                 references.foreach(function (ref) {
                     var instance = new ref.classDefinition();
                     if (application) {
@@ -380,6 +404,21 @@ MEPH.define(&#39;MEPH.dom.ControlLoader&#39;, {
             throw &#39;missing argument : ControlLoader.bindObjectReference&#39;;
         }
         // return promise;
+    },
+<span id='MEPH-dom-ControlLoader-method-getNodeInstanceReferences'>    /**
+</span>     * @private
+     * Gets the node instance.
+     */
+    getNodeInstanceReferences: function (node) {
+        var me = this;
+        return MEPH.Array(node.attributes).where(function (x) {
+            return x.name.startsWith(&#39;ref-&#39;);
+        }).select(function (x) {
+            return {
+                type: x.name.split(&#39;&#39;).subset(4).join(&#39;&#39;),
+                classDefinition: MEPH.getDefinedClass(node.getAttribute(x.name))
+            }
+        });;
     },
 <span id='MEPH-dom-ControlLoader-method-hasReferences'>    /**
 </span>     * Returns true if the dom object indicates whether or not it will reference an object.
