@@ -107,4 +107,47 @@
             done();
         });
     });
+
+    it('matrix scalar multiplication ', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+            var m1 = new Matrix(3, 4);
+            m1.set([].interpolate(0, 12, function (x) { return 1; }));
+            expect(m1.mul(10).get(1, 1) === 10).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('matrix transpose ', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+            var m1 = new Matrix(3, 4);
+            m1.set([].interpolate(0, 12, function (x) { return x; }));
+            expect(m1.transpose().get(0, 2) === 8).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('matrix multiplication ', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+            var m1 = new Matrix(3, 4);
+            m1.set([].interpolate(0, 12, function (x) { return x; }));
+
+            var m2 = new Matrix(4, 3);
+            m2.set([].interpolate(0, 12, function (x) { return x; }));
+
+            expect(m1.mul(m2).get(2, 2) > 1).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
 });
