@@ -4,7 +4,7 @@ MEPH.define('MEPH.util.Vector', {
     },
     initialize: function (x, y, z, useBinaryHeap) {
         if (useBinaryHeap)
-            this._id = pgx.Vector2d.Id++;
+            this._id = pgx.Vector.Id++;
         if (arguments.length > 0) {
             this._x = x;
             this._y = y;
@@ -66,7 +66,7 @@ MEPH.define('MEPH.util.Vector', {
     },
     get_id: function () { return this._id; },
     copy: function () {
-        return new pgx.Vector2d(this._x, this._y, this._z);
+        return new pgx.Vector(this._x, this._y, this._z);
     },
 
     destroy: function (edge) {
@@ -141,7 +141,7 @@ MEPH.define('MEPH.util.Vector', {
         return this;
     },
     add: function (that) {
-        return new pgx.Vector2d(this._x + that._x, this._y + that._y, this._z + that._z);
+        return new pgx.Vector(this._x + that._x, this._y + that._y, this._z + that._z);
     },
     addEquals: function (that) {
         this._x += that._x;
@@ -150,7 +150,7 @@ MEPH.define('MEPH.util.Vector', {
         return this;
     },
     subtract: function (that) {
-        return new pgx.Vector2d(this._x - that._x, this._y - that._y, this._z - that._z);
+        return new pgx.Vector(this._x - that._x, this._y - that._y, this._z - that._z);
     },
     subtractEquals: function (that) {
         this._x -= that._x;
@@ -158,16 +158,16 @@ MEPH.define('MEPH.util.Vector', {
         return this;
     },
     mapdivide: function (that) {
-        return new pgx.Vector2d(this._x / that._x, this._y / that._y);
+        return new pgx.Vector(this._x / that._x, this._y / that._y);
     },
     mapmultiply: function (that) {
-        return new pgx.Vector2d(this._x * that._x, this._y * that._y);
+        return new pgx.Vector(this._x * that._x, this._y * that._y);
     },
     square: function () {
         return this._x * this._x + this._y * this._y;
     },
     multiply: function (scalar) {
-        return new pgx.Vector2d(this._x * scalar, this._y * scalar);
+        return new pgx.Vector(this._x * scalar, this._y * scalar);
     },
     multiplyEquals: function (scalar) {
         this._x *= scalar;
@@ -176,9 +176,9 @@ MEPH.define('MEPH.util.Vector', {
     },
     divide: function (scalar) {
         if (scalar == 0) {
-            return new pgx.Vector2d(0, 0);
+            return new pgx.Vector(0, 0);
         }
-        return new pgx.Vector2d(this._x / scalar, this._y / scalar);
+        return new pgx.Vector(this._x / scalar, this._y / scalar);
     },
     divideEquals: function (scalar) {
         this._x /= scalar;
@@ -186,7 +186,7 @@ MEPH.define('MEPH.util.Vector', {
         return this;
     },
     perp: function () {
-        return new pgx.Vector2d(-this._y, this._x);
+        return new pgx.Vector(-this._y, this._x);
     },
     perpendicular: function (that) {
         return this.subtract(this.project(that));
@@ -212,9 +212,9 @@ MEPH.define('MEPH.util.Vector', {
         var sa = Math.sin(angle);
         var rx = this._x * ca - this._y * sa;
         var ry = this._x * sa + this._y * ca;
-        return new pgx.Vector2d(rx, ry);
+        return new pgx.Vector(rx, ry);
     },
     random: function () {
-        return new pgx.Vector2d(2 * (Math.random() - .5), 2 * (Math.random() - .5));
+        return new pgx.Vector(2 * (Math.random() - .5), 2 * (Math.random() - .5));
     }
 });

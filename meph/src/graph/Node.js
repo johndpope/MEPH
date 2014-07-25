@@ -262,16 +262,16 @@ MEPH.define('MEPH.graph.Node', {
     },
     setTargetPosition: function (x, y, z, callback) {
         var me = this;
-        me.$targetPosition = pgx.Vector2d.Create({ x: x, y: y, z: z });
+        me.$targetPosition = pgx.Vector.Create({ x: x, y: y, z: z });
         if (me.movingToTarget) {
             return;
         }
         me.movingToTarget = true;
 
         var anim = function () {
-            var pos = pgx.Vector2d.Create(me.$position);
+            var pos = pgx.Vector.Create(me.$position);
             var nextpos = me.$targetPosition.subtract(pos).unit().multiply(me.$speed).add(pos);
-            //pgx.Vector2d.Lerp2D(pos, me.$targetPosition, me.$speed);
+            //pgx.Vector.Lerp2D(pos, me.$targetPosition, me.$speed);
             me.setPosition(nextpos.x, nextpos.y, nextpos.z);
             if (nextpos.distance(me.$targetPosition) < me.maxDistanceToTarget) {
                 me.movingToTarget = false;

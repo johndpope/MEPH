@@ -2,7 +2,7 @@
 * @class MEPH.graph.Node
 */
 MEPH.define('MEPH.graph.Connection', {
-    requires: ['MEPH.math.Vector2d'],
+    requires: ['MEPH.math.Vector'],
     properties: {
         $connectionDetectionDepth: 10,
         $selectable: true,
@@ -79,15 +79,15 @@ MEPH.define('MEPH.graph.Connection', {
     },
     distanceFrom: function (point) {
         var me = this;
-        var target = Vector2d.Create(point);
+        var target = Vector.Create(point);
         var nodeendpoints = me.calculateEndPoints(me);
         return nodeendpoints.min(function (x) {
-            var start = Vector2d.Create(x.start);
-            var end = Vector2d.Create(x.end);
+            var start = Vector.Create(x.start);
+            var end = Vector.Create(x.end);
 
             var depth = me.getConnectionDetectionDepth();
             return [].interpolate(0, depth, function (t) {
-                return Vector2d.Lerp2D(start, end, t / depth).distance(target);
+                return Vector.Lerp2D(start, end, t / depth).distance(target);
             }).min();
         });
     },

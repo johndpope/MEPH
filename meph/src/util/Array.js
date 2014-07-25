@@ -189,7 +189,7 @@ MEPH.define('MEPH.util.Array', {
                     value: function (func) {
                         var collection = this;
                         for (var i = 0 ; i < collection.length ; i++) {
-                            if (!func(collection[i])) {
+                            if (!func(collection[i], i)) {
                                 return false;
                             }
                         }
@@ -496,6 +496,23 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+
+            if (!array.sum) {
+                Object.defineProperty(array, 'sum', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = 0;
+                        var collection = this;
+                        for (var i = 0 ; i < collection.length; i++) {
+                            result += func(collection[i], i);
+                        }
+                        return result;
+                    }
+                });
+            }
+
             if (!array.minSelect) {
                 Object.defineProperty(array, 'minSelect', {
                     enumerable: false,

@@ -84,11 +84,11 @@
                                 }
                                 else {
                                     var percentage = (i - settings.frameStart) / (settings.frameEnd - settings.frameStart);
-                                    config.dom[style][styleProp] = pgx.Vector2d.Lerp(settings.start, settings.stop, percentage) + (settings.postFix || '');
+                                    config.dom[style][styleProp] = pgx.Vector.Lerp(settings.start, settings.stop, percentage) + (settings.postFix || '');
                                 }
                             }
                             else if (settingsarray.length === 1) {
-                                config.dom[style][styleProp] = pgx.Vector2d.Lerp(settings.start, settings.stop, 0) + (settings.postFix || '');
+                                config.dom[style][styleProp] = pgx.Vector.Lerp(settings.start, settings.stop, 0) + (settings.postFix || '');
                             }
                         })
                     }

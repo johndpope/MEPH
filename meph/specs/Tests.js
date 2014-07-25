@@ -81,7 +81,10 @@
                         'ioc/Container.spec.js',
                         'pad/DrawingSurface.spec.js',
                         'list/List.spec.js',
-                        'math/Vector2d.spec.js',
+                        'math/Hamilton.spec.js',
+                        'math/Matrix.spec.js',
+                        'math/Quaternion.spec.js',
+                        'math/Vector.spec.js',
                         'mixins/Observable.spec.js',
                         'mobile/activity/ActivityController.spec.js',
                         'mobile/activity/container/Container.spec.js',
@@ -114,6 +117,7 @@
                         'util/Dom.spec.js',
                         'util/Manifest.spec.js',
                         'util/Observable.spec.js',
+                        'util/Queryable.spec.js',
                         'util/Renderer.spec.js',
                         'util/Validatable.spec.js',
                         'util/Template.spec.js',
@@ -128,7 +132,7 @@
                     }.bind(i));
                 }
                 promise.then(function () {
-                    jasmine.getEnv().execute();
+                    //jasmine.getEnv().execute();
                 });
             }
             loadScriptFiles();
