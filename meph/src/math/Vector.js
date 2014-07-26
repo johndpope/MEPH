@@ -3,11 +3,16 @@ MEPH.define('MEPH.math.Vector', {
     alternateNames: 'Vector',
     statics: {
         Id: 0,
+        ZeroLength: Math.pow(1, -15),
+        
         Create: function (obj) {
             if (Array.isArray(obj) || obj instanceof J3DIVector3) {
                 return new Vector(obj[0], obj[1], obj[2]);
             }
             return new Vector(obj.x, obj.y, obj.z);
+        },
+        ZeroVector: function (dim) {
+            return new Vector([].interpolate(0, dim || 4, function () { return 0; }));
         },
         /**
          * Linear Interpolation between to numbers.
@@ -99,6 +104,10 @@ MEPH.define('MEPH.math.Vector', {
         return that.dimensions() === this.dimensions() && this.vector.all(function (x, i) {
             return x === that.getIndex(i);
         });
+    },
+    firstNonZeroIndex: function () {
+        var me = this;
+        return me.vector.indexWhere(function (x) { return x; }).first();
     },
     /**
      * Gets the index of the vector.
@@ -212,6 +221,10 @@ MEPH.define('MEPH.math.Vector', {
         return new Vector(this.vector.select(function (x, index) {
             return x + that.getIndex(index);
         }));
+    },
+    isZero: function () {
+        var me = this;
+        return me.length() < Vector.ZeroLength;
     },
     /**
      * Subtracts a vector.

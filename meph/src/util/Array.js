@@ -304,7 +304,7 @@ MEPH.define('MEPH.util.Array', {
                             }
                         }
                         for (var i = 0 ; i < collection.length ; i++) {
-                            if (func(collection[i])) {
+                            if (func(collection[i], i)) {
                                 return (collection[i]);
                             }
                         }

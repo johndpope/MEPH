@@ -140,5 +140,95 @@
     },
     rref: function () {
         var me = this;
+        var firstcolumn = me.column(0);
+        var firstindex = firstcolumn.firstNonZeroIndex();
+        if (firstindex !== 0) {
+            me.switchRow(0, firstindex);
+        }
+        // For each column reduce the row
+        for (var i = 0; i < me.rows; i++) {
+            me.reduceColumn(i);
+            console.log(me.printMatrix());
+        }
+    },
+    /**
+     * Gets the row multiple to use in rref.
+     * @param {Number} ith
+     * @param {Number} jth
+     */
+    getMultiple: function (ith, jth) {
+        var me = this;
+        var r1 = me.row(ith);
+        var r2 = me.row(jth);
+        var index = r1.firstNonZeroIndex();
+        if (index !== null || index !== undefined) {
+            var r1v = r1.getIndex(index);
+            var r2v = r2.getIndex(index);
+            if (r2v === 0) {
+                return 0;
+            }
+            else {
+                return -r2v / r1v;
+            }
+        }
+        return 0;
+    },
+    /**
+     * Reduces the matrix by column and row.
+     * @param {Number} col
+     * @param {Number} row
+     */
+    reduceColumn: function (ithRow) {
+        var me = this;
+        me.reduceRow(ithRow);
+        var row = me.row(ithRow);
+        [].interpolate(0, me.rows, function (x) {
+            return x;
+        })
+        .where(function (x) {
+            return x !== ithRow;
+        }).foreach(function (jthRow) {
+            var multiple = me.getMultiple(ithRow, jthRow);
+            var r1 = me.row(ithRow);
+            var r2 = me.row(jthRow);
+            r1 = r1.multiply(multiple);
+            r2 = r2.add(r1);
+            if (r2.isZero()) {
+                me.setRow(jthRow, Vector.ZeroVector(r2.dimensions()));
+            }
+            else {
+                me.setRow(jthRow, r2);
+            }
+        });
+    },
+    /**
+     * Reduces the row.
+     * @param {Number} ith
+     */
+    reduceRow: function (ith) {
+        var me = this;
+        var r1 = me.row(ith);
+        var index = r1.firstNonZeroIndex();
+        if (index !== null && index !== undefined) {
+            var r1v = r1.getIndex(index);
+            r1 = r1.multiply(1 / r1v);
+            r1.vector[index] = 1;
+            me.setRow(ith, r1);
+        }
+    },
+    printMatrix: function () {
+        var me = this;
+        var newline = '\r\n';
+        var result = '[' + newline;
+        for (var j = 0 ; j < me.rows; j++) {
+
+            for (var i = 0 ; i < me.columns; i++) {
+                result += me.get(j, i) + ','
+            }
+            result += newline;
+        }
+        result += ']';
+
+        return result;
     }
 });

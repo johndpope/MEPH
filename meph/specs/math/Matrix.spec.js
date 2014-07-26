@@ -166,20 +166,106 @@
         });
     });
 
-    //it('matrix row reduce echelon form', function (done) {
-    //    MEPH.requires('MEPH.math.Matrix').then(function () {
-    //        var m1 = new Matrix(3, 4);
-    //        m1.set([]);
+    it('matrix print', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
 
-    //        var m2 = new Matrix(4, 3);
-    //        m2.set([].interpolate(0, 12, function (x) { return x; }));
+            var m2 = new Matrix(4, 4);
+            m2.set([].interpolate(0, 4 * 4, function (x) { return x; }));
 
-    //        expect(m1.mul(m2).get(2, 2) > 1).toBeTruthy();
+            expect(m2.printMatrix()).toBeTruthy();
 
-    //    }).catch(function () {
-    //        expect(new Error('something went wrong while creating a list')).caught();
-    //    }).then(function (x) {
-    //        done();
-    //    });
-    //});
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('matrix calculate row multiple for rref', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+
+            var m2 = new Matrix(4, 4);
+            m2.set([].interpolate(0, 4 * 4, function (x) { return x + 1; }));
+            var multiple = m2.getMultiple(0, 1);
+            expect(multiple === -5).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('matrix row operate ', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+
+            var m2 = new Matrix(4, 4);
+            m2.set([].interpolate(0, 4 * 4, function (x) { return x + 1; }));
+            console.log(m2.printMatrix());
+            m2.reduceColumn(0);
+            console.log(m2.printMatrix());
+            expect(m2.column(0).equals(new Vector([1, 0, 0, 0]))).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('matrix row operate twice ', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+
+            var m2 = new Matrix(4, 4);
+            m2.set([].interpolate(0, 4 * 4, function (x) { return x + 1; }));
+            console.log(m2.printMatrix());
+            m2.reduceColumn(0);
+            console.log(m2.printMatrix());
+            m2.reduceColumn(1);
+            console.log(m2.printMatrix());
+            expect(m2.column(0).equals(new Vector([1, 0, 0, 0]))).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('matrix row reduce echelon form', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+            var m1 = new Matrix(3, 4);
+            m1.set([]);
+
+            var m2 = new Matrix(4, 3);
+            m2.set([].interpolate(0, 12, function (x) { return x; }));
+            console.log(m2.printMatrix());
+            m2.rref();
+            console.log(m2.printMatrix());
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+    it('matrix row reduce echelon form', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+
+            var m2 = new Matrix(4, 4);
+            m2.set([1, 3, 5, 6,
+                    2, 7, 1, 12,
+                    2, 3, 4, 1,
+                    2, 3, 4, 1]);
+            console.log(m2.printMatrix());
+            m2.rref();
+            console.log(m2.printMatrix());
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
 });
