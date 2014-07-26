@@ -150,4 +150,36 @@
             done();
         });
     });
+
+    it('matrix interchange row ', function (done) {
+        MEPH.requires('MEPH.math.Matrix').then(function () {
+            var m1 = new Matrix(3, 4);
+            m1.set([].interpolate(0, 12, function (x) { return x; }));
+
+            m1.switchRow(0, 1);
+            expect(m1.get(0, 0) === 4).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating a list')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    //it('matrix row reduce echelon form', function (done) {
+    //    MEPH.requires('MEPH.math.Matrix').then(function () {
+    //        var m1 = new Matrix(3, 4);
+    //        m1.set([]);
+
+    //        var m2 = new Matrix(4, 3);
+    //        m2.set([].interpolate(0, 12, function (x) { return x; }));
+
+    //        expect(m1.mul(m2).get(2, 2) > 1).toBeTruthy();
+
+    //    }).catch(function () {
+    //        expect(new Error('something went wrong while creating a list')).caught();
+    //    }).then(function (x) {
+    //        done();
+    //    });
+    //});
 });

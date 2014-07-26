@@ -26,6 +26,15 @@
         var me = this;
         me.matrix[(row * me.columns + col)] = value;
     },
+    /**
+     * Set the rows values.
+     */
+    setRow: function (ith, vector) {
+        var me = this;
+        vector.vector.foreach(function (x, index) {
+            me.matrix[(ith * me.columns) + index] = vector.getIndex(index);
+        });
+    },
     row: function (ith) {
         var me = this;
         return new Vector(me.matrix.subset(ith * me.columns, (ith + 1) * me.columns));
@@ -115,5 +124,21 @@
             }
         }
         return result;
+    },
+    /**
+     * Switch rows in matrix
+     * @param {Number} r1
+     * @param {Number} r2
+     **/
+    switchRow: function (r1, r2) {
+        var me = this;
+        var row1 = me.row(r1);
+        var row2 = me.row(r2);
+        me.setRow(r1, row2);
+        me.setRow(r2, row1);
+        return me;
+    },
+    rref: function () {
+        var me = this;
     }
 });
