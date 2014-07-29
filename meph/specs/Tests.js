@@ -81,6 +81,7 @@
                         'ioc/Container.spec.js',
                         'pad/DrawingSurface.spec.js',
                         'list/List.spec.js',
+                        'math/jax/MathJax.spec.js',
                         'math/Hamilton.spec.js',
                         'math/Matrix.spec.js',
                         'math/Quaternion.spec.js',
