@@ -22,7 +22,8 @@
             var toresolve,
                 tofail;
             var math;
-            dom.setAttribute('id', "MathOutput");//dom.getAttribute('id') || MEPH.GUID());
+            dom.innerHTML = '${}$';
+            dom.setAttribute('id', dom.getAttribute('id') || MEPH.GUID());
             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
             MathJax.Hub.queue.Push(function () {
                 if (math) {
@@ -31,9 +32,9 @@
                 else {
 
                     MathJax.Hub.queue.Push(function () {
-                        debugger
+                        
                         math = MathJax.Hub.getAllJax("MathOutput")[0];
-                        MathJax.Hub.queue.Push(["Text", math, "\\displaystyle{" + script + "}"]);
+                        MathJax.Hub.queue.Push(["Text", math, script]);
                     });
 
 
