@@ -20,13 +20,14 @@
         document.body.appendChild(dom);
         MEPH.requires('MEPH.math.jax.MathJax').then(function () {
             return MEPHJax.ready().then(function () {
-                return MEPHJax.load('J_\alpha(x)', dom).then(function (success) {
-                    expect(success).toBeTruthy();
-                });
+                return MEPHJax.load('x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.', dom)
+                    .then(function (success) {
+                        expect(success).toBeTruthy();
+                    });
             });
         }).catch(function () {
             expect(new Error('something went wrong with loading mathml')).caught();
-        }).then(function(x){
+        }).then(function (x) {
             done();
         });
     });
