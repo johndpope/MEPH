@@ -3,16 +3,95 @@
     statics: {
         type: {
             variable: 'variable',
-            integral: 'integral'
+            integral: 'integral',
+            addition: 'addition',
+            power: 'power',
+            subtraction: 'subtraction',
+            multiplication: 'multiplication',
+            division: 'division'
         },
         'function': {
+            input: 'input',
             start: 'start',
             end: 'end',
+            denominator: 'denominator',
+            numerator: 'numerator',
+            base: 'base',
+            power: 'power',
             respectTo: 'respectTo'
+        },
+        /**
+         * When printing an expression, sub expressions of certain types should be wrapped in parenthesis,
+         * for readability purposes.
+         * @param {String} type
+         **/
+        requiresParenthesis: function (type) {
+            switch (type) {
+                case Expression.type.subtraction:
+                case Expression.type.division:
+                case Expression.type.multiplication:
+                case Expression.type.addition:
+                    return true;
+                default: return false;
+            }
+        },
+        power: function (base, power) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.power);
+            expression.addPart(Expression.function.base, base);
+            expression.addPart(Expression.function.power, power);
+            return expression;
         },
         variable: function (variable) {
             var expression = new Expression();
             expression.setExp(Expression.type.variable, variable);
+            return expression;
+        },
+        /**
+         * Expresses an addition function, a + b + c + ... + n
+         **/
+        addition: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.addition].concat(MEPHArray.convert(arguments)));
+        },
+        /**
+         * Expresses an addition function, a - b - c - ... - n
+         **/
+        subtraction: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.subtraction].concat(MEPHArray.convert(arguments)));
+        },
+        /**
+         * Expresses an multiplication function, a * b * c * ... * n
+         **/
+        multiplication: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.multiplication].concat(MEPHArray.convert(arguments)));
+        },
+        /**
+         * Expresses an multiplication function, a * b * c * ... * n
+         **/
+        division: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.division].concat(MEPHArray.convert(arguments)));
+        },
+        /**
+         * Expresses a fraction
+         **/
+        fraction: function (numerator, denominator) {
+            var expression = new Expression(); 
+            expression.setExp(Expression.type.fraction);
+            expression.addPart(Expression.function.numerator, x)
+            MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                ;
+            });
+            return expression;
+        },
+        /**
+         * Expresses an arithemetic like function, a - b - c - ... - n
+         **/
+        arithmetic: function (type, a, b) {
+            var expression = new Expression();
+            expression.setExp(type);
+            MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                expression.addPart(Expression.function.input, x);
+            });
             return expression;
         },
         integral: function (exp, dx, a, b) {
@@ -35,7 +114,9 @@
     setExp: function (type, val) {
         var me = this;
         me.type = type;
-        me.parts.push({ type: type, val: val });
+        if (val !== undefined) {
+            me.parts.push({ type: type, val: val });
+        }
     },
     addPart: function (type, val) {
         var me = this;
@@ -64,6 +145,33 @@
                 '\\mathrm{d}' +
                 me.partLatex(Expression.function.respectTo) + '.'
                 return result;
+            case Expression.type.addition:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(' + ');
+                break;
+            case Expression.type.subtraction:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(' - ');
+                break;
+            case Expression.type.multiplication:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(' * ');
+                break;
+            case Expression.type.division:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(' / ');
+                break;
+            case Expression.type.fraction:
+                return '\\frac{' + me.partLatex(Expression.function.numerator) +
+                    '}{' + me.partLatex(Expression.function.denominator) + '}';
+                break;
+            case Expression.type.power:
+                return me.partLatex(Expression.function.base) + '^' + me.partLatex(Expression.function.power);
+                break;
         }
     },
     partLatex: function (type) {

@@ -20,35 +20,36 @@
         },
         load: function (script, dom) {
             var toresolve,
-                tofail;
-            var math;
-            dom.innerHTML = '${}$';
-            dom.setAttribute('id', dom.getAttribute('id') || MEPH.GUID());
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-            MathJax.Hub.queue.Push(function () {
-                if (math) {
-                    MathJax.Hub.Queue(["Text", math, script]);
-                }
-                else {
-
-                    MathJax.Hub.queue.Push(function () {
-                        
-                        math = MathJax.Hub.getAllJax("MathOutput")[0];
-                        MathJax.Hub.queue.Push(["Text", math, script]);
-                    });
-
-
-                }
-                MathJax.Hub.Queue(function () {
-                    toresolve(true);
-                });
-            });
-
-            return MEPHJax.ready().then(function () {
-                return new Promise(function (r, f) {
+                tofail,
+                promise = new Promise(function (r, f) {
                     toresolve = r;
                     tofail = f;
-                });
+
+                    var math;
+                    dom.innerHTML = '${}$';
+                    dom.setAttribute('id', dom.getAttribute('id') || MEPH.GUID());
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                    MathJax.Hub.queue.Push(function () {
+                        if (math) {
+                            MathJax.Hub.Queue(["Text", math, script]);
+                        }
+                        else {
+
+                            MathJax.Hub.queue.Push(function () {
+
+                                math = MathJax.Hub.getAllJax("MathOutput")[0];
+                                MathJax.Hub.queue.Push(["Text", math, script]);
+                            });
+
+
+                        }
+                        MathJax.Hub.Queue(function () {
+                            toresolve(true);
+                        });
+                    });
+                });;
+            return MEPHJax.ready().then(function () {
+                return promise;
             });
         }
     },
