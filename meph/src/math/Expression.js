@@ -1,5 +1,6 @@
 ﻿MEPH.define('MEPH.math.Expression', {
     alternateNames: 'Expression',
+    requires: ['MEPH.math.ExpressionMatch'],
     statics: {
         type: {
             variable: 'variable',
@@ -15,10 +16,12 @@
             cot: 'cot',
             sec: 'sec',
             tan: 'tan',
+            func: 'func',
             mod: 'mod',
             modulo: 'modulo',
             theta: 'theta',
             subtraction: 'subtraction',
+            plusminus: 'plusminus',
             multiplication: 'multiplication',
             division: 'division'
         },
@@ -26,12 +29,16 @@
             input: 'input',
             start: 'start',
             end: 'end',
+            name: 'name',
             denominator: 'denominator',
             numerator: 'numerator',
             base: 'base',
             expression: 'exp',
             power: 'power',
             respectTo: 'respectTo'
+        },
+        getMatch: function (expression) {
+            return ExpressionMatch.getMatch(expression);
         },
         /**
          * When printing an expression, sub expressions of certain types should be wrapped in parenthesis,
@@ -54,6 +61,13 @@
             expression.addPart(Expression.function.base, base);
             expression.addPart(Expression.function.power, power);
             return expression;
+        },
+        plusminus: function (a, b) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.plusminus);
+            expression.addPart(Expression.function.input, a);
+            expression.addPart(Expression.function.input, b);
+            return expression
         },
         variable: function (variable) {
             var expression = new Expression();
@@ -190,6 +204,15 @@
             return expression;
 
         },
+        func: function (func) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.func);
+            expression.addPart(Expression.function.name, MEPHArray.convert(arguments).first());
+            MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                expression.addPart(Expression.function.input, x);
+            });
+            return expression;
+        },
         theta: function () {
             var expression = new Expression();
             expression.setExp(Expression.type.theta);
@@ -200,7 +223,8 @@
          **/
         integral: function (exp, dx, a, b) {
             var expression = new Expression();
-            expression.setExp(Expression.type.integral, exp);
+            expression.setExp(Expression.type.integral);
+            expression.addPart(Expression.function.input, exp);
             if (a)
                 expression.addPart(Expression.function.start, a);
             if (b)
@@ -259,6 +283,11 @@
                     return x.val.latex();
                 }).join(' - ');
                 break;
+            case Expression.type.func:
+                return me.partLatex(Expression.function.name) + '(' + me.parts.subset(1).select(function (x) {
+                    return x.val;
+                }).join(',') + ')';
+                break;
             case Expression.type.multiplication:
                 if (me.parts.unique(function (x) { return x.val.latex(); }).length !== me.parts.length ||
                     me.parts.where(function (x) { return parseFloat(x.val.latex()); }).length !== me.parts.length || x.val.latex() === '0') {
@@ -302,6 +331,12 @@
                     });
                     return start + me.latexPart(me.parts.last()) + end;
                 }
+                break;
+            case Expression.type.plusminus:
+                var a = me.parts.first(function (x) { return x.type === Expression.function.input; });
+                var b = me.parts.second(function (x) { return x.type === Expression.function.input; });
+
+                return me.latexPart(a) + ' \\pm ' + me.latexPart(b);
                 break;
             case Expression.type.theta:
                 return '\\theta';
@@ -366,7 +401,20 @@
             var expparts = expression.getParts().select(function (x) { return x; });
             if (meparts.length !== expparts.length) return false;
             meparts.foreach(function (x) {
-                var first = expparts.first(function (y) { return y.type === x.type });
+                var first = expparts.first(function (y) {
+                    if (y.type !== x.type) {
+                        return false;
+                    }
+                    if (y.val && x.val && y.val.equals && x.val.equals) {
+                        return y.val.equals(x.val);
+                    }
+                    else if (y.val && !x.val || !y.val && x.val) {
+                        return false;
+                    }
+                    else {
+                        return true
+                    }
+                });
                 if (first) {
                     expparts.removeWhere(function (t) { return t === first; });
                 }

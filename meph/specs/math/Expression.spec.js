@@ -382,7 +382,7 @@
             var Expression = MEPH.math.Expression;
             var expression = Expression.addition(Expression.sin('theta', 2), Expression.cos('theta', 2));
             var exp2 = Expression.addition(Expression.sin(Expression.variable('y'), 2), Expression.cos(Expression.variable('x'), 2));
-            
+
             expect(expression.equals(exp2)).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
@@ -399,6 +399,87 @@
             var exp2 = Expression.addition(Expression.sin(Expression.variable('y'), 2), Expression.cos(Expression.variable('x'), 2));
 
             expect(expression.equals(exp2)).toBeFalsy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('expression function', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.func('f', 'x');
+
+            var latexp = 'f(x)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('expression plusorminus', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.plusminus(Expression.variable('a'), Expression.variable('b'));
+            var latexp = 'a \\pm b';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can detect  Integration(a)dx = ax + c ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(Expression.variable('a'), 'x');
+
+            var results = Expression.getMatch(expression);
+            var exp2 = Expression.addition(
+                        Expression.multiplication(
+                            Expression.variable('a'),
+                            Expression.variable('x')),
+                        Expression.variable('c'));
+            expect(results.length).toBe(1);
+            var r = results.some(function (x) {
+                return x.equals(exp2);
+            });
+            expect(r).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('can detect  Integration(ax)dx = ax + c ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(Expression.multiplication(
+                                                    Expression.variable('a'),
+                                                    Expression.variable('x')),
+                                'x');
+
+            var results = Expression.getMatch(expression);
+            var exp2 = Expression.addition(
+                        Expression.multiplication(
+                            Expression.variable('a'),
+                            Expression.variable('x')),
+                        Expression.variable('c'));
+            expect(results.length).toBe(0);
+            var r = results.some(function (x) {
+                return x.equals(exp2);
+            });
+            expect(r).toBeFalsy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {
