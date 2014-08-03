@@ -149,11 +149,12 @@ MEPH.define('MEPH.util.Array', {
                     enumerable: false,
                     writable: true,
                     configurable: true,
-                    value: function (othercollection) {
+                    value: function (othercollection, func) {
                         var collection = this;
                         var result = [];
-                        for (var i = collection.length; i--;/**/) {
-                            if (othercollection.count(function (x) { return x == collection[i]; }) == 0) {
+                        func = func || function (x, y) { return x === y; };
+                        for (var i = collection.length; i--;/**/) {//function (x) { return x == collection[i]; }
+                            if (othercollection.count(func.bind(window, collection[i])) == 0) {
                                 result.push(collection[i]);
                             }
                         }

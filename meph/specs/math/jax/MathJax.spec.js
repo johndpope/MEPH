@@ -49,4 +49,22 @@
             done();
         });
     });
+
+    it('MathJax can load \\frac{f(x)}{y}', function (done) {
+        var dom = document.createElement('div');
+        document.body.appendChild(dom);
+        MEPH.requires('MEPH.math.jax.MathJax').then(function () {
+            return MEPHJax.ready().then(function () {
+                return MEPHJax.load('\\frac{f(x)}{y}', dom)
+                    .then(function (success) {
+                        expect(success).toBeTruthy();
+                    });
+            });
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+    
 });

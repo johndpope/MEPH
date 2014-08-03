@@ -129,6 +129,44 @@
         });
     });
 
+    it('represents an substitute with multiplication parts, if two variables are the same', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.multiplication(Expression.variable('f(x)'),
+                Expression.variable('x'),
+                Expression.variable('x'),
+                Expression.variable('b'),
+                Expression.variable('a'),
+                Expression.variable('y'));
+            var latexp = 'f(x)xxbay';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('represents an substitute with multiplication parts, if two variables are the same', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.multiplication(
+                Expression.variable('x'),
+                Expression.variable('b'),
+                Expression.variable('a'),
+                Expression.variable('y'));
+            var latexp = 'xbay';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
     it('requires parenthesis ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
@@ -166,6 +204,201 @@
             var latexp = '\\frac{f(x)}{y}';
 
             expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression fraction continuous', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.fraction(Expression.variable('f(x)'),
+                Expression.variable('f(x)'),
+                Expression.variable('f(x)'),
+                Expression.variable('f(x)'),
+                Expression.variable('y'));
+            var latexp = '\\begin{equation}' +
+                        ' \\cfrac{f(x)}{' +
+                        ' \\cfrac{f(x)}{' +
+                        ' \\cfrac{f(x)}{' +
+                        ' \\cfrac{f(x)}{y}}}}' +
+                        ' \\end{equation}';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression cos', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.cos(Expression.theta());
+            var latexp = '\\cos (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression sin', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.sin(Expression.theta());
+            var latexp = '\\sin (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression tan', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.tan(Expression.theta());
+            var latexp = '\\tan (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('expression csc', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.csc(Expression.theta());
+            var latexp = '\\csc (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression sec', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.sec(Expression.theta());
+            var latexp = '\\sec (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression cot', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.cot(Expression.theta());
+            var latexp = '\\cot (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression sin^2', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.sin(Expression.theta(), 2);
+            var latexp = '\\sin^2 (\\theta)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression mod', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.mod(Expression.theta(), Expression.variable('f'));
+            var latexp = '\\theta \\bmod f';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+
+    it('expression limit', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.limit(Expression.variable('f(x)'), Expression.variable('a'), Expression.variable('b'));
+            var latexp = '\\lim_{a \\to b} f(x)';
+
+            expect(latexp === expression.latex()).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression is the same form as', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.sec(Expression.variable('a'));
+            var exp2 = Expression.sec(Expression.variable('b'));
+
+            expect(expression.equals(exp2)).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('expression is equal to sin2 θ + cos2 θ === sin2 f(x) + cos2 f(x)  ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.addition(Expression.sin('theta', 2), Expression.cos('theta', 2));
+            var exp2 = Expression.addition(Expression.sin(Expression.variable('y'), 2), Expression.cos(Expression.variable('x'), 2));
+            
+            expect(expression.equals(exp2)).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('expression is equal to sin2 θ + cos2 θ + cos2 θ !== sin2 f(x) + cos2 f(x)  ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.addition(Expression.sin('theta', 2), Expression.cos('theta', 2), Expression.cos('theta', 2));
+            var exp2 = Expression.addition(Expression.sin(Expression.variable('y'), 2), Expression.cos(Expression.variable('x'), 2));
+
+            expect(expression.equals(exp2)).toBeFalsy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {
