@@ -461,7 +461,7 @@
     });
 
 
-    it('can detect  Integration(ax)dx = ax + c ', function (done) {
+    it('can detect Integration(ax)dx = ax + c ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(Expression.multiplication(
@@ -480,6 +480,31 @@
                 return x.equals(exp2);
             });
             expect(r).toBeFalsy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    xit('can detect Integration(af(x)) dx = a integrate(f(x))', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(Expression.multiplication(Expression.variable('a'),
+                Expression.func('f', 'x')), 'x');
+
+            var results = Expression.getMatch(expression);
+            var exp2 = Expression.multiplication(
+                            Expression.variable('a'),
+                            Expression.integral(
+                                Expression.func('f', 'x'),
+                                'x'
+                            )
+                       );
+            var r = results.some(function (x) {
+                return x.equals(exp2);
+            });
+            expect(r).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {

@@ -23,7 +23,8 @@
             subtraction: 'subtraction',
             plusminus: 'plusminus',
             multiplication: 'multiplication',
-            division: 'division'
+            division: 'division',
+            anything: 'anything'
         },
         'function': {
             input: 'input',
@@ -39,6 +40,14 @@
         },
         getMatch: function (expression) {
             return ExpressionMatch.getMatch(expression);
+        },
+        integrate: function (expression) {
+            return ExpressionMatch.integrate(expression);
+        },
+        anything: function () {
+            var expression = new Expression();
+            expression.setExp(Expression.type.anything);
+            return expression;
         },
         /**
          * When printing an expression, sub expressions of certain types should be wrapped in parenthesis,
