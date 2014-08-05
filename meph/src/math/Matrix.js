@@ -1,4 +1,10 @@
-﻿MEPH.define('MEPH.math.Matrix', {
+﻿/**
+ * @class MEPH.math.Matrix
+ * In mathematics, a matrix (plural matrices) is a rectangular array[1] of numbers, 
+ * symbols, or expressions, arranged in rows and columns.[2][3] 
+ * http://en.wikipedia.org/wiki/Matrix_(mathematics)
+ */
+MEPH.define('MEPH.math.Matrix', {
     alternateNames: 'Matrix',
     requires: ['MEPH.math.Vector'],
     properties: {

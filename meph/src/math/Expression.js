@@ -1,4 +1,9 @@
-﻿MEPH.define('MEPH.math.Expression', {
+﻿/**
+ * @class MEPH.math.Expression
+ * Describes mathematical expressions.
+ *
+ **/
+MEPH.define('MEPH.math.Expression', {
     alternateNames: 'Expression',
     requires: ['MEPH.math.ExpressionMatch'],
     statics: {

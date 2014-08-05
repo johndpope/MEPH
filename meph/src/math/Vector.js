@@ -1,4 +1,12 @@
-﻿
+﻿/**
+ * @class MEPH.math.Vector
+ *  Euclidean vector, a geometric entity endowed with magnitude and direction as well as 
+ *  a positive-definite inner product; an element of a Euclidean vector space. In physics,
+ *  euclidean vectors are used to represent physical quantities that have both magnitude and
+ *  direction, such as force, in contrast to scalar quantities, which have no direction.
+ *  http://en.wikipedia.org/wiki/Vector_(mathematics_and_physics)
+ *
+ */
 MEPH.define('MEPH.math.Vector', {
     alternateNames: 'Vector',
     statics: {

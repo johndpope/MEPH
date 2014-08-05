@@ -1,4 +1,8 @@
-﻿MEPH.define('MEPH.math.jax.MathJax', {
+﻿/**
+ * @class MEPH.math.jax.MathJax
+ * A wrapper around MathJax, http://www.mathjax.org/
+ **/
+MEPH.define('MEPH.math.jax.MathJax', {
     statics: {
         ready: function () {
             MEPHJax.$promise = MEPHJax.$promise || Promise.resolve();

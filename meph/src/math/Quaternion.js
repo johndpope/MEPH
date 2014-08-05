@@ -1,4 +1,19 @@
-﻿MEPH.define('MEPH.math.Quaternion', {
+﻿/**
+ * @class MEPH.math.Quaternion
+ *  In mathematics, the quaternions are a number system that extends the complex numbers. 
+ * They were first described by Irish mathematician William Rowan Hamilton in 1843[1][2]
+ * and applied to mechanics in three-dimensional space. A feature of quaternions is that 
+ * multiplication of two quaternions is noncommutative. Hamilton defined a quaternion as 
+ * the quotient of two directed lines in a three-dimensional space[3] or equivalently as 
+ * the quotient of two vectors.[4]
+ * Quaternions find uses in both theoretical and applied mathematics, in particular for 
+ * calculations involving three-dimensional rotations such as in three-dimensional computer 
+ * graphics and computer vision. In practical applications, they can be used alongside 
+ * other methods, such as Euler angles and rotation matrices, or as an alternative to them 
+ * depending on the application.
+ * http://en.wikipedia.org/wiki/Quaternion
+ */
+MEPH.define('MEPH.math.Quaternion', {
     alternateNames: 'Quaternion',
     extend: 'MEPH.math.Vector',
     requires: ['MEPH.math.Hamilton'],

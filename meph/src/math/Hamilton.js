@@ -1,4 +1,9 @@
-﻿MEPH.define('MEPH.math.Hamilton', {
+﻿/**
+ * @class MEPH.math.Hamilton
+ * Describes Hamiltonian result.
+ * see http://en.wikipedia.org/wiki/Quaternions
+ **/
+MEPH.define('MEPH.math.Hamilton', {
     alternateNames: 'Hamilton',
     requires: ['MEPH.math.Vector'],
     properties: {
@@ -9,6 +14,10 @@
         me.v1 = v1;
         me.v2 = v2;
     },
+    /**
+     * Performs a hamiltonian multiplication of two vectors.
+     * @return {MEPH.math.Vector}
+     */
     multiplication: function () {
         var me = this,
             v1 = me.v1,
