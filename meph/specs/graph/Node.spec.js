@@ -90,6 +90,15 @@
         jasmine.addMatchers(MEPH.customMatchers);
     });
 
+    afterEach(function () {
+
+        var canvases = MEPHArray.convert(document.querySelectorAll('canvas'));
+        canvases.foreach(function (x) {
+            if (x && x.parentNode)
+                return x.parentNode.removeChild(x);
+        })
+    });
+
     it("can create a node", function (done) {
         //Arrange
 

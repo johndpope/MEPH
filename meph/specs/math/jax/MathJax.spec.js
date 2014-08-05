@@ -53,9 +53,9 @@
     it('MathJax can load \\frac{f(x)}{y}', function (done) {
         var dom = document.createElement('div');
         document.body.appendChild(dom);
-        MEPH.requires('MEPH.math.jax.MathJax').then(function () {
+        MEPH.requires('MEPH.math.jax.MathJax', 'MEPH.math.Expression').then(function () {
             return MEPHJax.ready().then(function () {
-                return MEPHJax.load('\\frac{f(x)}{y}', dom)
+                return MEPHJax.load(Expression.Rules.PowerIntegrate().latex(), dom)
                     .then(function (success) {
                         expect(success).toBeTruthy();
                     });

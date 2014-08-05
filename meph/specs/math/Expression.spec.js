@@ -187,7 +187,7 @@
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
             var expression = Expression.power(Expression.variable('f(x)'), Expression.variable('y'));
-            var latexp = 'f(x)^y';
+            var latexp = 'f(x)^{y}';
 
             expect(latexp === expression.latex()).toBeTruthy();
         }).catch(function () {
@@ -487,24 +487,229 @@
         });
     });
 
-    xit('can detect Integration(af(x)) dx = a integrate(f(x))', function (done) {
+    it('match rule Integration(a*f(x)) dx = a integrate(f(x))', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(Expression.multiplication(Expression.variable('a'),
                 Expression.func('f', 'x')), 'x');
 
-            var results = Expression.getMatch(expression);
-            var exp2 = Expression.multiplication(
-                            Expression.variable('a'),
-                            Expression.integral(
-                                Expression.func('f', 'x'),
-                                'x'
-                            )
-                       );
-            var r = results.some(function (x) {
-                return x.equals(exp2);
-            });
-            expect(r).toBeTruthy();
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('match rule Integration(a*f(x)) dx !== Integration(a + f(x)) dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(Expression.addition(Expression.variable('a'),
+                Expression.func('f', 'x')), 'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+
+            expect(!rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match rule Integration(a*f(x)) dx === Integration(a (g(x) + f(x)) dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                                Expression.multiplication(
+                                    Expression.variable('a'),
+                                    Expression.addition(
+                                        Expression.func('g', 'x'),
+                                        Expression.func('f', 'x')
+                                    )),
+                            'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match rule Integration(a*f(x)) dx === Integration(a * (g(x) + f(x)) + h(x)) dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                                Expression.addition(
+                                Expression.multiplication(
+                                    Expression.variable('a'),
+                                    Expression.addition(
+                                        Expression.func('g', 'x'),
+                                        Expression.func('f', 'x')
+                                    )
+                                ),
+                                Expression.func('h', 'x')),
+                            'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+
+            expect(!rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match rule Integration(a) dx === Integration(a) dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(Expression.variable('a'), 'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConst());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match rule Integration(a) dx === Integration(a) dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(Expression.func('a', 'x'), 'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConst());
+
+            expect(!rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('match rule ax + c', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.addition(Expression.multiplication(Expression.variable('#B'), Expression.variable('x')), Expression.variable('#C'));
+
+            var rule = Expression.matchRule(expression, Expression.Rules.AxPlusC());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('match rule  a int(f(x))dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.multiplication(Expression.variable('#B'), Expression.integral(Expression.func('f', 'x'), 'x'));
+
+            var rule = Expression.matchRule(expression, Expression.Rules.MultiplyIntegralofFx());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+
+    });
+    it('match rule  a int(f(x))dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.multiplication(
+                                Expression.variable('#B'),
+                                Expression.integral(
+                                    Expression.multiplication(
+                                        Expression.func('g', 'x'),
+                                        Expression.func('f', 'x'))
+                                    , 'x')
+                                );
+
+            var rule = Expression.matchRule(expression, Expression.Rules.MultiplyIntegralofFx());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match power rule  int(x^n)dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                Expression.power(
+                    Expression.variable('x'),
+                    Expression.variable('n'))
+                , 'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.Power());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match power rule  1/(n+1)(x^(n+1))', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.multiplication(
+                                Expression.fraction(
+                                    Expression.variable(1),
+                                    Expression.addition(
+                                        Expression.variable('n'),
+                                        Expression.variable(1)
+                                    )
+                                ),
+                Expression.power(
+                    Expression.variable('x'),
+                    Expression.addition(Expression.variable('n'), Expression.variable(1))));
+
+            var rule = Expression.matchRule(expression, Expression.Rules.PowerIntegrate());
+
+            expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('match int(u +/- v +/- w)', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                            Expression.addition(Expression.func('f', 'x'),
+                                Expression.func('g', 'x'),
+                                Expression.func('h', 'x')), 'x');
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition());
+
+            expect(rule).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {

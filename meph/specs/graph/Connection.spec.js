@@ -88,6 +88,15 @@
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
     });
+    afterEach(function () {
+
+        var canvases = MEPHArray.convert(document.querySelectorAll('canvas'));
+        canvases.foreach(function (x) {
+            if (x && x.parentNode)
+                return x.parentNode.removeChild(x);
+        })
+    });
+
 
     it("can create a connection", function (done) {
         //Arrange

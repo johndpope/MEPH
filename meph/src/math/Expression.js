@@ -38,6 +38,44 @@
             power: 'power',
             respectTo: 'respectTo'
         },
+        Rules: {
+            IntegralConstMultiply: function () {
+                return Expression.integral(Expression.multiplication(Expression.variable('#C'), Expression.anything()), 'x');
+            },
+            MultiplyIntegralofFx: function () {
+                return Expression.multiplication(Expression.variable('#C'), Expression.integral(Expression.anything(), 'x'));
+            },
+            IntegralConst: function () {
+                return Expression.integral(Expression.variable('#C'), 'x');
+            },
+            AxPlusC: function () {
+                return Expression.addition(Expression.multiplication(Expression.variable('#C'), Expression.variable('x')), Expression.variable('#C'));
+            },
+            Power: function () {
+                return Expression.integral(Expression.power(Expression.variable('x'), Expression.variable('n')), 'x');
+            },
+            PowerIntegrate: function () {
+                return Expression.multiplication(
+                                Expression.fraction(
+                                    Expression.variable(1),
+                                    Expression.addition(
+                                        Expression.variable('n'),
+                                        Expression.variable(1)
+                                    )
+                                ),
+                Expression.power(
+                    Expression.variable('x'),
+                    Expression.addition(Expression.variable('n'), Expression.variable(1))));
+            },
+            IntegrationAddition: function () {
+                var addition = Expression.addition(Expression.func('f', 'x'));
+                addition.repeat = true;
+                return Expression.integral(addition, 'x')
+            }
+        },
+        matchRule: function (expression, rule) {
+            return expression.match(rule);
+        },
         getMatch: function (expression) {
             return ExpressionMatch.getMatch(expression);
         },
@@ -362,7 +400,7 @@
                 else { power = '' }
                 return '\\' + me.type + power + ' (' + me.partLatex(Expression.function.input) + ')';
             case Expression.type.power:
-                return me.partLatex(Expression.function.base) + '^' + me.partLatex(Expression.function.power);
+                return me.partLatex(Expression.function.base) + '^{' + me.partLatex(Expression.function.power) + '}';
                 break;
         }
     },
@@ -397,6 +435,68 @@
         me.parts = [];
     },
     /**
+     * Matches an expression to a rule.
+     * @param {U4M.math.Expression} rule
+     * @return {Boolean}
+     **/
+    match: function (rule) {
+        var me = this;
+        if (me.type === rule.type) {
+            var meParts = me.getParts().select();
+            var ruleParts = rule.getParts().select();
+
+            var matchParts = function (ruleParts, x) {
+                var first = ruleParts.first(function (y) {
+                    if (y.type !== x.type) {
+                        return false;
+                    }
+                    if (y.val && x.val && y.val.equals && x.val.equals) {
+                        return x.val.match(y.val);
+                    }
+                    else if (y.val && !x.val || !y.val && x.val) {
+                        return false;
+                    }
+                    else {
+                        return true
+                    }
+                });
+                if (first) {
+                    ruleParts.removeFirstWhere(function (t) { return t === first; });
+                }
+                else return false;
+            };
+            if (rule.repeat) {
+                var repeatedparts = [].interpolate(0, me.getParts().length, function () {
+                    return rule.parts.first();
+                });
+                meParts.foreach(matchParts.bind(me, repeatedparts));
+                if (repeatedparts.length === 0) return true;
+                return false;
+            }
+            else if (rule.part(Expression.type.anything)) {
+
+                ruleParts = rule.getParts().select().where(function (x) {
+                    return x.type === Expression.type.anything;
+                });
+
+                meParts.foreach(matchParts.bind(me, ruleParts));
+                if (ruleParts.length === 0) return true;
+                return false;
+            }
+            else {
+                if (meParts.length !== ruleParts.length) {
+                    return false;
+                }
+                meParts.foreach(matchParts.bind(me, ruleParts));
+                if (ruleParts.length > 0) return false;
+                return true;
+            }
+        }
+        else if (rule.type === Expression.type.anything) {
+            return true;
+        }
+    },
+    /**
      * Returns true if the equation are equal
      * @param {Object} options
      * @param {Boolean} options.formEquals
@@ -406,7 +506,7 @@
         options = options || { formEquals: true };
 
         if (me.type === expression.type) {
-            var meparts = me.getParts().select(function (x) { return x; });
+            var meparts = me.getParts().select();
             var expparts = expression.getParts().select(function (x) { return x; });
             if (meparts.length !== expparts.length) return false;
             meparts.foreach(function (x) {

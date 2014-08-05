@@ -213,6 +213,21 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.removeFirstWhere) {
+                Object.defineProperty(array, 'removeFirstWhere', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = collection.where(func);
+                        for (var i = 0 ; i < Math.min(result.length, 1) ; i++) {
+                            collection.splice(collection.indexOf(result[i]), 1);
+                        }
+                        return result;
+                    }
+                });
+            }
             if (!array.remove) {
                 Object.defineProperty(array, 'remove', {
                     enumerable: false,
