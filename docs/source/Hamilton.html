@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-math-Hamilton'>/**
+</span> * @class MEPH.math.Hamilton
+ * Describes Hamiltonian result.
+ * see http://en.wikipedia.org/wiki/Quaternions
+ **/
+MEPH.define(&#39;MEPH.math.Hamilton&#39;, {
+    alternateNames: &#39;Hamilton&#39;,
+    requires: [&#39;MEPH.math.Vector&#39;],
+    properties: {
+        keys: &#39;hijk&#39;
+    },
+    initialize: function (v1, v2) {
+        var me = this;
+        me.v1 = v1;
+        me.v2 = v2;
+    },
+<span id='MEPH-math-Hamilton-method-multiplication'>    /**
+</span>     * Performs a hamiltonian multiplication of two vectors.
+     * @return {MEPH.math.Vector}
+     */
+    multiplication: function () {
+        var me = this,
+            v1 = me.v1,
+            v2 = me.v2;
+
+        var h = v1.a * v2.a - v1.b * v2.b - v1.c * v2.c - v1.d * v2.d;
+        var i = v1.a * v2.b + v1.b * v2.a + v1.c * v2.d - v1.d * v2.c;
+        var j = v1.a * v2.c - v1.b * v2.d + v1.c * v2.a + v1.d * v2.b;
+        var k = v1.a * v2.d + v1.b * v2.c - v1.c * v2.b + v1.d * v2.a;
+
+        return new Vector([h, i, j, k]);
+    },
+    addition: function () {
+        var me = this,
+            v1 = me.v1,
+            v2 = me.v2;
+
+        return new Vector([v1.a + v2.a, v1.b + v2.b, v1.c + v2.c, v1.d + v2.d]);
+    }
+});</pre>
+</body>
+</html>

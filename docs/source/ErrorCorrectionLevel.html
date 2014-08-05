@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+  Ported to JavaScript by Lazar Laszlo 2011 
+  
+  lazarsoft@gmail.com, www.lazarsoft.info
+  
+*/
+
+/*
+*
+* Copyright 2007 ZXing authors
+*
+* Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+
+MEPH.define(&#39;MEPH.qrcode.ErrorCorrectionLevel&#39;, {
+    initialize: function (ordinal, bits, name) {
+        this.ordinal_Renamed_Field = ordinal;
+        this.bits = bits;
+        this.name = name;
+        this.__defineGetter__(&quot;Bits&quot;, function () {
+            return this.bits;
+        });
+        this.__defineGetter__(&quot;Name&quot;, function () {
+            return this.name;
+        });
+        this.ordinal = function () {
+            return this.ordinal_Renamed_Field;
+        }
+    },
+    statics: {
+        forBits: function (bits) {
+            var FOR_BITS = MEPH.qrcode.ErrorCorrectionLevel.FOR_BITS;
+            if (bits &lt; 0 || bits &gt;= FOR_BITS.length) {
+                throw &quot;ArgumentException&quot;;
+            }
+            return FOR_BITS[bits];
+        },
+        FOR_BITS: null
+    }
+}).then(function () {
+    var ErrorCorrectionLevel = MEPH.qrcode.ErrorCorrectionLevel;
+    var L = new ErrorCorrectionLevel(0, 0x01, &quot;L&quot;);
+    var M = new ErrorCorrectionLevel(1, 0x00, &quot;M&quot;);
+    var Q = new ErrorCorrectionLevel(2, 0x03, &quot;Q&quot;);
+    var H = new ErrorCorrectionLevel(3, 0x02, &quot;H&quot;);
+    var FOR_BITS = new Array(M, L, H, Q);
+    MEPH.qrcode.ErrorCorrectionLevel.FOR_BITS = FOR_BITS;
+});</pre>
+</body>
+</html>

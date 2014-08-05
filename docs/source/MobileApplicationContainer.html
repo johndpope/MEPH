@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-mobile-application-container-MobileApplicationContainer'>/**
+</span>* @class MEPH.mobile.application.container.MobileApplicationContainer
+* Mobile application container.
+*/
+MEPH.define(&#39;MEPH.mobile.application.container.MobileApplicationContainer&#39;, {
+    extend: &#39;MEPH.control.Control&#39;,
+    requires: [&#39;MEPH.mobile.application.body.MobileApplicationBody&#39;,
+                &#39;MEPH.mobile.application.header.MobileApplicationHeader&#39;,
+                &#39;MEPH.mobile.application.footer.MobileApplicationFooter&#39;],
+    templates: true,
+    alias: &#39;mobileapplicationcontainer&#39;,
+    statics: {
+        events: {
+<span id='MEPH-mobile-application-container-MobileApplicationContainer-property-application_resize'>            /**
+</span>             * @property application_resize
+             **/
+            resize: &#39;application_resize&#39;
+        }
+    },
+    properties: {
+        $resizeBuffer: 50,
+        $resizeReference: null
+    },
+    initialize: function () {
+        var me = this;
+
+        me.callParent.apply(me, arguments);
+        me.don(&#39;resize&#39;, me.$window, function () {
+            if (me.$resizeReference) {
+                clearTimeout(me.$resizeReference);
+            }
+            //    me.$resizeReference = setTimeout(me.resizeApplication.bind(me), me.$resizeBuffer);
+            me.resizeApplication();
+        });
+        me.on(&#39;load&#39;, me.resizeApplication.bind(me));
+    },
+    getDom: function () {
+        var me = this, dom;
+        dom = MEPH.Array(me.getDomTemplate()).first();
+        return dom;
+    },
+    resizeApplication: function () {
+        var me = this,
+            size,
+            Dom = MEPH.util.Dom,
+            dom;
+
+        dom = me.getDom();
+        if (dom) {
+            size = Dom.getWindowSize();
+            Dom.setSize(dom, size);
+            me.fire(MEPH.mobile.application.container.MobileApplicationContainer.events.resize, {
+                container: me
+            });
+        }
+    },
+    destroy: function () {
+        var me = this;
+        if (!me.isDestroyed()) {
+            me.dun();
+            me.callParent.apply(me, arguments);
+        }
+    }
+});</pre>
+</body>
+</html>

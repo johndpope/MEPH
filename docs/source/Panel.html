@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">MEPH.define(&#39;MEPH.panel.Panel&#39;, {
+    alias: &#39;panel&#39;,
+    templates: true,
+    requires: [&#39;MEPH.util.Observable&#39;],
+    extend: &#39;MEPH.control.Control&#39;,
+    properties: {
+        basePanelHeaderCls: &#39;meph-panel-header&#39;,
+        basePanelFooterCls: &#39;meph-panel-footer&#39;,
+        basePanelBodyCls: &#39;meph-panel-body  meph-grid-layout-flex-height&#39;,
+        basePanelLeftCls: &#39;meph-panel-body-left&#39;,
+        cls: &#39;&#39;,
+        basePanelRightCls: &#39;meph-panel-body-right&#39;,
+        basePanelCls: &#39;meph-panel&#39;,
+        injectControls: {
+            location: {
+                header: &#39;header&#39;,
+                left: &#39;left&#39;,
+                panelbody: &#39;panelbody&#39;,
+                right: &#39;right&#39;,
+                panelfooter: &#39;panelfooter&#39;
+            }
+        }
+    },
+    initialize: function () {
+        var me = this,
+            properties = MEPH.Array([&#39;cls&#39;]);
+
+        me.callParent.apply(me, arguments);
+        me.defineDependentProperties();
+
+        properties.foreach(function (prop) {
+            me.addTransferableAttribute(prop, {
+                object: me,
+                path: prop
+            });
+        });
+
+    },
+    onLoaded: function () {
+        var me = this;
+        me.callParent.apply(me, arguments);
+        me.dependentProperties.foreach(function (x) {
+            me.fire(&#39;altered&#39;, { path: x, references: [] });
+        });
+    },
+    defineDependentProperties: function () {
+        var properties = MEPH.Array([&#39;panelHeaderCls&#39;,
+                    &#39;panelFooterCls&#39;,
+                    &#39;panelBodyCls&#39;,
+                    &#39;panelCls&#39;,
+                    &#39;panelLeftCls&#39;,
+                    &#39;panelRightCls&#39;]),
+            me = this;
+
+        Observable.defineDependentProperty(&#39;panelHeaderCls&#39;, me, [&#39;basePanelHeaderCls&#39;], function () {
+            var result = []
+            if (me.basePanelHeaderCls) {
+                result.push(me.basePanelHeaderCls);
+            }
+            return result.join(&#39; &#39;);
+        });
+
+        Observable.defineDependentProperty(&#39;panelFooterCls&#39;, me, [&#39;basePanelFooterCls&#39;], function () {
+            var result = []
+            if (me.basePanelFooterCls) {
+                result.push(me.basePanelFooterCls);
+            }
+            return result.join(&#39; &#39;);
+        });
+
+        Observable.defineDependentProperty(&#39;panelBodyCls&#39;, me, [&#39;basePanelBodyCls&#39;], function () {
+            var result = [];
+            if (me.basePanelBodyCls) {
+                result.push(me.basePanelBodyCls);
+            }
+            return result.join(&#39; &#39;);
+        });
+
+        Observable.defineDependentProperty(&#39;panelLeftCls&#39;, me, [&#39;basePanelLeftCls&#39;], function () {
+            var result = [];
+            if (me.basePanelLeftCls) {
+                result.push(me.basePanelLeftCls);
+            }
+            return result.join(&#39; &#39;);
+        });
+
+        Observable.defineDependentProperty(&#39;panelRightCls&#39;, me, [&#39;basePanelRightCls&#39;], function () {
+            var result = [];
+            if (me.basePanelRightCls) {
+                result.push(me.basePanelRightCls);
+            }
+            return result.join(&#39; &#39;);
+        });
+
+        Observable.defineDependentProperty(&#39;panelCls&#39;, me, [&#39;basePanelCls&#39;, &#39;cls&#39;], function () {
+            var result = [];
+            
+            if (me.basePanelCls) {
+                result.push(me.basePanelCls);
+            }
+
+            if (me.cls) {
+                result.push(me.cls);
+            }
+
+            return result.join(&#39; &#39;);
+        });
+
+
+
+        me.dependentProperties = me.dependentProperties || [];
+
+        properties.foreach(function (prop) {
+            me.dependentProperties.push(prop);
+        })
+    }
+})</pre>
+</body>
+</html>

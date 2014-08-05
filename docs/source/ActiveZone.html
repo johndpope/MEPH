@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-graph-ActiveZone'>/**
+</span>* @class MEPH.graph.ActiveZone
+*/
+MEPH.define(&#39;MEPH.graph.ActiveZone&#39;, {
+    properties: {
+        raiseZIndex: 12,
+        textPopupTemplate: &#39;&lt;div activezone=&quot;holder&quot;&gt;&lt;input type=&quot;text&quot; activezone=&quot;texttemplate&quot; /&gt;&lt;/div&gt;&#39;
+    },
+    initialize: function () {
+        var me = this;
+        MEPH.Events(me);
+    },
+    statics: {
+        canCreateConnection: function (zone1, zone2) {
+            var result = true;
+            if (zone1.$options &amp;&amp;
+                zone1.$options.option &amp;&amp;
+                zone1.$options.option.canConnect
+                ) {
+                result = result &amp;&amp; zone1.$options.option.canConnect(zone1, zone2);
+            }
+            if (zone2.$options &amp;&amp;
+                zone2.$options.option &amp;&amp;
+                zone2.$options.option.canConnect
+                ) {
+                result = result &amp;&amp; zone2.$options.option.canConnect(zone2, zone1);
+            }
+            return result;
+        },
+        type:
+            {
+                &#39;connector&#39;: &#39;connector&#39;,
+                color: &#39;color&#39;,
+                select: &#39;select&#39;,
+                header: &#39;header&#39;,
+                custom: &#39;custom&#39;,
+                title: &#39;title&#39;
+            }
+    },
+    onTitleZoneClick: function (type, domAndMouseEvnt) {
+        var me = this, template;
+
+        switch (me.$options.option.type) {
+            case &#39;custom&#39;:
+                template = me.$options.option.generator(me, domAndMouseEvnt);
+                break;
+            default:
+                template = me.createTextPopup(domAndMouseEvnt, [&#39;title&#39;, &#39;variable&#39;]);
+                break;
+        }
+        if (template) {
+            template.az.addEventListener(&#39;activezoneblur&#39;, function () {
+                template.az.parentNode.removeChild(template.az);
+                me.getNode().fire(&#39;move&#39;, {});
+            });
+        }
+    },
+    onColorZoneClick: function (type, domAndMouseEvnt) {
+        var me = this, template;
+
+        switch (me.$options.option.type) {
+            case &#39;custom&#39;:
+                template = me.$options.option.generator(me, domAndMouseEvnt);
+                break;
+            default:
+                template = me.createTextPopup(domAndMouseEvnt, &#39;value&#39;);
+                break;
+        }
+        if (template) {
+            template.az.addEventListener(&#39;activezoneblur&#39;, function () {
+                template.az.parentNode.removeChild(template.az);
+                me.getNode().fire(&#39;move&#39;, {});
+            });
+        }
+    },
+    isEnumerable: function () {
+        var me = this;
+        if (me.getOptions() &amp;&amp; me.getOptions().option) {
+            return me.getOptions().option.enumerable
+        }
+        return false;
+    },
+    isMatching: function () {
+        var me = this;
+        if (me.getOptions() &amp;&amp; me.getOptions().option) {
+            return me.getOptions().option.matchingoutput;
+        }
+        return false;
+    },
+    createTextPopup: function (domAndMouseEvnt, prop) {
+        var me = this;
+        var domtext = document.createElement(&#39;div&#39;);
+        var divchild = document.body.appendChild(domtext);
+        divchild.innerHTML = me.textPopupTemplate;
+        if (!Array.isArray(prop)) {
+            prop = [prop];
+        }
+        var az = divchild.querySelector(&#39;[activezone=&quot;holder&quot;]&#39;);
+        az.style.position = &#39;fixed&#39;;
+        az.style.zIndex = 10000;
+        az.style.top = domAndMouseEvnt.evt.clientY + &#39;px&#39;;
+        az.style.left = domAndMouseEvnt.evt.clientX + &#39;px&#39;;
+        var azt = divchild.querySelector(&#39;[activezone=&quot;texttemplate&quot;]&#39;);
+        azt.addEventListener(&#39;change&#39;, function () {
+            me.fire(&#39;change&#39;, {});
+        });
+        azt.addEventListener(&#39;blur&#39;, function () {
+            prop.foreach(function (x) {
+                me.$options.option[x] = azt.value;
+            });
+            me.getDom().setAttribute(&#39;title&#39;, azt.value);
+            azt.dispatchEvent(MEPH.createEvent(&#39;activezoneblur&#39;, { bubbles: true }));
+        });
+        azt.value = me.$options.option[prop.first()];
+        document.body.appendChild(divchild.firstChild);
+        azt.focus();
+        return { az: az, azt: azt };
+    },
+    setGraphViewPort: function (graphviewport) {
+        var me = this;
+        me.$graphviewport = graphviewport;
+        me.$graphviewport.on(&#39;moved&#39;, me.onViewPortChange.bind(me));
+        me.$graphviewport.on(&#39;change&#39;, me.onViewPortChange.bind(me));
+    },
+    getGraphViewPort: function (graphviewport) {
+        var me = this;
+        return me.$graphviewport;
+    },
+    isDraggable: function () {
+        var me = this;
+        return me.$draggable;
+    },
+    setZoneType: function (type) {
+        var me = this;
+        me.$zoneType = type;
+    },
+    getZoneType: function () {
+        var me = this;
+        return me.$zoneType;
+    },
+    isConnector: function () {
+        var me = this;
+        return me.getZoneType() === pgx.ActiveZone.type.connector;
+    },
+    setOptions: function (options) {
+        var me = this;
+        me.$options = options;
+        me.setDomTitle();
+    },
+    getOptions: function () {
+        var me = this;
+        return me.$options;
+    },
+    onViewPortChange: function () {
+        var me = this, pos = me.getGraphViewPort().getPosition();
+        me.setRelativePosition(pos.x, pos.y, pos.z);//setPosition(pos.x, pos.y, pos.z);
+    },
+    onClick: function (e) {
+        var me = this;
+        if (me.$clickable) {
+            me.fire(&#39;click&#39;, { dom: me.getDom(), evt: e });
+        }
+    },
+    onMouseDown: function (e) {
+        var me = this;
+        if (me.$draggable) {
+            me.fire(&#39;activezone_dragstart&#39;, { dom: me.getDom(), evt: e });
+        }
+    },
+    setDom: function (dom) {
+        var me = this;
+        me.$dom = dom;
+        var graphviewport = me.getGraphViewPort();
+        if (graphviewport) {
+            graphviewport.getDock().appendChild(dom);
+        }
+        if (me.$clickable) {
+            Style.cursor(dom, &#39;pointer&#39;);
+        }
+        me.interactivity();
+        Style.position(dom, &#39;absolute&#39;);
+        Style.zIndex(dom, me.raiseZIndex);
+        me.$dom.addEventListener(&#39;mousedown&#39;, me.onMouseDown.bind(me));
+        me.$dom.addEventListener(&#39;click&#39;, me.onClick.bind(me));
+        me.setDomTitle();
+        me.ignoreMouse();
+
+    },
+    ignoreMouse: function (value) {
+        var me = this;
+        if (me.getDom() &amp;&amp; (value || me.$ignoreMouse)) {
+            me.getDom().style.pointerEvents = &#39;none&#39;;
+        }
+
+        else if (value !== undefined) {
+            me.$ignoreMouse = value;
+        }
+    },
+    setDomTitle: function () {
+        var me = this;
+        if (me.getDom() &amp;&amp; me.$options &amp;&amp; me.$options.option &amp;&amp; me.$options.option) {
+            switch (me.getZoneType()) {
+                case ActiveZone.type.color:
+                    me.$dom.setAttribute(&#39;title&#39;, me.$options.option.value);
+                    break;
+                case ActiveZone.type.title:
+                    me.$dom.setAttribute(&#39;title&#39;, me.$options.option.title);
+                    break;
+            }
+        }
+    },
+    setNode: function (node) {
+        var me = this;
+        me.$node = node;
+        if (node &amp;&amp; node.addZone)
+            node.addZone(me);
+
+    },
+    getNode: function () {
+        var me = this;
+        return me.$node;
+    },
+    getId: function () {
+        var me = this;
+        return me.id;
+    },
+    getDom: function () {
+        var me = this;
+        return me.$dom;
+    },
+    destroy: function () {
+        var me = this;
+        if (me.getDom() &amp;&amp; me.getDom().parentNode) {
+            me.getDom().parentNode.removeChild(me.getDom());
+        }
+        me.fire(&#39;destroy&#39;, me);
+    },
+    isOutput: function () {
+        var me = this;
+        return me.getNode().isOutput(me.getOptions().option);
+    },
+
+    clickable: function (notclickable) {
+        var me = this;
+        me.$clickable = notclickable !== undefined ? notclickable : true;
+        var dom = me.getDom();
+        if (dom) {
+            Style.cursor(dom, &#39;pointer&#39;);
+        }
+        me.setDomTitle();
+    },
+    draggable: function (notdraggable) {
+        var me = this;
+        me.$draggable = notdraggable !== undefined ? notdraggable : true;
+        me.interactivity();
+    },
+    interactivity: function () {
+        var me = this;
+        if (!me.$draggable &amp;&amp; me.getDom()) {
+            //me.getDom().style.pointerEvents = &#39;none&#39;;
+        }
+    },
+    setRelativePosition: function (x, y, z) {
+        var me = this,
+            dom = me.getDom();
+        me.$relativeposition = new J3DIVector3(x, y, z);
+    },
+    setPosition: function (x, y, z, override) {
+        var me = this,
+            _x = 0,
+            _y = 0,
+            dom = me.getDom();
+        me.$position = new J3DIVector3(x, y, z);
+        if (me.$relativeposition) {
+            //_x += me.$relativeposition[0];
+            //_y += me.$relativeposition[1];
+        }
+        if (me.$$$timeout) {
+            clearTimeout(me.$$$timeout);
+        }
+        if (dom &amp;&amp; (!me.stoppedMoveAbility || override)) {
+            // me.$$$timeout = setTimeout(function () {
+            Style.translate(dom, (x + _x), (y + _y));
+            //}, 100);
+        }
+    },
+    getPosition: function () {
+        var me = this;
+        if (me.$position) {
+            return {
+                x: me.$position[0],
+                y: me.$position[1],
+                z: me.$position[2]
+            }
+        }
+        return null;
+    }
+});</pre>
+</body>
+</html>

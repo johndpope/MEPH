@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-field-FormField'>/**
+</span> * @class MEPH.field.FormField
+ * @extends MEPH.control.Control
+ * Standard form for a input field.
+ **/
+MEPH.define(&#39;MEPH.field.FormField&#39;, {
+    alias: &#39;formfield&#39;,
+    templates: true,
+    extend: &#39;MEPH.control.Control&#39;,
+    requires: [&#39;MEPH.util.Observable&#39;],
+    properties: {
+
+<span id='MEPH-field-FormField-property-labelText'>        /**
+</span>         * @property {String} labelText
+         * Label text.
+         **/
+        labelText: null,
+<span id='MEPH-field-FormField-property-labelClsBase'>        /**
+</span>         * @property {String/Array} labelClsBase
+         * Base Css classes to apply to the label field.
+         */
+        labelClsBase: &#39;meph-label&#39;,
+<span id='MEPH-field-FormField-property-cls'>        /**
+</span>         * @property {String} cls
+         * CSS class to apply for this node.
+         */
+        cls: null,
+<span id='MEPH-field-FormField-property-baseComponentCls'>        /**
+</span>         * @property {String} baseComponentCls
+         * CSS class to apply for this node.
+         */
+        baseComponentCls: null,
+<span id='MEPH-field-FormField-property-labelClsComponent'>        /**
+</span>         * @property {String/Array} labelClsComponent
+         * Base Css classes to apply to the label field.
+         */
+        labelClsComponent: null,
+<span id='MEPH-field-FormField-property-inputCls'>        /**
+</span>         * @property {String/Array} inputCls
+         * Css classes to apply to the input field.
+         */
+        inputCls: null,
+<span id='MEPH-field-FormField-property-value'>        /**
+</span>         * Value of the input field
+         */
+        value: null,
+<span id='MEPH-field-FormField-property-validationError'>        /**
+</span>         * Validation error associated with the field.
+         */
+        validationError: null,
+<span id='MEPH-field-FormField-property-type'>        /**
+</span>         * @property {String} type
+         * Type of field, like text, number, phonenumber, email, etc.
+         */
+        type: null,
+<span id='MEPH-field-FormField-property-descriptionText'>        /**
+</span>         * @property {String} descriptionText
+         * Description text applied to the span following the text.
+         */
+        descriptionText: null,
+<span id='MEPH-field-FormField-property-descriptionCls'>        /**
+</span>         * @property {String/Array} descriptionCls
+         * Css classes applied to the description text.
+         */
+        descriptionCls: null,
+<span id='MEPH-field-FormField-property-defaultValidationErrorCls'>        /**
+</span>         * @property {String/Array} defaultValidationErrorCls
+         * Defatul css classes applied for validation.
+         */
+        defaultValidationErrorCls: &#39;meph-formfield-validation-error&#39;
+    },
+    initialize: function () {
+        var me = this;
+        me.callParent.apply(me, arguments);
+        me.addAutoBindProperty(&#39;value&#39;, &#39;validationError&#39;);
+        me.addTransferables();
+        me.defineDependentProperties();
+    },
+<span id='MEPH-field-FormField-method-getAutoBindPropertyPath'>    /**
+</span>     * Gets the auto bind property paths.
+     * @param {String} path
+     * @param {String} property
+     * @returns {String}
+     */
+    getAutoBindPropertyPath: function (property, autoProperty) {
+        var me = this, autoPropSetup, value, pathArray,
+            autoProperties = me.getAutoBindProperties();
+        autoPropSetup = autoProperties.first(function (x) { return property === x.property &amp;&amp; autoProperty === x.autoProperty; });
+
+        if (autoPropSetup) {
+            value = me.getInstanceTemplate().getAttribute(autoPropSetup.property);
+            if (value) {
+                pathArray = value.split(&#39;.&#39;);
+                if (pathArray.length &gt; 1) {
+                    pathArray.splice(pathArray.length - 1, 0, MEPH.isValidatablePropertyKey);
+                    return pathArray.join(MEPH.pathDelimiter);
+                }
+            }
+        }
+        return me.callParent.apply(path);
+    },
+
+<span id='MEPH-field-FormField-method-addTransferables'>    /**
+</span>     * @private
+     * Adds transferable properties.
+     **/
+
+    addTransferables: function () {
+        var me = this, properties = MEPH.Array([&#39;inputCls&#39;,
+                                                &#39;descriptionText&#39;,
+                                                &#39;cls&#39;,
+                                                &#39;labelText&#39;,
+                                                &#39;descriptionCls&#39;,
+                                                &#39;baseComponentCls&#39;,
+                                                &#39;componentCls&#39;,
+                                                &#39;labelClsBase&#39;,
+                                                &#39;labelClsComponent&#39;]);
+
+        properties.foreach(function (prop) {
+            me.addTransferableAttribute(prop, {
+                object: me,
+                path: prop
+            });
+        });
+
+    },
+    defineDependentProperties: function () {
+        var me = this;
+        me.combineClsIntoDepenendProperty(&#39;formFieldCls&#39;, [&#39;cls&#39;, &#39;baseComponentCls&#39;, &#39;componentCls&#39;]);
+        me.combineClsIntoDepenendProperty(&#39;labelCls&#39;, [&#39;labelClsBase&#39;, &#39;labelClsComponent&#39;]);
+        Observable.defineDependentProperty(&#39;validationCls&#39;, me, [&#39;validationError&#39;], me.validationErrorChange.bind(me));
+    },
+<span id='MEPH-field-FormField-method-validationErrorChange'>    /**
+</span>     * Validation changes the validationCls is recalulated.
+     **/
+    validationErrorChange: function () {
+        var me = this;
+        if (me.validationError) {
+            return me.defaultValidationErrorCls;
+        }
+        return &#39;&#39;;
+    },
+<span id='MEPH-field-FormField-method-combineClsIntoDepenendProperty'>    /**
+</span>     * Combines the clsProperties into the new property.
+     * @param {String} property
+     * @param {Array} clsProperties
+     */
+    combineClsIntoDepenendProperty: function (property, clsProperties) {
+        var me = this;
+        Observable.defineDependentProperty(property, me, clsProperties, function (clsProperties) {
+            var result = [];
+            MEPH.Array(clsProperties).foreach(function (prop) {
+                if (me[prop]) {
+                    result.push(me[prop]);
+                }
+            })
+            return result.join(&#39; &#39;);
+        }.bind(me, clsProperties));
+    }
+});</pre>
+</body>
+</html>

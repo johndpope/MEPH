@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*
+  Ported to JavaScript by Lazar Laszlo 2011 
+  
+  lazarsoft@gmail.com, www.lazarsoft.info
+  
+*/
+
+/*
+*
+* Copyright 2007 ZXing authors
+*
+* Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+
+
+MEPH.define(&#39;MEPH.qrcode.GF256Poly&#39;, {
+    alternateNames: [&#39;GF256Poly&#39;],
+
+    getCoefficient: function (degree) {
+        var me = this;
+        return me.coefficients[me.coefficients.length - 1 - degree];
+    },
+    evaluateAt: function (a) {
+        var me = this,
+            GF256 = MEPH.qrcode.GF256;
+        if (a == 0) {
+            // Just return the x^0 coefficient
+            return me.getCoefficient(0);
+        }
+        var size = me.coefficients.length;
+        if (a == 1) {
+            // Just the sum of the coefficients
+            var result = 0;
+            for (var i = 0; i &lt; size; i++) {
+                result = GF256.addOrSubtract(result, me.coefficients[i]);
+            }
+            return result;
+        }
+        var result2 = me.coefficients[0];
+        for (var i = 1; i &lt; size; i++) {
+            result2 = GF256.addOrSubtract(me.field.multiply(a, result2), me.coefficients[i]);
+        }
+        return result2;
+    },
+    addOrSubtract: function (other) {
+        var me = this,
+           GF256 = MEPH.qrcode.GF256;
+        if (me.field != other.field) {
+            throw &quot;GF256Polys do not have same GF256 field&quot;;
+        }
+        if (me.Zero) {
+            return other;
+        }
+        if (other.Zero) {
+            return this;
+        }
+
+        var smallerCoefficients = me.coefficients;
+        var largerCoefficients = other.coefficients;
+        if (smallerCoefficients.length &gt; largerCoefficients.length) {
+            var temp = smallerCoefficients;
+            smallerCoefficients = largerCoefficients;
+            largerCoefficients = temp;
+        }
+        var sumDiff = new Array(largerCoefficients.length);
+        var lengthDiff = largerCoefficients.length - smallerCoefficients.length;
+        // Copy high-order terms only found in higher-degree polynomial&#39;s coefficients
+        //Array.Copy(largerCoefficients, 0, sumDiff, 0, lengthDiff);
+        for (var ci = 0; ci &lt; lengthDiff; ci++) sumDiff[ci] = largerCoefficients[ci];
+
+        for (var i = lengthDiff; i &lt; largerCoefficients.length; i++) {
+            sumDiff[i] = GF256.addOrSubtract(smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
+        }
+
+        return new GF256Poly(me.field, sumDiff);
+    },
+    multiply1: function (other) {
+        var me = this,
+           GF256 = MEPH.qrcode.GF256;
+        if (me.field != other.field) {
+            throw &quot;GF256Polys do not have same GF256 field&quot;;
+        }
+        if (me.Zero || other.Zero) {
+            return me.field.Zero;
+        }
+        var aCoefficients = me.coefficients;
+        var aLength = aCoefficients.length;
+        var bCoefficients = other.coefficients;
+        var bLength = bCoefficients.length;
+        var product = new Array(aLength + bLength - 1);
+        for (var i = 0; i &lt; aLength; i++) {
+            var aCoeff = aCoefficients[i];
+            for (var j = 0; j &lt; bLength; j++) {
+                product[i + j] = GF256.addOrSubtract(product[i + j], me.field.multiply(aCoeff, bCoefficients[j]));
+            }
+        }
+        return new GF256Poly(me.field, product);
+    },
+    multiply2: function (scalar) {
+        var me = this,
+           GF256 = MEPH.qrcode.GF256;
+        if (scalar == 0) {
+            return me.field.Zero;
+        }
+        if (scalar == 1) {
+            return this;
+        }
+        var size = me.coefficients.length;
+        var product = new Array(size);
+        for (var i = 0; i &lt; size; i++) {
+            product[i] = me.field.multiply(me.coefficients[i], scalar);
+        }
+        return new GF256Poly(me.field, product);
+    },
+    multiplyByMonomial: function (degree, coefficient) {
+        var me = this,
+           GF256 = MEPH.qrcode.GF256;
+        if (degree &lt; 0) {
+            throw &quot;System.ArgumentException&quot;;
+        }
+        if (coefficient == 0) {
+            return me.field.Zero;
+        }
+        var size = me.coefficients.length;
+        var product = new Array(size + degree);
+        for (var i = 0; i &lt; product.length; i++) product[i] = 0;
+        for (var i = 0; i &lt; size; i++) {
+            product[i] = me.field.multiply(me.coefficients[i], coefficient);
+        }
+        return new GF256Poly(me.field, product);
+    },
+    divide: function (other) {
+        if (me.field != other.field) {
+            throw &quot;GF256Polys do not have same GF256 field&quot;;
+        }
+        if (other.Zero) {
+            throw &quot;Divide by 0&quot;;
+        }
+
+        var quotient = me.field.Zero;
+        var remainder = this;
+
+        var denominatorLeadingTerm = other.getCoefficient(other.Degree);
+        var inverseDenominatorLeadingTerm = me.field.inverse(denominatorLeadingTerm);
+
+        while (remainder.Degree &gt;= other.Degree &amp;&amp; !remainder.Zero) {
+            var degreeDifference = remainder.Degree - other.Degree;
+            var scale = me.field.multiply(remainder.getCoefficient(remainder.Degree), inverseDenominatorLeadingTerm);
+            var term = other.multiplyByMonomial(degreeDifference, scale);
+            var iterationQuotient = me.field.buildMonomial(degreeDifference, scale);
+            quotient = quotient.addOrSubtract(iterationQuotient);
+            remainder = remainder.addOrSubtract(term);
+        }
+
+        return new Array(quotient, remainder);
+    },
+    initialize: function (field, coefficients) {
+        var me = this;
+        if (coefficients == null || coefficients.length == 0) {
+            throw &quot;System.ArgumentException&quot;;
+        }
+        me.field = field;
+        var coefficientsLength = coefficients.length;
+        if (coefficientsLength &gt; 1 &amp;&amp; coefficients[0] == 0) {
+            // Leading term must be non-zero for anything except the constant polynomial &quot;0&quot;
+            var firstNonZero = 1;
+            while (firstNonZero &lt; coefficientsLength &amp;&amp; coefficients[firstNonZero] == 0) {
+                firstNonZero++;
+            }
+            if (firstNonZero == coefficientsLength) {
+                me.coefficients = field.Zero.coefficients;
+            }
+            else {
+                me.coefficients = new Array(coefficientsLength - firstNonZero);
+                for (var i = 0; i &lt; me.coefficients.length; i++) me.coefficients[i] = 0;
+                //Array.Copy(coefficients, firstNonZero, me.coefficients, 0, me.coefficients.length);
+                for (var ci = 0; ci &lt; me.coefficients.length; ci++) me.coefficients[ci] = coefficients[firstNonZero + ci];
+            }
+        }
+        else {
+            me.coefficients = coefficients;
+        }
+        Object.defineProperty(me, &#39;Zero&#39;, {
+            get: function () {
+                return me.coefficients[0] == 0;
+            }
+        });
+
+        Object.defineProperty(me, &#39;Degree&#39;, {
+            get: function () {
+                return me.coefficients.length - 1;
+            }
+        });
+        Object.defineProperty(me, &#39;Coefficients&#39;, {
+            get: function () {
+                return me.coefficients;
+            }
+        });
+    }
+});</pre>
+</body>
+</html>

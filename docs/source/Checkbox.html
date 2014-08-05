@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">/*global MEPH*/
+
+<span id=''>/**
+</span>* @class
+*
+* This is a convenient way of defining an input control
+* color css selector when using the MEPH.iconfont.IconFont#color selector syntax.
+*/
+MEPH.define(&#39;MEPH.input.Checkbox&#39;, {
+    alias: &#39;checkbox&#39;,
+    extend: &#39;MEPH.field.FormField&#39;,
+    templates: true,
+    properties: {
+        type: &#39;checkbox&#39;
+    },
+    initialize: function () {
+        var me = this,
+            properties = MEPH.Array([&#39;value&#39;]);
+
+        me.callParent.apply(me, arguments);
+        properties.foreach(function (prop) {
+            me.addTransferableAttribute(prop, {
+                object: me,
+                path: prop
+            });
+        });
+    },
+    onLoaded: function () {
+        var me = this;
+        me.callParent.apply(me, arguments);
+        me.fire(&#39;altered&#39;, { path: &#39;type&#39;, references: [] });
+    },
+    translateValue: function (value) {
+        return value || false;
+    }
+});</pre>
+</body>
+</html>

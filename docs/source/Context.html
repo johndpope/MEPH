@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-field-FormField'>/**
+</span> * @class MEPH.field.FormField
+ * @extends MEPH.control.Control
+ * Standard form for a input field.
+ **/
+MEPH.define(&#39;MEPH.gpu.Context&#39;, {
+    statics: {
+        Commands: {
+            select: &#39;select&#39;
+        }
+    },
+    properties: {
+        functions: null
+    },
+    initialize: function () {
+        var me = this;
+        me.functions = [];
+    },
+<span id='MEPH-field-FormField-method-select'>    /**
+</span>     * Selects fom the passed argument.             
+     * @param {Object} args { prop: &#39;float&#39; }
+     * @returns {Object}
+     */
+    select: function (args) {
+        var commandObject = {};
+        commandObject.command = MEPH.gpu.Context.Commands.select;
+        var arguments = [];
+        for (var i in args) {
+            arguments.push({ name: i, type: args[i] || null });
+        }
+        commandObject.arguments = arguments;
+        return commandObject;
+    },
+    command: function (commandObject, arg) {
+        return {
+            command: commandObject,
+            jsInputs: MEPH.Array(arguments).subset(1)
+        };
+
+    },
+    &#39;function&#39;: function (name, parameters) {
+        var me = this;  
+        if (!me.functions.contains(function (x) { return x.name === name; })) {
+            me.functions.push({ name: name, parameters: Array.isArray(parameters) ? parameters : [parameters] });
+        }
+        return me;
+    },
+    getFunction: function (name) {
+        var me = this;
+        
+        return me.functions.first(function (x) { return x.name === name; });
+    }
+});</pre>
+</body>
+</html>

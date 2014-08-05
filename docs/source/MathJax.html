@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-math-jax-MathJax'>/**
+</span> * @class MEPH.math.jax.MathJax
+ * A wrapper around MathJax, http://www.mathjax.org/
+ **/
+MEPH.define(&#39;MEPH.math.jax.MathJax&#39;, {
+    statics: {
+        ready: function () {
+            MEPHJax.$promise = MEPHJax.$promise || Promise.resolve();
+            MEPHJax.$promise = MEPHJax.$promise.then(function () {
+                if (!MEPHJax.$loaded) {
+                    var toresolve;
+                    return MEPH.loadJSCssFile(&#39;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full&#39;, &#39;.js&#39;, function () {
+                        MEPHJax.$loaded = true;
+                        toresolve(MEPHJax.$loaded);
+                    }).then(function () {
+                        return new Promise(function (r, f) {
+                            toresolve = r;
+                        });
+                    });
+                }
+                return MEPHJax.$loaded;
+            });
+            return MEPHJax.$promise;
+        },
+        load: function (script, dom) {
+            var toresolve,
+                tofail,
+                promise = new Promise(function (r, f) {
+                    toresolve = r;
+                    tofail = f;
+
+                    var math;
+                    dom.innerHTML = &#39;${}$&#39;;
+                    dom.setAttribute(&#39;id&#39;, dom.getAttribute(&#39;id&#39;) || MEPH.GUID());
+                    MathJax.Hub.Queue([&quot;Typeset&quot;, MathJax.Hub]);
+                    MathJax.Hub.queue.Push(function () {
+                        if (math) {
+                            MathJax.Hub.Queue([&quot;Text&quot;, math, script]);
+                        }
+                        else {
+
+                            MathJax.Hub.queue.Push(function () {
+
+                                math = MathJax.Hub.getAllJax(&quot;MathOutput&quot;)[0];
+                                MathJax.Hub.queue.Push([&quot;Text&quot;, math, script]);
+                            });
+
+
+                        }
+                        MathJax.Hub.Queue(function () {
+                            toresolve(true);
+                        });
+                    });
+                });;
+            return MEPHJax.ready().then(function () {
+                return promise;
+            });
+        }
+    },
+}).then(function () {
+    MEPH.namespace(&#39;MEPHJax&#39;);
+    MEPHJax = MEPH.math.jax.MathJax;
+    MEPHJax.$promise = MEPHJax.$promise || Promise.resolve();
+});</pre>
+</body>
+</html>

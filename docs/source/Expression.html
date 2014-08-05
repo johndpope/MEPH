@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-math-Expression'>/**
+</span> * @class MEPH.math.Expression
+ * Describes mathematical expressions.
+ *
+ **/
+MEPH.define(&#39;MEPH.math.Expression&#39;, {
+    alternateNames: &#39;Expression&#39;,
+    requires: [&#39;MEPH.math.ExpressionMatch&#39;],
+    statics: {
+        type: {
+            variable: &#39;variable&#39;,
+            integral: &#39;integral&#39;,
+            addition: &#39;addition&#39;,
+            power: &#39;power&#39;,
+            limit: &#39;limit&#39;,
+            fraction: &#39;fraction&#39;,
+            sin: &#39;sin&#39;,
+            cos: &#39;cos&#39;,
+            tan: &#39;tan&#39;,
+            csc: &#39;csc&#39;,
+            cot: &#39;cot&#39;,
+            sec: &#39;sec&#39;,
+            tan: &#39;tan&#39;,
+            func: &#39;func&#39;,
+            mod: &#39;mod&#39;,
+            modulo: &#39;modulo&#39;,
+            theta: &#39;theta&#39;,
+            subtraction: &#39;subtraction&#39;,
+            plusminus: &#39;plusminus&#39;,
+            multiplication: &#39;multiplication&#39;,
+            division: &#39;division&#39;,
+            anything: &#39;anything&#39;
+        },
+        &#39;function&#39;: {
+            input: &#39;input&#39;,
+            start: &#39;start&#39;,
+            end: &#39;end&#39;,
+            name: &#39;name&#39;,
+            denominator: &#39;denominator&#39;,
+            numerator: &#39;numerator&#39;,
+            base: &#39;base&#39;,
+            expression: &#39;exp&#39;,
+            power: &#39;power&#39;,
+            respectTo: &#39;respectTo&#39;
+        },
+        Rules: {
+            IntegralConstMultiply: function () {
+                return Expression.integral(Expression.multiplication(Expression.variable(&#39;#C&#39;), Expression.anything()), &#39;x&#39;);
+            },
+            MultiplyIntegralofFx: function () {
+                return Expression.multiplication(Expression.variable(&#39;#C&#39;), Expression.integral(Expression.anything(), &#39;x&#39;));
+            },
+            IntegralConst: function () {
+                return Expression.integral(Expression.variable(&#39;#C&#39;), &#39;x&#39;);
+            },
+            AxPlusC: function () {
+                return Expression.addition(Expression.multiplication(Expression.variable(&#39;#C&#39;), Expression.variable(&#39;x&#39;)), Expression.variable(&#39;#C&#39;));
+            },
+            Power: function () {
+                return Expression.integral(Expression.power(Expression.variable(&#39;x&#39;), Expression.variable(&#39;n&#39;)), &#39;x&#39;);
+            },
+            PowerIntegrate: function () {
+                return Expression.multiplication(
+                                Expression.fraction(
+                                    Expression.variable(1),
+                                    Expression.addition(
+                                        Expression.variable(&#39;n&#39;),
+                                        Expression.variable(1)
+                                    )
+                                ),
+                Expression.power(
+                    Expression.variable(&#39;x&#39;),
+                    Expression.addition(Expression.variable(&#39;n&#39;), Expression.variable(1))));
+            },
+            IntegrationAddition: function () {
+                var addition = Expression.addition(Expression.func(&#39;f&#39;, &#39;x&#39;));
+                addition.repeat = true;
+                return Expression.integral(addition, &#39;x&#39;)
+            }
+        },
+        matchRule: function (expression, rule) {
+            return expression.match(rule);
+        },
+        getMatch: function (expression) {
+            return ExpressionMatch.getMatch(expression);
+        },
+        integrate: function (expression) {
+            return ExpressionMatch.integrate(expression);
+        },
+        anything: function () {
+            var expression = new Expression();
+            expression.setExp(Expression.type.anything);
+            return expression;
+        },
+<span id='MEPH-math-Expression-method-requiresParenthesis'>        /**
+</span>         * When printing an expression, sub expressions of certain types should be wrapped in parenthesis,
+         * for readability purposes.
+         * @param {String} type
+         **/
+        requiresParenthesis: function (type) {
+            switch (type) {
+                case Expression.type.subtraction:
+                case Expression.type.division:
+                case Expression.type.multiplication:
+                case Expression.type.addition:
+                    return true;
+                default: return false;
+            }
+        },
+        power: function (base, power) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.power);
+            expression.addPart(Expression.function.base, base);
+            expression.addPart(Expression.function.power, power);
+            return expression;
+        },
+        plusminus: function (a, b) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.plusminus);
+            expression.addPart(Expression.function.input, a);
+            expression.addPart(Expression.function.input, b);
+            return expression
+        },
+        variable: function (variable) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.variable, variable);
+            return expression;
+        },
+        limit: function (exp, a, b) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.limit);
+            expression.addPart(Expression.function.expression, exp);
+            expression.addPart(Expression.function.start, a);
+            expression.addPart(Expression.function.end, b);
+            return expression;
+        },
+<span id='MEPH-math-Expression-method-addition'>        /**
+</span>         * Expresses an addition function, a + b + c + ... + n
+         **/
+        addition: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.addition].concat(MEPHArray.convert(arguments)));
+        },
+<span id='MEPH-math-Expression-method-subtraction'>        /**
+</span>         * Expresses an addition function, a - b - c - ... - n
+         **/
+        subtraction: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.subtraction].concat(MEPHArray.convert(arguments)));
+        },
+<span id='MEPH-math-Expression-method-multiplication'>        /**
+</span>         * Expresses an multiplication function, a * b * c * ... * n
+         **/
+        multiplication: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.multiplication].concat(MEPHArray.convert(arguments)));
+        },
+<span id='MEPH-math-Expression-method-division'>        /**
+</span>         * Expresses an multiplication function, a * b * c * ... * n
+         **/
+        division: function (a, b) {
+            return Expression.arithmetic.apply(null, [Expression.type.division].concat(MEPHArray.convert(arguments)));
+        },
+<span id='MEPH-math-Expression-method-fraction'>        /**
+</span>         * Expresses a fraction
+         **/
+        fraction: function (numerator, denominator) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.fraction);
+            expression.addPart(Expression.function.numerator, numerator)
+            MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                expression.addPart(Expression.function.denominator, x);
+            });
+            return expression;
+        },
+<span id='MEPH-math-Expression-method-mod'>        /**
+</span>         * Expresses a modulo function
+         **/
+        mod: function (a, b) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.modulo);
+            expression.addPart(Expression.function.input, a)
+
+            expression.addPart(Expression.function.input, b)
+            return expression;
+        },
+<span id='MEPH-math-Expression-method-arithmetic'>        /**
+</span>         * Expresses an arithemetic like function, a - b - c - ... - n
+         **/
+        arithmetic: function (type, a, b) {
+            var expression = new Expression();
+            expression.setExp(type);
+            MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                expression.addPart(Expression.function.input, x);
+            });
+            return expression;
+        },
+<span id='MEPH-math-Expression-method-cos'>        /**
+</span>         * Expresses cos
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        cos: function (exp, power) {
+            return Expression.trigonometric(Expression.type.cos, exp, power);
+        },
+<span id='MEPH-math-Expression-method-tan'>        /**
+</span>         * Expresses tan
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        tan: function (exp, power) {
+            return Expression.trigonometric(Expression.type.tan, exp, power);
+        },
+<span id='MEPH-math-Expression-method-sin'>        /**
+</span>         * Expresses sin
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        sin: function (exp, power) {
+            return Expression.trigonometric(Expression.type.sin, exp, power);
+        },
+<span id='MEPH-math-Expression-method-csc'>        /**
+</span>         * Expresses csc
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        csc: function (exp, power) {
+            return Expression.trigonometric(Expression.type.csc, exp, power);
+        },
+<span id='MEPH-math-Expression-method-sec'>        /**
+</span>         * Expresses sec
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        sec: function (exp, power) {
+            return Expression.trigonometric(Expression.type.sec, exp, power);
+        },
+<span id='MEPH-math-Expression-method-cot'>        /**
+</span>         * Expresses cot
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        cot: function (exp, power) {
+            return Expression.trigonometric(Expression.type.cot, exp, power);
+        },
+<span id='MEPH-math-Expression-method-trigonometric'>        /**
+</span>         * Expresses a trigonemtric function like, cos, sin and tan
+         * @param {String} type
+         * @param {MEPH.expression.Expression} exp
+         * @param {Number} power
+         **/
+        trigonometric: function (type, exp, power) {
+            var expression = new Expression();
+            expression.setExp(type);
+            expression.addPart(Expression.function.input, exp);
+            if (power !== undefined) {
+                expression.addPart(Expression.function.power, power);
+            }
+            return expression;
+
+        },
+        func: function (func) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.func);
+            expression.addPart(Expression.function.name, MEPHArray.convert(arguments).first());
+            MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                expression.addPart(Expression.function.input, x);
+            });
+            return expression;
+        },
+        theta: function () {
+            var expression = new Expression();
+            expression.setExp(Expression.type.theta);
+            return expression;
+        },
+<span id='MEPH-math-Expression-method-integral'>        /**
+</span>         * Expresses an integral
+         **/
+        integral: function (exp, dx, a, b) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.integral);
+            expression.addPart(Expression.function.input, exp);
+            if (a)
+                expression.addPart(Expression.function.start, a);
+            if (b)
+                expression.addPart(Expression.function.end, b);
+            if (dx)
+                expression.addPart(Expression.function.respectTo, dx);
+            return expression;
+        }
+    },
+    properties: {
+        expression: null,
+        parts: null,
+        type: null
+    },
+    setExp: function (type, val) {
+        var me = this;
+        me.type = type;
+        if (val !== undefined) {
+            me.parts.push({ type: type, val: val });
+        }
+    },
+    addPart: function (type, val) {
+        var me = this;
+        me.parts.push({ type: type, val: val });
+    },
+    latex: function () {
+        var me = this,
+            result;
+        switch (me.type) {
+            case Expression.type.variable:
+                return me.parts.first().val;
+            case Expression.type.integral:
+                //\int_a^b \! f(x) \, \mathrm{d}x.
+                var start = me.partLatex(Expression.function.start);
+                var end = me.partLatex(Expression.function.end);
+                var middle = &#39;&#39;;
+                if (start &amp;&amp; end) {
+                    middle = start + &#39;^&#39; + end;
+                }
+                result =
+                    &#39;\\int_&#39; +
+                    middle + &#39; &#39; +
+                &#39;\\! &#39; +
+                me.parts.first().val.latex() + &#39; &#39; +
+                &#39;\\,&#39; + &#39; &#39; +
+                &#39;\\mathrm{d}&#39; +
+                me.partLatex(Expression.function.respectTo) + &#39;.&#39;
+                return result;
+            case Expression.type.addition:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(&#39; + &#39;);
+                break;
+            case Expression.type.subtraction:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(&#39; - &#39;);
+                break;
+            case Expression.type.func:
+                return me.partLatex(Expression.function.name) + &#39;(&#39; + me.parts.subset(1).select(function (x) {
+                    return x.val;
+                }).join(&#39;,&#39;) + &#39;)&#39;;
+                break;
+            case Expression.type.multiplication:
+                if (me.parts.unique(function (x) { return x.val.latex(); }).length !== me.parts.length ||
+                    me.parts.where(function (x) { return parseFloat(x.val.latex()); }).length !== me.parts.length || x.val.latex() === &#39;0&#39;) {
+                    return me.parts.select(function (x, index) {
+                        return x.val.latex();
+                    }).join(&#39;&#39;);
+                }
+                else
+                    return me.parts.select(function (x, index) {
+                        return x.val.latex();
+                    }).join(&#39; * &#39;);
+                break;
+            case Expression.type.modulo:
+                return me.latexPart(me.parts.nth(1)) +
+                    &#39; \\bmod &#39; +
+                    me.latexPart(me.parts.nth(2));
+                break;
+            case Expression.type.limit:
+                var exp = me.partLatex(Expression.function.expression);
+                var a = me.partLatex(Expression.function.start);
+                var b = me.partLatex(Expression.function.end);
+                return &#39;\\lim_{&#39; + a + &#39; \\to &#39; + b + &#39;} &#39; + exp
+                break;
+            case Expression.type.division:
+                return me.parts.select(function (x) {
+                    return x.val.latex();
+                }).join(&#39; / &#39;);
+                break;
+            case Expression.type.fraction:
+                if (me.parts.length === 2) {
+                    return &#39;\\frac{&#39; + me.partLatex(Expression.function.numerator) +
+                        &#39;}{&#39; + me.partLatex(Expression.function.denominator) + &#39;}&#39;;
+                }
+                else {
+                    var start = &#39;\\begin{equation}&#39;;
+                    var end = &#39; \\end{equation}&#39;;
+                    me.parts.subset(0, me.parts.length - 1).foreach(function (part) {
+                        start += &#39; \\cfrac{&#39; + me.latexPart(part) + &#39;}{&#39;;
+
+                        end = &#39;}&#39; + end;
+                    });
+                    return start + me.latexPart(me.parts.last()) + end;
+                }
+                break;
+            case Expression.type.plusminus:
+                var a = me.parts.first(function (x) { return x.type === Expression.function.input; });
+                var b = me.parts.second(function (x) { return x.type === Expression.function.input; });
+
+                return me.latexPart(a) + &#39; \\pm &#39; + me.latexPart(b);
+                break;
+            case Expression.type.theta:
+                return &#39;\\theta&#39;;
+            case Expression.type.tan:
+            case Expression.type.sin:
+            case Expression.type.cos:
+            case Expression.type.sec:
+            case Expression.type.cot:
+            case Expression.type.csc:
+                var power = me.partLatex(Expression.function.power);
+                if (power) {
+                    power = &#39;^&#39; + power;
+                }
+                else { power = &#39;&#39; }
+                return &#39;\\&#39; + me.type + power + &#39; (&#39; + me.partLatex(Expression.function.input) + &#39;)&#39;;
+            case Expression.type.power:
+                return me.partLatex(Expression.function.base) + &#39;^{&#39; + me.partLatex(Expression.function.power) + &#39;}&#39;;
+                break;
+        }
+    },
+    latexPart: function (start) {
+        if (start &amp;&amp; start.val) {
+            if (start.val.latex) {
+                start = start.val.latex();
+            }
+            else {
+                start = start.val;
+            }
+        }
+        return start || &#39;&#39;;
+    },
+    partLatex: function (type) {
+        var me = this;
+        var start = me.part(type);
+        return me.latexPart(start);
+    },
+    part: function (type) {
+        var me = this;
+        return me.parts.first(function (x) { return x.type === type; });
+    },
+    getParts: function () {
+        var me = this;
+        return me.parts;
+    },
+    initialize: function (type) {
+        var me = this;
+        me.expression = {
+        };
+        me.parts = [];
+    },
+<span id='MEPH-math-Expression-method-match'>    /**
+</span>     * Matches an expression to a rule.
+     * @param {U4M.math.Expression} rule
+     * @return {Boolean}
+     **/
+    match: function (rule) {
+        var me = this;
+        if (me.type === rule.type) {
+            var meParts = me.getParts().select();
+            var ruleParts = rule.getParts().select();
+
+            var matchParts = function (ruleParts, x) {
+                var first = ruleParts.first(function (y) {
+                    if (y.type !== x.type) {
+                        return false;
+                    }
+                    if (y.val &amp;&amp; x.val &amp;&amp; y.val.equals &amp;&amp; x.val.equals) {
+                        return x.val.match(y.val);
+                    }
+                    else if (y.val &amp;&amp; !x.val || !y.val &amp;&amp; x.val) {
+                        return false;
+                    }
+                    else {
+                        return true
+                    }
+                });
+                if (first) {
+                    ruleParts.removeFirstWhere(function (t) { return t === first; });
+                }
+                else return false;
+            };
+            if (rule.repeat) {
+                var repeatedparts = [].interpolate(0, me.getParts().length, function () {
+                    return rule.parts.first();
+                });
+                meParts.foreach(matchParts.bind(me, repeatedparts));
+                if (repeatedparts.length === 0) return true;
+                return false;
+            }
+            else if (rule.part(Expression.type.anything)) {
+
+                ruleParts = rule.getParts().select().where(function (x) {
+                    return x.type === Expression.type.anything;
+                });
+
+                meParts.foreach(matchParts.bind(me, ruleParts));
+                if (ruleParts.length === 0) return true;
+                return false;
+            }
+            else {
+                if (meParts.length !== ruleParts.length) {
+                    return false;
+                }
+                meParts.foreach(matchParts.bind(me, ruleParts));
+                if (ruleParts.length &gt; 0) return false;
+                return true;
+            }
+        }
+        else if (rule.type === Expression.type.anything) {
+            return true;
+        }
+    },
+<span id='MEPH-math-Expression-method-equals'>    /**
+</span>     * Returns true if the equation are equal
+     * @param {Object} options
+     * @param {Boolean} options.formEquals
+     */
+    equals: function (expression, options) {
+        var me = this;
+        options = options || { formEquals: true };
+
+        if (me.type === expression.type) {
+            var meparts = me.getParts().select();
+            var expparts = expression.getParts().select(function (x) { return x; });
+            if (meparts.length !== expparts.length) return false;
+            meparts.foreach(function (x) {
+                var first = expparts.first(function (y) {
+                    if (y.type !== x.type) {
+                        return false;
+                    }
+                    if (y.val &amp;&amp; x.val &amp;&amp; y.val.equals &amp;&amp; x.val.equals) {
+                        return y.val.equals(x.val);
+                    }
+                    else if (y.val &amp;&amp; !x.val || !y.val &amp;&amp; x.val) {
+                        return false;
+                    }
+                    else {
+                        return true
+                    }
+                });
+                if (first) {
+                    expparts.removeWhere(function (t) { return t === first; });
+                }
+                else return false;
+            });
+            if (expparts.length &gt; 0) return false;
+            return true;
+        }
+    }
+});</pre>
+</body>
+</html>

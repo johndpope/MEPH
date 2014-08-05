@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">///&lt;reference path=&quot;~/extjs/ext-debug.js&quot; /&gt;
+
+<span id=''>/**
+</span> * @class
+ * The base class for Views used in the mobile application.
+ */
+
+/*global MEPH,U4,window*/
+MEPH.define(&#39;MEPH.mobile.activity.container.Container&#39;, {
+    extend: &#39;MEPH.control.Control&#39;,
+    mixins: [&#39;MEPH.mobile.mixins.Activity&#39;],
+    requires: [&#39;MEPH.mobile.activity.view.ActivityView&#39;],
+    properties: {
+        $removeHomePageCls: &#39;meph-view-remove&#39;
+    },
+    initialize: function () {
+        var me = this;
+        me.callParent.apply(me, arguments);
+        me.on(&#39;afterload&#39;, me.activityLoaded.bind(me));
+    },
+<span id='-method-show'>    /**
+</span>     * Shows the container.
+     * @returns {Promise}
+     */
+    show: function () {
+        var me = this,
+            view,
+            dom;
+        dom = me.getDomTemplate();
+        view = dom.first();
+        return me.viewTransition(view, { remove: me.$removeHomePageCls }).then(function (x) {
+            me.fire(&#39;show&#39;, {});
+        });;
+    },
+<span id='-method-hide'>    /**
+</span>     * Hides the container.
+     * @returns {Promise}
+     */
+    hide: function () {
+        var me = this,
+            view,
+            dom = me.getDomTemplate();
+
+        view = dom.first();
+        return me.viewTransition(view, { add: me.$removeHomePageCls }).then(function (x) {
+            me.fire(&#39;hide&#39;, {});
+        });
+    },
+    close: function () {
+        var me = this;
+        return me.hide().then(function () {
+            me.destroy();
+        });
+    },
+    open: function () {
+        var me = this;
+        return me.show();
+    }
+});</pre>
+</body>
+</html>

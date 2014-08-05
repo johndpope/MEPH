@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-mobile-providers-menuprovider-MenuProvider'>/**
+</span> * @class MEPH.mobile.providers.menuprovider.MenuProvider
+ * Providers menu information.
+ */
+MEPH.define(&#39;MEPH.mobile.providers.menuprovider.MenuProvider&#39;, {
+    properties: {
+        configuration: null,
+        menuLibrary: null
+    },
+    initialize: function (config) {
+        var me = this;
+        me.configuration = config;
+    },
+<span id='MEPH-mobile-providers-menuprovider-MenuProvider-method-getMenu'>    /**
+</span>     * Gets the view.
+     * @param {Object} view
+     * @returns {Promise}
+     */
+    getMenu: function (view) {
+        var me = this,
+            promise;
+        if (me.menuLibrary) {
+            promise = Promise.resolve();
+        }
+        else {
+            promise = me.load();
+        }
+        return promise.then(function () {
+            return (me.menuLibrary[me.libraryRoot] || me.menuLibrary.menu);
+        });
+    },
+<span id='MEPH-mobile-providers-menuprovider-MenuProvider-method-load'>    /**
+</span>     * Loads the view configuration from the server.
+     **/
+    load: function (configuration) {
+        var me = this,
+            resource;
+
+        configuration = configuration || me.configuration;
+
+        if (configuration) {
+            resource = configuration.viewsResource;
+            return Promise.resolve().then(function () {
+                var path = MEPH.getPath(resource.path);
+                path = path[path.length - 1] === MEPH.folderPathSeparator ?
+                path + resource.uri :
+                path + MEPH.folderPathSeparator + resource.uri;
+
+                return MEPH.ajaxJSON(path, {
+                    requestHeaders: [{
+                        header: &#39;Accept&#39;,
+                        value: &#39;application/json&#39;
+                    }]
+                }).then(function (response) {
+                    var json = response.responseJSON;
+                    me.menuLibrary = json;
+                    me.libraryRoot = configuration.root;
+                    return response;
+                });
+            });
+        }
+        else {
+            return Promise.resolve().then(function () {
+                throw &#39;no configuration in MenuProvider&#39;;
+            });
+        }
+    }
+});</pre>
+</body>
+</html>

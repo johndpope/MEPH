@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-dom-ControlReader'>/**
+</span> * @class MEPH.dom.ControlReader
+ * Reads controls from the dom which should be created, and associated with there js objects.
+ * 
+ *      The control ready will receive the &quot;div meph-app&quot; as input and return the meph_input and fieldForceView
+ *      as the dom elements that will be matched with the appropriate classes.
+ *              &lt;div meph-app&gt;
+ *                  &lt;meph_input data-bind=&#39;value: v$.someValue&#39; /&gt;
+ *                  &lt;fieldForceView /&gt;
+ *              &lt;/div&gt;
+ *
+ **/
+MEPH.define(&#39;MEPH.dom.ControlReader&#39;, {
+    initialize: function () {
+        var me = this;
+    },
+<span id='MEPH-dom-ControlReader-method-getViewObjects'>    /**
+</span>     * Gets the control that will be rendered and link to the js code-behind objects.
+     */
+    getViewObjects: function (dom) {
+        var me = this,
+            results = [],
+            aliases = MEPH.getAllAliases();
+        aliases.foreach(function (x) {
+            results = results.concat(MEPH.util.Array.convert(dom.querySelectorAll(x)));
+        });
+
+        return MEPH.util.Array.create(results);
+    },
+    getChildViewObjects: function (dom) {
+        var me = this,
+            results = [],
+            aliases = MEPH.getAllAliases();
+        MEPH.util.Array.convert(dom.childNodes).foreach(function (node) {
+            var alias = aliases.first(function (x) { return x === node.nodeName.toLowerCase(); });
+            if (alias) {
+                results.push({
+                    node: node,
+                    alias: alias
+                });
+            }
+        });
+        return MEPH.util.Array.create(results);
+    }
+});</pre>
+</body>
+</html>

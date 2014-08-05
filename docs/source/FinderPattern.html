@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js">
+
+MEPH.define(&#39;MEPH.qrcode.finder.FinderPattern&#39;, {
+    initialize: function (posX, posY, estimatedModuleSize) {
+        var me = this;
+        me.x = posX;
+        me.y = posY;
+        me.count = 1;
+        me.estimatedModuleSize = estimatedModuleSize;
+        Object.defineProperty(me, &#39;EstimatedModuleSize&#39;, {
+            get: function () {
+                return me.estimatedModuleSize;
+            }
+        });
+        Object.defineProperty(me, &#39;Count&#39;, {
+            get: function () {
+                return me.count;
+            }
+        });
+        Object.defineProperty(me, &#39;X&#39;, {
+            get: function () {
+                return me.x;
+            }
+        });
+
+        Object.defineProperty(me, &#39;Y&#39;, {
+            get: function () {
+                return me.y;
+            }
+        });
+
+
+    },
+    aboutEquals: function (moduleSize, i, j) {
+        var me = this;
+        if (Math.abs(i - me.y) &lt;= moduleSize &amp;&amp; Math.abs(j - me.x) &lt;= moduleSize) {
+            var moduleSizeDiff = Math.abs(moduleSize - me.estimatedModuleSize);
+            return moduleSizeDiff &lt;= 1.0 || moduleSizeDiff / me.estimatedModuleSize &lt;= 1.0;
+        }
+        return false;
+    },
+    incrementCount: function () {
+        var me = this;
+        me.count++;
+    }
+
+});
+</pre>
+</body>
+</html>
