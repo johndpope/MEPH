@@ -676,7 +676,7 @@
     it('match power rule  1/(n+1)(x^(n+1))', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.multiplication(
+            var expression = Expression.addition(Expression.multiplication(
                                 Expression.fraction(
                                     Expression.variable(1),
                                     Expression.addition(
@@ -686,7 +686,7 @@
                                 ),
                 Expression.power(
                     Expression.variable('x'),
-                    Expression.addition(Expression.variable('n'), Expression.variable(1))));
+                    Expression.addition(Expression.variable('n'), Expression.variable(1)))), Expression.variable('a'));
 
             var rule = Expression.matchRule(expression, Expression.Rules.PowerIntegrate());
 
@@ -710,6 +710,148 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition());
 
             expect(rule).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can describe the transfer from one for to another', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                            Expression.multiplication(Expression.variable('a')), 'x');
+
+            expression.mark('A');
+            var variable = expression.partVal(Expression.function.input);
+            variable.mark('B');
+
+            expect(expression.mark() === 'A').toBeTruthy();
+            expect(variable.mark() === 'B').toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can describe the transfer from one for to another', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegralConstMultiply();
+
+            var marks = expression.getMarks();
+            expect(marks.C).toBeTruthy();
+            expect(marks.A).toBeTruthy();
+            expect(marks.dx).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from AxPlusC', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.AxPlusC();
+
+            var marks = expression.getMarks();
+            expect(marks.A).toBeTruthy();
+            expect(marks.C).toBeTruthy();
+            expect(marks.x).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from AxPlusC', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.AxPlusC();
+
+            var marks = expression.getMarks();
+            expect(marks.A).toBeTruthy();
+            expect(marks.C).toBeTruthy();
+            expect(marks.x).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from AxPlusC', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.MultiplyIntegralofFx();
+
+            var marks = expression.getMarks();
+            expect(marks.A).toBeTruthy();
+            expect(marks.C).toBeTruthy();
+            expect(marks.I).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from IntegralConst', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegralConst();
+
+            var marks = expression.getMarks();
+
+            expect(marks.C).toBeTruthy();
+            expect(marks.I).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from Power', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.Power();
+
+            var marks = expression.getMarks();
+
+            expect(marks.x).toBeTruthy();
+            expect(marks.n).toBeTruthy();
+            expect(marks.I).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from PowerIntegrate', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.PowerIntegrate();
+
+            var marks = expression.getMarks();
+
+            expect(marks.n_pre).toBeTruthy();
+            expect(marks.n_post).toBeTruthy();
+            expect(marks.x).toBeTruthy();
+            expect(marks.C).toBeTruthy();
+
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {
