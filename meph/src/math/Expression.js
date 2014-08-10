@@ -5,7 +5,8 @@
  **/
 MEPH.define('MEPH.math.Expression', {
     alternateNames: 'Expression',
-    requires: ['MEPH.math.ExpressionMatch'],
+    requires: ['MEPH.math.ExpressionMatch',
+                'MEPH.math.ExpressionTranslation'],
     statics: {
         type: {
             variable: 'variable',
@@ -43,6 +44,23 @@ MEPH.define('MEPH.math.Expression', {
             power: 'power',
             respectTo: 'respectTo'
         },
+        translation: {
+            Translate: function (a, b) {
+                return ExpressionTranslation.translate(a, b)
+            },
+            Transform: function (transform, a, b) {
+                return ExpressionTranslation.transform(transform, a, b);
+            }
+        },
+        RuleType: {
+            IntegralConstMultiply: 'IntegralConstMultiply',
+            MultiplyIntegralofFx: 'MultiplyIntegralofFx',
+            IntegralConst: 'IntegralConst',
+            AxPlusC: 'AxPlusC',
+            Power: 'Power',
+            PowerIntegrate: 'PowerIntegrate',
+            IntegrationAddition: 'IntegrationAddition'
+        },
         Rules: {
             IntegralConstMultiply: function () {
                 var c = Expression.variable('#C');
@@ -50,7 +68,10 @@ MEPH.define('MEPH.math.Expression', {
                 var a = Expression.anything();
                 a.mark('A');
                 var expression = Expression.integral(Expression.multiplication(c, a), 'x');
-                expression.mark('dx');
+                expression.mark('I');
+
+                expression.name(Expression.RuleType.IntegralConstMultiply);
+
                 return expression;
             },
             MultiplyIntegralofFx: function () {
@@ -60,13 +81,19 @@ MEPH.define('MEPH.math.Expression', {
                 a.mark('A');
                 var I = Expression.integral(a, 'x');
                 I.mark('I');
-                return Expression.multiplication(c, I);
+                var expression = Expression.multiplication(c, I);
+
+                expression.name(Expression.RuleType.MultiplyIntegralofFx);
+
+                return expression;
             },
             IntegralConst: function () {
                 var c = Expression.variable('#C');
                 c.mark('C');
                 var expression = Expression.integral(c, 'x');
                 expression.mark('I');
+
+                expression.name(Expression.RuleType.IntegralConst);
                 return expression;
             },
             AxPlusC: function () {
@@ -76,7 +103,12 @@ MEPH.define('MEPH.math.Expression', {
                 x.mark('x');
                 var c = Expression.variable('#C');
                 c.mark('C');
-                return Expression.addition(Expression.multiplication(a, x), c);
+
+                var expression = Expression.addition(Expression.multiplication(a, x), c);
+
+                expression.name(Expression.RuleType.IntegralConst);
+
+                return expression;
             },
             Power: function () {
                 var n = Expression.variable('n');
@@ -87,6 +119,9 @@ MEPH.define('MEPH.math.Expression', {
 
                 var expression = Expression.integral(power, 'x');
                 expression.mark('I');
+
+                expression.name(Expression.RuleType.Power);
+
                 return expression
             },
             PowerIntegrate: function () {
@@ -110,12 +145,20 @@ MEPH.define('MEPH.math.Expression', {
                     x,
                     Expression.addition(n2, Expression.variable(1)))), c);
 
+                exp.name(Expression.RuleType.PowerIntegrate);
+
                 return exp;
             },
             IntegrationAddition: function () {
-                var addition = Expression.addition(Expression.func('f', 'x'));
+                var func = Expression.func('f', 'x');
+                func.mark('f');
+                var addition = Expression.addition(func);
+                addition.mark('A');
                 addition.repeat = true;
-                return Expression.integral(addition, 'x')
+                var integral = Expression.integral(addition, 'x');
+                integral.mark('I');
+                integral.name(Expression.RuleType.IntegrationAddition);
+                return integral;
             }
         },
         matchRule: function (expression, rule) {
@@ -330,13 +373,38 @@ MEPH.define('MEPH.math.Expression', {
         expression: null,
         parts: null,
         type: null,
-        _mark: null
+        _mark: null,
+        _parent: null,
+        _name: null
+    },
+    copy: function () {
+        var me = this;
+        var expression = new Expression();
+        expression.type = me.type;
+        expression.mark(me.mark());
+        expression.name(me.name());
+        expression.parts = me.getParts().select(function (x) {
+            var copy = x.val.copy ? x.val.copy() : x.val;
+            if (x.val.copy) {
+                copy.parent(expression);
+            }
+            return { type: x.type, val: copy };
+        });
+        expression.expression = me.expression;
+        return expression;
     },
     mark: function (val) {
         var me = this;
         if (val !== undefined)
             me._mark = val;
         return me._mark;
+    },
+    name: function (val) {
+        var me = this;
+        if (val !== undefined) {
+            me._name = val;
+        }
+        return me._name;
     },
     setExp: function (type, val) {
         var me = this;
@@ -345,10 +413,18 @@ MEPH.define('MEPH.math.Expression', {
             me.parts.push({ type: type, val: val });
         }
     },
+    getMark: function (mark) {
+        var me = this;
+        return me.getMarks()[mark];
+    },
     getMarks: function () {
         var me = this,
             marks = {};
-        marks[me.mark()] = me;
+
+        if (me.mark()) {
+            marks[me.mark()] = me;
+        }
+
         me.parts.foreach(function (part) {
             if (part && part.val && part.val.getMarks) {
                 var submarks = part.val.getMarks();
@@ -362,7 +438,19 @@ MEPH.define('MEPH.math.Expression', {
     },
     addPart: function (type, val) {
         var me = this;
+        if (val.parent) {
+            val.parent(me);
+        }
         me.parts.push({ type: type, val: val });
+    },
+    parent: function (parent) {
+        var me = this;
+
+        if (parent) {
+            me._parent = parent;
+        }
+
+        return me._parent;
     },
     latex: function () {
         var me = this,
@@ -490,6 +578,30 @@ MEPH.define('MEPH.math.Expression', {
     part: function (type) {
         var me = this;
         return me.parts.first(function (x) { return x.type === type; });
+    },
+    /**
+     * Swaps the part from the mark.
+     ***/
+    swap: function (mark, exp) {
+        var me = this,
+            marks = me.getMarks();
+        var parts = me.getParts()
+        if (marks[mark]) {
+            var parent = marks[mark].parent();
+            var part = parent.remove(marks[mark]).first();
+            exp.mark(mark);
+            parent.addPart(part.type, exp);
+        }
+
+    },
+    /**
+     * Removes the part.
+     * @param {MEPH.math.Expression} part
+     * @returns {Array} removed parts.
+     **/
+    remove: function (part) {
+        var me = this;
+        return me.getParts().removeWhere(function (x) { return x.val === part; });
     },
     partVal: function (type) {
         var me = this;

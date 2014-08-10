@@ -745,7 +745,7 @@
             var marks = expression.getMarks();
             expect(marks.C).toBeTruthy();
             expect(marks.A).toBeTruthy();
-            expect(marks.dx).toBeTruthy();
+            expect(marks.I).toBeTruthy();
 
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
@@ -854,6 +854,127 @@
 
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can get marks from IntegrationAddition', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+
+            var marks = expression.getMarks();
+
+            expect(marks.I).toBeTruthy();
+            expect(marks.A).toBeTruthy();
+            expect(marks.f).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('translate a f(x) => g(x) ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+
+            var translation = Expression.translation.Translate(Expression.Rules.IntegrationAddition(), Expression.Rules.MultiplyIntegralofFx());
+            expect(translation).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('an expression can copy ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+
+            var copy = expression.copy();
+
+            expect(copy.type === expression.type).toBeTruthy();
+            expect(copy.mark() === expression.mark()).toBeTruthy();
+            expect(copy.parts.length === expression.parts.length).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('a rule has a name ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+
+            for (var i in Expression.Rules) {
+                expect(Expression.Rules[i]().name).theTruth(i + ' does not have a name.');
+            }
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('an expression can be set parent. ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = new Expression();
+            expression.parent(new Expression());
+            expect(expression.parent()).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('can replace a part, in an expression. ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+
+            var a = Expression.anything();
+            a.mark('A');
+
+            var I = Expression.integral(a, 'x');
+            var newc = Expression.variable('newc');
+            I.swap('A', newc);
+            expect(I.getMark('A')).toBeTruthy();
+
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can use swap rules to transform an expression from a -> b', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var rule1 = Expression.Rules.IntegralConstMultiply();
+            var rule2 = Expression.Rules.MultiplyIntegralofFx();
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.IntegralConstMultiply,
+                    to: Expression.RuleType.MultiplyIntegralofFx
+                },
+                C: 'C',
+                A: 'A',
+                I: 'I'
+            };
+            var result = Expression.translation.Transform(transformation, rule1, rule2);
+            expect(result).toBeTruthy();
+
+        }).catch(function (e) {
+            expect(e).caught();
         }).then(function (x) {
             done();
         });
