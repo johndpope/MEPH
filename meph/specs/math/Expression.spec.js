@@ -877,19 +877,6 @@
         });
     });
 
-    it('translate a f(x) => g(x) ', function (done) {
-        MEPH.requires('MEPH.math.Expression').then(function ($class) {
-            var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
-
-            var translation = Expression.translation.Translate(Expression.Rules.IntegrationAddition(), Expression.Rules.MultiplyIntegralofFx());
-            expect(translation).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
-        }).then(function (x) {
-            done();
-        });
-    });
 
     it('an expression can copy ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
@@ -975,6 +962,46 @@
 
         }).catch(function (e) {
             expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can set the value of a mark', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.AxPlusC();
+
+            rule1.swap('A', Expression.variable('A'));
+            console.log(rule1.latex());
+            expect(rule1.latex() === 'xA + #C').toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('translate a IntegralConst => AxPlusC ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+            var rule1 = Expression.Rules.IntegralConst();
+            var rule2 = Expression.Rules.AxPlusC();
+
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.IntegralConst,
+                    to: Expression.RuleType.AxPlusC
+                },
+                C: 'A',
+                dx: 'x'
+            };
+            var result = Expression.translation.Transform(transformation, rule1, rule2);
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {
             done();
         });

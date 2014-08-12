@@ -205,6 +205,7 @@ MEPH.define('MEPH.util.Array', {
                     configurable: true,
                     value: function (func) {
                         var collection = this;
+                        func = func || function () { return true; }
                         var result = collection.where(func);
                         for (var i = 0 ; i < result.length; i++) {
                             collection.splice(collection.indexOf(result[i]), 1);

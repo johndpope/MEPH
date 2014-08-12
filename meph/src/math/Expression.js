@@ -90,7 +90,9 @@ MEPH.define('MEPH.math.Expression', {
             IntegralConst: function () {
                 var c = Expression.variable('#C');
                 c.mark('C');
-                var expression = Expression.integral(c, 'x');
+                var dx = Expression.variable('x');
+                dx.mark('dx');
+                var expression = Expression.integral(c, dx);
                 expression.mark('I');
 
                 expression.name(Expression.RuleType.IntegralConst);
@@ -416,6 +418,12 @@ MEPH.define('MEPH.math.Expression', {
     getMark: function (mark) {
         var me = this;
         return me.getMarks()[mark];
+    },
+    setMark: function (mark, val) {
+        var me = this;
+        var mark = me.getMark(mark);
+        debugger
+        mark.parts.removeWhere();
     },
     getMarks: function () {
         var me = this,
