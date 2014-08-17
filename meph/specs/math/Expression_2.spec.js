@@ -143,6 +143,67 @@
     });
 
 
+    //it('match int(u +/- v +/- w) -> int(u) +/- int(v) +/- int(w)', function (done) {
+    //    MEPH.requires('MEPH.math.Expression').then(function ($class) {
+    //        var Expression = MEPH.math.Expression;
+    //        var expression = Expression.integral(
+    //                        Expression.addition(Expression.func('f', 'x'),
+    //                            Expression.func('g', 'x'),
+    //                            Expression.func('h', 'x')), Expression.variable('x'));
+    //        var rule2 = Expression.Rules.AdditionIntegral();
+    //        var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition(), true);
+    //        expect(expression.getMarks().dx).toBeTruthy();
+    //        var transformation = {
+    //            repeat: {
+    //                A: {
+    //                    target: 'A',
+
+    //                    trans: {
+    //                        transformation: {
+    //                            from: Expression.RuleType.IntegrationAddition,
+    //                            to: Expression.RuleType.AdditionIntegral
+    //                        },
+    //                        f: 'f'
+    //                    }
+    //                },
+    //                dx: {
+    //                    scatter: {
+    //                        transformation: {
+    //                            from: Expression.RuleType.IntegrationAddition,
+    //                            to: Expression.RuleType.AdditionIntegral
+    //                        },
+    //                        dx: 'dx'
+    //                    }
+    //                }
+    //            },
+    //            transform: {
+    //                from: 'A',
+    //                to: 'A'
+    //            }
+    //        };
+    //        var result = Expression.translation.Transform(transformation, expression, rule2);
+    //        console.log(result.latex());
+    //        expect(result.getMarks().A.parts.length === 3).toBeTruthy();
+    //            transformation: {
+    //                from: Expression.RuleType.IntegrationAddition,
+    //                to: null
+    //            },
+    //            repeat: {
+    //                A: 'A'
+    //            },
+    //            f: 'f',
+    //            dx: 'dx'
+    //        };
+    //        var result = Expression.translation.Transform(transformation, expression, rule2);
+    //        console.log(result.latex());
+    //        expecct(result.getMarks().A.parts.length === 3).toBeTruthy();
+    //        expect(result).toBeTruthy();
+    //    }).catch(function () {
+    //        expect(new Error('something went wrong while creating an expression')).caught();
+    //    }).then(function (x) {
+    //        done();
+    //    });
+    //});
     it('match int(u +/- v +/- w) -> int(u) +/- int(v) +/- int(w)', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
@@ -191,5 +252,6 @@
             done();
         });
     });
+
 
 });
