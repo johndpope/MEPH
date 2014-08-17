@@ -1,4 +1,7 @@
-﻿MEPH.define('MEPH.query.QueryableWorker', {
+﻿/**
+ * @class MEPH.query.QueryableWorker
+ **/
+MEPH.define('MEPH.query.QueryableWorker', {
     properties: {
         $worker: null,
         $promise: null

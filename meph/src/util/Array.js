@@ -214,6 +214,17 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.clear) {
+                Object.defineProperty(array, 'clear', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        return collection.removeWhere(function (x) { return true; });
+                    }
+                });
+            }
             if (!array.removeFirstWhere) {
                 Object.defineProperty(array, 'removeFirstWhere', {
                     enumerable: false,

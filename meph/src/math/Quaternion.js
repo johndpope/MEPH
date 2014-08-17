@@ -83,7 +83,7 @@ MEPH.define('MEPH.math.Quaternion', {
      * then the formulas for addition is:
      *  (r1, v1) + (r2, v2) = (r1 + r2, v1 + v2)
      * where "·" is the dot product and "×" is the cross product.
-     * @param {Number}
+     * @param {Number} q2
      */
     qaddition: function (q2) {
         var me = this;
@@ -93,6 +93,7 @@ MEPH.define('MEPH.math.Quaternion', {
         return new Quaternion(res);
     },
     /**
+     * @method norm
      * The square root of the product of a quaternion with its conjugate is 
      * called its norm and is denoted ||q|| (Hamilton called this quantity 
      * the tensor of q, but this conflicts with modern meaning of "tensor").
@@ -110,7 +111,7 @@ MEPH.define('MEPH.math.Quaternion', {
         return this.dot(this);
     },
     /**
-     * reciprocal
+     * @method reciprocal
      * @returns {MEPH.math.Quaternion}
      **/
     reciprocal: function () {
@@ -119,6 +120,7 @@ MEPH.define('MEPH.math.Quaternion', {
         return new Quaternion(me.conjugate().divide(norm * norm).vector);
     },
     /**
+     * @method unit 
      * Unit Quaternion
      * @returns {MEPH.math.Quaternion}
      **/
@@ -192,14 +194,14 @@ MEPH.define('MEPH.math.Quaternion', {
     },
     /**
      * If a + bi + cj + dk is any quaternion, then a is called its scalar part.
-     * @param {Number}
+     * @return {Number}
      */
     scalarPart: function () {
         return this.h;
     },
     /**
      * If a + bi + cj + dk is any quaternion, then  bi + cj + dk is called its vector part.
-     * @param {MEPH.math.Vector}
+     * @return {MEPH.math.Vector}
      */
     vectorPart: function () {
         return new Vector([this.i, this.j, this.k])

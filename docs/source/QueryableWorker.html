@@ -15,7 +15,10 @@
   </script>
 </head>
 <body onload="prettyPrint(); highlight();">
-  <pre class="prettyprint lang-js">MEPH.define(&#39;MEPH.query.QueryableWorker&#39;, {
+  <pre class="prettyprint lang-js"><span id='MEPH-query-QueryableWorker'>/**
+</span> * @class MEPH.query.QueryableWorker
+ **/
+MEPH.define(&#39;MEPH.query.QueryableWorker&#39;, {
     properties: {
         $worker: null,
         $promise: null
@@ -78,7 +81,7 @@
             func: &#39;exec&#39;
         }, callback);
     },
-<span id='global-method-execute'>    /**
+<span id='MEPH-query-QueryableWorker-method-execute'>    /**
 </span>     * Executes an arbitrary piece of code, with the arguments passed in an array.
      * @param {Function} code,
      * @param {Array} args

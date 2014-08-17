@@ -83,6 +83,7 @@
                         'list/List.spec.js',
                         'math/jax/MathJax.spec.js',
                         'math/Expression.spec.js',
+                        'math/Expression_2.spec.js',
                         'math/Hamilton.spec.js',
                         'math/Matrix.spec.js',
                         'math/Quaternion.spec.js',

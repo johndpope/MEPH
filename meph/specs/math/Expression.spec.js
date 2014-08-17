@@ -37,7 +37,8 @@
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(Expression.variable('f(x)'), 'x', Expression.variable('a'), Expression.variable('b'));
-            var latexp = '\\int_a^b \\! f(x) \\, \\mathrm{d}x.';
+            var latexp = '\\int_a^b \\! f(x) \\, \\mathrm{d}x';
+            
             expect(latexp === expression.latex()).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
@@ -50,7 +51,7 @@
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(Expression.variable('f(x)'), 'x');
-            var latexp = '\\int_ \\! f(x) \\, \\mathrm{d}x.';
+            var latexp = '\\int_ \\! f(x) \\, \\mathrm{d}x';
             expect(latexp === expression.latex()).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
@@ -1000,6 +1001,77 @@
             var result = Expression.translation.Transform(transformation, rule1, rule2);
             console.log(result.latex());
             expect(result).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('translate a IntegralConst => AxPlusC , with Expression.translation.Translate', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+            var rule1 = Expression.Rules.IntegralConst();
+            var rule2 = Expression.Rules.AxPlusC();
+
+            var result = Expression.translation.Translate(rule1, rule2);
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('translate a IntegralConstMultiply => MultiplyIntegralofFx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.Rules.IntegrationAddition();
+            var rule1 = Expression.Rules.IntegralConstMultiply();
+            var rule2 = Expression.Rules.MultiplyIntegralofFx();
+
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.IntegralConstMultiply,
+                    to: Expression.RuleType.MultiplyIntegralofFx
+                },
+                C: 'C',
+                A: 'A'
+            };
+            var result = Expression.translation.Transform(transformation, rule1, rule2);
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('match rule Integration(a*f(x)) dx === Integration(a (g(x) + f(x)) dx, and marks the expression ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var a = Expression.variable('a');
+            var anything = Expression.addition(
+                                        Expression.func('g', 'x'),
+                                        Expression.func('f', 'x')
+                                    );
+            var expression = Expression.integral(
+                                Expression.multiplication(
+                                    a,
+                                    anything),
+                            'x');
+
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply(), true);
+            var marks = expression.getMarks();
+            expect(rule).toBeTruthy();
+            expect(marks.C === a).toBeTruthy();
+            expect(marks.I === expression).toBeTruthy();
+            expect(marks.A === anything).toBeTruthy();
+
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {
