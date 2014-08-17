@@ -22,6 +22,9 @@ MEPH.define('MEPH.math.Expression', {
             cot: 'cot',
             sec: 'sec',
             tan: 'tan',
+            ln: 'ln',
+            negative: 'negative',
+            abs: 'abs',
             func: 'func',
             mod: 'mod',
             modulo: 'modulo',
@@ -30,7 +33,8 @@ MEPH.define('MEPH.math.Expression', {
             plusminus: 'plusminus',
             multiplication: 'multiplication',
             division: 'division',
-            anything: 'anything'
+            anything: 'anything',
+            dirivitive: 'dirivitive'
         },
 
         'function': {
@@ -43,7 +47,8 @@ MEPH.define('MEPH.math.Expression', {
             base: 'base',
             expression: 'exp',
             power: 'power',
-            respectTo: 'respectTo'
+            respectTo: 'respectTo',
+            dirivitive: 'dirivitive'
         },
         translation: {
             Translate: function (a, b) {
@@ -61,7 +66,21 @@ MEPH.define('MEPH.math.Expression', {
             Power: 'Power',
             PowerIntegrate: 'PowerIntegrate',
             IntegrationAddition: 'IntegrationAddition',
-            AdditionIntegral: 'AdditionIntegral'
+            AdditionIntegral: 'AdditionIntegral',
+            IntegrationByParts: 'IntegrationByParts',
+            IntegrationByPartsComplete: 'IntegrationByPartsComplete',
+            Fudx: 'Fudx',
+            FuOveruprimedx: 'FuOveruprimedx',
+            OneOverX: 'OneOverX',
+            NaturalLogAbsX: 'NaturalLogAbsX',
+            GeneralFormula8A: 'GeneralFormula8A',
+            GeneralFormula8B: 'GeneralFormula8B',
+            GeneralFormula9A: 'GeneralFormula9A',
+            GeneralFormula9B: 'GeneralFormula9B',
+            TrigonometricFormula10A: 'TrigonometricFormula10A',
+            TrigonometricFormula10B: 'TrigonometricFormula10B',
+            TrigonometricFormula11A: 'TrigonometricFormula11A',
+            TrigonometricFormula11B: 'TrigonometricFormula11B'
         },
         Rules: {
             IntegralConstMultiply: function () {
@@ -178,10 +197,328 @@ MEPH.define('MEPH.math.Expression', {
                 addition.mark('A');
                 addition.name(Expression.RuleType.AdditionIntegral);
                 return addition;
+            },
+            IntegrationByParts: function () {
+                var dv = Expression.variable('v');
+                dv.mark('dv');
+                var du = Expression.variable('u');
+                du.mark('du');
+                var Fx = Expression.func('f', du);
+                var integral = Expression.integral(Fx, dv);
+                integral.name(Expression.RuleType.IntegrationByParts);
+                return integral;
+            },
+            IntegrationByPartsComplete: function () {
+                var u1 = Expression.variable('u');
+                u1.mark('u_1');
+                var f = Expression.func('f', u1);
+
+                var v1 = Expression.variable('v');
+                v1.mark('v_1');
+                var g = Expression.func('g', v1);
+
+                var mul = Expression.multiplication(f, g);
+
+                var v2 = Expression.variable('v');
+                v2.mark('v_2');
+                var g2 = Expression.func('g', v2);
+
+                var du = Expression.variable('u');
+                du.mark('u_2');
+                var integral = Expression.integral(g2, du);
+
+                var subtraction = Expression.subtraction(mul, integral);
+
+                subtraction.name(Expression.RuleType.IntegrationByPartsComplete);
+
+                return subtraction;
+            },
+            Fudx: function () {
+                var u = Expression.variable('u');
+                u.mark('u');
+
+                var dx = Expression.variable('x');
+                dx.mark('dx');
+
+                var fu = Expression.func('f', u);
+
+                var integral = Expression.integral(fu, dx);
+                integral.mark('I');
+
+                integral.name(Expression.RuleType.Fudx);
+
+                return integral;
+            },
+            FuOveruprimedx: function () {
+                var du3 = Expression.variable('u');
+                du3.mark('du3');
+
+                var FuPrime = Expression.dirivitive('f', 1, du3);
+
+                var du2 = Expression.variable('u');
+                du2.mark('du2');
+
+                var Fu = Expression.func('f', du2);
+
+                var du = Expression.variable('u');
+                du.mark('du');
+
+                var fraction = Expression.fraction(Fu, FuPrime);
+
+                var integral = Expression.integral(fraction, du);
+                integral.name(Expression.RuleType.FuOveruprimedx);
+                return integral;
+            },
+            OneOverX: function () {
+
+                var x = Expression.variable('x');
+                x.mark('x');
+
+                var one = Expression.variable('1');
+
+                var fraction = Expression.fraction(one, x);
+
+                var dx = Expression.variable('x');
+
+                var integral = Expression.integral(fraction, dx);
+
+                integral.name(Expression.RuleType.OneOverX);
+
+                return integral;
+            },
+            NaturalLogAbsX: function () {
+
+                var x = Expression.variable('x');
+                x.mark('x');
+
+                var abs = Expression.abs(x);
+
+                var ln = Expression.ln(abs);
+
+                var c = Expression.variable('c');
+
+                var addition = Expression.addition(ln, c);
+
+                addition.name(Expression.RuleType.NaturalLogAbsX);
+
+                return addition;
+            },
+            GeneralFormula8A: function () {
+                var a = Expression.variable('a');
+                a.mark('a');
+
+                var x = Expression.variable('x');
+                x.mark('x');
+
+                var x2 = Expression.power(x, 2);
+
+                var a2 = Expression.power(a, 2);
+
+                var denominator = Expression.addition(x2, a2);
+
+                var one = Expression.variable('1');
+
+                var f = Expression.fraction(one, denominator);
+
+                var dx = Expression.variable('x');
+
+                var integral = Expression.integral(f, dx);
+                integral.name(Expression.RuleType.GeneralFormula8A);
+
+
+                return integral;
+            },
+            GeneralFormula8B: function () {
+
+                var xtan = Expression.variable('x');
+                xtan.mark('x');
+
+                var atan = Expression.variable('a');
+                atan.mark('a_tan');
+
+                var tanexp = Expression.fraction(xtan, atan);
+
+                var tanInv = Expression.tan(tanexp, -1);
+
+                var denominator = Expression.variable('a');
+                denominator.mark('a');
+
+                var numerator = Expression.variable('1');
+
+                var fraction = Expression.fraction(numerator, denominator);
+
+                var c = Expression.variable('c');
+
+                var f = Expression.multiplication(fraction, tanInv);
+
+                var addition = Expression.addition(f, c);
+                addition.name(Expression.RuleType.GeneralFormula8B);
+
+                return addition;
+            },
+            /**
+             * http://myhandbook.info/form_integ.html
+             * General Formula 8 a
+             * @return {MEPH.math.Expression}
+             **/
+            GeneralFormula9A: function () {
+                var a = Expression.variable('a');
+                a.mark('a');
+
+                var x = Expression.variable('x');
+                x.mark('x');
+
+                var a2 = Expression.power(a, 2);
+                var x2 = Expression.power(x, 2);
+
+                var denominator = Expression.subtraction(x2, a2);
+
+                var numerator = Expression.variable('1');
+                var dx = Expression.variable('x');
+                var f = Expression.fraction(numerator, denominator);
+
+                var integral = Expression.integral(f, dx);
+                integral.name(Expression.RuleType.GeneralFormula9A);
+
+                return integral;
+            },
+            /**
+             * http://myhandbook.info/form_integ.html
+             * General Formula 8 b
+             * @return {MEPH.math.Expression}
+             **/
+            GeneralFormula9B: function () {
+                var a2 = Expression.variable('a');
+                a2.mark('a2');
+
+                var x2 = Expression.variable('x');
+                x2.mark('x2');
+
+                var denominator = Expression.addition(x2, a2);
+
+                var a1 = Expression.variable('a');
+                a1.mark('a1');
+
+                var x1 = Expression.variable('x');
+                x1.mark('x1');
+
+                var numerator = Expression.subtraction(x1, a1);
+                var frac = Expression.fraction(numerator, denominator);
+
+                var abs = Expression.abs(frac);
+
+                var ln = Expression.ln(abs);
+
+                var two = Expression.variable('2');
+
+                var a3 = Expression.variable('a');
+                a3.mark('a3');
+                var denom = Expression.multiplication(two, a3);
+
+                var num = Expression.variable('1');
+
+                var fraction = Expression.fraction(num, denom);
+
+                var f = Expression.multiplication(fraction, ln);
+
+                var c = Expression.variable('c');
+
+                var addition = Expression.addition(f, c);
+
+                addition.name(Expression.RuleType.GeneralFormula9B);
+
+                return addition;
+            },
+            /**
+             * http://myhandbook.info/form_integ.html
+             * Trigonometric Formula 10 a
+             * @return {MEPH.math.Expression}
+             **/
+            TrigonometricFormula10A: function () {
+                var dx = Expression.variable('x');
+                dx.mark('dx');
+
+                var x = Expression.variable('x');
+
+                x.mark('x');
+
+                var sin = Expression.sin(x);
+
+                var integral = Expression.integral(sin, dx);
+
+                integral.name(Expression.RuleType.TrigonometricFormula10A);
+
+                return integral;
+            },
+            /**
+             * http://myhandbook.info/form_integ.html
+             * Trigonometric Formula 10 b
+             * @return {MEPH.math.Expression}
+             **/
+            TrigonometricFormula10B: function () {
+                var c = Expression.variable('c');
+
+                var x = Expression.variable('x');
+                x.mark('x');
+
+                var cosine = Expression.cos(x);
+
+                var neg1 = Expression.neg(cosine);
+
+
+                var addition = Expression.addition(neg1, c);
+
+                addition.name(Expression.RuleType.TrigonometricFormula10B);
+
+                return addition;
+            },
+            /**
+             * http://myhandbook.info/form_integ.html
+             * Trigonometric Formula 10 a
+             * @return {MEPH.math.Expression}
+             **/
+            TrigonometricFormula11A: function () {
+                var dx = Expression.variable('x');
+                dx.mark('dx');
+
+                var x = Expression.variable('x');
+
+                x.mark('x');
+
+                var cos = Expression.cos(x);
+
+                var integral = Expression.integral(cos, dx);
+
+                integral.name(Expression.RuleType.TrigonometricFormula11A);
+
+                return integral;
+            },
+            /**
+             * http://myhandbook.info/form_integ.html
+             * Trigonometric Formula 10 b
+             * @return {MEPH.math.Expression}
+             **/
+            TrigonometricFormula11B: function () {
+                var c = Expression.variable('c');
+
+                var x = Expression.variable('x');
+                x.mark('x');
+
+                var sin = Expression.sin(x);
+
+                var addition = Expression.addition(sin, c);
+
+                addition.name(Expression.RuleType.TrigonometricFormula11B);
+
+                return addition;
             }
         },
         matchRule: function (expression, rule, markRule) {
-            return expression.match(rule, markRule || false);
+            var res = expression.match(rule, markRule || false);
+            if (res) {
+                expression.name(rule.name());
+            }
+            return res;
         },
         getMatch: function (expression) {
             return ExpressionMatch.getMatch(expression);
@@ -269,6 +606,26 @@ MEPH.define('MEPH.math.Expression', {
             expression.addPart(Expression.function.numerator, numerator)
             MEPHArray.convert(arguments).subset(1).foreach(function (x) {
                 expression.addPart(Expression.function.denominator, x);
+            });
+            return expression;
+        },
+        ln: function (x) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.ln);
+            expression.addPart(Expression.function.input, x);
+            return expression;
+        },
+        abs: function (x) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.abs);
+            expression.addPart(Expression.function.input, x);
+            return expression;
+        },
+        neg: function () {
+            var expression = new Expression();
+            expression.setExp(Expression.type.negative);
+            MEPHArray.convert(arguments).foreach(function (x) {
+                expression.addPart(Expression.function.input, x);
             });
             return expression;
         },
@@ -363,6 +720,16 @@ MEPH.define('MEPH.math.Expression', {
             expression.setExp(Expression.type.func);
             expression.addPart(Expression.function.name, MEPHArray.convert(arguments).first());
             MEPHArray.convert(arguments).subset(1).foreach(function (x) {
+                expression.addPart(Expression.function.input, x);
+            });
+            return expression;
+        },
+        dirivitive: function (func, dir) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.dirivitive);
+            expression.addPart(Expression.function.name, MEPHArray.convert(arguments).first());
+            expression.addPart(Expression.function.dirivitive, dir);
+            MEPHArray.convert(arguments).subset(2).foreach(function (x) {
                 expression.addPart(Expression.function.input, x);
             });
             return expression;
@@ -544,8 +911,17 @@ MEPH.define('MEPH.math.Expression', {
                 return 'f(x)';
             case Expression.type.func:
                 return me.partLatex(Expression.function.name) + '(' + me.parts.subset(1).select(function (x) {
-                    return x.val;
+                    return x.val && x.val.latex ? x.val.latex() : x.val;
                 }).join(',') + ')';
+                break;
+            case Expression.type.dirivitive:
+                return me.partLatex(Expression.function.name) +
+                    [].interpolate(0, parseInt(me.parts.nth(2).val), function (x) {
+                        return "'";
+                    }).join('') +
+                    '(' + me.parts.subset(2).select(function (x) {
+                        return x.val && x.val.latex ? x.val.latex() : x.val;
+                    }).join(',') + ')';
                 break;
             case Expression.type.multiplication:
                 if (me.parts.unique(function (x) { return x.val.latex(); }).length !== me.parts.length ||
@@ -564,6 +940,10 @@ MEPH.define('MEPH.math.Expression', {
                     ' \\bmod ' +
                     me.latexPart(me.parts.nth(2));
                 break;
+            case Expression.type.negative:
+                return '-' + me.parts.orderBy(me.orderParts.bind(me)).select(function (x, index) {
+                    return x.val && x.val.latex ? x.val.latex() : x.val;
+                }).join('');;
             case Expression.type.limit:
                 var exp = me.partLatex(Expression.function.expression);
                 var a = me.partLatex(Expression.function.start);
@@ -575,6 +955,31 @@ MEPH.define('MEPH.math.Expression', {
                     return x.val.latex();
                 }).join(' / ');
                 break;
+            case Expression.type.ln:
+                var start = '\\ln ';
+                if (me.parts.length > 1) {
+                    start += '(';
+                }
+                var val = me.parts.first().val;
+                if (val.latex) {
+                    start += val.latex();
+                }
+                else {
+                    start += val;
+                }
+                if (me.parts.length > 1) {
+                    start += ')';
+                }
+                return start;
+            case Expression.type.abs:
+                var start = '|';
+
+                var val = me.parts.select(function (x) {
+                    return me.latexPart(x);
+                }).join('');
+                start += val;
+                start += '|';
+                return start;
             case Expression.type.fraction:
                 if (me.parts.length === 2) {
                     return '\\frac{' + me.partLatex(Expression.function.numerator) +
@@ -614,6 +1019,8 @@ MEPH.define('MEPH.math.Expression', {
             case Expression.type.power:
                 return me.partLatex(Expression.function.base) + '^{' + me.partLatex(Expression.function.power) + '}';
                 break;
+            default:
+                throw new Error('unhandled : ' + me.type);
         }
     },
     latexPart: function (start) {
@@ -657,11 +1064,12 @@ MEPH.define('MEPH.math.Expression', {
     orderParts: function (a, b) {
         var order = {
             variable: 0,
+            ln: 8,
             integral: 10,
             addition: 5,
             power: 5,
             limit: 5,
-            fraction: 5,
+            fraction: 3,
             sin: 5,
             cos: 5,
             tan: 5,

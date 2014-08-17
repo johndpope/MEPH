@@ -114,7 +114,6 @@
             var result = Expression.translation.Translate(rule1, rule2);
             var matches = Expression.matchRule(result, rule2);
             expect(matches).toBeTruthy();
-            return printExpressionToScreen(result);
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
         }).then(function (x) {
@@ -142,68 +141,6 @@
         });
     });
 
-
-    //it('match int(u +/- v +/- w) -> int(u) +/- int(v) +/- int(w)', function (done) {
-    //    MEPH.requires('MEPH.math.Expression').then(function ($class) {
-    //        var Expression = MEPH.math.Expression;
-    //        var expression = Expression.integral(
-    //                        Expression.addition(Expression.func('f', 'x'),
-    //                            Expression.func('g', 'x'),
-    //                            Expression.func('h', 'x')), Expression.variable('x'));
-    //        var rule2 = Expression.Rules.AdditionIntegral();
-    //        var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition(), true);
-    //        expect(expression.getMarks().dx).toBeTruthy();
-    //        var transformation = {
-    //            repeat: {
-    //                A: {
-    //                    target: 'A',
-
-    //                    trans: {
-    //                        transformation: {
-    //                            from: Expression.RuleType.IntegrationAddition,
-    //                            to: Expression.RuleType.AdditionIntegral
-    //                        },
-    //                        f: 'f'
-    //                    }
-    //                },
-    //                dx: {
-    //                    scatter: {
-    //                        transformation: {
-    //                            from: Expression.RuleType.IntegrationAddition,
-    //                            to: Expression.RuleType.AdditionIntegral
-    //                        },
-    //                        dx: 'dx'
-    //                    }
-    //                }
-    //            },
-    //            transform: {
-    //                from: 'A',
-    //                to: 'A'
-    //            }
-    //        };
-    //        var result = Expression.translation.Transform(transformation, expression, rule2);
-    //        console.log(result.latex());
-    //        expect(result.getMarks().A.parts.length === 3).toBeTruthy();
-    //            transformation: {
-    //                from: Expression.RuleType.IntegrationAddition,
-    //                to: null
-    //            },
-    //            repeat: {
-    //                A: 'A'
-    //            },
-    //            f: 'f',
-    //            dx: 'dx'
-    //        };
-    //        var result = Expression.translation.Transform(transformation, expression, rule2);
-    //        console.log(result.latex());
-    //        expecct(result.getMarks().A.parts.length === 3).toBeTruthy();
-    //        expect(result).toBeTruthy();
-    //    }).catch(function () {
-    //        expect(new Error('something went wrong while creating an expression')).caught();
-    //    }).then(function (x) {
-    //        done();
-    //    });
-    //});
     it('match int(u +/- v +/- w) -> int(u) +/- int(v) +/- int(w)', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
@@ -254,4 +191,246 @@
     });
 
 
+    it('match int(u +/- v +/- w) -> int(u) +/- int(v) +/- int(w)', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                            Expression.addition(Expression.func('f', 't'),
+                                Expression.func('g', 'y'),
+                                Expression.func('h', 'x')), Expression.variable('x'));
+            var rule2 = Expression.Rules.AdditionIntegral();
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition(), true);
+            expect(expression.getMarks().dx).toBeTruthy();
+            var result = Expression.translation.Translate(expression, rule2);
+            console.log(result.latex());
+            expect(result.getMarks().A.parts.length === 3).toBeTruthy();
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+
+    it(' do Integration By Parts ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.IntegrationByParts();
+            var rule2 = Expression.Rules.IntegrationByPartsComplete();
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.IntegraionByPartsComplete,
+                    to: Expression.RuleType.IntegrationByParts
+                },
+                v_2: 'dv',
+                v_1: 'dv',
+                u_1: 'du',
+                u_2: 'du'
+            };
+
+            var result = Expression.translation.Transform(transformation, rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it(' translateIntegrationByParts ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.IntegrationByParts();
+            var rule2 = Expression.Rules.IntegrationByPartsComplete();
+
+            var result = Expression.translation.Translate(rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function () {
+            expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+
+    it(' OneOverX -> NaturalLogAbsX ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.OneOverX();
+            var rule2 = Expression.Rules.NaturalLogAbsX();
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.OneOverX,
+                    to: Expression.RuleType.NaturalLogAbsX
+                },
+                x: 'x'
+            };
+
+            var result = Expression.translation.Transform(transformation, rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it(' OneOverX -> NaturalLogAbsX ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.OneOverX();
+            var rule2 = Expression.Rules.NaturalLogAbsX();
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.OneOverX,
+                    to: Expression.RuleType.NaturalLogAbsX
+                },
+                x: 'x'
+            };
+
+            var result = Expression.translation.Transform(transformation, rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it(' Translate OneOverX -> NaturalLogAbsX ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.OneOverX();
+            var rule2 = Expression.Rules.NaturalLogAbsX();
+
+            var result = Expression.translation.Translate(rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it(' Translate GeneralFormula8A -> GeneralFormula8B ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.GeneralFormula8A();
+            var rule2 = Expression.Rules.GeneralFormula8B();
+
+            var result = Expression.translation.Translate(rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it(' Translate GeneralFormula9A -> GeneralFormula9B ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.GeneralFormula9A();
+            var rule2 = Expression.Rules.GeneralFormula9B();
+
+            var result = Expression.translation.Translate(rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+            return printExpressionToScreen(result);
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it(' Translate GeneralFormula9B  -> GeneralFormula9A', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.GeneralFormula9A();
+            var rule2 = Expression.Rules.GeneralFormula9B();
+
+            var result = Expression.translation.Translate(rule2, rule1);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('TrigonometricFormula10A -> TrigonometricFormula10B', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.TrigonometricFormula10A();
+            var rule2 = Expression.Rules.TrigonometricFormula10B();
+
+            var result = Expression.translation.Translate(rule2, rule1);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+            return printExpressionToScreen(result);
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('TrigonometricFormula11A -> TrigonometricFormula11B', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.TrigonometricFormula11A();
+            var rule2 = Expression.Rules.TrigonometricFormula11B();
+
+            var result = Expression.translation.Translate(rule1, rule2);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('TrigonometricFormula11B -> TrigonometricFormula11A ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var rule1 = Expression.Rules.TrigonometricFormula11A();
+            var rule2 = Expression.Rules.TrigonometricFormula11B();
+
+            var result = Expression.translation.Translate(rule2, rule1);
+
+            console.log(result.latex());
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
 });

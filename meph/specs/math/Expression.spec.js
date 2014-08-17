@@ -903,10 +903,11 @@
             var expression = Expression.Rules.IntegrationAddition();
 
             for (var i in Expression.Rules) {
+                expect(Expression.Rules[i]).theTruth(i + ' does not have a name.');
                 expect(Expression.Rules[i]().name).theTruth(i + ' does not have a name.');
             }
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e).caught();
         }).then(function (x) {
             done();
         });
