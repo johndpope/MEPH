@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>The source code</title>
+  <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
+  <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
+  <style type="text/css">
+    .highlight { display: block; background-color: #ddd; }
+  </style>
+  <script type="text/javascript">
+    function highlight() {
+      document.getElementById(location.hash.replace(/#/, "")).className = "highlight";
+    }
+  </script>
+</head>
+<body onload="prettyPrint(); highlight();">
+  <pre class="prettyprint lang-js"><span id='MEPH-math-ExpressionTranslation'>/**
+</span> * @class MEPH.math.ExpressionTranslation
+ *
+ **/
+MEPH.define(&#39;MEPH.math.ExpressionTranslation&#39;, {
+    alternateNames: &#39;ExpressionTranslation&#39;,
+    statics: {
+        translate: function (a, b) {
+            switch (a.name()) {
+                case Expression.RuleType.IntegralConst:
+                    return ExpressionTranslation.translateIntegralConst(a, b);
+                case Expression.RuleType.IntegralConstMultiply:
+                    return ExpressionTranslation.translateIntegralConstMultiply(a, b);
+            }
+        },
+<span id='MEPH-math-ExpressionTranslation-method-transform'>        /**
+</span>         * Transforms a expression a in to expression b
+         * @param {Object} transform
+         * @param {MEPH.math.Expression} a
+         * @param {MEPH.math.Expression} b
+         */
+        transform: function (transform, a, b) {
+            var a_copy = a.copy();
+            var b_copy = b.copy();
+            var a_marks = a_copy.getMarks();
+            var b_marks = b_copy.getMarks();
+
+            for (var i in transform) {
+                if (i !== &#39;transformation&#39;) {
+                    var ai;
+                    var bi;
+                    if (transform.transformation.from === a.name()) {
+                        ai = i;
+                        bi = transform[i];
+                    }
+                    else {
+                        ai = transform[i];
+                        bi = i;
+                    }
+                    b_copy.swap(bi, a_copy.getMark(ai));
+                }
+            }
+            return b_copy;
+        },
+        translateIntegralConst: function (a, b) {
+            a = a.copy();
+            b = b.copy();
+            var a_marks = a.getMarks();
+            var result = b.copy();
+            var b_marks = result.getMarks();
+            switch (b.name()) {
+                case Expression.RuleType.AxPlusC:
+                    var transformation = {
+                        transformation: {
+                            from: Expression.RuleType.IntegralConst,
+                            to: Expression.RuleType.AxPlusC
+                        },
+                        C: &#39;A&#39;,
+                        dx: &#39;x&#39;
+                    };
+                    return Expression.translation.Transform(transformation, a, b);
+                default: return null;
+            }
+        },
+<span id='MEPH-math-ExpressionTranslation-method-translateIntegralConstMultiply'>        /**
+</span>         * Translates the IntegralConstMultiply
+         * @param {MEPH.math.Expression} a
+         * @param {MEPH.math.Expression} b
+         **/
+        translateIntegralConstMultiply: function (a, b) {
+            a = a.copy();
+            b = b.copy();
+            var a_marks = a.getMarks();
+            var result = b.copy();
+            var b_marks = result.getMarks();
+            switch (b.name()) {
+                case Expression.MultiplyIntegralofFx:
+
+                    break;
+                default: return null;
+            }
+        }
+    }
+});</pre>
+</body>
+</html>

@@ -32,6 +32,7 @@ MEPH.define('MEPH.math.Expression', {
             division: 'division',
             anything: 'anything'
         },
+
         'function': {
             input: 'input',
             start: 'start',
@@ -59,11 +60,12 @@ MEPH.define('MEPH.math.Expression', {
             AxPlusC: 'AxPlusC',
             Power: 'Power',
             PowerIntegrate: 'PowerIntegrate',
-            IntegrationAddition: 'IntegrationAddition'
+            IntegrationAddition: 'IntegrationAddition',
+            AdditionIntegral: 'AdditionIntegral'
         },
         Rules: {
             IntegralConstMultiply: function () {
-                var c = Expression.variable('#C');
+                var c = Expression.variable('A');
                 c.mark('C');
                 var a = Expression.anything();
                 a.mark('A');
@@ -99,7 +101,7 @@ MEPH.define('MEPH.math.Expression', {
                 return expression;
             },
             AxPlusC: function () {
-                var a = Expression.variable('#C');
+                var a = Expression.variable('A');
                 a.mark('A');
                 var x = Expression.variable('x');
                 x.mark('x');
@@ -108,7 +110,7 @@ MEPH.define('MEPH.math.Expression', {
 
                 var expression = Expression.addition(Expression.multiplication(a, x), c);
 
-                expression.name(Expression.RuleType.IntegralConst);
+                expression.name(Expression.RuleType.AxPlusC);
 
                 return expression;
             },
@@ -157,14 +159,28 @@ MEPH.define('MEPH.math.Expression', {
                 var addition = Expression.addition(func);
                 addition.mark('A');
                 addition.repeat = true;
-                var integral = Expression.integral(addition, 'x');
+                var dx = Expression.variable('x');
+                dx.mark('dx');
+                var integral = Expression.integral(addition, dx);
                 integral.mark('I');
                 integral.name(Expression.RuleType.IntegrationAddition);
                 return integral;
+            },
+            AdditionIntegral: function () {
+                var func = Expression.func('f', 'x');
+                func.mark('f');
+                var dx = Expression.variable('x');
+                dx.mark('dx');
+                var integral = Expression.integral(func, dx);
+                integral.mark('I');
+                var addition = Expression.addition(integral);
+                addition.repeat = true;
+                addition.name(Expression.RuleType.AdditionIntegral);
+                return addition;
             }
         },
-        matchRule: function (expression, rule) {
-            return expression.match(rule);
+        matchRule: function (expression, rule, markRule) {
+            return expression.match(rule, markRule || false);
         },
         getMatch: function (expression) {
             return ExpressionMatch.getMatch(expression);
@@ -377,7 +393,20 @@ MEPH.define('MEPH.math.Expression', {
         type: null,
         _mark: null,
         _parent: null,
+        repeat: false,
         _name: null
+    },
+    /**
+     * @private
+     * If the expession is repeating, its repeating parts are returned in an array.
+     * @returns {Array}
+     **/
+    getRepeatParts: function () {
+        var me = this;
+        if (me.repeat) {
+            return me.getParts();
+        }
+        return [];
     },
     copy: function () {
         var me = this;
@@ -385,6 +414,7 @@ MEPH.define('MEPH.math.Expression', {
         expression.type = me.type;
         expression.mark(me.mark());
         expression.name(me.name());
+        expression.repeat = me.repeat;
         expression.parts = me.getParts().select(function (x) {
             var copy = x.val.copy ? x.val.copy() : x.val;
             if (x.val.copy) {
@@ -478,10 +508,10 @@ MEPH.define('MEPH.math.Expression', {
                     '\\int_' +
                     middle + ' ' +
                 '\\! ' +
-                me.parts.first().val.latex() + ' ' +
+                me.partLatex(Expression.function.input) + ' ' +
                 '\\,' + ' ' +
                 '\\mathrm{d}' +
-                me.partLatex(Expression.function.respectTo) + '.'
+                me.partLatex(Expression.function.respectTo) + ''
                 return result;
             case Expression.type.addition:
                 return me.parts.select(function (x) {
@@ -493,6 +523,8 @@ MEPH.define('MEPH.math.Expression', {
                     return x.val.latex();
                 }).join(' - ');
                 break;
+            case Expression.type.anything:
+                return 'f(x)';
             case Expression.type.func:
                 return me.partLatex(Expression.function.name) + '(' + me.parts.subset(1).select(function (x) {
                     return x.val;
@@ -501,12 +533,12 @@ MEPH.define('MEPH.math.Expression', {
             case Expression.type.multiplication:
                 if (me.parts.unique(function (x) { return x.val.latex(); }).length !== me.parts.length ||
                     me.parts.where(function (x) { return parseFloat(x.val.latex()); }).length !== me.parts.length || x.val.latex() === '0') {
-                    return me.parts.select(function (x, index) {
+                    return me.parts.orderBy(me.orderParts.bind(me)).select(function (x, index) {
                         return x.val.latex();
                     }).join('');
                 }
                 else
-                    return me.parts.select(function (x, index) {
+                    return me.parts.orderBy(me.orderParts.bind(me)).select(function (x, index) {
                         return x.val.latex();
                     }).join(' * ');
                 break;
@@ -603,6 +635,37 @@ MEPH.define('MEPH.math.Expression', {
 
     },
     /**
+     * @private
+     */
+    orderParts: function (a, b) {
+        var order = {
+            variable: 0,
+            integral: 10,
+            addition: 5,
+            power: 5,
+            limit: 5,
+            fraction: 5,
+            sin: 5,
+            cos: 5,
+            tan: 5,
+            csc: 5,
+            cot: 5,
+            sec: 5,
+            tan: 5,
+            func: 5,
+            mod: 5,
+            modulo: 5,
+            theta: 5,
+            subtraction: 5,
+            plusminus: 5,
+            multiplication: 5,
+            division: 5,
+            anything: 5
+        }
+
+        return (a.val && a.val.type ? order[a.val.type] || 0 : 0) - (b.val && b.val.type ? order[b.val.type] || 0 : 0);
+    },
+    /**
      * Removes the part.
      * @param {MEPH.math.Expression} part
      * @returns {Array} removed parts.
@@ -634,7 +697,7 @@ MEPH.define('MEPH.math.Expression', {
      * @param {U4M.math.Expression} rule
      * @return {Boolean}
      **/
-    match: function (rule) {
+    match: function (rule, markRule) {
         var me = this;
         if (me.type === rule.type) {
             var meParts = me.getParts().select();
@@ -646,7 +709,7 @@ MEPH.define('MEPH.math.Expression', {
                         return false;
                     }
                     if (y.val && x.val && y.val.equals && x.val.equals) {
-                        return x.val.match(y.val);
+                        return x.val.match(y.val, markRule);
                     }
                     else if (y.val && !x.val || !y.val && x.val) {
                         return false;
@@ -657,6 +720,7 @@ MEPH.define('MEPH.math.Expression', {
                 });
                 if (first) {
                     ruleParts.removeFirstWhere(function (t) { return t === first; });
+                    return first;
                 }
                 else return false;
             };
@@ -665,7 +729,14 @@ MEPH.define('MEPH.math.Expression', {
                     return rule.parts.first();
                 });
                 meParts.foreach(matchParts.bind(me, repeatedparts));
-                if (repeatedparts.length === 0) return true;
+                if (repeatedparts.length === 0) {
+                    if (markRule) {
+                        me.mark(rule.mark());
+                    }
+                    me.repeat = rule.repeat;
+
+                    return true;
+                }
                 return false;
             }
             else if (rule.part(Expression.type.anything)) {
@@ -675,7 +746,12 @@ MEPH.define('MEPH.math.Expression', {
                 });
 
                 meParts.foreach(matchParts.bind(me, ruleParts));
-                if (ruleParts.length === 0) return true;
+                if (ruleParts.length === 0) {
+                    if (markRule) {
+                        me.mark(rule.mark());
+                    }
+                    return true;
+                }
                 return false;
             }
             else {
@@ -683,11 +759,20 @@ MEPH.define('MEPH.math.Expression', {
                     return false;
                 }
                 meParts.foreach(matchParts.bind(me, ruleParts));
-                if (ruleParts.length > 0) return false;
+                if (ruleParts.length > 0) {
+                    return false;
+                }
+                if (markRule) {
+                    me.mark(rule.mark());
+                }
+
                 return true;
             }
         }
         else if (rule.type === Expression.type.anything) {
+            if (markRule) {
+                me.mark(rule.mark());
+            }
             return true;
         }
     },

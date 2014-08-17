@@ -2,4 +2,4 @@ C:\Users\mephisto\Documents\Visual Studio 2010\WebSites\ChordMaster\MEPH
 
 
 
-jsduck meph/src --builtin-classes --guides guides --output docs
+jsduck meph/src --builtin-classes --guides guides.json --output docs
