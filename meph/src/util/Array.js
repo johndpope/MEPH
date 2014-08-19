@@ -495,6 +495,7 @@ MEPH.define('MEPH.util.Array', {
                     value: function (func) {
                         var result = MEPH.util.Array.create();
                         var finalresult = MEPH.util.Array.create();
+                        func = func || function (x) { return x; };
                         var collection = this;
                         for (var i = 0 ; i < collection.length ; i++) {
                             //if (func(collection[i])) {

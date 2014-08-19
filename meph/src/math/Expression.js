@@ -115,7 +115,6 @@ MEPH.define('MEPH.math.Expression', {
                 dx.mark('dx');
                 var expression = Expression.integral(c, dx);
                 expression.mark('I');
-
                 expression.name(Expression.RuleType.IntegralConst);
                 return expression;
             },
@@ -653,7 +652,7 @@ MEPH.define('MEPH.math.Expression', {
         },
         /**
          * Expresses cos
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         cos: function (exp, power) {
@@ -661,7 +660,7 @@ MEPH.define('MEPH.math.Expression', {
         },
         /**
          * Expresses tan
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         tan: function (exp, power) {
@@ -669,7 +668,7 @@ MEPH.define('MEPH.math.Expression', {
         },
         /**
          * Expresses sin
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         sin: function (exp, power) {
@@ -677,7 +676,7 @@ MEPH.define('MEPH.math.Expression', {
         },
         /**
          * Expresses csc
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         csc: function (exp, power) {
@@ -685,7 +684,7 @@ MEPH.define('MEPH.math.Expression', {
         },
         /**
          * Expresses sec
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         sec: function (exp, power) {
@@ -693,7 +692,7 @@ MEPH.define('MEPH.math.Expression', {
         },
         /**
          * Expresses cot
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         cot: function (exp, power) {
@@ -702,7 +701,7 @@ MEPH.define('MEPH.math.Expression', {
         /**
          * Expresses a trigonemtric function like, cos, sin and tan
          * @param {String} type
-         * @param {MEPH.expression.Expression} exp
+         * @param {MEPH.math.Expression} exp
          * @param {Number} power
          **/
         trigonometric: function (type, exp, power) {
@@ -759,6 +758,7 @@ MEPH.define('MEPH.math.Expression', {
         expression: null,
         parts: null,
         type: null,
+        dependencies: null,
         _mark: null,
         _parent: null,
         repeat: false,
@@ -791,6 +791,7 @@ MEPH.define('MEPH.math.Expression', {
             return { type: x.type, val: copy };
         });
         expression.expression = me.expression;
+        expression.dependencies = me.getDependencies().select();
         return expression;
     },
     mark: function (val) {
@@ -858,6 +859,36 @@ MEPH.define('MEPH.math.Expression', {
         });
         return marks;
     },
+    /**
+     * Gets the list of variables and consts in the expression.
+     * @return {Array}
+     **/
+    respects: function () {
+        var me = this;
+        var respects = me.getParts().select(function (x) {
+            if (x.val) {
+                if (x.val instanceof Expression) {
+                    return x.val.respects();
+                }
+                else {
+                    if (isNaN(parseFloat(x.val))) {
+                        return x.val;
+                    }
+                    else return null;
+                }
+            }
+            else {
+                return null;
+            }
+        }).concatFluent(function (x) {
+            if (x) {
+                return Array.isArray(x) ? x : [x];
+            }
+            return [];
+        }).unique();
+
+        return respects;
+    },
     addPart: function (type, val) {
         var me = this;
         if (val.parent) {
@@ -874,6 +905,47 @@ MEPH.define('MEPH.math.Expression', {
 
         return me._parent;
     },
+    /**
+     * Adds a dependency between itself and another expression relative to it.
+     * @param {String} offset
+     * @param {String} part
+     * @param {Function} ruleFunc
+     */
+    dependency: function (offset, part, ruleFunc) {
+        var me = this;
+        me.dependencies.push({ offset: offset, part: part, ruleFunction: ruleFunc });
+    },
+    /**
+     * Gets dependencies
+     * @return {Array}
+     **/
+    getDependencies: function () {
+        var me = this;
+        return me.dependencies;
+    },
+    dependenciesAreRespected: function (expession) {
+        var me = this;
+
+        return me.getDependencies().all(function (d) {
+            var offset;
+            switch (d.offset) {
+                case 'parent':
+                    offset = expession.parent();
+                    break
+                default:
+                    throw new Error('not handled offset');
+            }
+            if (!offset) {
+                throw new Error('no offset found');
+            }
+            var part = offset.part(d.part);
+            return d.ruleFunction(expession, part);
+        });
+    },
+    /**
+     * Converts expressions in to latex format.s
+     * @return {String}
+     **/
     latex: function () {
         var me = this,
             result;
@@ -1115,11 +1187,12 @@ MEPH.define('MEPH.math.Expression', {
         var me = this;
         me.expression = {
         };
+        me.dependencies = [];
         me.parts = [];
     },
     /**
      * Matches an expression to a rule.
-     * @param {U4M.math.Expression} rule
+     * @param {MEPH.math.Expression} rule
      * @return {Boolean}
      **/
     match: function (rule, markRule) {

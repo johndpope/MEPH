@@ -28,6 +28,27 @@ MEPH.define(&#39;MEPH.math.ExpressionTranslation&#39;, {
                     return ExpressionTranslation.translateIntegralConst(a, b);
                 case Expression.RuleType.IntegralConstMultiply:
                     return ExpressionTranslation.translateIntegralConstMultiply(a, b);
+                case Expression.RuleType.Power:
+                case Expression.RuleType.PowerIntegrate:
+                    return ExpressionTranslation.translatePowerIntegrate(a, b);
+                case Expression.RuleType.IntegrationAddition:
+                    return ExpressionTranslation.translateIntegrationAddition(a, b);
+                case Expression.RuleType.IntegrationByParts:
+                    return ExpressionTranslation.translateIntegrationByParts(a, b);
+                case Expression.RuleType.OneOverX:
+                    return ExpressionTranslation.translateOneOverX(a, b);
+                case Expression.RuleType.GeneralFormula8A:
+                case Expression.RuleType.GeneralFormula8B:
+                    return ExpressionTranslation.translateGeneralFormula8(a, b);
+                case Expression.RuleType.GeneralFormula9A:
+                case Expression.RuleType.GeneralFormula9B:
+                    return ExpressionTranslation.translateGeneralFormula9(a, b);
+                case Expression.RuleType.TrigonometricFormula10A:
+                case Expression.RuleType.TrigonometricFormula10B:
+                    return ExpressionTranslation.translateGeneralFormula10(a, b);
+                case Expression.RuleType.TrigonometricFormula11A:
+                case Expression.RuleType.TrigonometricFormula11B:
+                    return ExpressionTranslation.translateGeneralFormula11(a, b);
             }
         },
 <span id='MEPH-math-ExpressionTranslation-method-transform'>        /**
@@ -36,28 +57,200 @@ MEPH.define(&#39;MEPH.math.ExpressionTranslation&#39;, {
          * @param {MEPH.math.Expression} a
          * @param {MEPH.math.Expression} b
          */
+
         transform: function (transform, a, b) {
             var a_copy = a.copy();
             var b_copy = b.copy();
             var a_marks = a_copy.getMarks();
             var b_marks = b_copy.getMarks();
+            var tranformedRepeats;
+            if (transform.repeat) {
 
-            for (var i in transform) {
-                if (i !== &#39;transformation&#39;) {
-                    var ai;
-                    var bi;
-                    if (transform.transformation.from === a.name()) {
-                        ai = i;
-                        bi = transform[i];
+                for (var i in transform.repeat) {
+                    var transFormInfo = transform.repeat[i];
+                    if (transFormInfo.trans) {
+                        var a_repeat = a_marks[i];
+                        var b_repeat = b_marks[transFormInfo.target];
+                        var repeatPartsA = a_repeat.getRepeatParts();
+                        var repeatPartsB = b_repeat.getRepeatParts();
+
+                        if (repeatPartsB.length &gt; 1) {
+                            throw &#39;not handled&#39;;
+                        }
+                        else {
+                            tranformedRepeats = repeatPartsA.select(function (a) {
+                                var tempA = a.val.copy();
+                                return ExpressionTranslation.transform(transFormInfo.trans, tempA, repeatPartsB.first().val);
+                            });
+                        }
                     }
-                    else {
-                        ai = transform[i];
-                        bi = i;
+                    else if (transFormInfo.scatter) {
+                        tranformedRepeats = tranformedRepeats.select(function (x) {
+                            a_copy = a_copy.copy();
+                            return ExpressionTranslation.transform(transFormInfo.scatter, a_copy, x);
+                        });
                     }
-                    b_copy.swap(bi, a_copy.getMark(ai));
                 }
+                b_copy.getMark(transform.transform.to).clearParts();
+                b_copy.getMark(transform.transform.to).setParts(tranformedRepeats, Expression.function.input);
+                return b_copy;
             }
-            return b_copy;
+            else {
+                for (var i in transform) {
+                    if (i !== &#39;transformation&#39; &amp;&amp; i !== &#39;repeat&#39;) {
+                        var ai;
+                        var bi;
+                        if (transform.transformation.from === a.name()) {
+                            ai = i;
+                            bi = transform[i];
+                        }
+                        else {
+                            ai = transform[i];
+                            bi = i;
+                        }
+                        a_copy = a.copy();
+                        b_copy.swap(bi, a_copy.getMark(ai));
+                    }
+                }
+                return b_copy;
+            }
+        },
+        translateGeneralFormula8: function (a, b) {
+
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.GeneralFormula8B,
+                    to: Expression.RuleType.GeneralFormula8A
+                },
+                x: &#39;x&#39;,
+                a_tan: &#39;a&#39;,
+                a: &#39;a&#39;
+            };
+            var result = Expression.translation.Transform(transformation, a, b);
+            return result;
+        },
+        translateGeneralFormula11: function (a, b) {
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.GeneralFormula11A,
+                    to: Expression.RuleType.GeneralFormula11B
+                },
+                x: &#39;x&#39;,
+            };
+            var result = Expression.translation.Transform(transformation, a, b);
+            return result;
+        },
+        translateGeneralFormula10: function (a, b) {
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.GeneralFormula10B,
+                    to: Expression.RuleType.GeneralFormula10A
+                },
+                x: &#39;x&#39;,
+            };
+            var result = Expression.translation.Transform(transformation, a, b);
+            return result;
+
+        },
+        translateGeneralFormula9: function (a, b) {
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.GeneralFormula9B,
+                    to: Expression.RuleType.GeneralFormula9A
+                },
+                x1: &#39;x&#39;,
+                x2: &#39;x&#39;,
+                a1: &#39;a&#39;,
+                a2: &#39;a&#39;,
+                a3: &#39;a&#39;
+            };
+            var result = Expression.translation.Transform(transformation, a, b);
+            return result;
+
+        },
+        translateOneOverX: function (a, b) {
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.OneOverX,
+                    to: Expression.RuleType.NaturalLogAbsX
+                },
+                x: &#39;x&#39;
+            };
+
+            var result = Expression.translation.Transform(transformation, a, b);
+            return result;
+        },
+        translateIntegrationByParts: function (a, b) {
+            var transformation = {
+                transformation: {
+                    from: Expression.RuleType.IntegraionByPartsComplete,
+                    to: Expression.RuleType.IntegrationByParts
+                },
+                v_2: &#39;dv&#39;,
+                v_1: &#39;dv&#39;,
+                u_1: &#39;du&#39;,
+                u_2: &#39;du&#39;
+            };
+
+            var result = Expression.translation.Transform(transformation, a, b);
+
+            return result;
+        },
+        translateIntegrationAddition: function (a, b) {
+            switch (b.name()) {
+                case Expression.RuleType.AdditionIntegral:
+                    var transformation = {
+                        repeat: {
+                            A: {
+                                target: &#39;A&#39;,
+
+                                trans: {
+                                    transformation: {
+                                        from: Expression.RuleType.IntegrationAddition,
+                                        to: Expression.RuleType.AdditionIntegral
+                                    },
+                                    f: &#39;f&#39;
+                                }
+                            },
+                            dx: {
+                                scatter: {
+                                    transformation: {
+                                        from: Expression.RuleType.IntegrationAddition,
+                                        to: Expression.RuleType.AdditionIntegral
+                                    },
+                                    dx: &#39;dx&#39;
+                                }
+                            }
+                        },
+                        transform: {
+                            from: &#39;A&#39;,
+                            to: &#39;A&#39;
+                        }
+                    };
+                    var result = Expression.translation.Transform(transformation, a, b);
+
+                    return result;
+            }
+        },
+        translateIntegralConst: function (a, b) {
+            a = a.copy();
+            b = b.copy();
+            var a_marks = a.getMarks();
+            var result = b.copy();
+            var b_marks = result.getMarks();
+            switch (b.name()) {
+                case Expression.RuleType.AxPlusC:
+                    var transformation = {
+                        transformation: {
+                            from: Expression.RuleType.IntegralConst,
+                            to: Expression.RuleType.AxPlusC
+                        },
+                        C: &#39;A&#39;,
+                        dx: &#39;x&#39;
+                    };
+                    return Expression.translation.Transform(transformation, a, b);
+                default: return null;
+            }
         },
         translateIntegralConst: function (a, b) {
             a = a.copy();
@@ -83,6 +276,7 @@ MEPH.define(&#39;MEPH.math.ExpressionTranslation&#39;, {
 </span>         * Translates the IntegralConstMultiply
          * @param {MEPH.math.Expression} a
          * @param {MEPH.math.Expression} b
+         * @return {MEPH.math.Expression}
          **/
         translateIntegralConstMultiply: function (a, b) {
             a = a.copy();
@@ -91,9 +285,48 @@ MEPH.define(&#39;MEPH.math.ExpressionTranslation&#39;, {
             var result = b.copy();
             var b_marks = result.getMarks();
             switch (b.name()) {
-                case Expression.MultiplyIntegralofFx:
-
-                    break;
+                case Expression.RuleType.MultiplyIntegralofFx:
+                    var transformation = {
+                        transformation: {
+                            from: Expression.RuleType.IntegralConstMultiply,
+                            to: Expression.RuleType.MultiplyIntegralofFx
+                        },
+                        C: &#39;C&#39;,
+                        A: &#39;A&#39;
+                    };
+                    return Expression.translation.Transform(transformation, a, b);
+                default: return null;
+            }
+        },
+<span id='MEPH-math-ExpressionTranslation-method-translatePowerIntegrate'>        /**
+</span>      * Translates the PowerIntegrate
+      * @param {MEPH.math.Expression} a
+      * @param {MEPH.math.Expression} b
+      * @return {MEPH.math.Expression}
+      **/
+        translatePowerIntegrate: function (a, b) {
+            var name = a.name();
+            if (Expression.RuleType.PowerIntegrate !== a.name()) {
+                name = b.name();
+            }
+            a = a.copy();
+            b = b.copy();
+            var a_marks = a.getMarks();
+            var result = b.copy();
+            var b_marks = result.getMarks();
+            switch (name) {
+                case Expression.RuleType.PowerIntegrate:
+                case Expression.RuleType.Power:
+                    var transformation = {
+                        transformation: {
+                            from: Expression.RuleType.PowerIntegrate,
+                            to: Expression.RuleType.Power
+                        },
+                        n_pre: &#39;n&#39;,
+                        n_post: &#39;n&#39;,
+                        x: &#39;x&#39;
+                    };
+                    return Expression.translation.Transform(transformation, a, b);
                 default: return null;
             }
         }

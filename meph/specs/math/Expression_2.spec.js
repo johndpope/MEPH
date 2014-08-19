@@ -433,4 +433,141 @@
             done();
         });
     });
+
+    it(' an expression can say what variables are available for respecting', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var power = Expression.power(Expression.variable('x'), Expression.variable('y'));
+            var respects = power.respects();
+
+            expect(respects.length === 2).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+    it(' an expression will not add numbers to the list', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var power = Expression.power(Expression.variable('x'), Expression.variable('2'));
+            var respects = power.respects();
+
+            expect(respects.length === 1).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+    it(' an expression will not add numbers to the respects  list', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var power = Expression.power(Expression.variable('2'), Expression.variable('2'));
+            var respects = power.respects();
+
+            expect(respects.length === 0).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+    it(' an expression will not add numbers to the respects list', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var power = Expression.addition(Expression.variable('s'), Expression.power(Expression.variable('x'), '2'), Expression.variable('2'));
+            var respects = power.respects();
+
+            expect(respects.length === 2).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it(' an expression will not add duplicates to the respects list', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var power = Expression.addition(Expression.variable('x'), Expression.power(Expression.variable('x'), '2'), Expression.variable('2'));
+            var respects = power.respects();
+
+            expect(respects.length === 1).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('an expression can expression a dependency on another expression', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var c = Expression.variable('#C');
+            c.mark('C');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var expression = Expression.integral(c, dx);
+            expression.mark('I');
+            c.dependency('parent', 'respectTo', function (c, x) {
+                var inRespectTo = x && x.val ? x.val : x;
+                return c.respects().contains(function (x) { return x === inRespectTo; });
+            });
+
+            var list = c.getDependencies();
+
+            expect(list.length).toBe(1);
+            expect(list.first()).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
+
+    it('an expression can tell if an expression respects its dependencies', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var c = Expression.variable('#C');
+            c.mark('C');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var expression = Expression.integral(c, dx);
+            expression.mark('I');
+            c.dependency('parent', 'respectTo', function (c, x) {
+                var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
+                
+                return !c.respects().contains(function (x) { return x === inRespectTo; });
+            });
+
+            var d = Expression.variable('d');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var integral = Expression.integral(d, dx);
+
+            var result = c.dependenciesAreRespected(d);
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
+
+
+    it('an expression has no dependencies, it is considered respected.', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var c = Expression.variable('#C');
+            c.mark('C');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var expression = Expression.integral(c, dx);
+            expression.mark('I');
+          
+            var d = Expression.variable('d');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var integral = Expression.integral(d, dx);
+
+            var result = c.dependenciesAreRespected(d);
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
 });
