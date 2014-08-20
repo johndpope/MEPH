@@ -132,7 +132,6 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 dx.mark(&#39;dx&#39;);
                 var expression = Expression.integral(c, dx);
                 expression.mark(&#39;I&#39;);
-
                 expression.name(Expression.RuleType.IntegralConst);
                 return expression;
             },
@@ -776,6 +775,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
         expression: null,
         parts: null,
         type: null,
+        dependencies: null,
         _mark: null,
         _parent: null,
         repeat: false,
@@ -808,6 +808,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             return { type: x.type, val: copy };
         });
         expression.expression = me.expression;
+        expression.dependencies = me.getDependencies().select();
         return expression;
     },
     mark: function (val) {
@@ -875,6 +876,36 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
         });
         return marks;
     },
+<span id='MEPH-math-Expression-method-respects'>    /**
+</span>     * Gets the list of variables and consts in the expression.
+     * @return {Array}
+     **/
+    respects: function () {
+        var me = this;
+        var respects = me.getParts().select(function (x) {
+            if (x.val) {
+                if (x.val instanceof Expression) {
+                    return x.val.respects();
+                }
+                else {
+                    if (isNaN(parseFloat(x.val))) {
+                        return x.val;
+                    }
+                    else return null;
+                }
+            }
+            else {
+                return null;
+            }
+        }).concatFluent(function (x) {
+            if (x) {
+                return Array.isArray(x) ? x : [x];
+            }
+            return [];
+        }).unique();
+
+        return respects;
+    },
     addPart: function (type, val) {
         var me = this;
         if (val.parent) {
@@ -891,6 +922,47 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
 
         return me._parent;
     },
+<span id='MEPH-math-Expression-method-dependency'>    /**
+</span>     * Adds a dependency between itself and another expression relative to it.
+     * @param {String} offset
+     * @param {String} part
+     * @param {Function} ruleFunc
+     */
+    dependency: function (offset, part, ruleFunc) {
+        var me = this;
+        me.dependencies.push({ offset: offset, part: part, ruleFunction: ruleFunc });
+    },
+<span id='MEPH-math-Expression-method-getDependencies'>    /**
+</span>     * Gets dependencies
+     * @return {Array}
+     **/
+    getDependencies: function () {
+        var me = this;
+        return me.dependencies;
+    },
+    dependenciesAreRespected: function (expession) {
+        var me = this;
+
+        return me.getDependencies().all(function (d) {
+            var offset;
+            switch (d.offset) {
+                case &#39;parent&#39;:
+                    offset = expession.parent();
+                    break
+                default:
+                    throw new Error(&#39;not handled offset&#39;);
+            }
+            if (!offset) {
+                throw new Error(&#39;no offset found&#39;);
+            }
+            var part = offset.part(d.part);
+            return d.ruleFunction(expession, part);
+        });
+    },
+<span id='MEPH-math-Expression-method-latex'>    /**
+</span>     * Converts expressions in to latex format.s
+     * @return {String}
+     **/
     latex: function () {
         var me = this,
             result;
@@ -1132,6 +1204,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
         var me = this;
         me.expression = {
         };
+        me.dependencies = [];
         me.parts = [];
     },
 <span id='MEPH-math-Expression-method-match'>    /**

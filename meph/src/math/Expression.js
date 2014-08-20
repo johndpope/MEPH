@@ -82,6 +82,12 @@ MEPH.define('MEPH.math.Expression', {
             TrigonometricFormula11A: 'TrigonometricFormula11A',
             TrigonometricFormula11B: 'TrigonometricFormula11B'
         },
+        Dependency: {
+            ConstRelation: function (c, x) {
+                var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
+                return !c.respects().contains(function (x) { return x === inRespectTo; });
+            }
+        },
         Rules: {
             IntegralConstMultiply: function () {
                 var c = Expression.variable('A');
@@ -109,8 +115,10 @@ MEPH.define('MEPH.math.Expression', {
                 return expression;
             },
             IntegralConst: function () {
-                var c = Expression.variable('#C');
+                var c = Expression.anything();
                 c.mark('C');
+                c.dependency('parent', 'respectTo', Expression.Dependency.IntegralConst);
+
                 var dx = Expression.variable('x');
                 dx.mark('dx');
                 var expression = Expression.integral(c, dx);
@@ -119,7 +127,7 @@ MEPH.define('MEPH.math.Expression', {
                 return expression;
             },
             AxPlusC: function () {
-                var a = Expression.variable('A');
+                var a = Expression.anything('A');
                 a.mark('A');
                 var x = Expression.variable('x');
                 x.mark('x');
@@ -525,8 +533,9 @@ MEPH.define('MEPH.math.Expression', {
         integrate: function (expression) {
             return ExpressionMatch.integrate(expression);
         },
-        anything: function () {
+        anything: function (v) {
             var expression = new Expression();
+            expression.anything = v || null;
             expression.setExp(Expression.type.anything);
             return expression;
         },
@@ -980,7 +989,7 @@ MEPH.define('MEPH.math.Expression', {
                 }).join(' - ');
                 break;
             case Expression.type.anything:
-                return 'f(x)';
+                return me.anything || 'f(x)';
             case Expression.type.func:
                 return me.partLatex(Expression.function.name) + '(' + me.parts.subset(1).select(function (x) {
                     return x.val && x.val.latex ? x.val.latex() : x.val;
@@ -1267,12 +1276,14 @@ MEPH.define('MEPH.math.Expression', {
                 return true;
             }
         }
-        else if (rule.type === Expression.type.anything) {
+        else if (rule.type === Expression.type.anything && rule.dependenciesAreRespected(me)) {
             if (markRule) {
                 me.mark(rule.mark());
             }
             return true;
         }
+
+        return false;
     },
     /**
      * Returns true if the equation are equal
