@@ -86,6 +86,10 @@ MEPH.define('MEPH.math.Expression', {
             ConstRelation: function (c, x) {
                 var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
                 return !c.respects().contains(function (x) { return x === inRespectTo; });
+            },
+            VariableRelation: function (c, x) {
+                var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
+                return c.respects().contains(function (x) { return x === inRespectTo; });
             }
         },
         Rules: {
@@ -117,7 +121,7 @@ MEPH.define('MEPH.math.Expression', {
             IntegralConst: function () {
                 var c = Expression.anything();
                 c.mark('C');
-                c.dependency('parent', 'respectTo', Expression.Dependency.IntegralConst);
+                c.dependency('parent', 'respectTo', Expression.Dependency.ConstRelation);
 
                 var dx = Expression.variable('x');
                 dx.mark('dx');
@@ -129,6 +133,13 @@ MEPH.define('MEPH.math.Expression', {
             AxPlusC: function () {
                 var a = Expression.anything('A');
                 a.mark('A');
+                a.dependency('sibling', '', function (c, t) {
+                    var inRespectTo = t.select(function (x) {
+                        var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
+                        return inRespectTo;
+                    });
+                    return !inRespectTo.intersection(c.respects()).count();
+                });
                 var x = Expression.variable('x');
                 x.mark('x');
                 var c = Expression.variable('#C');
@@ -145,7 +156,9 @@ MEPH.define('MEPH.math.Expression', {
                 n.mark('n');
                 var x = Expression.variable('x');
                 x.mark('x');
+
                 var power = Expression.power(x, n);
+                x.dependency('grandparent', 'respectTo', Expression.Dependency.VariableRelation);
 
                 var expression = Expression.integral(power, 'x');
                 expression.mark('I');
@@ -932,23 +945,34 @@ MEPH.define('MEPH.math.Expression', {
         var me = this;
         return me.dependencies;
     },
-    dependenciesAreRespected: function (expession) {
+    dependenciesAreRespected: function (expression) {
         var me = this;
 
         return me.getDependencies().all(function (d) {
-            var offset;
+            var offset, part;
             switch (d.offset) {
+                case 'grandparent':
+                    offset = expression.parent().parent();
+                    part = offset.part(d.part);
+                    break;
                 case 'parent':
-                    offset = expession.parent();
+                    offset = expression.parent();
+                    part = offset.part(d.part);
                     break
+                case 'sibling':
+                    offset = expression.parent();
+                    var json = JSON.parse('{' + d.part + '}');
+                    part = offset.parts.where(function (x) {
+                        return x.val !== expression;
+                    });
+                    break;
                 default:
                     throw new Error('not handled offset');
             }
             if (!offset) {
                 throw new Error('no offset found');
             }
-            var part = offset.part(d.part);
-            return d.ruleFunction(expession, part);
+            return d.ruleFunction(expression, part);
         });
     },
     /**
@@ -1206,7 +1230,7 @@ MEPH.define('MEPH.math.Expression', {
      **/
     match: function (rule, markRule) {
         var me = this;
-        if (me.type === rule.type) {
+        if (me.type === rule.type && rule.dependenciesAreRespected(me)) {
             var meParts = me.getParts().select();
             var ruleParts = rule.getParts().select();
 

@@ -533,7 +533,7 @@
             expression.mark('I');
             c.dependency('parent', 'respectTo', function (c, x) {
                 var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
-                
+
                 return !c.respects().contains(function (x) { return x === inRespectTo; });
             });
 
@@ -549,6 +549,33 @@
         }).then(done);
     });
 
+    it('an expression can tell if an expression respects its dependencies, siblings', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var c = Expression.variable('#C');
+            c.mark('C');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var expression = Expression.integral(c, dx);
+            expression.mark('I');
+            c.dependency('sibling', '', function (c, t) {
+                var inRespectTo = t.select(function (x) {
+                    var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
+                    return inRespectTo;
+                });
+                return !inRespectTo.intersection(c.respects()).count();
+            });
+
+            var d = Expression.variable('d');
+            var dx = Expression.variable('x');
+            dx.mark('dx');
+            var multiplication = Expression.multiplication(d, dx);
+            
+            var result = c.dependenciesAreRespected(d);
+            expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
 
     it('an expression has no dependencies, it is considered respected.', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
@@ -558,7 +585,7 @@
             dx.mark('dx');
             var expression = Expression.integral(c, dx);
             expression.mark('I');
-          
+
             var d = Expression.variable('d');
             var dx = Expression.variable('x');
             dx.mark('dx');
@@ -570,4 +597,5 @@
             expect(e).caught();
         }).then(done);
     });
+
 });

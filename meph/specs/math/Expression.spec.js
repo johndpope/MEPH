@@ -578,8 +578,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegralConst());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -594,8 +594,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegralConst());
 
             expect(!rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e).caught();
         }).then(function (x) {
             done();
         });
@@ -666,8 +666,29 @@
             var rule = Expression.matchRule(expression, Expression.Rules.Power());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('doesnt match power rule  int(y^n)dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                Expression.power(
+                    Expression.variable('y'),
+                    Expression.variable('n'))
+                , 'x');
+
+            debugger
+            var rule = Expression.matchRule(expression, Expression.Rules.Power());
+
+            expect(!rule).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
         }).then(function (x) {
             done();
         });

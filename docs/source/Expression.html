@@ -99,6 +99,12 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             TrigonometricFormula11A: &#39;TrigonometricFormula11A&#39;,
             TrigonometricFormula11B: &#39;TrigonometricFormula11B&#39;
         },
+        Dependency: {
+            ConstRelation: function (c, x) {
+                var inRespectTo = x &amp;&amp; x.val &amp;&amp; x.val.part ? x.val.part(&#39;variable&#39;).val : x.val;
+                return !c.respects().contains(function (x) { return x === inRespectTo; });
+            }
+        },
         Rules: {
             IntegralConstMultiply: function () {
                 var c = Expression.variable(&#39;A&#39;);
@@ -126,8 +132,10 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 return expression;
             },
             IntegralConst: function () {
-                var c = Expression.variable(&#39;#C&#39;);
+                var c = Expression.anything();
                 c.mark(&#39;C&#39;);
+                c.dependency(&#39;parent&#39;, &#39;respectTo&#39;, Expression.Dependency.IntegralConst);
+
                 var dx = Expression.variable(&#39;x&#39;);
                 dx.mark(&#39;dx&#39;);
                 var expression = Expression.integral(c, dx);
@@ -136,7 +144,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 return expression;
             },
             AxPlusC: function () {
-                var a = Expression.variable(&#39;A&#39;);
+                var a = Expression.anything(&#39;A&#39;);
                 a.mark(&#39;A&#39;);
                 var x = Expression.variable(&#39;x&#39;);
                 x.mark(&#39;x&#39;);
@@ -542,8 +550,9 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
         integrate: function (expression) {
             return ExpressionMatch.integrate(expression);
         },
-        anything: function () {
+        anything: function (v) {
             var expression = new Expression();
+            expression.anything = v || null;
             expression.setExp(Expression.type.anything);
             return expression;
         },
@@ -997,7 +1006,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 }).join(&#39; - &#39;);
                 break;
             case Expression.type.anything:
-                return &#39;f(x)&#39;;
+                return me.anything || &#39;f(x)&#39;;
             case Expression.type.func:
                 return me.partLatex(Expression.function.name) + &#39;(&#39; + me.parts.subset(1).select(function (x) {
                     return x.val &amp;&amp; x.val.latex ? x.val.latex() : x.val;
@@ -1284,12 +1293,14 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 return true;
             }
         }
-        else if (rule.type === Expression.type.anything) {
+        else if (rule.type === Expression.type.anything &amp;&amp; rule.dependenciesAreRespected(me)) {
             if (markRule) {
                 me.mark(rule.mark());
             }
             return true;
         }
+
+        return false;
     },
 <span id='MEPH-math-Expression-method-equals'>    /**
 </span>     * Returns true if the equation are equal

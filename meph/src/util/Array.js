@@ -86,6 +86,7 @@ MEPH.define('MEPH.util.Array', {
                     value: function (othercollection, func) {
                         var collection = this;
                         var result = [];
+                        func = func || function (x, y) { return x === y; };
                         for (var i = collection.length; i--;/**/) {
                             for (var j = othercollection.length; j--;/**/) {
                                 if ((func(othercollection[j], collection[i]))) {
