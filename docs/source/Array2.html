@@ -103,6 +103,7 @@ MEPH.define(&#39;MEPH.util.Array&#39;, {
                     value: function (othercollection, func) {
                         var collection = this;
                         var result = [];
+                        func = func || function (x, y) { return x === y; };
                         for (var i = collection.length; i--;/**/) {
                             for (var j = othercollection.length; j--;/**/) {
                                 if ((func(othercollection[j], collection[i]))) {
@@ -122,6 +123,7 @@ MEPH.define(&#39;MEPH.util.Array&#39;, {
                     writable: true,
                     configurable: true,
                     value: function (func) {
+                        func = func || function () { return true; };
                         return this.where(func).length;
                     }
                 });

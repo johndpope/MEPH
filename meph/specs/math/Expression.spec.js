@@ -683,7 +683,27 @@
                     Expression.variable('n'))
                 , 'x');
 
-            debugger
+            
+            var rule = Expression.matchRule(expression, Expression.Rules.Power());
+
+            expect(!rule).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('doesnt match power rule  int(y^n)dx ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                Expression.power(
+                    Expression.variable('x'),
+                    Expression.variable('x'))
+                , 'x');
+
+
             var rule = Expression.matchRule(expression, Expression.Rules.Power());
 
             expect(!rule).toBeTruthy();
@@ -715,6 +735,30 @@
             expect(rule).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating an expression')).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+    it('match power rule  1/(n+1)(x^(n+1))', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.addition(Expression.multiplication(
+                                Expression.fraction(
+                                    Expression.variable(1),
+                                    Expression.addition(
+                                        Expression.variable('n'),
+                                        Expression.variable(1)
+                                    )
+                                ),
+                Expression.power(
+                    Expression.variable('x'),
+                    Expression.addition(Expression.variable('x'), Expression.variable(1)))), Expression.variable('a'));
+
+            var rule = Expression.matchRule(expression, Expression.Rules.PowerIntegrate());
+
+            expect(!rule).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
         }).then(function (x) {
             done();
         });

@@ -195,8 +195,8 @@
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(
-                            Expression.addition(Expression.func('f', 't'),
-                                Expression.func('g', 'y'),
+                            Expression.addition(Expression.func('f', 'x'),
+                                Expression.func('g', 'x'),
                                 Expression.func('h', 'x')), Expression.variable('x'));
             var rule2 = Expression.Rules.AdditionIntegral();
 
@@ -206,6 +206,27 @@
             console.log(result.latex());
             expect(result.getMarks().A.parts.length === 3).toBeTruthy();
             expect(result).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+
+    it('doesnt match int(u +/- v +/- w) -> int(u(t)) +/- int(v) +/- int(w)', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function ($class) {
+            var Expression = MEPH.math.Expression;
+            var expression = Expression.integral(
+                            Expression.addition(Expression.func('f', 't'),
+                                Expression.func('g', 'x'),
+                                Expression.func('h', 'x')), Expression.variable('x'));
+            var rule2 = Expression.Rules.AdditionIntegral();
+
+            var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition(), true);
+            expect(expression.getMarks().dx).toBeTruthy();
+            var result = Expression.translation.Translate(expression, rule2);
+            expect(!result).toBeTruthy();
         }).catch(function (e) {
             expect(e).caught();
         }).then(function (x) {

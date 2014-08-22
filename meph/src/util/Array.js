@@ -106,6 +106,7 @@ MEPH.define('MEPH.util.Array', {
                     writable: true,
                     configurable: true,
                     value: function (func) {
+                        func = func || function () { return true; };
                         return this.where(func).length;
                     }
                 });

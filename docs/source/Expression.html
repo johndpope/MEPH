@@ -51,7 +51,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             multiplication: &#39;multiplication&#39;,
             division: &#39;division&#39;,
             anything: &#39;anything&#39;,
-            dirivitive: &#39;dirivitive&#39;
+            derivative: &#39;derivative&#39;
         },
 
         &#39;function&#39;: {
@@ -65,7 +65,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             expression: &#39;exp&#39;,
             power: &#39;power&#39;,
             respectTo: &#39;respectTo&#39;,
-            dirivitive: &#39;dirivitive&#39;
+            derivative: &#39;derivative&#39;
         },
         translation: {
             Translate: function (a, b) {
@@ -103,6 +103,24 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             ConstRelation: function (c, x) {
                 var inRespectTo = x &amp;&amp; x.val &amp;&amp; x.val.part ? x.val.part(&#39;variable&#39;).val : x.val;
                 return !c.respects().contains(function (x) { return x === inRespectTo; });
+            },
+            VariableRelation: function (c, x) {
+                var inRespectTo = x &amp;&amp; x.val &amp;&amp; x.val.part ? x.val.part(&#39;variable&#39;).val : x.val;
+                return c.respects().contains(function (x) { return x === inRespectTo; });
+            },
+            SiblingIndependence: function (c, t) {
+                var inRespectTo = t.select(function (x) {
+                    var inRespectTo = x &amp;&amp; x.val &amp;&amp; x.val.part ? x.val.respects() : [x.val];
+                    return inRespectTo;
+                }).concatFluent(function (x) { return x; });
+                return !inRespectTo.intersection(c.respects()).count();
+            },
+            SiblingDependence: function (c, t) {
+                var inRespectTo = t.select(function (x) {
+                    var inRespectTo = x &amp;&amp; x.val &amp;&amp; x.val.part ? x.val.respects() : [x.val];
+                    return inRespectTo;
+                }).concatFluent(function (x) { return x; });
+                return inRespectTo.intersection(c.respects()).count();
             }
         },
         Rules: {
@@ -134,7 +152,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             IntegralConst: function () {
                 var c = Expression.anything();
                 c.mark(&#39;C&#39;);
-                c.dependency(&#39;parent&#39;, &#39;respectTo&#39;, Expression.Dependency.IntegralConst);
+                c.dependency(&#39;parent&#39;, &#39;respectTo&#39;, Expression.Dependency.ConstRelation);
 
                 var dx = Expression.variable(&#39;x&#39;);
                 dx.mark(&#39;dx&#39;);
@@ -146,6 +164,9 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             AxPlusC: function () {
                 var a = Expression.anything(&#39;A&#39;);
                 a.mark(&#39;A&#39;);
+
+                a.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
+
                 var x = Expression.variable(&#39;x&#39;);
                 x.mark(&#39;x&#39;);
                 var c = Expression.variable(&#39;#C&#39;);
@@ -162,7 +183,10 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 n.mark(&#39;n&#39;);
                 var x = Expression.variable(&#39;x&#39;);
                 x.mark(&#39;x&#39;);
+
                 var power = Expression.power(x, n);
+                x.dependency(&#39;grandparent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
+                n.dependency(&#39;grandparent&#39;, &#39;respectTo&#39;, Expression.Dependency.ConstRelation);
 
                 var expression = Expression.integral(power, &#39;x&#39;);
                 expression.mark(&#39;I&#39;);
@@ -178,8 +202,11 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 n2.mark(&#39;n_post&#39;);
                 var x = Expression.variable(&#39;x&#39;);
                 x.mark(&#39;x&#39;);
+                x.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
+
                 var c = Expression.variable(&#39;C&#39;);
                 c.mark(&#39;C&#39;);
+
                 var exp = Expression.addition(Expression.multiplication(
                                 Expression.fraction(
                                     Expression.variable(1),
@@ -199,6 +226,8 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             IntegrationAddition: function () {
                 var func = Expression.func(&#39;f&#39;, &#39;x&#39;);
                 func.mark(&#39;f&#39;);
+                func.dependency(&#39;grandparent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
+
                 var addition = Expression.addition(func);
                 addition.mark(&#39;A&#39;);
                 addition.repeat = true;
@@ -212,6 +241,8 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             AdditionIntegral: function () {
                 var func = Expression.func(&#39;f&#39;, &#39;x&#39;);
                 func.mark(&#39;f&#39;);
+                func.dependency(&#39;parent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
+
                 var dx = Expression.variable(&#39;x&#39;);
                 dx.mark(&#39;dx&#39;);
                 var integral = Expression.integral(func, dx);
@@ -228,6 +259,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 var du = Expression.variable(&#39;u&#39;);
                 du.mark(&#39;du&#39;);
                 var Fx = Expression.func(&#39;f&#39;, du);
+                Fx.dependency(&#39;parent&#39;, &#39;respectTo&#39;, Expression.Dependency.ConstRelation);
                 var integral = Expression.integral(Fx, dv);
                 integral.name(Expression.RuleType.IntegrationByParts);
                 return integral;
@@ -240,12 +272,15 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 var v1 = Expression.variable(&#39;v&#39;);
                 v1.mark(&#39;v_1&#39;);
                 var g = Expression.func(&#39;g&#39;, v1);
+                f.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingDependence);
+                g.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingDependence);
 
                 var mul = Expression.multiplication(f, g);
 
                 var v2 = Expression.variable(&#39;v&#39;);
                 v2.mark(&#39;v_2&#39;);
                 var g2 = Expression.func(&#39;g&#39;, v2);
+                g2.dependency(&#39;parent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
 
                 var du = Expression.variable(&#39;u&#39;);
                 du.mark(&#39;u_2&#39;);
@@ -258,7 +293,10 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 return subtraction;
             },
             Fudx: function () {
-                var u = Expression.variable(&#39;u&#39;);
+                var udx = Expression.variable(&#39;x&#39;);
+                udx.mark(&#39;u_dx&#39;);
+
+                var u = Expression.func(&#39;u&#39;, udx);
                 u.mark(&#39;u&#39;);
 
                 var dx = Expression.variable(&#39;x&#39;);
@@ -277,7 +315,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 var du3 = Expression.variable(&#39;u&#39;);
                 du3.mark(&#39;du3&#39;);
 
-                var FuPrime = Expression.dirivitive(&#39;f&#39;, 1, du3);
+                var FuPrime = Expression.derivative(&#39;f&#39;, 1, du3);
 
                 var du2 = Expression.variable(&#39;u&#39;);
                 du2.mark(&#39;du2&#39;);
@@ -297,6 +335,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
 
                 var x = Expression.variable(&#39;x&#39;);
                 x.mark(&#39;x&#39;);
+                x.dependency(&#39;grandparent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
 
                 var one = Expression.variable(&#39;1&#39;);
 
@@ -318,6 +357,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 var abs = Expression.abs(x);
 
                 var ln = Expression.ln(abs);
+                ln.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
 
                 var c = Expression.variable(&#39;c&#39;);
 
@@ -339,6 +379,8 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 var a2 = Expression.power(a, 2);
 
                 var denominator = Expression.addition(x2, a2);
+                x2.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
+                x2.dependency(&#39;parent.parent.parent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
 
                 var one = Expression.variable(&#39;1&#39;);
 
@@ -359,6 +401,8 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
 
                 var atan = Expression.variable(&#39;a&#39;);
                 atan.mark(&#39;a_tan&#39;);
+
+                xtan.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
 
                 var tanexp = Expression.fraction(xtan, atan);
 
@@ -394,6 +438,8 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
 
                 var a2 = Expression.power(a, 2);
                 var x2 = Expression.power(x, 2);
+                x2.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
+                x2.dependency(&#39;parent.parent.parent&#39;, &#39;respectTo&#39;, Expression.Dependency.VariableRelation);
 
                 var denominator = Expression.subtraction(x2, a2);
 
@@ -417,6 +463,8 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
 
                 var x2 = Expression.variable(&#39;x&#39;);
                 x2.mark(&#39;x2&#39;);
+                
+                x2.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
 
                 var denominator = Expression.addition(x2, a2);
 
@@ -426,8 +474,12 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 var x1 = Expression.variable(&#39;x&#39;);
                 x1.mark(&#39;x1&#39;);
 
+                x1.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingIndependence);
+
                 var numerator = Expression.subtraction(x1, a1);
                 var frac = Expression.fraction(numerator, denominator);
+
+                numerator.dependency(&#39;sibling&#39;, &#39;&#39;, Expression.Dependency.SiblingDependence);
 
                 var abs = Expression.abs(frac);
 
@@ -571,6 +623,11 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                 default: return false;
             }
         },
+<span id='MEPH-math-Expression-method-power'>        /**
+</span>         * Math.pow(base , power);
+         * @param {MEPH.math.Expression} power
+         * @param {MEPH.math.Expression} base
+         */
         power: function (base, power) {
             var expression = new Expression();
             expression.setExp(Expression.type.power);
@@ -749,11 +806,11 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
             });
             return expression;
         },
-        dirivitive: function (func, dir) {
+        derivative: function (func, dir) {
             var expression = new Expression();
-            expression.setExp(Expression.type.dirivitive);
+            expression.setExp(Expression.type.derivative);
             expression.addPart(Expression.function.name, MEPHArray.convert(arguments).first());
-            expression.addPart(Expression.function.dirivitive, dir);
+            expression.addPart(Expression.function.derivative, dir);
             MEPHArray.convert(arguments).subset(2).foreach(function (x) {
                 expression.addPart(Expression.function.input, x);
             });
@@ -949,23 +1006,43 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
         var me = this;
         return me.dependencies;
     },
-    dependenciesAreRespected: function (expession) {
+    dependenciesAreRespected: function (expression) {
         var me = this;
 
         return me.getDependencies().all(function (d) {
-            var offset;
+            var offset, part;
             switch (d.offset) {
+                case &#39;grandparent&#39;:
+                    offset = expression.parent().parent();
+                    part = offset.part(d.part);
+                    break;
                 case &#39;parent&#39;:
-                    offset = expession.parent();
+                    offset = expression.parent();
+                    part = offset.part(d.part);
                     break
+                case &#39;sibling&#39;:
+                    offset = expression.parent();
+                    var json = JSON.parse(&#39;{&#39; + d.part + &#39;}&#39;);
+                    part = offset.parts.where(function (x) {
+                        return x.val !== expression;
+                    });
+                    break;
                 default:
-                    throw new Error(&#39;not handled offset&#39;);
+                    if (d.offset.split(&#39;.&#39;)) {
+                        d.offset.split(&#39;.&#39;).foreach(function (x) {
+                            if (x === &#39;parent&#39;) {
+                                offset = offset.parent();
+                            }
+                        });
+                        part = offset.part(d.part);
+                    } else
+                        throw new Error(&#39;not handled offset&#39;);
+                    break;
             }
             if (!offset) {
                 throw new Error(&#39;no offset found&#39;);
             }
-            var part = offset.part(d.part);
-            return d.ruleFunction(expession, part);
+            return d.ruleFunction(expression, part);
         });
     },
 <span id='MEPH-math-Expression-method-latex'>    /**
@@ -1012,7 +1089,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
                     return x.val &amp;&amp; x.val.latex ? x.val.latex() : x.val;
                 }).join(&#39;,&#39;) + &#39;)&#39;;
                 break;
-            case Expression.type.dirivitive:
+            case Expression.type.derivative:
                 return me.partLatex(Expression.function.name) +
                     [].interpolate(0, parseInt(me.parts.nth(2).val), function (x) {
                         return &quot;&#39;&quot;;
@@ -1223,7 +1300,7 @@ MEPH.define(&#39;MEPH.math.Expression&#39;, {
      **/
     match: function (rule, markRule) {
         var me = this;
-        if (me.type === rule.type) {
+        if (me.type === rule.type &amp;&amp; rule.dependenciesAreRespected(me)) {
             var meParts = me.getParts().select();
             var ruleParts = rule.getParts().select();
 
