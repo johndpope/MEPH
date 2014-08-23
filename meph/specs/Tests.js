@@ -86,6 +86,7 @@
                         'math/Expression_2.spec.js',
                         'math/Hamilton.spec.js',
                         'math/Matrix.spec.js',
+                        'math/Set.spec.js',
                         'math/Quaternion.spec.js',
                         'math/Vector.spec.js',
                         'mixins/Observable.spec.js',

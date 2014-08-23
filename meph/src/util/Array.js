@@ -264,6 +264,7 @@ MEPH.define('MEPH.util.Array', {
                     value: function (func) {
                         var result = null,
                             resultValue = null;
+                        func = func || function (x) { return x; }
                         var collection = this;
                         for (var i = 0 ; i < collection.length; i++) {
                             if (resultValue == null || func(collection[i]) > resultValue) {
