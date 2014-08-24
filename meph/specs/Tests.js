@@ -88,6 +88,7 @@
                         'math/Matrix.spec.js',
                         'math/Set.spec.js',
                         'math/Quaternion.spec.js',
+                        'math/Util.spec.js',
                         'math/Vector.spec.js',
                         'mixins/Observable.spec.js',
                         'mobile/activity/ActivityController.spec.js',

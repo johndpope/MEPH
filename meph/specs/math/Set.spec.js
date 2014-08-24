@@ -91,7 +91,7 @@
         MEPH.requires('MEPH.math.Set').then(function () {
 
             var sets = MEPH.math.Set.itemSets(6, 5);
-            
+
             expect(sets.length).toBe(6);
 
         }).catch(function (e) {
@@ -105,7 +105,7 @@
         MEPH.requires('MEPH.math.Set').then(function () {
 
             var sets = MEPH.math.Set.itemSets(6, 4);
-            
+
             expect(sets.length).toBe(15);
 
         }).catch(function (e) {
@@ -121,6 +121,44 @@
             var sets = MEPH.math.Set.itemSets(6, 3);
 
             expect(sets.length).toBe(20);
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can generate all the permutations of a set ', function (done) {
+        MEPH.requires('MEPH.math.Set').then(function () {
+            var set = new MEPH.math.Set();
+            set.set([].interpolate(0, 3, function (x) {
+                return x;
+            }));
+            var sets = MEPH.math.Set.permutate(set);
+            sets.foreach(function (set) {
+                console.log(set.print());
+            });
+            expect(sets.length).toBe(6);
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    it('can generate all the permutations of a set ', function (done) {
+        MEPH.requires('MEPH.math.Set').then(function () {
+            var set = new MEPH.math.Set();
+            set.set([].interpolate(0, 5, function (x) {
+                return x;
+            }));
+            var sets = MEPH.math.Set.permutate(set);
+            sets.foreach(function (set) {
+                console.log(set.print());
+            });
+            expect(sets.length).toBe(MEPH.math.Util.factorial(5));
 
         }).catch(function (e) {
             expect(e).caught();

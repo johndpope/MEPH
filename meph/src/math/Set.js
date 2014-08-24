@@ -1,10 +1,11 @@
 ﻿/**
- * @class MEPH.math.Expression
- * Describes mathematical expressions.
+ * @class MEPH.math.Set
+ * Describes mathematical sets.
  *
  **/
 MEPH.define('MEPH.math.Set', {
     alternateNames: 'Set',
+    requires: ['MEPH.math.Util'],
     statics: {
         /**
          * Creates a superset of the set.
@@ -45,6 +46,44 @@ MEPH.define('MEPH.math.Set', {
             return Set.superset(set).get().where(function (set) {
                 return set.count(function (x) { return x !== null; }) === itemsCountInSet;
             });
+        },
+        /**
+         * Returns all the permutations of the set.
+         * @param {MEPH.math.Set} set
+         * @returns {Array}
+         */
+        permutate: function (set, i, n) {
+            var j,
+                result = [];
+
+            if (i === undefined && n === undefined) {
+                i = 0;
+                n = set.get().length;
+            }
+
+            if (i == n) {
+                result.push(set);
+            }
+            else {
+                for (j = i; j < n; j++) {
+                    Set.swap(set, i, j);
+                    result = result.concat(Set.permutate(set.copy(), i + 1, n));
+                    Set.swap(set, i, j); //backtrack
+                }
+            }
+            return result;
+        },
+        /**
+         * Swaps the ith and jth item of a set.
+         * @param {MEPH.math.Set} set
+         * @param {Number} i
+         * @param {Number} j
+         **/
+        swap: function (set, i, j) {
+            var array = set.get();
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
         },
         /**
          * Produces a sag set.
@@ -117,6 +156,16 @@ MEPH.define('MEPH.math.Set', {
         me.value = [];
     },
     /**
+     * Create a copy of it self.
+     **/
+    copy: function () {
+        var me = this,
+            set = new MEPH.math.Set();
+
+        set.set(me.value.select());
+        return set;
+    },
+    /**
      * Set the sets value.;
      * @param {Array} array
      **/
@@ -125,6 +174,16 @@ MEPH.define('MEPH.math.Set', {
         me.value.length = 0;
         me.value.push.apply(me.value, array);
     },
+    /**
+     * Returns a string.
+     **/
+    print: function () {
+        var me = this;
+        return '[' + me.get().join() + ']';
+    },
+    /**
+     * Returns the array of items.
+     **/
     get: function () {
         var me = this;
         return me.value;
