@@ -6,6 +6,7 @@
 MEPH.define('MEPH.math.Expression', {
     alternateNames: 'Expression',
     requires: ['MEPH.math.ExpressionMatch',
+                'MEPH.math.Set',
                 'MEPH.math.ExpressionTranslation'],
     statics: {
         type: {
@@ -446,7 +447,7 @@ MEPH.define('MEPH.math.Expression', {
 
                 var x2 = Expression.variable('x');
                 x2.mark('x2');
-                
+
                 x2.dependency('sibling', '', Expression.Dependency.SiblingIndependence);
 
                 var denominator = Expression.addition(x2, a2);
@@ -571,6 +572,68 @@ MEPH.define('MEPH.math.Expression', {
 
                 return addition;
             }
+        },
+        /**
+         * Flattens an expression.
+         * @param {MEPH.math.Expression} expression
+         * @param {String} type
+         * @return {MEPH.math.Expression}
+         **/
+        Flatten: function (expression, type, started) {
+            var parts = expression.getValues().concatFluent(function (x) {
+                if (x.type === type) {
+                    return Expression.Flatten(x.copy(), type, true);
+                }
+                else {
+                    return [x.copy()];
+                }
+            });
+            if (!started) {
+                var copy = expression.copy();
+
+                copy.clearParts();
+                parts.foreach(function (p) {
+                    copy.addInput(p)
+                    return p.parent(copy);
+                });
+
+                return copy;
+            }
+
+            return parts;
+        },
+        /**
+         * Creates associative groupings of a flattened expression.
+         * @param {MEPH.math.Expression} expression
+         * @returns {Array}
+         **/
+        createAssociativeGroupings: function (expression) {
+            var superset = MEPH.math.Set.superset(new Set([].interpolate(0, expression.parts.length, function (x) {
+                return x;
+            }))).get();
+            var sagset = MEPH.math.Set.sagset(expression.parts.length);
+            sagset.foreach(function (sag) {
+                var set = sag;
+                var perm = MEPH.math.Set.permutate(new Set([].interpolate(0, expression.parts.length, function (x) {
+                    return x;
+                })));
+
+                var generateSetPermutations = function (set, index) {
+                    var sub_super_set = superset.where(function (x) {
+                        return x.count(function (t) {
+                            return t !== null;
+                        }) === set[index];
+                    });
+                    debugger
+                    perm.where(function (x) {
+
+                        x.get();
+                    });
+                };
+
+                generateSetPermutations(set, 0);
+            });
+            debugger
         },
         matchRule: function (expression, rule, markRule) {
             var res = expression.match(rule, markRule || false);
@@ -962,6 +1025,10 @@ MEPH.define('MEPH.math.Expression', {
         }
         me.parts.push({ type: type, val: val });
     },
+    addInput: function (val) {
+        var me = this;
+        me.addPart(Expression.function.input, val);
+    },
     parent: function (parent) {
         var me = this;
 
@@ -1268,6 +1335,10 @@ MEPH.define('MEPH.math.Expression', {
     getParts: function () {
         var me = this;
         return me.parts;
+    },
+    getValues: function () {
+        var me = this;
+        return me.getParts().select(function (x) { return x.val; });
     },
     initialize: function (type) {
         var me = this;

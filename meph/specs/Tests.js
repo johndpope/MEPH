@@ -84,6 +84,7 @@
                         'math/jax/MathJax.spec.js',
                         'math/Expression.spec.js',
                         'math/Expression_2.spec.js',
+                        'math/Expression_3.spec.js',
                         'math/Hamilton.spec.js',
                         'math/Matrix.spec.js',
                         'math/Set.spec.js',

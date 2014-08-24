@@ -3,13 +3,13 @@
         jasmine.addMatchers(MEPH.customMatchers);
     });
     var printExpressionToScreen = function (result) {
-        return MEPH.requires('MEPH.math.jax.MathJax', 'MEPH.math.Expression').then(function () {
-            return MEPHJax.ready().then(function () {
-                var dom = document.createElement('div');
-                document.body.appendChild(dom);
-                return MEPHJax.load(result.latex(), dom)
-            });
-        })
+        //return MEPH.requires('MEPH.math.jax.MathJax', 'MEPH.math.Expression').then(function () {
+        //    return MEPHJax.ready().then(function () {
+        //        var dom = document.createElement('div');
+        //        document.body.appendChild(dom);
+        //        return MEPHJax.load(result.latex(), dom)
+        //    });
+        //})
     };
     it('match rule Integration(a*f(x)) dx === Integration(a (g(x) + f(x)) dx, and marks the expression, then' +
         'translate a Integration(a (g(x) + f(x)) dx => a * Integration((g(x) + f(x)) dx ', function (done) {

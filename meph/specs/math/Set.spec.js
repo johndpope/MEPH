@@ -71,6 +71,21 @@
             done();
         });
     });
+    it('can generate a sag set. ', function (done) {
+        MEPH.requires('MEPH.math.Set').then(function () {
+            
+            var superset = MEPH.math.Set.sagset(3);
+
+            expect(superset.length).toBe(4);
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function (x) {
+            done();
+        });
+    });
+
+    
 
     it('can generate all the 6 item subsets of a 6 item set', function (done) {
         MEPH.requires('MEPH.math.Set').then(function () {

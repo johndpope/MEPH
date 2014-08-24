@@ -5,8 +5,8 @@
 
     it('a factorial can be calculated.', function (done) {
         MEPH.requires('MEPH.math.Util').then(function () {
-            var vector = new MEPH.math.Util.factorial(3);
-            expect(vector===6).theTruth('the factorial was incorrect.');
+            var vector = MEPH.math.Util.factorial(3);
+            expect(vector === 6).theTruth('the factorial was incorrect.');
         }).catch(function (e) {
             expect(new Error(e)).caught();
         }).then(function (x) {

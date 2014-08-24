@@ -123,6 +123,9 @@ MEPH.define('MEPH.math.Set', {
                     });
 
                     var firstMin = xcopy.indexOf(min);
+                    if (firstMin === -1) {
+                        firstMin = lastMin;
+                    }
                     xcopy[firstMin]++;
 
                     if (lastMin === firstMin) {
@@ -151,9 +154,9 @@ MEPH.define('MEPH.math.Set', {
     properties: {
         value: null
     },
-    initialize: function () {
+    initialize: function (val) {
         var me = this;
-        me.value = [];
+        me.value = val || [];
     },
     /**
      * Create a copy of it self.
