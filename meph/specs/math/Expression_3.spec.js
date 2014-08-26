@@ -32,6 +32,7 @@
             var addition = Expression.addition(Expression.variable('a'), Expression.variable('b'), Expression.variable('c'));
 
             var groupings = Expression.createAssociativeGroupings(addition);
+            expect(groupings).toBeTruthy();
         }).catch(function (e) {
             expect(e).caught();
         }).then(done);

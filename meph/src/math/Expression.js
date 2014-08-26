@@ -608,32 +608,59 @@ MEPH.define('MEPH.math.Expression', {
          * @returns {Array}
          **/
         createAssociativeGroupings: function (expression) {
-            var superset = MEPH.math.Set.superset(new Set([].interpolate(0, expression.parts.length, function (x) {
-                return x;
-            }))).get();
+
             var sagset = MEPH.math.Set.sagset(expression.parts.length);
-            sagset.foreach(function (sag) {
+            return sagset.select(function (sag) {
                 var set = sag;
                 var perm = MEPH.math.Set.permutate(new Set([].interpolate(0, expression.parts.length, function (x) {
                     return x;
                 })));
 
-                var generateSetPermutations = function (set, index) {
-                    var sub_super_set = superset.where(function (x) {
+                var generateSetPermutations = function (set, index, max, $subtree) {
+                    var superset = MEPH.math.Set.superset(new Set([].interpolate(0, $subtree.length, function (x) {
+                        return $subtree[x];
+                    }))).get();
+                    var sub_super_set = (superset).where(function (x) {
                         return x.count(function (t) {
                             return t !== null;
                         }) === set[index];
                     });
-                    debugger
-                    perm.where(function (x) {
 
-                        x.get();
+                    var result = sub_super_set.select(function (y) {
+                        return y.select(function (t, i) {
+                            return y[i] !== null ? $subtree[i] : false;
+                        }).where(function (x) {
+                            return x !== false;
+                        });
                     });
+
+                    result = result.concatFluent(function (subresult) {
+                        var subtree = ($subtree.where(function (x) {
+                            return !subresult.contains(function (t) { return t === x; })
+                        }));
+                        var generatedSubTree;
+                        if (index < max - 1 && subtree.length) {
+                            return generateSetPermutations(set, index + 1, max, subtree).select(function (st) {
+                                return subresult.concat(st);
+                            });
+                        }
+
+                        return subresult;
+                    });
+
+                    return result;
                 };
 
-                generateSetPermutations(set, 0);
+                var output = generateSetPermutations(set, 0, expression.parts.length, [].interpolate(0, expression.parts.length, function (x) {
+                    return x;
+                }));
+                
+                return {
+                    set: set,
+                    grouping: output
+                }
             });
-            debugger
+
         },
         matchRule: function (expression, rule, markRule) {
             var res = expression.match(rule, markRule || false);
