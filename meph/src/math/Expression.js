@@ -645,7 +645,7 @@ MEPH.define('MEPH.math.Expression', {
                             });
                         }
 
-                        return subresult;
+                        return index ? subresult : [subresult];
                     });
 
                     return result;
@@ -653,14 +653,79 @@ MEPH.define('MEPH.math.Expression', {
 
                 var output = generateSetPermutations(set, 0, expression.parts.length, [].interpolate(0, expression.parts.length, function (x) {
                     return x;
-                }));
-                
+                })).select(function (x, index) {
+                    return x.select(function (t) {
+                        var val = expression.parts[t].val;
+                        return val && val.copy ? val.copy() : val;
+                    });
+                });
+
+
                 return {
                     set: set,
                     grouping: output
                 }
             });
 
+        },
+        /**
+         * Convert a grouping to expressions.
+         * @param {Object} grouping
+         * @param {String} type
+         * @return {Array}
+         **/
+        convertGrouping: function (grouping, type) {
+            return grouping.concatFluent(function (group) {
+                return group.grouping.select(function (t) {
+                    return Expression.convertGroup({ set: group.set, grouping: t }, type);
+                });
+            })
+        },
+        /**
+         * Convert a grouping to an expression.
+         * @param {Object} grouping
+         * @param {String} type
+         * @return {MEPH.math.Expression}
+         **/
+        convertGroup: function (grouping, type) {
+            var expression,
+                index = 0,
+                buffer = [],
+                parentFunc;
+            switch (type) {
+                case Expression.type.multiplication:
+                    parentFunc = Expression.multiplication;
+                    break;
+                case Expression.type.addition:
+                    parentFunc = Expression.addition;
+                    break;
+            }
+            [].interpolate(0, grouping.set.length, function (_s) {
+                var s = grouping.set[_s];
+                if (expression) {
+                    var temp = grouping.grouping.subset(index, s + index);
+                    expression = parentFunc.apply(null, [expression].concat(temp));
+                    index = s + index;
+                }
+                else {
+                    if (buffer.length || s > 1) {
+                        if (buffer.length) {
+                            var temp = grouping.grouping.subset(index, s + index);
+                            expression = parentFunc.apply(null, buffer.concat(temp));
+                            buffer = [];
+                        }
+                        else {
+                            expression = parentFunc.apply(null, grouping.grouping.subset(index, s + index));
+                        }
+                        index = s + index;
+                    }
+                    else {
+                        buffer.push(grouping.grouping[index]);
+                        index++;
+                    }
+                }
+            });
+            return expression;
         },
         matchRule: function (expression, rule, markRule) {
             var res = expression.match(rule, markRule || false);
@@ -1150,9 +1215,15 @@ MEPH.define('MEPH.math.Expression', {
                 me.partLatex(Expression.function.respectTo) + ''
                 return result;
             case Expression.type.addition:
-                return me.parts.select(function (x) {
+                var before = '';
+                var after = '';
+                if (me.parent()) {
+                    before = '(';
+                    after = ')';
+                }
+                return before + me.parts.select(function (x) {
                     return x.val.latex();
-                }).join(' + ');
+                }).join(' + ') + after;
                 break;
             case Expression.type.subtraction:
                 return me.parts.select(function (x) {

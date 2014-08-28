@@ -37,4 +37,40 @@
             expect(e).caught();
         }).then(done);
     });
+
+    it(' can convert groupings into an expression.', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var addition = Expression.addition(Expression.variable('a'), Expression.variable('b'), Expression.variable('c'));
+
+            var groupings = Expression.createAssociativeGroupings(addition);
+
+            var expression = Expression.convertGroup({ set: groupings[0].set, grouping: groupings.first().grouping.first() }, Expression.type.addition);
+
+            expect(expression).toBeTruthy();
+
+            expect(expression.parts.length === 2).toBeTruthy();
+            return printExpressionToScreen(expression);
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
+
+
+    it('can convert all groupings into expressions.', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var addition = Expression.addition(Expression.variable('a'), Expression.variable('b'), Expression.variable('c'));
+
+            var groupings = Expression.createAssociativeGroupings(addition);
+
+            var expressions = Expression.convertGrouping(groupings, Expression.type.addition);
+                
+            expect(expressions).toBeTruthy();
+            expressions.foreach(function (x) {
+                console.log(x.latex());
+            })
+            expect(expressions.length).toBe(13);
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
 });
