@@ -7,6 +7,7 @@ MEPH.define('MEPH.math.Expression', {
     alternateNames: 'Expression',
     requires: ['MEPH.math.ExpressionMatch',
                 'MEPH.math.Set',
+                'MEPH.math.expression.Factor',
                 'MEPH.math.ExpressionTranslation'],
     statics: {
         type: {
@@ -106,6 +107,23 @@ MEPH.define('MEPH.math.Expression', {
                 }).concatFluent(function (x) { return x; });
                 return inRespectTo.intersection(c.respects()).count();
             }
+        },
+        /**
+         * Gets the greatest common factor from an array of expressions.
+         * @param {MEPH.math.Expression} expression
+         * @return {MEPH.math.Expression}
+         */
+        GreatestCommomFactor: function (expression) {
+
+            var flattenedExpression = Expression.Flatten(expression, Expression.type.multiplication);
+            var factors = flattenedExpression.getParts().select(function (x) {
+                return MEPH.math.expression.Factor.getFactors(x.val);
+            });
+
+            var groupedFactors = factors.intersectFluent(function (x) {
+                return x.exp.latex();
+            });
+
         },
         Rules: {
             IntegralConstMultiply: function () {
@@ -580,27 +598,104 @@ MEPH.define('MEPH.math.Expression', {
          * @return {MEPH.math.Expression}
          **/
         Flatten: function (expression, type, started) {
-            var parts = expression.getValues().concatFluent(function (x) {
-                if (x.type === type) {
-                    return Expression.Flatten(x.copy(), type, true);
-                }
-                else {
-                    return [x.copy()];
-                }
-            });
-            if (!started) {
-                var copy = expression.copy();
 
-                copy.clearParts();
-                parts.foreach(function (p) {
-                    copy.addInput(p)
-                    return p.parent(copy);
-                });
+            switch (type) {
+                case Expression.type.power:
+                    return Expression.FlattenPower(expression.copy(), type, true);
+                default:
+                    var parts = expression.getValues().concatFluent(function (x) {
+                        if (x.type === type) {
 
-                return copy;
+                            return Expression.Flatten(x.copy(), type, true);
+
+                        }
+                        else {
+                            return [x.copy()];
+                        }
+                    });
+                    if (!started) {
+                        var copy = expression.copy();
+
+                        copy.clearParts();
+                        parts.foreach(function (p) {
+                            copy.addInput(p)
+                            return p.parent(copy);
+                        });
+
+                        return copy;
+                    }
+
+                    return parts;
+            }
+        },
+        /**
+         * Flattens a power expression.
+         * @param {MEPH.math.Expression} expression
+         * @param {String} type
+         * @return {MEPH.math.Expression}
+         **/
+        FlattenPower: function (expression, type, started) {
+            //
+            //            expression.addPart(Expression.function.base, base);
+            //           expression.addPart(Expression.function.power, power);
+            var exp = expression.partOrDefault(Expression.function.base),
+                variable,
+                flattenedPower;
+            switch (exp.type) {
+                case Expression.type.power:
+                    flattenedPower = Expression.FlattenPower(exp.copy(), type, started);
+                    break;
+                default:
+                    return expression;
+            }
+            var powerval,
+                power = flattenedPower.partOrDefault(Expression.function.power);
+
+            if (typeof power === 'object') {
+                switch (power.type) {
+                    case Expression.type.variable:
+                        powerval = power.partOrDefault(Expression.type.variable)
+                        powerval = isNaN(powerval) ? powerval : parseFloat(powerval);
+                        break;
+                }
+            }
+            else {
+                powerval = isNaN(power) ? power : parseFloat(power);;
             }
 
-            return parts;
+            var expressionpower = expression.partOrDefault(Expression.function.power);
+            var expressionpowerval;
+            if (typeof expressionpower === 'object') {
+                expressionpowerval = expressionpower.partOrDefault(Expression.type.input) || expressionpower.partOrDefault(Expression.type.variable);
+                switch (expressionpower.type) {
+                    case Expression.type.variable:
+                        expressionpowerval = isNaN(expressionpowerval) ? expressionpowerval : parseFloat(expressionpowerval);
+                        break;
+                }
+            }
+            else {
+                expressionpowerval = isNaN(expressionpower) ? expressionpower : parseFloat(expressionpower);
+            }
+
+            if (!isNaN(powerval) && !isNaN(expressionpowerval)) {
+                var part = flattenedPower.partOrDefault(Expression.function.power);
+                flattenedPower.remove(part);
+                flattenedPower.addPart(Expression.function.power, Expression.variable(powerval * expressionpowerval));
+            }
+            else {
+                var part = flattenedPower.partOrDefault(Expression.function.power);
+                flattenedPower.remove(part);
+                if (typeof powerval !== 'object') {
+                    powerval = Expression.variable(powerval);
+                }
+                if (typeof expressionpowerval !== 'object') {
+                    expressionpowerval = Expression.variable(expressionpowerval);
+                }
+
+                flattenedPower.addPart(Expression.function.power, Expression.multiplication(powerval, expressionpowerval));
+            }
+
+            return flattenedPower;
         },
         /**
          * Creates associative groupings of a flattened expression.
@@ -1361,6 +1456,11 @@ MEPH.define('MEPH.math.Expression', {
         var me = this;
         var start = me.part(type);
         return me.latexPart(start);
+    },
+    partOrDefault: function (type) {
+        var me = this;
+        var part = me.part(type)
+        return part ? part.val : null;
     },
     part: function (type) {
         var me = this;

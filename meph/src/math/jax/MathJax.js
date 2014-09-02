@@ -9,7 +9,7 @@ MEPH.define('MEPH.math.jax.MathJax', {
             MEPHJax.$promise = MEPHJax.$promise.then(function () {
                 if (!MEPHJax.$loaded) {
                     var toresolve;
-                    return MEPH.loadJSCssFile('http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full', '.js', function () {
+                    return MEPH.loadJSCssFile('../external/MathJax-2.3-latest/MathJax-2.3-latest/MathJax.js?config=TeX-AMS_HTML-full', '.js', function () {
                         MEPHJax.$loaded = true;
                         toresolve(MEPHJax.$loaded);
                     }).then(function () {

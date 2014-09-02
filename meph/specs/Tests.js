@@ -82,6 +82,7 @@
                         'pad/DrawingSurface.spec.js',
                         'list/List.spec.js',
                         'math/jax/MathJax.spec.js',
+                        'math/expression/Factor.spec.js',
                         'math/Expression.spec.js',
                         'math/Expression_2.spec.js',
                         'math/Expression_3.spec.js',

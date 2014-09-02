@@ -35,6 +35,24 @@ MEPH.define('MEPH.math.Util', {
                 }
             }
             return cachedPrimes;
+        },
+        /**
+         * Factors an integer into its basic parts.
+         * @param {Number} val
+         * @returns {Array}
+         **/
+        factor: function (val) {
+            var Util = MEPH.math.Util,
+                result = [1];
+            var primes = Util.primes(val);
+            var v = val;
+            while (!primes.contains(function (x) { return x === v; }) && v % 1 == 0) {
+                var prime = primes.first(function (x) { return v % x === 0; });
+                result.push(prime);
+                v /= prime;
+            }
+            result.push(v);
+            return result;
         }
     }
 });

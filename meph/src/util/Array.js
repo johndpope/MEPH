@@ -99,7 +99,24 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
-
+            if (!array.intersectFluent) {
+                Object.defineProperty(array, 'intersectFluent', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = [];
+                        func = func || function (x, y) { return x === y; };
+                        result.push.apply(result, collection[0]);
+                        collection = collection.subset(1);
+                        collection.foreach(function (x) {
+                            result = result.intersection(x, func);
+                        });
+                        return result;
+                    }
+                });
+            }
             if (!array.count) {
                 Object.defineProperty(array, 'count', {
                     enumerable: false,
