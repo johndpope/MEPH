@@ -98,7 +98,7 @@
         });
     });
 
-    
+
 
     it('can create all the possible associative groupings for an expression', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
@@ -155,7 +155,71 @@
             var factor = Expression.GreatestCommomFactor(Expression.multiplication(power, x));
 
             expect(factor).toBeTruthy();
-            expect(factor.type === Expression.type.variable).toBeTruthy();
+            expect(factor.length === 1).toBeTruthy();
+            expect(factor.first().exp.type === Expression.type.variable).toBeTruthy();
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
+
+
+
+    it('can get the base version of a expression, pow -> multiplication + multiplication ', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var power = Expression.power(Expression.variable('x'), Expression.variable('2'));
+            var power2 = Expression.power(Expression.variable('x'), Expression.variable('2'));
+            var x = Expression.variable('x');
+            var addition = Expression.addition(Expression.multiplication(power, x), power2);
+            var factor = Expression.GreatestCommomFactor(addition);
+
+            expect(factor).toBeTruthy();
+            expect(factor.length === 1).toBeTruthy();
+            expect(factor.first().exp.type === Expression.type.variable).toBeTruthy();
+            expect(factor.first().count === 2).toBeTruthy();
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
+
+
+    it('can get the base version of a expression, pow -> a x^2+ a x^2', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var power = Expression.power(Expression.variable('x'), Expression.variable('2'));
+            var power2 = Expression.power(Expression.variable('x'), Expression.variable('2'));
+            var a = Expression.variable('a');
+            var a2 = Expression.variable('a');
+            var addition = Expression.addition(Expression.multiplication(power, a), Expression.multiplication(power2, a2));
+            var factor = Expression.GreatestCommomFactor(addition);
+
+            expect(factor).toBeTruthy();
+            expect(factor.length === 2).toBeTruthy();
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    });
+
+    it('can refactor an expression in to ; ax + bx => x(a+b)', function (done) {
+        MEPH.requires('MEPH.math.Expression').then(function () {
+            var x = Expression.variable('x');
+            var x2 = Expression.variable('x');
+            var a = Expression.variable('a');
+            var a2 = Expression.variable('b');
+            var addition = Expression.addition(Expression.multiplication(x, a), Expression.multiplication(x2, a2));
+            var factor = Expression.GreatestCommomFactor(addition);
+
+            expect(factor).toBeTruthy();
+            expect(factor.length === 1).toBeTruthy();
+
+            factor = factor.first();
+
+            var refactored = Expression.Refactor(addition, [factor]);
+
+            var expectedResult = Expression.multiplication(Expression.variable('x'), Expression.addition(Expression.variable('a'), Expression.variable('b')));
+
+            expect(refactored.equals(expectedResult)).toBeTruthy();
 
         }).catch(function (e) {
             expect(e).caught();

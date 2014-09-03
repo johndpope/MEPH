@@ -111,19 +111,44 @@ MEPH.define('MEPH.math.Expression', {
         /**
          * Gets the greatest common factor from an array of expressions.
          * @param {MEPH.math.Expression} expression
-         * @return {MEPH.math.Expression}
+         * @return {Array} of MEPH.math.expression.Factor
          */
         GreatestCommomFactor: function (expression) {
 
-            var flattenedExpression = Expression.Flatten(expression, Expression.type.multiplication);
-            var factors = flattenedExpression.getParts().select(function (x) {
+            var flattenedExpression = Expression.Flatten(expression.copy(), Expression.type.multiplication);
+            var factors = [];
+            var collectedFactors = flattenedExpression.getParts().select(function (x) {
                 return MEPH.math.expression.Factor.getFactors(x.val);
+            })
+            var preCompactedFactors = collectedFactors.intersectFluent(function (x, y) {
+                return x.exp.equals(y.exp);
             });
 
-            var groupedFactors = factors.intersectFluent(function (x) {
-                return x.exp.latex();
+            var ret = preCompactedFactors.select(function (gh) {
+                return collectedFactors.concatFluent(function (x) { return x; }).where(function (x) {
+                    return x.exp.equals(gh.exp, { exact: true });
+                }).minSelect(function (y) {
+                    return y.count;
+                });
             });
 
+            return ret;
+        },
+        /**
+         * The expression will have the factors removed from a flattened expression, and 
+         * multiplied by those factors.
+         * @param {MEPH.math.Expression} expression
+         * @param {Array} factors 
+         * @return {MEPH.math.Expression}
+         ***/
+        Refactor: function (expression, factors) {
+            var flattenedExpression = Expression.Flatten(expression.copy(), Expression.type.multiplication);
+
+            factors.foreach(function (factor) {
+                MEPH.math.expression.Factor.removeFactor(flattenedExpression, factor)
+            });
+
+            return Expression.multiplication.apply(this, factors.select(function (x) { return x.exp }).concat(flattenedExpression))
         },
         Rules: {
             IntegralConstMultiply: function () {
@@ -603,29 +628,39 @@ MEPH.define('MEPH.math.Expression', {
                 case Expression.type.power:
                     return Expression.FlattenPower(expression.copy(), type, true);
                 default:
-                    var parts = expression.getValues().concatFluent(function (x) {
-                        if (x.type === type) {
-
-                            return Expression.Flatten(x.copy(), type, true);
-
+                    if (expression.type !== type) {
+                        if (started) {
+                            return [expression];
                         }
                         else {
-                            return [x.copy()];
+                            return expression;
                         }
-                    });
-                    if (!started) {
-                        var copy = expression.copy();
-
-                        copy.clearParts();
-                        parts.foreach(function (p) {
-                            copy.addInput(p)
-                            return p.parent(copy);
-                        });
-
-                        return copy;
                     }
+                    else {
+                        var parts = expression.getValues().concatFluent(function (x) {
+                            if (x.type === type) {
 
-                    return parts;
+                                return Expression.Flatten(x.copy(), type, true);
+
+                            }
+                            else {
+                                return [x.copy()];
+                            }
+                        });
+                        if (!started) {
+                            var copy = expression.copy();
+
+                            copy.clearParts();
+                            parts.foreach(function (p) {
+                                copy.addInput(p)
+                                return p.parent(copy);
+                            });
+
+                            return copy;
+                        }
+
+                        return parts;
+                    }
             }
         },
         /**
@@ -1638,7 +1673,7 @@ MEPH.define('MEPH.math.Expression', {
      */
     equals: function (expression, options) {
         var me = this;
-        options = options || { formEquals: true };
+        options = options || { formEquals: true, exact: false };
 
         if (me.type === expression.type) {
             var meparts = me.getParts().select();
@@ -1650,12 +1685,14 @@ MEPH.define('MEPH.math.Expression', {
                         return false;
                     }
                     if (y.val && x.val && y.val.equals && x.val.equals) {
-                        return y.val.equals(x.val);
+                        return y.val.equals(x.val, options);
                     }
                     else if (y.val && !x.val || !y.val && x.val) {
                         return false;
                     }
                     else {
+                        if (options.exact)
+                            return x.val === y.val;
                         return true
                     }
                 });
