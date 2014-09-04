@@ -83,7 +83,8 @@
             expect(factors).toBeTruthy();
             expect(factors.length === 1).toBeTruthy();
             expect(factors.first().exp.type === Expression.type.variable).toBeTruthy();
-            expect(factors.first().count === 'a').toBeTruthy();
+            var c = MEPH.math.expression.Factor.getNumerical(factors.first().count, true);
+            expect(c === 'a').toBeTruthy();
 
         }).catch(function (e) {
             expect(e).caught();
@@ -179,23 +180,25 @@
     })
 
     it('can remove "x^b" factors from an expression a*x^b => a', function (done) {
-        MEPH.requires('MEPH.math.Expression', 'MEPH.math.expression.Factor').then(function ($class) {
+        MEPH.requires('MEPH.math.Expression',
+                        'MEPH.math.expression.Factor',
+                        'MEPH.math.expression.Evaluator').then(function ($class) {
 
-            var power = Expression.power(Expression.variable('x'), Expression.variable('b'));
-            var a = Expression.variable('a');
-            var addition = Expression.multiplication(power, a);
+                            var power = Expression.power(Expression.variable('x'), Expression.variable('b'));
+                            var a = Expression.variable('a');
+                            var addition = Expression.multiplication(power, a);
 
-            var factors = MEPH.math.expression.Factor.getFactors(addition);
+                            var factors = MEPH.math.expression.Factor.getFactors(addition);
 
-            var raddition = MEPH.math.expression.Factor.removeFactors(addition, [factors.second()]);
+                            var raddition = MEPH.math.expression.Factor.removeFactors(addition, [factors.second()]);
 
-            expect(raddition.type === Expression.type.variable);
-            expect(raddition.getParts().first().val === 'a');
+                            expect(raddition.type === Expression.type.variable);
+                            expect(raddition.getParts().first().val === 'a');
 
-        }).catch(function (e) {
-            expect(e).caught();
-        }).then(function (x) {
-            done();
-        });
+                        }).catch(function (e) {
+                            expect(e).caught();
+                        }).then(function (x) {
+                            done();
+                        });
     })
 });

@@ -144,9 +144,7 @@ MEPH.define('MEPH.math.Expression', {
         Refactor: function (expression, factors) {
             var flattenedExpression = Expression.Flatten(expression.copy(), Expression.type.multiplication);
 
-            factors.foreach(function (factor) {
-                MEPH.math.expression.Factor.removeFactor(flattenedExpression, factor)
-            });
+            MEPH.math.expression.Factor.removeFactors(flattenedExpression, factors);
 
             return Expression.multiplication.apply(this, factors.select(function (x) { return x.exp }).concat(flattenedExpression))
         },

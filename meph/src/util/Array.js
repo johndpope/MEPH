@@ -536,7 +536,7 @@ MEPH.define('MEPH.util.Array', {
                     writable: true,
                     configurable: true,
                     value: function (func) {
-                        var result;
+                        var result = 0;
                         var collection = this;
                         for (var i = collection.length ; i--;) {
                             result = func(collection[i], result, i);

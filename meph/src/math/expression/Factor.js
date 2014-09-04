@@ -1,6 +1,6 @@
 ﻿/**
- * @class MEPH.math.Expression
- * Describes mathematical expressions.
+ * @class MEPH.math.expression.Factor
+ * A utility class for factors.
  *
  **/
 MEPH.define('MEPH.math.expression.Factor', {
@@ -40,7 +40,8 @@ MEPH.define('MEPH.math.expression.Factor', {
                     toremove.foreach(function (part) {
                         var count = Factor.getCount(part.val);
                         if (isNaN(factor.count) || isNaN(count)) {
-                            throw new Error('unhandled exception: requires expression addition/subtraction logic');
+                            var sub = Expression.subtraction(factor.count, count);
+                            factor.count = MEPH.math.expression.Evaluator.evaluate(sub);
                         } else
                             factor.count -= count;
                         expression.remove(part.val);
@@ -141,14 +142,15 @@ MEPH.define('MEPH.math.expression.Factor', {
         /**
          * Gets a numerical value or string or expression.
          * @param {Object} obj
+         * @param {Boolean} prefferVal
          * @return {Object/Number/String}
          **/
-        getNumerical: function (obj) {
+        getNumerical: function (obj, prefferVal) {
             var result;
             if (typeof obj === 'object') {
                 if (obj.type === Expression.type.variable) {
                     result = obj.partOrDefault(Expression.type.variable);
-                    result = isNaN(result) ? obj : parseFloat(result);
+                    result = isNaN(result) ? (prefferVal ? result : obj) : parseFloat(result);
                 }
                 else result = obj;
             }

@@ -225,4 +225,5 @@
             expect(e).caught();
         }).then(done);
     });
+
 });
