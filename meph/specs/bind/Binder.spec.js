@@ -928,43 +928,6 @@
     });
 
 
-
-    it('a control with automatically bind in both directions if there are no pipes in the instructions ', function (done) {
-        //Arrange
-        var dom = createDomObjectWithDataBind('div', '');
-        helperCompositeNode = ' <helpercomposite mephid="helperComposite"' +
-        ' data-bind=\'"helperCompositeProperty" : "c$.deepHelperProperty"\'' +
-        ' mephuniqueid="f6f0b8c8-ac52-401c-b2ec-e0adaec4e963">' +
-        '</helpercomposite>';
-        dom.innerHTML = helperCompositeNode,
-        helperCompositeNode = dom.firstElementChild;
-
-        MEPH.requires('MEPH.bind.Binder',
-            'MEPHTests.helper.composite.DeepHelperComposite',
-            'MEPHTests.helper.composite.HelperComposite').then(function () {
-                try {
-                    var dhc = new MEPHTests.helper.composite.DeepHelperComposite(),
-                    hc = new MEPHTests.helper.composite.HelperComposite();
-                    hc.addReferenceConnection(MEPH.control.Control.connectables.subcontrol, dhc);
-                    MEPH.Binder.bindControl(dhc, hc, helperCompositeNode);
-
-                    //Act
-                    var teep = hc.helperCompositeProperty = 'prop';
-
-                    //Assert
-                    setTimeout(function () {
-                        expect(dhc.deepHelperProperty === 'prop').theTruth('helperCompositeProperty didnt propogate to the deepHelperProperty');
-                        done();
-                    }, 100);
-                }
-                catch (error) {
-                    expect(error).caught();
-                }
-                finally {
-                }
-            });
-    });
-
     it('a binder will be able to prune the bindingInformation specifically for a presenter/control/viewmodel/view', function (done) {
         //Arrange
         var transform = 'transform';

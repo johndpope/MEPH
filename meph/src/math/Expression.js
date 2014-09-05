@@ -121,7 +121,7 @@ MEPH.define('MEPH.math.Expression', {
                 return MEPH.math.expression.Factor.getFactors(x.val);
             })
             var preCompactedFactors = collectedFactors.intersectFluent(function (x, y) {
-                return x.exp.equals(y.exp);
+                return x.exp.equals(y.exp, { exact: true });
             });
 
             var ret = preCompactedFactors.select(function (gh) {
@@ -143,10 +143,31 @@ MEPH.define('MEPH.math.Expression', {
          ***/
         Refactor: function (expression, factors) {
             var flattenedExpression = Expression.Flatten(expression.copy(), Expression.type.multiplication);
-
-            MEPH.math.expression.Factor.removeFactors(flattenedExpression, factors);
+            flattenedExpression.getParts().select(function (part) {
+                var replacement = MEPH.math.expression.Factor.removeFactors(part.val, factors);
+                return { r: replacement, p: part.val };
+            }).foreach(function (t) {
+                Expression.SwapPart(t.p, t.r);
+            });
 
             return Expression.multiplication.apply(this, factors.select(function (x) { return x.exp }).concat(flattenedExpression))
+        },
+
+        /**
+         * Swaps a for b.
+         * @param {MEPH.math.Expression} b
+         * @param {MEPH.math.Expression} a
+         * @return {Boolean}s
+         ***/
+        SwapPart: function (a, b) {
+            if (a.parent()) {
+                var parent = a.parent();
+                var part = parent.remove(a).first();
+                parent.addPart(part.type, b);
+                b.parent(parent);
+                return true;
+            }
+            return false;
         },
         Rules: {
             IntegralConstMultiply: function () {
