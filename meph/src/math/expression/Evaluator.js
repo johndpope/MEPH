@@ -19,9 +19,38 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return Evaluator.evalSubtraction(expression);
                 case Expression.type.division:
                     return Evaluator.evalDivision(expression);
+                case Expression.type.multiplication:
+                    return Evaluator.evalMultiplication(expression);
                 default:
                     throw new Error('unhandled case');
             }
+        },
+        evalMultiplication: function (expression) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var multiplyNums = function (exps) {
+                return exps.summation(function (x, t, i) {
+                    if (i === 0) {
+                        return Factor.getNumerical(x.val);
+                    }
+                    return t * Factor.getNumerical(x.val);
+                });
+            }
+            if (Evaluator.allNumbers(expression)) {
+                var result = multiplyNums(expression.getParts());
+                return Expression.variable(result);
+            }
+
+            var numerparts = expression.getParts().where(function (x) {
+                return Factor.isNumerical(x.val);
+            });
+            var notnumbers = expression.getParts().where(function (x) {
+                return !Factor.isNumerical(x.val);
+            });
+
+            var numexp = Expression.variable(multiplyNums(numerparts));
+            return Expression.multiplication.apply(this, [numexp].concat(notnumbers));
+
         },
         /**
          * Evaluates a division expression.

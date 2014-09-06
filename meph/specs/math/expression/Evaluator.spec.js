@@ -166,4 +166,17 @@
         expect(result.type === Expression.type.division).toBeTruthy();
     });
 
+    it('can evaluate a multiplication = 4*5*3', function () {
+        var multiplication = Expression.multiplication(4, 5, 3);
+        var result = MEPH.math.expression.Evaluator.evaluate(multiplication);
+
+        expect(result.partOrDefault(Expression.type.variable).val === 60);
+    });
+
+    it('can evaluate a multiplication = 4*a*3', function () {
+        var multiplication = Expression.multiplication(4, 'a', 3);
+        var result = MEPH.math.expression.Evaluator.evaluate(multiplication);
+        expect(result.parts.length === 2).toBeTruthy();
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
 });
