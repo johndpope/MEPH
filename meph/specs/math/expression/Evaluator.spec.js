@@ -1,4 +1,4 @@
-﻿describe("MEPH/math/expression/Evaluator.spec.js", function () {
+﻿describe("MEPH/math/expression/Evaluator.spec.js", 'MEPH.math.expression.Evaluator', 'MEPH.math.Expression', 'MEPH.math.expression.Factor', function () {
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
     });
@@ -150,4 +150,20 @@
             done();
         });
     });
+
+    it('can evaluate a division = Expression.division(Expression.variable(9),Expression.variable(3))', function () {
+        var division = Expression.division(Expression.variable(9), Expression.variable(3));
+        var result = MEPH.math.expression.Evaluator.evaluate(division);
+        expect(result.partOrDefault(Expression.type.variable) === 3).toBeTruthy();
+        expect(result.type === Expression.type.variable).toBeTruthy();
+    });
+
+
+    it('can evaluate a division = Expression.division(Expression.variable(9),Expression.variable(3),Expression.variable(a),Expression.variable(b))', function () {
+        var division = Expression.division(Expression.variable(9), Expression.variable(3), Expression.variable('a'), Expression.variable('b'));
+        var result = MEPH.math.expression.Evaluator.evaluate(division);
+        expect(result.parts.length === 3).toBeTruthy();
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
 });

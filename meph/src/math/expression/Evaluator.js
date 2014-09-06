@@ -17,6 +17,45 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return Evaluator.evalAddition(expression);
                 case Expression.type.subtraction:
                     return Evaluator.evalSubtraction(expression);
+                case Expression.type.division:
+                    return Evaluator.evalDivision(expression);
+                default:
+                    throw new Error('unhandled case');
+            }
+        },
+        /**
+         * Evaluates a division expression.
+         * @param {MEPH.math.Expression} expression
+         * @return {MEPH.math.Expression}s
+         **/
+        evalDivision: function (expression) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var divideNums = function (exps) {
+                return exps.summation(function (x, t, i) {
+                    if (i === 0) {
+                        return Factor.getNumerical(x.val);
+                    }
+                    return t / Factor.getNumerical(x.val);
+                });
+            }
+            if (Evaluator.allNumbers(expression)) {
+                var result = divideNums(expression.getParts());
+                return Expression.variable(result);
+            }
+            else {
+                var index = expression.getParts().indexWhere(function (x) {
+                    return !Factor.isNumerical(x.val);
+                }).first();
+                if (index !== null) {
+                    var numerparts = expression.getParts().subset(0, index);
+                    var numexp = Expression.variable(divideNums(numerparts));
+                    var therest = expression.getParts().subset(index);
+                    return Expression.division.apply(this, [numexp].concat(therest));
+                }
+                else {
+                    return expression;
+                }
             }
         },
         /**

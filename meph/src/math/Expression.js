@@ -929,6 +929,35 @@ MEPH.define('MEPH.math.Expression', {
             expression.addPart(Expression.function.input, b);
             return expression
         },
+        /**
+         * An expression representing the value '1'
+         * @return {MEPH.math.Expression}
+         **/
+        one: function () {
+            return Expression.variable(1);
+        },
+        /**
+         * If an expression represents the value '1' then true is returned otherwise false.
+         * @return {MEPH.math.Expression}
+         **/
+        isOne: function (exp) {
+            return Expression.one().equals(exp, { exact: true });
+        },
+        /**
+         * Removes all the parts of an expression representing one.
+         * @param {MEPH.math.Expression} exp
+         **/
+        removeOne: function (exp) {
+            var oneparts = exp.getParts().where(function (x) { return Expression.isOne(x.val); });
+            if (oneparts.length === exp.getParts().length) {
+                oneparts = oneparts.subset(1);
+            }
+            oneparts.foreach(function (x) { return exp.remove(x.val); });
+            if (exp.getParts().length === 1) {
+                return exp.getParts().first().val;
+            }
+            return exp;
+        },
         variable: function (variable) {
             var expression = new Expression();
             expression.setExp(Expression.type.variable, variable);
@@ -1710,8 +1739,14 @@ MEPH.define('MEPH.math.Expression', {
                         return false;
                     }
                     else {
-                        if (options.exact)
-                            return x.val === y.val;
+                        if (options.exact) {
+                            if (isNaN(x.val) && isNaN(y.val)) {
+                                return x.val === y.val;
+                            }
+                            else {
+                                return parseFloat(x.val) === parseFloat(y.val);
+                            }
+                        }
                         return true
                     }
                 });

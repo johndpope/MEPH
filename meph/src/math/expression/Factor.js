@@ -4,6 +4,7 @@
  *
  **/
 MEPH.define('MEPH.math.expression.Factor', {
+    requires: ['MEPH.math.Util'],
     statics: {
         /**
          * Gets factors from the expression.
@@ -13,13 +14,49 @@ MEPH.define('MEPH.math.expression.Factor', {
         getFactors: function (expression) {
             var Factor = MEPH.math.expression.Factor;
             switch (expression.type) {
+                case Expression.type.integral:
                 case Expression.type.variable:
                     return Factor.getVariableFactors(expression);
                 case Expression.type.power:
                     return Factor.getPowerFactors(expression);
                 case Expression.type.multiplication:
                     return Factor.getMultiplicationFactors(expression);
+                default:
+                    throw new Error('unhandle case ? getFactors -> Factor.js ');
             }
+        },
+        /**
+         * Get the first numerical expression with a matching factor.
+         * @param {Number} num
+         * @param {Expression} expression
+         * @return {Object}
+         **/
+        getFirstNumericalPartWithMatchingFactor: function (num, expression) {
+            var Factor = MEPH.math.expression.Factor;
+            var factorVal, part = expression.getParts().first(function (part) {
+                var val = Factor.getNumerical(part.val);
+                if (typeof val === 'number') {
+                    var factors = MEPH.math.Util.factor(val);
+                    factorVal = factors.first(function (x) { return num === x; })
+                    return factorVal;
+                }
+                else {
+                    return false;
+                }
+            });
+
+            return part ? { factorVal: factorVal, exp: part.val } : false;
+        },
+        /**
+         * Divides the expression by a value.
+         * @param {MEPH.math.Expression} expression
+         * @param {Number} num
+         **/
+        divideFactor: function (expression, num) {
+            var Factor = MEPH.math.expression.Factor;
+            var expNum = Factor.getNumerical(expression);
+            var result = MEPH.math.expression.Evaluator.evaluate(Expression.division(expression.copy(), num));
+            return result;
         },
         /**
          * Removes factors from an expression
@@ -33,19 +70,28 @@ MEPH.define('MEPH.math.expression.Factor', {
 
             $factors.foreach(function (factor) {
                 if (factor.count) {
-                    var toremove = expression.getParts().where(function (part) {
-                        return Factor.getExp(part.val).equals(factor.exp, { exact: true });
-                    });
+                    var toremove;
+                    var num;
+                    if (typeof (num = Factor.getNumerical(factor.exp)) === 'number') {
+                        var val = Factor.getFirstNumericalPartWithMatchingFactor(num, expression);
+                        if (val) {
+                            var newexp = Factor.divideFactor(val.exp, val.factorVal);
+                            Expression.SwapPart(val.exp, newexp);
+                            Factor.reduceFactorCount(factor, 1);
+                        }
+                    }
+                    else {
+                        toremove = expression.getParts().where(function (part) {
+                            return Factor.getExp(part.val).equals(factor.exp, { exact: true });
+                        });
 
-                    toremove.foreach(function (part) {
-                        var count = Factor.getCount(part.val);
-                        if (isNaN(factor.count) || isNaN(count)) {
-                            var sub = Expression.subtraction(factor.count, count);
-                            factor.count = MEPH.math.expression.Evaluator.evaluate(sub);
-                        } else
-                            factor.count -= count;
-                        expression.remove(part.val);
-                    });
+                        toremove.foreach(function (part) {
+                            var count = Factor.getCount(part.val);
+                            Factor.reduceFactorCount(factor, count);
+
+                            expression.remove(part.val);
+                        });
+                    }
                 }
             });
             if (expression.parts.length === 1) {
@@ -55,7 +101,25 @@ MEPH.define('MEPH.math.expression.Factor', {
                         break;
                 }
             }
+            else {
+                switch (expression.type) {
+                    case Expression.type.multiplication:
+                        expression = Expression.removeOne(expression);
+                }
+            }
             return expression;
+        },
+        /**
+         * Reduces factor count.
+         * @param {MEPH.math.expression.Factor} factor
+         * @param {Object} count
+         **/
+        reduceFactorCount: function (factor, count) {
+            if (isNaN(factor.count) || isNaN(count)) {
+                var sub = Expression.subtraction(factor.count, count);
+                factor.count = MEPH.math.expression.Evaluator.evaluate(sub);
+            } else
+                factor.count -= count;
         },
         /**
          * Gets the number of factors it accounts for.
@@ -122,6 +186,18 @@ MEPH.define('MEPH.math.expression.Factor', {
          **/
         getVariableFactors: function (expression) {
             var Factor = MEPH.math.expression.Factor;
+            var numerical = Factor.getNumerical(expression);
+            if (!isNaN(numerical)) {
+                var t = MEPH.math.Util.factor(numerical).where(function (x) {
+                    return x !== 1;
+                });
+
+                if (t.length !== 1) {
+                    return t.where(function (x) { return x !== numerical; }).select(function (x) {
+                        return new Factor(Expression.variable(x), 1);
+                    });
+                }
+            }
             var factor = new Factor(expression, 1);
             return [factor];
         },
@@ -158,9 +234,19 @@ MEPH.define('MEPH.math.expression.Factor', {
                 result = obj;
             }
             else if (typeof obj === 'string') {
-                result = parseFloat(obj);
+
+                result = isNaN(obj) ? obj : parseFloat(obj);
             }
             return result;
+        },
+        /**
+         * Returns true if the expression is representing a number.
+         * @param {MEPH.math.Expression} exp;
+         * @return {Boolean}
+         **/
+        isNumerical: function (exp) {
+            var result = MEPH.math.expression.Factor.getNumerical(exp);
+            return !isNaN(result);
         }
     },
     initialize: function (exp, count) {

@@ -6,6 +6,20 @@
         /**
          * Custom Matchers
          */
+        var jasmineDescribe = describe;
+        window.describe = function () {
+            var args = MEPH.util.Array.convert(arguments);
+            var name = args.first();
+            var funcIndex = args.indexWhere(function (x) { return typeof x === 'function'; }).first();
+            if (funcIndex === 1) {
+                jasmineDescribe(name, args[funcIndex]);
+            }
+            else {
+                MEPH.requires.apply(this, args.subset(1, funcIndex)).then(function () {
+                    jasmineDescribe(name, args[funcIndex]);
+                })
+            }
+        }
 
         MEPH.customMatchers = {
             caught: function (util, customEqualityTesters) {

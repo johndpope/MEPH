@@ -1,4 +1,4 @@
-﻿describe("MEPH/math/Expression.spec.js", function () {
+﻿describe("MEPH/math/Expression.spec.js", 'MEPH.math.Expression', function () {
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
     });
@@ -226,4 +226,133 @@
         }).then(done);
     });
 
+    it('can refactor an expression from 2x + 2y => 2(x + y)', function () {
+        var two = Expression.variable('2');
+        var t2 = Expression.variable('2');
+        var x = Expression.variable('x');
+        var y = Expression.variable('y');
+        var addition = Expression.addition(Expression.multiplication(two, x), Expression.multiplication(t2, y));
+
+        var factor = Expression.GreatestCommomFactor(addition);
+
+        expect(factor).toBeTruthy();
+        expect(factor.length === 1).toBeTruthy();
+
+        factor = factor.first();
+        var refactored = Expression.Refactor(addition, [factor]);
+
+        var expectedResult = Expression.multiplication(Expression.variable('2'), Expression.addition(Expression.variable('x'), Expression.variable('y')));
+        expect(refactored.equals(expectedResult, { exact: true })).toBeTruthy();
+    });
+
+
+    it('can refactor an expression from 6x + 3y => 3(2x + y)', function () {
+        var two = Expression.variable('6');
+        var t2 = Expression.variable('3');
+        var x = Expression.variable('x');
+        var y = Expression.variable('y');
+        var addition = Expression.addition(Expression.multiplication(two, x), Expression.multiplication(t2, y));
+
+        var factor = Expression.GreatestCommomFactor(addition);
+
+        expect(factor).toBeTruthy();
+        expect(factor.length === 1).toBeTruthy();
+
+        factor = factor.first();
+        var refactored = Expression.Refactor(addition, [factor]);
+
+        var expectedResult = Expression.multiplication(Expression.variable('3'), Expression.addition(Expression.multiplication(Expression.variable('2'), Expression.variable('x')), Expression.variable('y')));
+        expect(refactored.equals(expectedResult, { exact: true })).toBeTruthy();
+    });
+
+    it('Expression.one() is a variable with the value of 1', function () {
+        var one = Expression.one();
+        expect(one.type === Expression.type.variable).toBeTruthy();
+        expect(one.partOrDefault(Expression.type.variable) === 1).toBeTruthy();
+    });
+
+
+    it('Expression.isOne(exp) detects if the expression equals one.', function () {
+        var one = Expression.one();
+        expect(Expression.isOne(one)).toBeTruthy();
+    });
+
+    it('Can remove a one from an expression', function () {
+
+        var one = Expression.one();
+        var mul = Expression.multiplication(Expression.variable('b'), Expression.variable('a'), one);
+        Expression.removeOne(mul);
+
+        expect(mul.parts.length === 2).toBeTruthy();
+    });
+
+    it('Can remove multiple ones from an expression', function () {
+
+        var one = Expression.one();
+        var mul = Expression.multiplication(Expression.variable('b'), Expression.variable('a'), one, Expression.one());
+        Expression.removeOne(mul);
+
+        expect(mul.parts.length === 2).toBeTruthy();
+    });
+
+    it('if everything is remove except for 1 value, it returns the single part left.', function () {
+
+        var one = Expression.one();
+        var mul = Expression.multiplication(Expression.variable('b'), one, Expression.one());
+        var result = Expression.removeOne(mul);
+        expect(result.type === Expression.type.variable).toBeTruthy();
+
+    });
+
+    it('if everything is a 1 then a 1 is all that will remain.', function () {
+
+        var one = Expression.one();
+        var mul = Expression.multiplication(Expression.variable('1'), one, Expression.one());
+        var result = Expression.removeOne(mul);
+        expect(result.type === Expression.type.variable).toBeTruthy();
+        expect(result.partOrDefault(Expression.type.variable) == 1).toBeTruthy();
+    });
+
+    it('can refactor an expression from 6(int(fx)) + 3(int(fy)) => 3(2(int(fx)) + (int(fy)))', function () {
+        var two = Expression.variable('6');
+        var t2 = Expression.variable('3');
+        var x = Expression.integral(Expression.variable('a'), 'x');
+        var y = Expression.integral(Expression.variable('d'), 'y');
+        var addition = Expression.addition(Expression.multiplication(two, x), Expression.multiplication(t2, y));
+
+        var factor = Expression.GreatestCommomFactor(addition);
+
+        expect(factor).toBeTruthy();
+        expect(factor.length === 1).toBeTruthy();
+
+        factor = factor.first();
+        var refactored = Expression.Refactor(addition, [factor]);
+
+        var expectedResult = Expression.multiplication(Expression.variable('3'), Expression.addition(
+            Expression.multiplication(Expression.variable('2'),
+                                        Expression.integral(Expression.variable('a'), 'x')),
+                                        Expression.integral(Expression.variable('d'), 'y')));
+        expect(refactored.equals(expectedResult, { exact: true })).toBeTruthy();
+    });
+
+
+    it('can refactor an expression from 2(int(fx)) + 3(int(fx)) => int(fx)(2 + 3)', function () {
+        var two = Expression.variable('2');
+        var t2 = Expression.variable('3');
+        var x = Expression.integral(Expression.variable('a'), 'x');
+        var y = Expression.integral(Expression.variable('a'), 'x');
+        var addition = Expression.addition(Expression.multiplication(two, x), Expression.multiplication(t2, y));
+
+        var factor = Expression.GreatestCommomFactor(addition);
+
+        expect(factor).toBeTruthy();
+        expect(factor.length === 1).toBeTruthy();
+
+        factor = factor.first();
+        var refactored = Expression.Refactor(addition, [factor]);
+
+        var expectedResult = Expression.multiplication(Expression.integral(Expression.variable('a'), 'x'),
+            Expression.addition(Expression.variable('2'), Expression.variable('3')));
+        expect(refactored.equals(expectedResult, { exact: true })).toBeTruthy();
+    });
 });

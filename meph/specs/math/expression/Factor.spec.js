@@ -1,4 +1,4 @@
-﻿describe("MEPH/math/expression/Factor.spec.js", function () {
+﻿describe("MEPH/math/expression/Factor.spec.js", 'MEPH.math.Expression', 'MEPH.math.expression.Factor', 'MEPH.math.expression.Evaluator', function () {
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
     });
@@ -200,5 +200,14 @@
                         }).then(function (x) {
                             done();
                         });
-    })
+    });
+
+    it('gets primes that make the number 6', function () {
+        var number = Expression.variable('6');
+
+        var factors = MEPH.math.expression.Factor.getFactors(number);
+
+        expect(factors.length === 2).toBeTruthy();
+
+    });
 });
