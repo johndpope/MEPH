@@ -11,8 +11,8 @@
 
             expect(expression).theTruth('a quaternion was not created');
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -25,8 +25,8 @@
             var latexp = expression.latex();
             expect(latexp === 'a').toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -40,8 +40,8 @@
             var latexp = '\\int_a^b \\! f(x) \\, \\mathrm{d}x';
             
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -53,8 +53,8 @@
             var expression = Expression.integral(Expression.variable('f(x)'), 'x');
             var latexp = '\\int_ \\! f(x) \\, \\mathrm{d}x';
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -66,8 +66,8 @@
             var expression = Expression.addition(Expression.variable('f(x)'), Expression.variable('x'));
             var latexp = 'f(x) + x';
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -85,8 +85,8 @@
             var latexp = 'f(x) + x + x + b + a + y';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -104,8 +104,8 @@
             var latexp = 'f(x) - x - x - b - a - y';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -123,8 +123,8 @@
             var latexp = 'f(x) / x / x / b / a / y';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -142,8 +142,8 @@
             var latexp = 'f(x)xxbay';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -161,8 +161,8 @@
             var latexp = 'xbay';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -176,8 +176,8 @@
             expect(Expression.requiresParenthesis(Expression.type.subtraction)).toBeTruthy();
             expect(Expression.requiresParenthesis(Expression.type.multiplication)).toBeTruthy();
             expect(Expression.requiresParenthesis(Expression.type.division)).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -191,8 +191,8 @@
             var latexp = 'f(x)^{y}';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -205,8 +205,8 @@
             var latexp = '\\frac{f(x)}{y}';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -228,8 +228,8 @@
                         ' \\end{equation}';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -242,8 +242,8 @@
             var latexp = '\\cos (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -256,8 +256,8 @@
             var latexp = '\\sin (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -270,8 +270,8 @@
             var latexp = '\\tan (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -285,8 +285,8 @@
             var latexp = '\\csc (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -299,8 +299,8 @@
             var latexp = '\\sec (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -313,8 +313,8 @@
             var latexp = '\\cot (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -327,8 +327,8 @@
             var latexp = '\\sin^2 (\\theta)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -341,8 +341,8 @@
             var latexp = '\\theta \\bmod f';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -357,8 +357,8 @@
             var latexp = '\\lim_{a \\to b} f(x)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -371,8 +371,8 @@
             var exp2 = Expression.sec(Expression.variable('b'));
 
             expect(expression.equals(exp2)).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -385,8 +385,8 @@
             var exp2 = Expression.addition(Expression.sin(Expression.variable('y'), 2), Expression.cos(Expression.variable('x'), 2));
 
             expect(expression.equals(exp2)).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -400,8 +400,8 @@
             var exp2 = Expression.addition(Expression.sin(Expression.variable('y'), 2), Expression.cos(Expression.variable('x'), 2));
 
             expect(expression.equals(exp2)).toBeFalsy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -416,8 +416,8 @@
             var latexp = 'f(x)';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -431,8 +431,8 @@
             var latexp = 'a \\pm b';
 
             expect(latexp === expression.latex()).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -454,8 +454,8 @@
                 return x.equals(exp2);
             });
             expect(r).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -481,8 +481,8 @@
                 return x.equals(exp2);
             });
             expect(r).toBeFalsy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -497,8 +497,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -513,8 +513,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
 
             expect(!rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -536,8 +536,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -562,8 +562,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
 
             expect(!rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -609,8 +609,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.AxPlusC());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -624,8 +624,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.MultiplyIntegralofFx());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -646,8 +646,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.MultiplyIntegralofFx());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -733,8 +733,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.PowerIntegrate());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -776,8 +776,8 @@
             var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition());
 
             expect(rule).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -796,8 +796,8 @@
             expect(expression.mark() === 'A').toBeTruthy();
             expect(variable.mark() === 'B').toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -813,8 +813,8 @@
             expect(marks.A).toBeTruthy();
             expect(marks.I).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -830,8 +830,8 @@
             expect(marks.C).toBeTruthy();
             expect(marks.x).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -847,8 +847,8 @@
             expect(marks.C).toBeTruthy();
             expect(marks.x).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -864,8 +864,8 @@
             expect(marks.C).toBeTruthy();
             expect(marks.I).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -881,8 +881,8 @@
             expect(marks.C).toBeTruthy();
             expect(marks.I).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -899,8 +899,8 @@
             expect(marks.n).toBeTruthy();
             expect(marks.I).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -918,8 +918,8 @@
             expect(marks.x).toBeTruthy();
             expect(marks.C).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -936,8 +936,8 @@
             expect(marks.A).toBeTruthy();
             expect(marks.f).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -955,8 +955,8 @@
             expect(copy.mark() === expression.mark()).toBeTruthy();
             expect(copy.parts.length === expression.parts.length).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -985,8 +985,8 @@
             expression.parent(new Expression());
             expect(expression.parent()).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -1004,8 +1004,8 @@
             I.swap('A', newc);
             expect(I.getMark('A')).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -1042,8 +1042,8 @@
             rule1.swap('A', Expression.variable('A'));
             console.log(rule1.latex());
             expect(rule1.latex() === 'xA + #C').toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -1067,8 +1067,8 @@
             var result = Expression.translation.Transform(transformation, rule1, rule2);
             console.log(result.latex());
             expect(result).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -1084,8 +1084,8 @@
             var result = Expression.translation.Translate(rule1, rule2);
             console.log(result.latex());
             expect(result).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -1109,8 +1109,8 @@
             var result = Expression.translation.Transform(transformation, rule1, rule2);
             console.log(result.latex());
             expect(result).toBeTruthy();
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });
@@ -1138,8 +1138,8 @@
             expect(marks.I === expression).toBeTruthy();
             expect(marks.A === anything).toBeTruthy();
 
-        }).catch(function () {
-            expect(new Error('something went wrong while creating an expression')).caught();
+        }).catch(function (e) {
+            expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {
             done();
         });

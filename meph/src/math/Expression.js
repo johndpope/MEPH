@@ -109,6 +109,69 @@ MEPH.define('MEPH.math.Expression', {
             }
         },
         /**
+         * Selects the result based on the selector.
+         *
+         *              Example
+         *              up:.[type of expression] -> traverses the expression upwards for the
+         *              first expression of the type.
+         * 
+         * @param {MEPH.math.Expression}
+         * @param {Object} d
+         * @param {String} d.offset
+         * @returns {MEPH.math.Expression}
+         ***/
+        select: function (expression, d) {
+            var selector = d.offset;
+            var split = selector.split(':');
+            var traversalDirection = split.first();
+            var expType;
+            var exp = expression;
+            switch (traversalDirection) {
+                case 'up':
+                    expType = split.second().split('.').second();
+                    do {
+                        exp = exp.parent();
+                    }
+                    while (exp && exp.type !== expType);
+                    if (exp) {
+                        if (d.part)
+                            return exp.part(d.part);
+                        else return exp;
+                    }
+            }
+            /* I would like this section below to dissapear */
+            switch (selector) {
+                case 'grandparent':
+                    offset = expression.parent().parent();
+                    part = offset.part(d.part);
+                    break;
+                case 'parent':
+                    offset = expression.parent();
+                    part = offset.part(d.part);
+                    break
+                case 'sibling':
+                    offset = expression.parent();
+                    var json = JSON.parse('{' + d.part + '}');
+                    part = offset.parts.where(function (x) {
+                        return x.val !== expression;
+                    });
+                    break;
+                default:
+                    if (selector.split('.')) {
+                        selector.split('.').foreach(function (x) {
+                            if (x === 'parent') {
+                                offset = offset.parent();
+                            }
+                        });
+                        part = offset.part(d.part);
+                    }
+                    else
+                        throw new Error('not handled offset');
+                    break;
+            }
+            return part;
+        },
+        /**
          * Gets the greatest common factor from an array of expressions.
          * @param {MEPH.math.Expression} expression
          * @return {Array} of MEPH.math.expression.Factor
@@ -171,11 +234,20 @@ MEPH.define('MEPH.math.Expression', {
         },
         Rules: {
             IntegralConstMultiply: function () {
-                var c = Expression.variable('A');
+                var c = Expression.anything();
+                c.dependency('up:.integral', 'respectTo', Expression.Dependency.ConstRelation);
                 c.mark('C');
+
                 var a = Expression.anything();
+                a.dependency('up:.integral', 'respectTo', Expression.Dependency.VariableRelation);
                 a.mark('A');
-                var expression = Expression.integral(Expression.multiplication(c, a), 'x');
+
+                var mul = Expression.multiplication(c, a);
+                mul.repeat = {
+                    requires: [Expression.function.input]
+                };
+
+                var expression = Expression.integral(mul, 'x');
                 expression.mark('I');
 
                 expression.name(Expression.RuleType.IntegralConstMultiply);
@@ -183,13 +255,21 @@ MEPH.define('MEPH.math.Expression', {
                 return expression;
             },
             MultiplyIntegralofFx: function () {
-                var c = Expression.variable('#C');
+                var c = Expression.anything('#C');
+                c.dependency('sibling', '', Expression.Dependency.SiblingIndependence);
                 c.mark('C');
+
                 var a = Expression.anything();
+                a.dependency('up:.integral', 'respectTo', Expression.Dependency.VariableRelation);
                 a.mark('A');
+
                 var I = Expression.integral(a, 'x');
                 I.mark('I');
+
                 var expression = Expression.multiplication(c, I);
+                expression.repeat = {
+                    requires: [Expression.function.input]
+                };
 
                 expression.name(Expression.RuleType.MultiplyIntegralofFx);
 
@@ -1236,9 +1316,13 @@ MEPH.define('MEPH.math.Expression', {
     setMark: function (mark, val) {
         var me = this;
         var mark = me.getMark(mark);
-        debugger
+
         mark.parts.removeWhere();
     },
+    /**
+     * Gets the marks on the expression.
+     * @returns {Object}
+     ***/
     getMarks: function () {
         var me = this,
             marks = {};
@@ -1251,12 +1335,39 @@ MEPH.define('MEPH.math.Expression', {
             if (part && part.val && part.val.getMarks) {
                 var submarks = part.val.getMarks();
                 for (var i in submarks) {
-                    if (submarks[i])
-                        marks[i] = submarks[i];
+                    if (submarks[i]) {
+                        var smi = Array.isArray(submarks[i]) ? submarks[i].first() : submarks[i];
+                        var temp_exp = marks[i];
+                        if (temp_exp) {
+                            
+                            temp_exp = (!Array.isArray((temp_exp))) ? temp_exp : temp_exp.first();
+                            if (temp_exp.isSibling(smi)) {
+                                if (!Array.isArray(submarks[i])) {
+                                    marks[i] = [temp_exp];
+                                    marks[i].push(submarks[i]);
+                                }
+                                else {
+                                    marks[i] = [temp_exp].concat(submarks[i]);
+                                }
+                            }
+                        }
+                        else {
+                            marks[i] = submarks[i];
+                        }
+                    }
                 }
             }
         });
         return marks;
+    },
+    /**
+     * Returns true if the exp expression share the same parent().
+     * @param {MEPH.math.Expression} exp
+     * @return {Boolean}
+     **/
+    isSibling: function (exp) {
+        var me = this;
+        return me.parent() === exp.parent();
     },
     /**
      * Gets the list of variables and consts in the expression.
@@ -1331,35 +1442,36 @@ MEPH.define('MEPH.math.Expression', {
 
         return me.getDependencies().all(function (d) {
             var offset, part;
-            switch (d.offset) {
-                case 'grandparent':
-                    offset = expression.parent().parent();
-                    part = offset.part(d.part);
-                    break;
-                case 'parent':
-                    offset = expression.parent();
-                    part = offset.part(d.part);
-                    break
-                case 'sibling':
-                    offset = expression.parent();
-                    var json = JSON.parse('{' + d.part + '}');
-                    part = offset.parts.where(function (x) {
-                        return x.val !== expression;
-                    });
-                    break;
-                default:
-                    if (d.offset.split('.')) {
-                        d.offset.split('.').foreach(function (x) {
-                            if (x === 'parent') {
-                                offset = offset.parent();
-                            }
-                        });
-                        part = offset.part(d.part);
-                    } else
-                        throw new Error('not handled offset');
-                    break;
-            }
-            if (!offset) {
+            part = Expression.select(expression, d);
+            //switch (d.offset) {
+            //    case 'grandparent':
+            //        offset = expression.parent().parent();
+            //        part = offset.part(d.part);
+            //        break;
+            //    case 'parent':
+            //        offset = expression.parent();
+            //        part = offset.part(d.part);
+            //        break
+            //    case 'sibling':
+            //        offset = expression.parent();
+            //        var json = JSON.parse('{' + d.part + '}');
+            //        part = offset.parts.where(function (x) {
+            //            return x.val !== expression;
+            //        });
+            //        break;
+            //    default:
+            //        if (d.offset.split('.')) {
+            //            d.offset.split('.').foreach(function (x) {
+            //                if (x === 'parent') {
+            //                    offset = offset.parent();
+            //                }
+            //            });
+            //            part = offset.part(d.part);
+            //        } else
+            //            throw new Error('not handled offset');
+            //        break;
+            //}
+            if (!part) {
                 throw new Error('no offset found');
             }
             return d.ruleFunction(expression, part);
@@ -1661,25 +1773,52 @@ MEPH.define('MEPH.math.Expression', {
                 else return false;
             };
             if (rule.repeat) {
-                var repeatedparts = [].interpolate(0, me.getParts().length, function () {
-                    return rule.parts.first();
-                });
-                meParts.foreach(matchParts.bind(me, repeatedparts));
-                if (repeatedparts.length === 0) {
-                    if (markRule) {
-                        me.mark(rule.mark());
-                    }
-                    me.repeat = rule.repeat;
+                var repeatedparts;
+                if (rule.repeat.requires) {
+                    repeatedparts = rule.getParts().where(function (x) {
+                        return rule.repeat.requires.contains(function (y) {
+                            return y === x.type;
+                        });
+                    }).select(function (x) { return x; });
 
-                    return true;
+                    var eq = repeatedparts.all(function (part) {
+                        var p = [].interpolate(0, me.getParts().length, function () {
+                            return part;
+                        });
+                        var start = p.length;
+
+                        meParts.foreach(matchParts.bind(me, p));
+
+                        return start != p.length;
+                    });
+
+                    return eq;
+                }
+                else {
+
+                    repeatedparts = [].interpolate(0, me.getParts().length, function () {
+                        return rule.parts.first();
+                    });
+                    meParts.foreach(matchParts.bind(me, repeatedparts));
+                    if (repeatedparts.length === 0) {
+                        if (markRule) {
+                            me.mark(rule.mark());
+                        }
+                        me.repeat = rule.repeat;
+
+                        return true;
+                    }
                 }
                 return false;
             }
-            else if (rule.part(Expression.type.anything)) {
+            else if (rule.getParts().contains(function (x) {
+                return x.val.type === (Expression.type.anything);
+            })) {
 
-                ruleParts = rule.getParts().select().where(function (x) {
-                    return x.type === Expression.type.anything;
-                });
+                ruleParts = rule.getParts().select();
+                //.where(function (x) {
+                //    return x.val.type === Expression.type.anything;
+                //});
 
                 meParts.foreach(matchParts.bind(me, ruleParts));
                 if (ruleParts.length === 0) {

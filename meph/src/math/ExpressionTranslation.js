@@ -92,10 +92,33 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                             bi = i;
                         }
                         a_copy = a.copy();
-                        b_copy.swap(bi, a_copy.getMark(ai));
+                        var a_mark = a_copy.getMark(ai);
+                        if (Array.isArray(a_mark)) {
+                            a_mark = ExpressionTranslation.convertSiblingsToAnExpression(a_mark);
+                        }
+
+                        b_copy.swap(bi, a_mark);
                     }
                 }
                 return b_copy;
+            }
+        },
+        /**
+         * Convers siblings to an expression of the same type as the parent.
+         * @param {Array} siblings
+         ***/
+        convertSiblingsToAnExpression: function (siblings) {
+            var sibling = siblings.first();
+            var parent = sibling.parent();
+            switch (parent.type) {
+                case Expression.type.multiplication:
+                    return Expression.multiplication.apply(this, siblings);
+                case Expression.type.subtraction:
+                    return Expression.subtraction.apply(this, siblings);
+                case Expression.type.addition:
+                    return Expression.addition.apply(this, siblings);
+                case Expression.type.division:
+                    return Expression.division.apply(this, siblings);
             }
         },
         translateGeneralFormula8: function (a, b) {
