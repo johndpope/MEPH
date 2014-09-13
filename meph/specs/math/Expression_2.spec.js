@@ -223,10 +223,9 @@
                                 Expression.func('h', 'x')), Expression.variable('x'));
             var rule2 = Expression.Rules.Integration.AdditionIntegral();
 
-            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegrationAddition(), true);
-            expect(expression.getMarks().dx).toBeTruthy();
-            var result = Expression.translation.Translate(expression, rule2);
-            expect(!result).toBeTruthy();
+            expression.name(Expression.RuleType.IntegrationAddition);
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegrationAddition(), true); 
+            expect(!rule).toBeTruthy();
         }).catch(function (e) {
             expect(e).caught();
         }).then(function (x) {

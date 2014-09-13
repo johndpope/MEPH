@@ -17,6 +17,7 @@ MEPH.define('MEPH.math.Set', {
             var length = values.length;
             var sets = [];
             var supersetcount = Math.pow(2, length);
+
             var base2Masks = [].interpolate(0, supersetcount, function (x) {
                 var t = Set.baseConvert(x, 10, 2);
                 return [].interpolate(0, length - t.length, function () {
@@ -31,6 +32,21 @@ MEPH.define('MEPH.math.Set', {
             var result = new Set();
             result.set(base2Masks);
             return result;
+        },
+        /**
+         * Creates a set of strings represent all the possible base2 bit masks.
+         * @param {Number} bits
+         */
+        base2MaskSet: function (bits) {
+            var supersetcount = Math.pow(2, bits);
+            var length = Math.log(bits) / Math.log(2)
+            var base2Masks = [].interpolate(0, supersetcount, function (x) {
+                var t = Set.baseConvert(x, 10, 2);
+                return [].interpolate(0, length - t.length + 1, function () {
+                    return '0';
+                }).join('') + Set.baseConvert(x, 10, 2);
+            });
+            return base2Masks;
         },
         /**
          * Returns a set of items that have the item set size.

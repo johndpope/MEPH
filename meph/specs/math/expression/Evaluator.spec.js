@@ -327,7 +327,7 @@
                 })];
             }
         });
-        expect(result.parts.length === 2).toBeTruthy();
+        expect(result.parts.length === 1).toBeTruthy();
         expect(result.type === Expression.type.addition).toBeTruthy();
     });
 
@@ -340,7 +340,7 @@
                 })];
             }
         });
-        expect(result.parts.length === 3).toBeTruthy();
+        expect(result.parts.length === 1).toBeTruthy();
         expect(result.type === Expression.type.addition).toBeTruthy();
     });
 
@@ -348,8 +348,16 @@
         var d = Expression.derivative(Expression.multiplication('x', 'x', 'x'), 1, null, 'x');
 
         var result = Evaluator.evaluate(d);
-
+        
         expect(result.parts.length === 3).toBeTruthy();
         expect(result.type === Expression.type.addition).toBeTruthy();
+    });
+
+    it('can evaluate a single variable in a derivative', function () {
+        var d = Expression.derivative(Expression.variable('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result === 1).toBeTruthy();
     });
 });

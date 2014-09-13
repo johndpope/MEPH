@@ -62,6 +62,8 @@ MEPH.define('MEPH.math.Expression', {
         },
         RuleType: {
             Derivation: {
+                SimpleVariableA: 'SimpleVariableA',
+                SimpleVariableB: 'SimpleVariableB',
                 GeneralFormula1a: 'GeneralFormula1a',
                 GeneralFormula1b: 'GeneralFormula1b',
                 GeneralFormula2a: 'GeneralFormula2a',
@@ -72,14 +74,14 @@ MEPH.define('MEPH.math.Expression', {
                 GeneralFormula4b: 'GeneralFormula4b',
                 GeneralFormula5a: 'GeneralFormula5a',
                 GeneralFormula5b: 'GeneralFormula5b',
-                GeneralFormula5b: 'GeneralFormula6a',
-                GeneralFormula5b: 'GeneralFormula6b',
-                GeneralFormula5b: 'GeneralFormula7a',
-                GeneralFormula5b: 'GeneralFormula7b',
-                GeneralFormula5b: 'GeneralFormula8a',
-                GeneralFormula5b: 'GeneralFormula8b',
-                GeneralFormula5b: 'GeneralFormula9a',
-                GeneralFormula5b: 'GeneralFormula9b'
+                GeneralFormula6a: 'GeneralFormula6a',
+                GeneralFormula6b: 'GeneralFormula6b',
+                GeneralFormula7a: 'GeneralFormula7a',
+                GeneralFormula7b: 'GeneralFormula7b',
+                GeneralFormula8a: 'GeneralFormula8a',
+                GeneralFormula8b: 'GeneralFormula8b',
+                GeneralFormula9a: 'GeneralFormula9a',
+                GeneralFormula9b: 'GeneralFormula9b'
             },
             IntegralConstMultiply: 'IntegralConstMultiply',
             MultiplyIntegralofFx: 'MultiplyIntegralofFx',
@@ -275,7 +277,7 @@ MEPH.define('MEPH.math.Expression', {
         SwapPart: function (a, b) {
             if (a.parent()) {
                 var parent = a.parent();
-                var part = parent.remove(a).first();
+                 var part = parent.remove(a).first();
                 parent.addPart(part.type, b);
                 b.parent(parent);
                 return true;
@@ -317,6 +319,25 @@ MEPH.define('MEPH.math.Expression', {
         },
         Rules: {
             Differentiation: {
+                SimpleVariableA: function () {
+                    var exp = Expression.variable('x');
+                    exp.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var expression = Expression.derivative(exp, 1, null, denom);
+
+                    expression.name(Expression.RuleType.Derivation.SimpleVariableA);
+
+                    return expression;
+                },
+                SimpleVariableB: function () {
+                    var one = Expression.one();
+                    one.name(Expression.RuleType.Derivation.SimpleVariableB);
+
+                    return one;
+                },
                 GeneralFormula1a: function () {
                     var exp = Expression.anything();
                     exp.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.ConstRelation);
@@ -436,18 +457,44 @@ MEPH.define('MEPH.math.Expression', {
                 },
                 GeneralFormula5a: function () {
 
+                    var a = Expression.anything();
+                    a.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+                    a.mark('U');
+
                     var denom = Expression.variable('d');
                     denom.mark('dx');
 
-                    var multiplication = Expression.multiplication(derivative);
-                    multiplication.name(Expression.RuleType.Derivation.GeneralFormula4b);
+                    var multiplication = Expression.multiplication(a);
                     multiplication.mark('A');
                     multiplication.repeat = true;
 
 
-                    var dirivative = Expression.derivative(exp, 1, null, denom);
+                    var dirivative = Expression.derivative(multiplication, 1, null, denom);
                     dirivative.name(Expression.RuleType.Derivation.GeneralFormula5a);
                     return dirivative;
+                },
+                GeneralFormula5b: function () {
+
+                    var v = Expression.anything();
+                    v.mark('V')
+
+                    var u = Expression.anything();
+                    u.mark('U')
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var dir = Expression.derivative(u, 1, null, denom);
+                    dir.mark('dir');
+
+                    var mul = Expression.multiplication(dir, v);
+                    mul.mark('copyTo');
+
+                    var addition = Expression.addition(mul);
+                    addition.mark('A');
+                    addition.repeat = true;
+
+                    return addition;
                 }
             },
             Integration: {
@@ -1989,6 +2036,19 @@ MEPH.define('MEPH.math.Expression', {
     getParts: function () {
         var me = this;
         return me.parts;
+    },
+    /**
+     * Get parts by index.
+     * @param {Number} index
+     * @param {MEPH.math.Expression}
+     ***/
+    getPartByIndex: function (index) {
+        var me = this;
+        var p = me.getParts()[index];
+        if (p) {
+            return p.val;
+        }
+        return null;
     },
     getValues: function () {
         var me = this;

@@ -4,6 +4,7 @@
  **/
 MEPH.define('MEPH.math.ExpressionTranslation', {
     alternateNames: 'ExpressionTranslation',
+    requires: ['MEPH.math.Set'],
     statics: {
         translate: function (a, b) {
             switch (a.name()) {
@@ -44,6 +45,13 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Derivation.GeneralFormula4a:
                 case Expression.RuleType.Derivation.GeneralFormula4b:
                     return ExpressionTranslation.derivation.translateGeneralFormula4(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula5a:
+                    return ExpressionTranslation.derivation.translateGeneralFormula5(a, b);
+                case Expression.RuleType.Derivation.SimpleVariableA:
+                case Expression.RuleType.Derivation.SimpleVariableB:
+                    return ExpressionTranslation.derivation.translateSimpleFormula(a, b);
+                default:
+                    throw new Error('Unhandled case : ExpressionTranslation');
             }
         },
         /**
@@ -64,6 +72,9 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             res.push([Expression.RuleType.Derivation.GeneralFormula2a, Expression.RuleType.Derivation.GeneralFormula2b]);
             res.push([Expression.RuleType.Derivation.GeneralFormula3a, Expression.RuleType.Derivation.GeneralFormula3b]);
             res.push([Expression.RuleType.Derivation.GeneralFormula4a, Expression.RuleType.Derivation.GeneralFormula4b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula5a, Expression.RuleType.Derivation.GeneralFormula5b]);
+
+            res.push([Expression.RuleType.Derivation.SimpleVariableA, Expression.RuleType.Derivation.SimpleVariableB]);
 
             return res;
         },
@@ -110,6 +121,11 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 b_copy.getMark(transform.transform.to).clearParts();
                 b_copy.getMark(transform.transform.to).setParts(tranformedRepeats, Expression.function.input);
                 return b_copy;
+            }
+            else if (transform.pattern) {
+                if (transform.pattern.process) {
+                 return   transform.pattern.process(transform, a_copy, b_copy);
+                }
             }
             else {
                 for (var i in transform) {
@@ -225,6 +241,82 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                         to: 'A'
                     }
                 };
+                var result = Expression.translation.Transform(transformation, a, b);
+
+                return result;
+            },
+            translateSimpleFormula: function (a, b) {
+                // Expression.SwapPart(a, b);
+                return b.copy();
+            },
+            translateGeneralFormula5: function (a, b) {
+                var convert = {
+                    from: 'A', to: 'A'
+                }
+                var targetselection = {
+                    target: 'dir',
+                    overrite: 'U'
+                }
+                var nonselection = {
+                    target: 'V'
+                }
+                var respecto = {
+                    target: 'dx'
+                }
+                var Copyto = {
+                    target: 'copyTo'
+                }
+                var transformation = {
+                    pattern: {
+                        process: function (transform, a_copy, b_copy) {
+                            var a_A = a_copy.getMark(convert.from);
+                            var b_A = b_copy.getMark(convert.to);
+                            var count = a_A.parts.length;
+
+                            var masks = Set.base2MaskSet(count);
+                            var partsTo = masks.where(function (t) {
+                                return t.split('').count(function (x) {
+                                    return x === '1';
+
+                                }) === 1;
+                            }).select(function (mask) {
+                                var cc_a = a_A.copy();
+                                var cc_b = b_A.copy();
+                                var copyto = b_copy.getMark(Copyto.target).copy();
+                                
+                                var res = mask.split('').select(function (x, index) {
+                                    if (x === '1') {
+                                        var target = cc_b.getMark(targetselection.target).copy();
+
+                                        var dx = a_copy.getMark(respecto.target).copy();
+                                        target.swap(respecto.target, dx);
+                                        var overrite = target.swap(targetselection.overrite, cc_a.getPartByIndex(index).copy());
+                                        return target;
+                                    }
+                                    else {
+                                        var target = cc_a.getPartByIndex(index).copy();
+                                        return target;
+                                    }
+                                }).select(function (x) { return x.copy(); });
+                                
+                                copyto.clearParts();
+                                copyto.setParts(res, Expression.function.input);
+                             
+                                return copyto;
+                            });
+                            
+
+                            b_copy.getMark(transformation.transform.to).clearParts();
+                            b_copy.getMark(transformation.transform.to).setParts(partsTo, Expression.function.input);
+                            return b_copy;
+                        }
+                    },
+                    transform: {
+                        from: 'A',
+                        to: 'A'
+                    }
+                };
+
                 var result = Expression.translation.Transform(transformation, a, b);
 
                 return result;
