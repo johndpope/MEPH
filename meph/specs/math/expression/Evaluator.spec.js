@@ -1,7 +1,19 @@
 ﻿describe("MEPH/math/expression/Evaluator.spec.js", 'MEPH.math.expression.Evaluator', 'MEPH.math.Expression', 'MEPH.math.expression.Factor', function () {
+    var Evaluator;
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
+        Evaluator = MEPH.math.expression.Evaluator;
     });
+
+    var printExpressionToScreen = function (result) {
+        return MEPH.requires('MEPH.math.jax.MathJax', 'MEPH.math.Expression').then(function () {
+            return MEPHJax.ready().then(function () {
+                var dom = document.createElement('div');
+                document.body.appendChild(dom);
+                return MEPHJax.load(result.latex(), dom)
+            });
+        })
+    };
 
     it('can evaluate an addition = Expression.addition(1, 2)', function (done) {
         MEPH.requires('MEPH.math.expression.Evaluator', 'MEPH.math.Expression', 'MEPH.math.expression.Factor').then(function ($class) {
@@ -179,4 +191,113 @@
         expect(result.parts.length === 2).toBeTruthy();
         expect(result.type === Expression.type.multiplication).toBeTruthy();
     });
+
+    it('can evaluate a integral of a constant:general formula 1 of Integration rules', function () {
+        var integral = Expression.integral(Expression.variable('f'), Expression.variable('x'));
+
+        var result = Evaluator.evaluate(integral);
+        console.log(integral.latex() + ' => ' + result.latex());
+        expect(result.type === Expression.type.addition).toBeTruthy();
+    });
+
+    it('can evaluate an integral of general formula 2 of Integration rules.', function () {
+        var integral = Expression.integral(Expression.multiplication('a', 'x'), 'x');
+        var result = Evaluator.evaluate(integral);
+        console.log(result.latex());
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
+    it('can evaluate a fraction', function () {
+        var fraction = Expression.fraction(4, 2);
+        var result = Evaluator.evaluate(fraction);
+
+        expect(result.value() === 2).toBeTruthy();
+    });
+
+
+    it('can evaluate a fraction', function () {
+        var fraction = Expression.fraction(2, 3);
+        var result = Evaluator.evaluate(fraction);
+
+        expect(result.getParts().first().val.value() === 2).toBeTruthy();
+    });
+
+    it('can evaluate an integral of general formula 3 of Integration rules ', function () {
+        var integral = Expression.integral(Expression.power(Expression.variable('x'), Expression.variable(3)), 'x');
+
+        var result = Evaluator.evaluate(integral);
+        console.log(result.latex());
+
+        expect(result.type === Expression.type.addition).toBeTruthy();
+    });
+
+
+    it('can evaluate an integral of general formula 4 of Inetegration rules', function () {
+        var integral = Expression.integral(Expression.addition('a', 'b', 'c'), 'x');
+
+        var result = Evaluator.evaluate(integral);
+        console.log(result.latex());
+
+        expect(result.type === Expression.type.addition).toBeTruthy();
+    });
+
+
+    it('can evaluate an integral of general formula 4 of Inetegration rules', function () {
+        var integral = Expression.integral(Expression.addition('5', '0', '2'), 'x');
+
+        var result = Evaluator.evaluate(integral);
+        console.log(result.latex());
+
+        expect(result.type === Expression.type.addition).toBeTruthy();
+    });
+
+    it('can evaluate a derivative of general formula 1 of Derivative rules', function () {
+        var derivative = Expression.derivative(Expression.variable('a'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(derivative);
+
+        expect(result === 0).toBeTruthy();
+    });
+
+    it('can evaluate a derivative of general formula 1 of Derivative rules', function () {
+        var derivative = Expression.derivative(Expression.multiplication(
+            Expression.variable('a'), Expression.variable('b')), 1, null, 'x');
+
+        var result = Evaluator.evaluate(derivative);
+
+        expect(result === 0).toBeTruthy();
+    });
+
+    it('can evaluate a derivative of general formula 2 of Derivative rules', function () {
+        var derivative = Expression.derivative(
+            Expression.multiplication(Expression.variable('c'), Expression.variable('x'))
+            , 1, null, 'x');
+
+        var result = Evaluator.evaluate(derivative);
+
+        expect(result === 'c').toBeTruthy();
+
+    });
+
+    it('can evaluate a derivative of general formula 2 of Derivative rules', function () {
+        var derivative = Expression.derivative(
+            Expression.multiplication(Expression.variable('d'), Expression.variable('c'), Expression.variable('x'))
+            , 1, null, 'x');
+
+        var result = Evaluator.evaluate(derivative);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
+    it('can evaluate a derivative of general formula 3 of Derivative rules', function () {
+        var d = Expression.derivative(Expression.multiplication(Expression.variable('c')
+            , Expression.multiplication('d', 'x', 'f')), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    })
 });

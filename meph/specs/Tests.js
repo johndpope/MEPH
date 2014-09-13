@@ -102,6 +102,7 @@
                         'math/Expression_2.spec.js',
                         'math/Expression_3.spec.js',
                         'math/Expression_4.spec.js',
+                        'math/Expression_5.spec.js',
                         'math/Hamilton.spec.js',
                         'math/Matrix.spec.js',
                         'math/Set.spec.js',

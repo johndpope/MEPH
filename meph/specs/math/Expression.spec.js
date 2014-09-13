@@ -494,7 +494,7 @@
             var expression = Expression.integral(Expression.multiplication(Expression.variable('a'),
                 Expression.func('f', 'x')), 'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConstMultiply());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -510,7 +510,7 @@
             var expression = Expression.integral(Expression.addition(Expression.variable('a'),
                 Expression.func('f', 'x')), 'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConstMultiply());
 
             expect(!rule).toBeTruthy();
         }).catch(function (e) {
@@ -533,7 +533,7 @@
                                     )),
                             'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConstMultiply());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -559,7 +559,7 @@
                                 Expression.func('h', 'x')),
                             'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConstMultiply());
 
             expect(!rule).toBeTruthy();
         }).catch(function (e) {
@@ -575,7 +575,7 @@
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(Expression.variable('a'), 'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConst());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConst());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -591,7 +591,7 @@
             var Expression = MEPH.math.Expression;
             var expression = Expression.integral(Expression.func('a', 'x'), 'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConst());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConst());
 
             expect(!rule).toBeTruthy();
         }).catch(function (e) {
@@ -606,7 +606,7 @@
             var Expression = MEPH.math.Expression;
             var expression = Expression.addition(Expression.multiplication(Expression.variable('#B'), Expression.variable('x')), Expression.variable('#C'));
 
-            var rule = Expression.matchRule(expression, Expression.Rules.AxPlusC());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.AxPlusC());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -621,7 +621,7 @@
             var Expression = MEPH.math.Expression;
             var expression = Expression.multiplication(Expression.variable('#B'), Expression.integral(Expression.func('f', 'x'), 'x'));
 
-            var rule = Expression.matchRule(expression, Expression.Rules.MultiplyIntegralofFx());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.MultiplyIntegralofFx());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -643,7 +643,7 @@
                                     , 'x')
                                 );
 
-            var rule = Expression.matchRule(expression, Expression.Rules.MultiplyIntegralofFx());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.MultiplyIntegralofFx());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -663,7 +663,7 @@
                     Expression.variable('n'))
                 , 'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.Power());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.Power());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -684,7 +684,7 @@
                 , 'x');
 
             
-            var rule = Expression.matchRule(expression, Expression.Rules.Power());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.Power());
 
             expect(!rule).toBeTruthy();
         }).catch(function (e) {
@@ -704,7 +704,7 @@
                 , 'x');
 
 
-            var rule = Expression.matchRule(expression, Expression.Rules.Power());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.Power());
 
             expect(!rule).toBeTruthy();
         }).catch(function (e) {
@@ -730,7 +730,7 @@
                     Expression.variable('x'),
                     Expression.addition(Expression.variable('n'), Expression.variable(1)))), Expression.variable('a'));
 
-            var rule = Expression.matchRule(expression, Expression.Rules.PowerIntegrate());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.PowerIntegrate());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -754,7 +754,7 @@
                     Expression.variable('x'),
                     Expression.addition(Expression.variable('x'), Expression.variable(1)))), Expression.variable('a'));
 
-            var rule = Expression.matchRule(expression, Expression.Rules.PowerIntegrate());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.PowerIntegrate());
 
             expect(!rule).toBeTruthy();
         }).catch(function (e) {
@@ -773,7 +773,7 @@
                                 Expression.func('g', 'x'),
                                 Expression.func('h', 'x')), 'x');
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegrationAddition());
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegrationAddition());
 
             expect(rule).toBeTruthy();
         }).catch(function (e) {
@@ -806,7 +806,7 @@
     it('can describe the transfer from one for to another', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegralConstMultiply();
+            var expression = Expression.Rules.Integration.IntegralConstMultiply();
 
             var marks = expression.getMarks();
             expect(marks.C).toBeTruthy();
@@ -823,7 +823,7 @@
     it('can get marks from AxPlusC', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.AxPlusC();
+            var expression = Expression.Rules.Integration.AxPlusC();
 
             var marks = expression.getMarks();
             expect(marks.A).toBeTruthy();
@@ -840,7 +840,7 @@
     it('can get marks from AxPlusC', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.AxPlusC();
+            var expression = Expression.Rules.Integration.AxPlusC();
 
             var marks = expression.getMarks();
             expect(marks.A).toBeTruthy();
@@ -857,7 +857,7 @@
     it('can get marks from AxPlusC', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.MultiplyIntegralofFx();
+            var expression = Expression.Rules.Integration.MultiplyIntegralofFx();
 
             var marks = expression.getMarks();
             expect(marks.A).toBeTruthy();
@@ -874,7 +874,7 @@
     it('can get marks from IntegralConst', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegralConst();
+            var expression = Expression.Rules.Integration.IntegralConst();
 
             var marks = expression.getMarks();
 
@@ -891,7 +891,7 @@
     it('can get marks from Power', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.Power();
+            var expression = Expression.Rules.Integration.Power();
 
             var marks = expression.getMarks();
 
@@ -909,7 +909,7 @@
     it('can get marks from PowerIntegrate', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.PowerIntegrate();
+            var expression = Expression.Rules.Integration.PowerIntegrate();
 
             var marks = expression.getMarks();
 
@@ -928,7 +928,7 @@
     it('can get marks from IntegrationAddition', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
+            var expression = Expression.Rules.Integration.IntegrationAddition();
 
             var marks = expression.getMarks();
 
@@ -947,7 +947,7 @@
     it('an expression can copy ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
+            var expression = Expression.Rules.Integration.IntegrationAddition();
 
             var copy = expression.copy();
 
@@ -965,11 +965,11 @@
     it('a rule has a name ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
+            var expression = Expression.Rules.Integration.IntegrationAddition();
 
-            for (var i in Expression.Rules) {
-                expect(Expression.Rules[i]).theTruth(i + ' does not have a name.');
-                expect(Expression.Rules[i]().name).theTruth(i + ' does not have a name.');
+            for (var i in Expression.Rules.Integration) {
+                expect(Expression.Rules.Integration[i]).theTruth(i + ' does not have a name.');
+                expect(Expression.Rules.Integration[i]().name).theTruth(i + ' does not have a name.');
             }
         }).catch(function (e) {
             expect(e).caught();
@@ -1013,8 +1013,8 @@
 
     it('can use swap rules to transform an expression from a -> b', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
-            var rule1 = Expression.Rules.IntegralConstMultiply();
-            var rule2 = Expression.Rules.MultiplyIntegralofFx();
+            var rule1 = Expression.Rules.Integration.IntegralConstMultiply();
+            var rule2 = Expression.Rules.Integration.MultiplyIntegralofFx();
             var transformation = {
                 transformation: {
                     from: Expression.RuleType.IntegralConstMultiply,
@@ -1037,7 +1037,7 @@
     it('can set the value of a mark', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var rule1 = Expression.Rules.AxPlusC();
+            var rule1 = Expression.Rules.Integration.AxPlusC();
 
             rule1.swap('A', Expression.variable('A'));
             console.log(rule1.latex());
@@ -1052,9 +1052,9 @@
     it('translate a IntegralConst => AxPlusC ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
-            var rule1 = Expression.Rules.IntegralConst();
-            var rule2 = Expression.Rules.AxPlusC();
+            var expression = Expression.Rules.Integration.IntegrationAddition();
+            var rule1 = Expression.Rules.Integration.IntegralConst();
+            var rule2 = Expression.Rules.Integration.AxPlusC();
 
             var transformation = {
                 transformation: {
@@ -1077,9 +1077,9 @@
     it('translate a IntegralConst => AxPlusC , with Expression.translation.Translate', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
-            var rule1 = Expression.Rules.IntegralConst();
-            var rule2 = Expression.Rules.AxPlusC();
+            var expression = Expression.Rules.Integration.IntegrationAddition();
+            var rule1 = Expression.Rules.Integration.IntegralConst();
+            var rule2 = Expression.Rules.Integration.AxPlusC();
 
             var result = Expression.translation.Translate(rule1, rule2);
             console.log(result.latex());
@@ -1094,9 +1094,9 @@
     it('translate a IntegralConstMultiply => MultiplyIntegralofFx ', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function ($class) {
             var Expression = MEPH.math.Expression;
-            var expression = Expression.Rules.IntegrationAddition();
-            var rule1 = Expression.Rules.IntegralConstMultiply();
-            var rule2 = Expression.Rules.MultiplyIntegralofFx();
+            var expression = Expression.Rules.Integration.IntegrationAddition();
+            var rule1 = Expression.Rules.Integration.IntegralConstMultiply();
+            var rule2 = Expression.Rules.Integration.MultiplyIntegralofFx();
 
             var transformation = {
                 transformation: {
@@ -1131,7 +1131,7 @@
                             'x');
 
 
-            var rule = Expression.matchRule(expression, Expression.Rules.IntegralConstMultiply(), true);
+            var rule = Expression.matchRule(expression, Expression.Rules.Integration.IntegralConstMultiply(), true);
             var marks = expression.getMarks();
             expect(rule).toBeTruthy();
             expect(marks.C === a).toBeTruthy();

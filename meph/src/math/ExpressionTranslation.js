@@ -32,7 +32,36 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.TrigonometricFormula11A:
                 case Expression.RuleType.TrigonometricFormula11B:
                     return ExpressionTranslation.translateGeneralFormula11(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula1a:
+                case Expression.RuleType.Derivation.GeneralFormula1b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula1(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula2a:
+                case Expression.RuleType.Derivation.GeneralFormula2b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula2(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula3a:
+                case Expression.RuleType.Derivation.GeneralFormula3b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula3(a, b);
             }
+        },
+        /**
+         * Returns an array of translation sets.
+         * @returns {Array}
+         ***/
+        translationPool: function () {
+            var res = [];
+
+            //Integration
+            res.push([Expression.RuleType.IntegralConst, Expression.RuleType.AxPlusC]);
+            res.push([Expression.RuleType.IntegralConstMultiply, Expression.RuleType.MultiplyIntegralofFx]);
+            res.push([Expression.RuleType.PowerIntegrate, Expression.RuleType.Power]);
+            res.push([Expression.RuleType.IntegrationAddition, Expression.RuleType.AdditionIntegral]);
+
+            //Derivatives
+            res.push([Expression.RuleType.Derivation.GeneralFormula1a, Expression.RuleType.Derivation.GeneralFormula1b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula2a, Expression.RuleType.Derivation.GeneralFormula2b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula3a, Expression.RuleType.Derivation.GeneralFormula3b]);
+
+            return res;
         },
         /**
          * Transforms a expression a in to expression b
@@ -96,8 +125,11 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                         if (Array.isArray(a_mark)) {
                             a_mark = ExpressionTranslation.convertSiblingsToAnExpression(a_mark);
                         }
-
                         b_copy.swap(bi, a_mark);
+
+                        if (b_copy === b_copy.getMark(bi)) {
+                            b_copy = a_mark;
+                        }
                     }
                 }
                 return b_copy;
@@ -119,6 +151,46 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                     return Expression.addition.apply(this, siblings);
                 case Expression.type.division:
                     return Expression.division.apply(this, siblings);
+            }
+        },
+
+        derivation: {
+
+            translateGeneralFormula1: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula1a,
+                        to: Expression.RuleType.Derivation.GeneralFormula1b
+                    }
+                };
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula2: function (a, b) {
+
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula2a,
+                        to: Expression.RuleType.Derivation.GeneralFormula2b
+                    },
+                    C: 'C'
+                };
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+
+            },
+            translateGeneralFormula3: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula3a,
+                        to: Expression.RuleType.Derivation.GeneralFormula3b
+                    },
+                    C: 'C',
+                    U: 'U',
+                    dx: 'dx'
+                };
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
             }
         },
         translateGeneralFormula8: function (a, b) {

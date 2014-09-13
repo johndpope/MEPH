@@ -55,7 +55,7 @@
         document.body.appendChild(dom);
         MEPH.requires('MEPH.math.jax.MathJax', 'MEPH.math.Expression').then(function () {
             return MEPHJax.ready().then(function () {
-                return MEPHJax.load(Expression.Rules.PowerIntegrate().latex(), dom)
+                return MEPHJax.load(Expression.Rules.Integration.PowerIntegrate().latex(), dom)
                     .then(function (success) {
                         expect(success).toBeTruthy();
                     });

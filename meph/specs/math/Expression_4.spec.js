@@ -14,7 +14,7 @@
 
     it('when anything is matched, it can be more than one things matching the anything.', function () {
         // MultiplyIntegralofFx
-        var rule = Expression.Rules.IntegralConstMultiply();
+        var rule = Expression.Rules.Integration.IntegralConstMultiply();
 
         var c = Expression.variable('A');
         var t = Expression.variable('x');
@@ -27,7 +27,7 @@
 
     it('when anything is matched, it can be more than one things matching the anything.', function () {
         // MultiplyIntegralofFx
-        var rule = Expression.Rules.IntegralConstMultiply();
+        var rule = Expression.Rules.Integration.IntegralConstMultiply();
 
         var c = Expression.variable('c');
         var t = Expression.variable('t');
@@ -51,8 +51,8 @@
     it('can translate with more than the expect parts.', function () {
         var Expression = MEPH.math.Expression;
 
-        var rule1 = Expression.Rules.IntegralConstMultiply();
-        var rule2 = Expression.Rules.MultiplyIntegralofFx();
+        var rule1 = Expression.Rules.Integration.IntegralConstMultiply();
+        var rule2 = Expression.Rules.Integration.MultiplyIntegralofFx();
 
         var expression = Expression.integral(
                             Expression.multiplication(
@@ -63,13 +63,73 @@
                                     Expression.func('f', 'x')
                                 )),
                         'x');
-        expression.name(Expression.Rules.IntegralConstMultiply().name());
+        expression.name(Expression.Rules.Integration.IntegralConstMultiply().name());
         var rule = Expression.matchRule(expression, rule1, true);
         var result = Expression.translation.Translate(expression, rule2);
         var matches = Expression.matchRule(result, rule2);
         expect(matches).toBeTruthy();
-        
+
         expect(result.getMarks().A.parts.length === 2).toBeTruthy();
 
+    });
+
+
+    it('wont translate if it is not correct.', function () {
+        var Expression = MEPH.math.Expression;
+
+        var rule1 = Expression.Rules.Integration.IntegralConstMultiply();
+        var rule2 = Expression.Rules.Integration.MultiplyIntegralofFx();
+
+        var expression = Expression.integral(
+                            Expression.multiplication(
+                                Expression.variable('x'),
+                                Expression.addition(
+                                    Expression.func('g', 'x'),
+                                    Expression.func('f', 'x')
+                                )),
+                        'x');
+        expression.name(Expression.Rules.Integration.IntegralConstMultiply().name());
+        var rule = Expression.matchRule(expression, rule1, true);
+        expect(!rule).toBeTruthy();
+    });
+
+    it('a zero expression has a value, and can be detected', function () {
+        var exp = Expression.zero();
+
+        var res = Expression.isZero(exp);
+
+        expect(res).toBeTruthy();
+    });
+
+    it('can return the gcd of an expression like 4*x + 4*y => 4', function () {
+        var exp = Expression.addition(Expression.multiplication('4', 'x'), Expression.multiplication('4', 'y'));
+
+        var denom = Expression.GreatestCommonDenominator(exp);
+
+        expect(denom.partOrDefault(Expression.type.variable) == 4).toBeTruthy();
+    });
+
+    it('can return the gcd of an expression like 4*x + 4*x => 4*x', function () {
+        var exp = Expression.addition(Expression.multiplication('4', 'x'), Expression.multiplication('4', 'x'));
+
+        var denom = Expression.GreatestCommonDenominator(exp);
+
+        expect(denom.latex() === '4x').toBeTruthy();
+    });
+
+
+    it('can return the gcd of an expression like 4*x + 5*t => null', function () {
+        var exp = Expression.addition(Expression.multiplication('4', 'x'), Expression.multiplication('5', 't'));
+
+        var denom = Expression.GreatestCommonDenominator(exp);
+
+        expect(denom === null).toBeTruthy();
+    });
+
+    it('can get matching rules ', function () {
+        var exp = Expression.integral(Expression.variable('a'), Expression.variable('x'));
+        var rules = Expression.getMatchingRules(exp);
+        expect(rules.first().type === Expression.type.integral);
+        expect(rules.length === 1).toBeTruthy();
     });
 });
