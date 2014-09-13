@@ -71,7 +71,15 @@ MEPH.define('MEPH.math.Expression', {
                 GeneralFormula4a: 'GeneralFormula4a',
                 GeneralFormula4b: 'GeneralFormula4b',
                 GeneralFormula5a: 'GeneralFormula5a',
-                GeneralFormula5b: 'GeneralFormula5b'
+                GeneralFormula5b: 'GeneralFormula5b',
+                GeneralFormula5b: 'GeneralFormula6a',
+                GeneralFormula5b: 'GeneralFormula6b',
+                GeneralFormula5b: 'GeneralFormula7a',
+                GeneralFormula5b: 'GeneralFormula7b',
+                GeneralFormula5b: 'GeneralFormula8a',
+                GeneralFormula5b: 'GeneralFormula8b',
+                GeneralFormula5b: 'GeneralFormula9a',
+                GeneralFormula5b: 'GeneralFormula9b'
             },
             IntegralConstMultiply: 'IntegralConstMultiply',
             MultiplyIntegralofFx: 'MultiplyIntegralofFx',
@@ -388,6 +396,58 @@ MEPH.define('MEPH.math.Expression', {
                     var expression = Expression.multiplication(c, diff);
                     expression.name(Expression.RuleType.Derivation.GeneralFormula3b);
                     return expression;
+                },
+                GeneralFormula4a: function () {
+                    var d = Expression.anything();;
+                    d.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+                    d.mark('U');
+
+                    var exp = Expression.addition(d);
+                    exp.repeat = true;
+                    exp.mark('A');
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(exp, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula4a);
+                    diff.mark('dir');
+
+                    return diff;
+                },
+                GeneralFormula4b: function () {
+                    var d = Expression.anything();;
+                    d.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+                    d.mark('U');
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+
+                    var derivative = Expression.derivative(d, 1, null, denom);
+                    derivative.mark('dir');
+
+                    var addition = Expression.addition(derivative);
+                    addition.name(Expression.RuleType.Derivation.GeneralFormula4b);
+                    addition.mark('A');
+                    addition.repeat = true;
+
+                    return addition;
+                },
+                GeneralFormula5a: function () {
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var multiplication = Expression.multiplication(derivative);
+                    multiplication.name(Expression.RuleType.Derivation.GeneralFormula4b);
+                    multiplication.mark('A');
+                    multiplication.repeat = true;
+
+
+                    var dirivative = Expression.derivative(exp, 1, null, denom);
+                    dirivative.name(Expression.RuleType.Derivation.GeneralFormula5a);
+                    return dirivative;
                 }
             },
             Integration: {

@@ -41,6 +41,9 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Derivation.GeneralFormula3a:
                 case Expression.RuleType.Derivation.GeneralFormula3b:
                     return ExpressionTranslation.derivation.translateGeneralFormula3(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula4a:
+                case Expression.RuleType.Derivation.GeneralFormula4b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula4(a, b);
             }
         },
         /**
@@ -60,6 +63,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             res.push([Expression.RuleType.Derivation.GeneralFormula1a, Expression.RuleType.Derivation.GeneralFormula1b]);
             res.push([Expression.RuleType.Derivation.GeneralFormula2a, Expression.RuleType.Derivation.GeneralFormula2b]);
             res.push([Expression.RuleType.Derivation.GeneralFormula3a, Expression.RuleType.Derivation.GeneralFormula3b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula4a, Expression.RuleType.Derivation.GeneralFormula4b]);
 
             return res;
         },
@@ -190,6 +194,39 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                     dx: 'dx'
                 };
                 var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula4: function (a, b) {
+                var transformation = {
+                    repeat: {
+                        A: {
+                            target: 'A',
+
+                            trans: {
+                                transformation: {
+                                    from: Expression.RuleType.Derivation.GeneralFormula4a,
+                                    to: Expression.RuleType.Derivation.GeneralFormula4b
+                                },
+                                U: 'U'
+                            }
+                        },
+                        dx: {
+                            scatter: {
+                                transformation: {
+                                    from: Expression.RuleType.Derivation.GeneralFormula4a,
+                                    to: Expression.RuleType.Derivation.GeneralFormula4b
+                                },
+                                dx: 'dx'
+                            }
+                        }
+                    },
+                    transform: {
+                        from: 'A',
+                        to: 'A'
+                    }
+                };
+                var result = Expression.translation.Transform(transformation, a, b);
+
                 return result;
             }
         },

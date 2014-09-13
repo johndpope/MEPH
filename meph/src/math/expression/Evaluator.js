@@ -117,6 +117,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         /**
          * Evaluates a division expression.
          * @param {MEPH.math.Expression} expression
+         * @param {Object} options
          * @return {MEPH.math.Expression}s
          **/
         evalDivision: function (expression, options) {
@@ -189,8 +190,9 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             //}
         },
         /**
-         * Evalues an addition expression.
-         * @param {MEPH.math.Expression}
+         * Evaluates  an addition expression.
+         * @param {MEPH.math.Expression} expression
+         * @param {Object} options
          * @return {MEPH.math.Expression}
          **/
         evalAddition: function (expression, options) {
@@ -229,9 +231,10 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             }
         },
         /**
-         * Evalues an subtraction expression.
+         * Evaluates  an subtraction expression.
          * @param {MEPH.math.Expression} expression
-         * @reurn {MEPH.math.Expression}
+         * @param {Object} options
+         * @return {MEPH.math.Expression}
          **/
         evalSubtraction: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
@@ -278,12 +281,22 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 }
             }
         },
-        evalDerivative: function(expression){
+        /**
+         * Evaluates a derivative expression.
+         * @param {MEPH.math.Expression} expression
+         * @param {Object} options
+         * @return {MEPH.math.Expression}
+         **/
+        evalDerivative: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
             var Factor = MEPH.math.expression.Factor;
             var rules = Expression.getMatchingRules(expression);
             var derivativeRules = rules.where(function (x) { return x.type === Expression.type.derivative; });
-
+            if (options && derivativeRules.length > 1) {
+                if (options.strategy) {
+                    derivativeRules = options.strategy(derivativeRules);
+                }
+            }
             if (derivativeRules.length === 1) {
                 var rule = derivativeRules.first().rule;
 
@@ -315,6 +328,12 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 return expression;
             }
         },
+        /**
+         * Evaluates an integral expression.
+         * @param {MEPH.math.Expression} expression
+         * @param {Object} options
+         * @return {MEPH.math.Expression}
+         **/
         evalIntegral: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
             var Factor = MEPH.math.expression.Factor;
