@@ -25,6 +25,7 @@ MEPH.define('MEPH.math.Expression', {
             sec: 'sec',
             tan: 'tan',
             ln: 'ln',
+            e: 'e',
             negative: 'negative',
             abs: 'abs',
             func: 'func',
@@ -81,7 +82,13 @@ MEPH.define('MEPH.math.Expression', {
                 GeneralFormula8a: 'GeneralFormula8a',
                 GeneralFormula8b: 'GeneralFormula8b',
                 GeneralFormula9a: 'GeneralFormula9a',
-                GeneralFormula9b: 'GeneralFormula9b'
+                GeneralFormula9b: 'GeneralFormula9b',
+                GeneralFormula10a: 'GeneralFormula10a',
+                GeneralFormula10b: 'GeneralFormula10b',
+                GeneralFormula12a: 'GeneralFormula12a',
+                GeneralFormula12b: 'GeneralFormula12b',
+                GeneralFormula13a: 'GeneralFormula13a',
+                GeneralFormula13b: 'GeneralFormula13b'
             },
             IntegralConstMultiply: 'IntegralConstMultiply',
             MultiplyIntegralofFx: 'MultiplyIntegralofFx',
@@ -277,7 +284,7 @@ MEPH.define('MEPH.math.Expression', {
         SwapPart: function (a, b) {
             if (a.parent()) {
                 var parent = a.parent();
-                 var part = parent.remove(a).first();
+                var part = parent.remove(a).first();
                 parent.addPart(part.type, b);
                 b.parent(parent);
                 return true;
@@ -477,9 +484,11 @@ MEPH.define('MEPH.math.Expression', {
 
                     var v = Expression.anything();
                     v.mark('V')
+                    v.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
 
                     var u = Expression.anything();
                     u.mark('U')
+                    u.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
 
                     var denom = Expression.variable('d');
                     denom.mark('dx');
@@ -493,8 +502,183 @@ MEPH.define('MEPH.math.Expression', {
                     var addition = Expression.addition(mul);
                     addition.mark('A');
                     addition.repeat = true;
+                    addition.name(Expression.RuleType.Derivation.GeneralFormula5b);
 
                     return addition;
+                },
+                GeneralFormula7a: function () {
+                    var v = Expression.anything();
+                    v.mark('V')
+                    v.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var u = Expression.anything();
+                    u.mark('U')
+                    u.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var division = Expression.division(u, v);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(division, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula7a);
+
+                    return diff;
+                },
+                GeneralFormula7b: function () {
+                    var v = Expression.anything();
+                    v.mark('V');
+
+                    var _du = Expression.anything();
+                    _du.mark('dU');
+
+
+                    var dudx = Expression.variable('d');
+                    dudx.mark('dudx');
+
+                    var du = Expression.derivative(_du, 1, null, dudx);
+
+                    var _dv = Expression.anything();
+                    _dv.mark('dV');
+
+                    var dvdx = Expression.variable('d');
+                    dvdx.mark('dvdx');
+
+                    var dv = Expression.derivative(_dv, 1, null, dvdx);
+
+
+                    var u = Expression.anything();
+                    u.mark('U');
+
+                    var vdu = Expression.multiplication(v, du);
+
+
+                    var udv = Expression.multiplication(u, dv);
+
+                    var top = Expression.subtraction(vdu, udv);
+
+                    var vd = Expression.anything();
+                    vd.mark('VD');
+
+                    var bottom = Expression.power(vd, 2);
+                    var division = Expression.division(top, bottom);
+
+                    division.name(Expression.RuleType.Derivation.GeneralFormula7b);
+
+                    return division;
+                },
+                GeneralFormula10a: function () {
+                    var n = Expression.anything();
+                    n.mark('N');
+
+                    var exp = Expression.anything();
+                    exp.mark('U');
+                    exp.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var power = Expression.power(exp, n);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(power, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula10a);
+
+                    return diff;
+                },
+                GeneralFormula10b: function () {
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var _du = Expression.anything();
+                    _du.mark('dU');
+
+                    var du = Expression.derivative(_du, 1, null, denom);
+
+                    var ns = Expression.anything();
+                    ns.mark('NS');
+
+                    var sub = Expression.subtraction(ns, 1);
+
+                    var u = Expression.anything();
+                    u.mark('U');
+
+                    var power = Expression.power(u, sub);
+
+                    var n = Expression.anything();
+                    n.mark('N');
+
+                    var multiplication = Expression.multiplication(n, power, du);
+
+                    multiplication.name(Expression.RuleType.Derivation.GeneralFormula10b);
+
+                    return multiplication;
+                },
+                GeneralFormula12a: function () {
+                    var x = Expression.anything();
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var exp = Expression.e(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(exp, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula12a)
+                    return diff;
+                },
+                GeneralFormula12b: function () {
+                    var x = Expression.anything();
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var exp = Expression.e(x);
+                    exp.name(Expression.RuleType.Derivation.GeneralFormula12b)
+                    return exp;
+
+                },
+                GeneralFormula13a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation)
+
+                    var a = Expression.anything()
+                    a.mark('A');
+                    a.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.ConstRelation);
+
+                    var power = Expression.power(a, x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(power, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula13a)
+
+                    return diff;
+                },
+                GeneralFormula13b: function () {
+                    var lna = Expression.anything();
+                    lna.mark('LNA');
+
+                    var ln = Expression.ln(lna);
+
+                    var a = Expression.anything();
+                    a.mark('A');
+
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var power = Expression.power(a, x);
+
+                    var multiplication = Expression.multiplication(power, ln);
+
+                    multiplication.name(Expression.RuleType.Derivation.GeneralFormula13b);
+
+                    return multiplication;
                 }
             },
             Integration: {
@@ -1266,7 +1450,15 @@ MEPH.define('MEPH.math.Expression', {
         power: function (base, power) {
             var expression = new Expression();
             expression.setExp(Expression.type.power);
+
+            if (!(base instanceof Expression)) {
+                base = Expression.variable(base);
+            }
             expression.addPart(Expression.function.base, base);
+
+            if (!(power instanceof Expression)) {
+                power = Expression.variable(power);
+            }
             expression.addPart(Expression.function.power, power);
             return expression;
         },
@@ -1368,6 +1560,18 @@ MEPH.define('MEPH.math.Expression', {
         ln: function (x) {
             var expression = new Expression();
             expression.setExp(Expression.type.ln);
+            if (!(x instanceof Expression)) {
+                x = Expression.variable(x);
+            }
+            expression.addPart(Expression.function.input, x);
+            return expression;
+        },
+        e: function (x) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.e);
+            if (!(x instanceof Expression)) {
+                x = Expression.variable(x);
+            }
             expression.addPart(Expression.function.input, x);
             return expression;
         },
@@ -1796,6 +2000,8 @@ MEPH.define('MEPH.math.Expression', {
                 '\\mathrm{d}' +
                 me.partLatex(Expression.function.respectTo) + ''
                 return result;
+            case Expression.type.e:
+                return 'e^' + me.partLatex(Expression.function.input);
             case Expression.type.addition:
                 var before = '';
                 var after = '';
@@ -1961,18 +2167,60 @@ MEPH.define('MEPH.math.Expression', {
      * Swaps the part from the mark.
      ***/
     swap: function (mark, exp) {
-        var me = this,
-            marks = me.getMarks();
+        var me = this;
+        me.ensureLineage();
+        var marks = me.getMarks();
         var parts = me.getParts()
         if (marks[mark]) {
             var parent = marks[mark].parent();
-            if (parent)
+            var pos;
+            if (parent) {
+                pos = parent.indexOf(marks[mark]);
                 var part = parent.remove(marks[mark]).first();
+            }
             exp.mark(mark);
-            if (parent)
-                parent.addPart(part.type, exp);
+            if (parent) {
+                if (pos === null || !part) {
+                    throw new Error('illegal state for swapping.');
+                }
+                parent.addPartAt(part.type, exp, pos);
+            }
         }
 
+    },
+    ensureLineage: function () {
+        var me = this;
+        me.getParts().foreach(function (p) {
+            if (p.val.parent) {
+                p.val.parent(me);
+                p.val.ensureLineage();
+            }
+        });
+    },
+    /**
+     * Add part at position pos.
+     * @param {string} type
+     * @param {MEPH.math.Expression} exp
+     * @param {Number} pos
+     **/
+    addPartAt: function (type, exp, pos) {
+        var me = this;
+        if (me.getParts().length > pos && pos !== -1) {
+            me.getParts().splice(pos, 0, { val: exp, type: type });
+        }
+        else {
+            me.addPart(type, exp);
+        }
+    },
+    /**
+     * Gets the index of the expression.
+     * @param {MEPH.math.Expression} exp
+     * @return {Number}
+     **/
+    indexOf: function (exp) {
+        var me = this;
+        var indexes = me.parts.indexWhere(function (x) { return x.val === exp; });
+        return indexes.first();
     },
     /**
      * @private

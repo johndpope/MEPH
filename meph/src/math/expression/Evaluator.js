@@ -35,6 +35,10 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return Evaluator.evalIntegral(expression, options);
                 case Expression.type.derivative:
                     return Evaluator.evalDerivative(expression, options);
+                case Expression.type.e:
+                    return Evaluator.evalE(expression, options);
+                case Expression.type.ln:
+                    return Evaluator.evalLn(expression, options);
                 default:
                     throw new Error('unhandled case : ' + expression.type);
             }
@@ -47,6 +51,33 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 default:
                     return expression;
             }
+        },
+        evalE: function (expression, options) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var x = expression.partOrDefault(Expression.function.input);
+            if (Factor.isNumerical(x)) {
+                var val = Math.pow(Math.E, Factor.getNumerical(x));
+                if ((val % 1) === 0) {
+                    val;
+                }
+            };
+            ;
+            return Expression.e(Evaluator.evaluate(x));
+        },
+        evalLn: function (expression, options) {
+
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var x = expression.partOrDefault(Expression.function.input);
+            if (Factor.isNumerical(x)) {
+                var val = Math.log(Factor.getNumerical(x)) / Math.log(Math.E);
+                if ((val % 1) === 0) {
+                    val;
+                }
+            };
+            ;
+            return Expression.ln(Evaluator.evaluate(x));
         },
         evalVariable: function (expression) {
             var Factor = MEPH.math.expression.Factor;
@@ -274,7 +305,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 }
                 else {
                     var first = notnumbers.first(function (x) { return x.index === 0; });
-                    var start = number ? [first] : [first, number];
+                    var start = !!number ? [first.val, number] : [first.val];
                     return Expression.subtraction.apply(this, start.concat(notnumbers.where(function (x) {
                         return x !== first;
                     }).select(function (x) { return x.val; })));

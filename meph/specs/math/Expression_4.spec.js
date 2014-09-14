@@ -48,31 +48,6 @@
     });
 
 
-    it('can translate with more than the expect parts.', function () {
-        var Expression = MEPH.math.Expression;
-
-        var rule1 = Expression.Rules.Integration.IntegralConstMultiply();
-        var rule2 = Expression.Rules.Integration.MultiplyIntegralofFx();
-
-        var expression = Expression.integral(
-                            Expression.multiplication(
-                                Expression.variable('a'),
-                                Expression.variable('b'),
-                                Expression.addition(
-                                    Expression.func('g', 'x'),
-                                    Expression.func('f', 'x')
-                                )),
-                        'x');
-        expression.name(Expression.Rules.Integration.IntegralConstMultiply().name());
-        var rule = Expression.matchRule(expression, rule1, true);
-        var result = Expression.translation.Translate(expression, rule2);
-        var matches = Expression.matchRule(result, rule2);
-        expect(matches).toBeTruthy();
-
-        expect(result.getMarks().A.parts.length === 2).toBeTruthy();
-
-    });
-
 
     it('wont translate if it is not correct.', function () {
         var Expression = MEPH.math.Expression;

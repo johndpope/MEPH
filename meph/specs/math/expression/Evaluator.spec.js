@@ -348,7 +348,7 @@
         var d = Expression.derivative(Expression.multiplication('x', 'x', 'x'), 1, null, 'x');
 
         var result = Evaluator.evaluate(d);
-        
+
         expect(result.parts.length === 3).toBeTruthy();
         expect(result.type === Expression.type.addition).toBeTruthy();
     });
@@ -360,4 +360,69 @@
 
         expect(result === 1).toBeTruthy();
     });
+
+    it('can evaluate a quotient rule , derivative of general formula 7 of derivative rules', function () {
+        var d = Expression.derivative(Expression.division(Expression.multiplication(2, 'x'), Expression.multiplication(4, 'x')), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evaluate the power rule , derivative of general formula 10 of derivative rules', function () {
+        var d = Expression.derivative(Expression.power(Expression.variable('x'), 10), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+        expect("10x^{9}" === result.latex()).toBeTruthy();
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+    it('can evaluate the power rule , derivative of general formula 10 of derivative rules', function () {
+        var d = Expression.derivative(Expression.power(Expression.power(Expression.variable('x'), 2), 4), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+        expect("4x^{2}^{3}2x^{1}" === result.latex()).toBeTruthy();
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+
+    it('can translate with more than the expect parts.', function () {
+        var Expression = MEPH.math.Expression;
+
+        var rule1 = Expression.Rules.Integration.IntegralConstMultiply();
+        var rule2 = Expression.Rules.Integration.MultiplyIntegralofFx();
+
+        var expression = Expression.integral(
+                            Expression.multiplication(
+                                Expression.variable('a'),
+                                Expression.variable('b'),
+                                Expression.addition(
+                                    Expression.variable('x'),
+                                    Expression.variable('x')
+                                )),
+                        'x');
+
+
+        var result = Evaluator.evaluate(expression);
+
+        expect(result).toBeTruthy();
+
+    });
+
+    it('can evaluate a derivative of general formula 12 of derivative rules', function () {
+        var d = Expression.derivative(Expression.e('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.e).toBeTruthy();
+    });
+
+    it('can evaluate a derivative of general formula 13 of derivatives rules', function () {
+        var d = Expression.derivative(Expression.power('a', 'x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    })
 });

@@ -32,5 +32,10 @@
         expect(derivative.latex()).toBe('\\frac{\\partial^2 u}{\\partial t^2} (a)');
     });
 
+    it('can create a e expression', function () {
+        var e = Expression.e('x');
+
+        expect(e.latex() === 'e^x').toBeTruthy();
+    });
 
 });

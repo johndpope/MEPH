@@ -1041,7 +1041,7 @@
 
             rule1.swap('A', Expression.variable('A'));
             console.log(rule1.latex());
-            expect(rule1.latex() === 'xA + #C').toBeTruthy();
+            expect(rule1.latex() === 'Ax + #C').toBeTruthy();
         }).catch(function (e) {
             expect(e.message? e : new Error(e)).caught();
         }).then(function (x) {

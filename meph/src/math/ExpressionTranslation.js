@@ -50,6 +50,17 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Derivation.SimpleVariableA:
                 case Expression.RuleType.Derivation.SimpleVariableB:
                     return ExpressionTranslation.derivation.translateSimpleFormula(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula7a:
+                    return ExpressionTranslation.derivation.translateGeneralFormula7(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula10a:
+                    return ExpressionTranslation.derivation.translateGeneralFormula10(a, b);
+                case Expression.RuleType.Derivation.GeneralFormula12a:
+                case Expression.RuleType.Derivation.GeneralFormula12b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula12(a, b);
+
+                case Expression.RuleType.Derivation.GeneralFormula13a:
+                case Expression.RuleType.Derivation.GeneralFormula13b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula13(a, b);
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
             }
@@ -75,6 +86,11 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             res.push([Expression.RuleType.Derivation.GeneralFormula5a, Expression.RuleType.Derivation.GeneralFormula5b]);
 
             res.push([Expression.RuleType.Derivation.SimpleVariableA, Expression.RuleType.Derivation.SimpleVariableB]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula7a, Expression.RuleType.Derivation.GeneralFormula7b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula10a, Expression.RuleType.Derivation.GeneralFormula10b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula12a, Expression.RuleType.Derivation.GeneralFormula12b]);
+            res.push([Expression.RuleType.Derivation.GeneralFormula13a, Expression.RuleType.Derivation.GeneralFormula13b]);
+
 
             return res;
         },
@@ -88,6 +104,8 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
         transform: function (transform, a, b) {
             var a_copy = a.copy();
             var b_copy = b.copy();
+            a_copy.ensureLineage();
+            b_copy.ensureLineage();
             var a_marks = a_copy.getMarks();
             var b_marks = b_copy.getMarks();
             var tranformedRepeats;
@@ -124,7 +142,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             }
             else if (transform.pattern) {
                 if (transform.pattern.process) {
-                 return   transform.pattern.process(transform, a_copy, b_copy);
+                    return transform.pattern.process(transform, a_copy, b_copy);
                 }
             }
             else {
@@ -283,7 +301,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                                 var cc_a = a_A.copy();
                                 var cc_b = b_A.copy();
                                 var copyto = b_copy.getMark(Copyto.target).copy();
-                                
+
                                 var res = mask.split('').select(function (x, index) {
                                     if (x === '1') {
                                         var target = cc_b.getMark(targetselection.target).copy();
@@ -298,13 +316,13 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                                         return target;
                                     }
                                 }).select(function (x) { return x.copy(); });
-                                
+
                                 copyto.clearParts();
                                 copyto.setParts(res, Expression.function.input);
-                             
+
                                 return copyto;
                             });
-                            
+
 
                             b_copy.getMark(transformation.transform.to).clearParts();
                             b_copy.getMark(transformation.transform.to).setParts(partsTo, Expression.function.input);
@@ -319,6 +337,66 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
 
                 var result = Expression.translation.Transform(transformation, a, b);
 
+                return result;
+            },
+            translateGeneralFormula7: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula7b,
+                        to: Expression.RuleType.Derivation.GeneralFormula7a,
+                    },
+                    V: 'V',
+                    dU: 'U',
+                    dV: 'V',
+                    dudx: 'dx',
+                    dvdx: 'dx',
+                    U: 'U',
+                    VD: 'V'
+                };
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula10: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula10b,
+                        to: Expression.RuleType.Derivation.GeneralFormula10a
+                    },
+                    dx: 'dx',
+                    dU: 'U',
+                    NS: 'N',
+                    U: 'U',
+                    N: 'N'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula12: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula12b,
+                        to: Expression.RuleType.Derivation.GeneralFormula12a
+                    },
+                    X: 'X'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula13: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        from: Expression.RuleType.Derivation.GeneralFormula13b,
+                        to: Expression.RuleType.Derivation.GeneralFormula13a
+                    },
+                    X: 'X',
+                    A: 'A',
+                    LNA: 'A'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
                 return result;
             }
         },
