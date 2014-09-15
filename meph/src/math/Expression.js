@@ -25,6 +25,7 @@ MEPH.define('MEPH.math.Expression', {
             sec: 'sec',
             tan: 'tan',
             ln: 'ln',
+            log: 'log',
             e: 'e',
             negative: 'negative',
             abs: 'abs',
@@ -88,7 +89,17 @@ MEPH.define('MEPH.math.Expression', {
                 GeneralFormula12a: 'GeneralFormula12a',
                 GeneralFormula12b: 'GeneralFormula12b',
                 GeneralFormula13a: 'GeneralFormula13a',
-                GeneralFormula13b: 'GeneralFormula13b'
+                GeneralFormula13b: 'GeneralFormula13b',
+                GeneralFormula14a: 'GeneralFormula14a',
+                GeneralFormula14b: 'GeneralFormula14b',
+                GeneralFormula15a: 'GeneralFormula15a',
+                GeneralFormula15b: 'GeneralFormula15b',
+                GeneralFormula17a: 'GeneralFormula17a',
+                GeneralFormula17b: 'GeneralFormula17b',
+                GeneralFormula18a: 'GeneralFormula18a',
+                GeneralFormula18b: 'GeneralFormula18b',
+                GeneralFormula19a: 'GeneralFormula19a',
+                GeneralFormula19b: 'GeneralFormula19b'
             },
             IntegralConstMultiply: 'IntegralConstMultiply',
             MultiplyIntegralofFx: 'MultiplyIntegralofFx',
@@ -679,6 +690,149 @@ MEPH.define('MEPH.math.Expression', {
                     multiplication.name(Expression.RuleType.Derivation.GeneralFormula13b);
 
                     return multiplication;
+                },
+                GeneralFormula14a: function () {
+                    var x = Expression.anything('x');
+                    x.mark('X');
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var abs = Expression.abs(x);
+
+                    var ln = Expression.ln(abs);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(ln, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula14a);
+                    return diff;
+                },
+                GeneralFormula14b: function () {
+                    var x = Expression.anything('x');
+                    x.mark('X');
+
+                    var division = Expression.division(Expression.variable('1'), x);
+                    division.name(Expression.RuleType.Derivation.GeneralFormula14b);
+
+                    return division;
+                },
+                GeneralFormula15a: function () {
+
+                    var x = Expression.anything('x');
+                    x.mark('X');
+
+                    var a = Expression.variable('a');
+                    a.mark('A');
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var log = Expression.log(x, a);
+
+                    var diff = Expression.derivative(log, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula15a)
+                    return diff;
+                },
+                GeneralFormula15b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var a = Expression.anything();
+                    a.mark('A');
+
+                    var ln = Expression.ln(a);
+
+                    var sub = Expression.multiplication(x, ln);
+
+                    var division = Expression.division(1, sub);
+
+                    division.name(Expression.RuleType.Derivation.GeneralFormula15b);
+
+                    return division;
+                },
+                GeneralFormula17a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var sin = Expression.sin(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(sin, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula17a);
+
+                    return diff;
+                },
+                GeneralFormula17b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var cos = Expression.cos(x);
+                    cos.name(Expression.RuleType.Derivation.GeneralFormula17b);
+
+                    return cos;
+                },
+                GeneralFormula18a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var cos = Expression.cos(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(cos, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula18a);
+
+                    return diff;
+                },
+                GeneralFormula18b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var cos = Expression.cos(x);
+                    cos.name(Expression.RuleType.Derivation.GeneralFormula17b);
+
+                    var mul = Expression.multiplication(-1, cos);
+
+                    mul.name(Expression.RuleType.Derivation.GeneralFormula18b);
+
+                    return mul;
+                },
+                GeneralFormula19a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+                    x.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var tan = Expression.tan(x);
+
+                    var diff = Expression.derivative(tan, 1, null, denom);
+
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula19a);
+
+                    return diff;
+                },
+                GeneralFormula19b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var sec = Expression.sec(x);
+
+                    var power = Expression.power(sec, 2);
+
+                    power.name(Expression.RuleType.Derivation.GeneralFormula19b);
+
+                    return power;
                 }
             },
             Integration: {
@@ -1581,6 +1735,35 @@ MEPH.define('MEPH.math.Expression', {
             expression.addPart(Expression.function.input, x);
             return expression;
         },
+        /**
+         * Expresses log
+         * @param {Number} a
+         * @param {Number} base
+         * @return {MEPH.math.Expression}
+         **/
+        log: function (a, base) {
+            var expression = new Expression();
+
+            expression.setExp(Expression.type.log);
+
+            if (!(a instanceof Expression)) {
+                a = Expression.variable(a);
+            }
+
+            expression.addPart(Expression.function.input, a)
+
+            if (base === undefined || base === null) {
+                base = 10;
+            }
+
+            if (!(base instanceof Expression)) {
+                base = Expression.variable(base);
+            }
+
+            expression.addPart(Expression.function.base, base)
+
+            return expression;
+        },
         neg: function () {
             var expression = new Expression();
             expression.setExp(Expression.type.negative);
@@ -1672,10 +1855,16 @@ MEPH.define('MEPH.math.Expression', {
         trigonometric: function (type, exp, power) {
             var expression = new Expression();
             expression.setExp(type);
+
+            if (!(exp instanceof Expression)) {
+                exp = Expression.variable(exp);
+            }
             expression.addPart(Expression.function.input, exp);
+
             if (power !== undefined) {
                 expression.addPart(Expression.function.power, power);
             }
+
             return expression;
 
         },

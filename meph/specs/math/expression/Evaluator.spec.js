@@ -423,6 +423,66 @@
 
         var result = Evaluator.evaluate(d);
 
+        expect(result.latex() === 'a^{x}\\ln a').toBeTruthy();
         expect(result.type === Expression.type.multiplication).toBeTruthy();
-    })
+    });
+
+    it('can evaluate a derivative of general formula 14 of derivative rules', function () {
+        var d = Expression.derivative(Expression.ln(Expression.abs(Expression.variable('x'))), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evaluate an absolute value expression', function () {
+        var d = Expression.abs('-4');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result === 4).toBeTruthy();
+    });
+
+    it('can evalute a log a x => ', function () {
+        var d = Expression.log(Expression.variable('10'), Expression.variable('10'));
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result === 1).toBeTruthy();
+
+    });
+
+    it('can evaluate a derivative of general formula 15 of derivative rules', function () {
+        var d = Expression.derivative(Expression.log(Expression.variable('x'), Expression.variable('a')), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evaluate a derivative of general formula 17 of derivative rules', function () {
+        var d = Expression.derivative(Expression.sin('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.cos).toBeTruthy();
+    });
+
+    it('can evalute a derivative of general formula 18 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.cos('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.latex() === '-1\\cos (x)').toBeTruthy();
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalute a derivative of general formula 19 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.tan('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.power).toBeTruthy();
+    });
 });

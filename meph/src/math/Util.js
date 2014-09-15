@@ -6,6 +6,9 @@
 MEPH.define('MEPH.math.Util', {
     statics: {
         cachedPrimes: null,
+        sec: function (num) {
+            return 1 / Math.cos(num);
+        },
         /**
          * n mathematics, the factorial of a non-negative integer n, denoted by n!, is the product of all positive integers less than or equal to n.
          * http://en.wikipedia.org/wiki/Factorial
@@ -55,4 +58,8 @@ MEPH.define('MEPH.math.Util', {
             return result;
         }
     }
-});
+}).then(function (x) {
+    if (!Math.sec) {
+        Math.sec = MEPH.math.Util.sec;
+    }
+});;

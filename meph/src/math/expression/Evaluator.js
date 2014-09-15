@@ -39,6 +39,14 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return Evaluator.evalE(expression, options);
                 case Expression.type.ln:
                     return Evaluator.evalLn(expression, options);
+                case Expression.type.abs:
+                    return Evaluator.evalAbs(expression, options);
+                case Expression.type.log:
+                    return Evaluator.evalLog(expression, options);
+                case Expression.type.cos:
+                case Expression.type.tan:
+                case Expression.type.sec:
+                    return Evaluator.evalTrig(expression, options);
                 default:
                     throw new Error('unhandled case : ' + expression.type);
             }
@@ -52,6 +60,72 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return expression;
             }
         },
+        evalTrig: function (expression, options) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var x = expression.partOrDefault(Expression.function.input);
+
+            if (Factor.isNumerical(x)) {
+                var val;
+
+                switch (expression.type) {
+                    case Expression.type.sec:
+                        val = Math.sec(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.tan:
+                        val = Math.tan(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.cos:
+                        val = Math.cos(Factor.getNumerical(x));
+                        break;
+                    default:
+                        throw new Error('unhandled trignometric case : ' + expression.type);
+                }
+
+                if (!isNaN(val)) {
+                    return (val);
+                }
+            };
+
+            switch (expression.type) {
+                case Expression.type.sec:
+                    return Expression.sec(Evaluator.evaluate(x, options));
+                case Expression.type.tan:
+                    return Expression.tan(Evaluator.evaluate(x, options));
+                case Expression.type.cos:
+                    return Expression.cos(Evaluator.evaluate(x, options));
+                default:
+                    throw new Error('unhandled trignometric case : ' + expression.type);
+            }
+        },
+        evalLog: function (expression, options) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var x = expression.partOrDefault(Expression.function.input);
+            var base = expression.partOrDefault(Expression.function.base);
+
+            if (Factor.isNumerical(x) && Factor.isNumerical(base)) {
+                var val = Math.log(Factor.getNumerical(x)) / Math.log(Factor.getNumerical(base));
+                if (!isNaN(val)) {
+                    return (val);
+                }
+            };
+            ;
+            return Expression.log(Evaluator.evaluate(x, options), Evaluator.evaluate(base, options));
+        },
+        evalAbs: function (expression, options) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var x = expression.partOrDefault(Expression.function.input);
+            if (Factor.isNumerical(x)) {
+                var val = Math.abs(Factor.getNumerical(x));
+                if (!isNaN(val)) {
+                    return (val);
+                }
+            };
+            ;
+            return Expression.abs(Evaluator.evaluate(x, options));
+        },
         evalE: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
@@ -59,11 +133,11 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             if (Factor.isNumerical(x)) {
                 var val = Math.pow(Math.E, Factor.getNumerical(x));
                 if ((val % 1) === 0) {
-                    val;
+                    return Expression.variable(val);
                 }
             };
             ;
-            return Expression.e(Evaluator.evaluate(x));
+            return Expression.e(Evaluator.evaluate(x, options));
         },
         evalLn: function (expression, options) {
 
@@ -77,7 +151,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 }
             };
             ;
-            return Expression.ln(Evaluator.evaluate(x));
+            return Expression.ln(Evaluator.evaluate(x, options));
         },
         evalVariable: function (expression) {
             var Factor = MEPH.math.expression.Factor;
