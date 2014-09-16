@@ -27,6 +27,7 @@ MEPH.define('MEPH.math.Expression', {
             ln: 'ln',
             log: 'log',
             e: 'e',
+            sqrt: 'sqrt',
             negative: 'negative',
             abs: 'abs',
             func: 'func',
@@ -99,7 +100,15 @@ MEPH.define('MEPH.math.Expression', {
                 GeneralFormula18a: 'GeneralFormula18a',
                 GeneralFormula18b: 'GeneralFormula18b',
                 GeneralFormula19a: 'GeneralFormula19a',
-                GeneralFormula19b: 'GeneralFormula19b'
+                GeneralFormula19b: 'GeneralFormula19b',
+                GeneralFormula20a: 'GeneralFormula20a',
+                GeneralFormula20b: 'GeneralFormula20b',
+                GeneralFormula21a: 'GeneralFormula21a',
+                GeneralFormula21b: 'GeneralFormula21b',
+                GeneralFormula22a: 'GeneralFormula22a',
+                GeneralFormula22b: 'GeneralFormula22b',
+                GeneralFormula23a: 'GeneralFormula23a',
+                GeneralFormula23b: 'GeneralFormula23b'
             },
             IntegralConstMultiply: 'IntegralConstMultiply',
             MultiplyIntegralofFx: 'MultiplyIntegralofFx',
@@ -833,6 +842,123 @@ MEPH.define('MEPH.math.Expression', {
                     power.name(Expression.RuleType.Derivation.GeneralFormula19b);
 
                     return power;
+                },
+                GeneralFormula20a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var cot = Expression.cot(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(cot, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula20a);
+                    return diff;
+                },
+                GeneralFormula20b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var csc = Expression.csc(x);
+
+                    var pow = Expression.power(csc, 2);
+
+                    var negone = Expression.variable(-1);
+
+                    var multiplication = Expression.multiplication(negone, pow);
+                    multiplication.name(Expression.RuleType.Derivation.GeneralFormula20b);
+
+                    return multiplication;
+                },
+                GeneralFormula21a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var csc = Expression.csc(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(csc, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula21a);
+                    return diff;
+                },
+                GeneralFormula21b: function () {
+                    var x1 = Expression.anything();
+                    x1.mark('X1');
+
+                    var x2 = Expression.anything();
+                    x2.mark('X2');
+
+                    var csc = Expression.csc(x1);
+
+                    var cot = Expression.cot(x2);
+
+                    var mul = Expression.multiplication(-1, csc, cot);
+                    mul.name(Expression.RuleType.Derivation.GeneralFormula21b);
+
+                    return mul;
+                },
+                GeneralFormula22a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var sec = Expression.sec(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(sec, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula22a);
+                    return diff;
+                },
+                GeneralFormula22b: function () {
+                    var x1 = Expression.anything();
+                    x1.mark('X1');
+
+                    var x2 = Expression.anything();
+                    x2.mark('X2');
+
+                    var sec = Expression.sec(x1);
+
+                    var tan = Expression.tan(x2);
+
+                    var mul = Expression.multiplication(sec, tan);
+                    mul.name(Expression.RuleType.Derivation.GeneralFormula21b);
+
+                    return mul;
+                },
+                GeneralFormula23a: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var sin = Expression.sin(x);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+                    var power = Expression.power(sin, -1);
+
+                    var diff = Expression.derivative(power, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.GeneralFormula23a);
+
+                    return diff;
+                },
+                GeneralFormula23b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var x2 = Expression.power(x, 2);
+
+                    var sub = Expression.subtraction(1, x2);
+
+                    var sqrt = Expression.sqrt(sub);
+
+                    var division = Expression.division(1, sqrt);
+
+                    division.name(Expression.RuleType.Derivation.GeneralFormula23b);
+
+                    return division;
                 }
             },
             Integration: {
@@ -1614,6 +1740,22 @@ MEPH.define('MEPH.math.Expression', {
                 power = Expression.variable(power);
             }
             expression.addPart(Expression.function.power, power);
+            return expression;
+        },
+        /**
+         * Math.sqrt(expression);
+         * @param {MEPH.math.Expression} expression
+         */
+        sqrt: function (base) {
+            var expression = new Expression();
+            expression.setExp(Expression.type.sqrt);
+
+            if (!(base instanceof Expression)) {
+                base = Expression.variable(base);
+            }
+
+            expression.addPart(Expression.function.input, base);
+
             return expression;
         },
         plusminus: function (a, b) {

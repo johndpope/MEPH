@@ -46,7 +46,12 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 case Expression.type.cos:
                 case Expression.type.tan:
                 case Expression.type.sec:
+                case Expression.type.sin:
+                case Expression.type.csc:
+                case Expression.type.cot:
                     return Evaluator.evalTrig(expression, options);
+                case Expression.type.sqrt:
+                    return Evaluator.evalSqrt(expression, options);
                 default:
                     throw new Error('unhandled case : ' + expression.type);
             }
@@ -69,6 +74,9 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 var val;
 
                 switch (expression.type) {
+                    case Expression.type.csc:
+                        val = Math.csc(Factor.getNumerical(x));
+                        break;
                     case Expression.type.sec:
                         val = Math.sec(Factor.getNumerical(x));
                         break;
@@ -78,11 +86,17 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     case Expression.type.cos:
                         val = Math.cos(Factor.getNumerical(x));
                         break;
+                    case Expression.type.sin:
+                        val = Math.sin(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.cot:
+                        val = Math.cot(Factor.getNumerical(x));
+                        break;
                     default:
                         throw new Error('unhandled trignometric case : ' + expression.type);
                 }
 
-                if (!isNaN(val)) {
+                if (!isNaN(val) && (val % 1) === 0) {
                     return (val);
                 }
             };
@@ -94,6 +108,12 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return Expression.tan(Evaluator.evaluate(x, options));
                 case Expression.type.cos:
                     return Expression.cos(Evaluator.evaluate(x, options));
+                case Expression.type.sin:
+                    return Expression.sin(Evaluator.evaluate(x, options));
+                case Expression.type.csc:
+                    return Expression.csc(Evaluator.evaluate(x, options));
+                case Expression.type.cot:
+                    return Expression.cot(Evaluator.evaluate(x, options));
                 default:
                     throw new Error('unhandled trignometric case : ' + expression.type);
             }
@@ -112,6 +132,20 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             };
             ;
             return Expression.log(Evaluator.evaluate(x, options), Evaluator.evaluate(base, options));
+        },
+        evalSqrt: function (expression, options) {
+            var Factor = MEPH.math.expression.Factor;
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var x = expression.partOrDefault(Expression.function.input);
+
+            if (Factor.isNumerical(x) && Factor.isNumerical(base)) {
+                var val = Math.sqrt(Factor.getNumerical(x));
+                if (!isNaN(val) && (val % 1) === 0) {
+                    return (val);
+                }
+            };
+            ;
+            return Expression.sqrt(Evaluator.evaluate(x, options));
         },
         evalAbs: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;

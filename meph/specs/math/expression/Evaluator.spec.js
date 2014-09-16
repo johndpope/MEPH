@@ -485,4 +485,45 @@
 
         expect(result.type === Expression.type.power).toBeTruthy();
     });
+
+    it('can evalutate a derivative of general formula 20 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.cot('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 21 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.csc('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 22 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.sec('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 23 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.sin('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula23a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
 });
