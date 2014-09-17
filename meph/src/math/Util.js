@@ -9,11 +9,29 @@ MEPH.define('MEPH.math.Util', {
         sec: function (num) {
             return 1 / Math.cos(num);
         },
-        csc: function(num){
+        csc: function (num) {
             return 1 / Math.sin(num);
         },
-        cot: function(num){
+        cot: function (num) {
             return 1 / Math.tan(num);
+        },
+        sinh: function (num) {
+            return (Math.exp(num) - Math.exp(-num)) / 2;
+        },
+        cosh: function (num) {
+            return (Math.exp(num) + Math.exp(-num)) / 2;
+        },
+        tanh: function(x){
+            return (Math.exp(2 * x) - 1) / (Math.exp(2 * x) + 1);
+        },
+        sech: function (num) {
+            return 1 / MEPH.math.Util.cosh(num);
+        },
+        coth: function (num) {
+            return 1 / MEPH.math.Util.tanh(num);
+        },
+        csch: function (num) {
+            return 1 / MEPH.math.Util.sinh(num);
         },
         /**
          * n mathematics, the factorial of a non-negative integer n, denoted by n!, is the product of all positive integers less than or equal to n.
@@ -73,5 +91,23 @@ MEPH.define('MEPH.math.Util', {
     }
     if (!Math.cot) {
         Math.cot = MEPH.math.Util.cot;
+    }
+    if (!Math.sinh) {
+        Math.sinh = MEPH.math.Util.sinh;
+    }
+    if (!Math.cosh) {
+        Math.cosh = MEPH.math.Util.cosh;
+    }
+    if (!Math.sech) {
+        Math.sech = MEPH.math.Util.sech;
+    }
+    if (!Math.csch) {
+        Math.csch = MEPH.math.Util.csch;
+    }
+    if (!Math.coth) {
+        Math.coth = MEPH.math.Util.coth;
+    }
+    if (!Math.tanh) {
+        Math.tanh = MEPH.math.Util.tanh;
     }
 });;

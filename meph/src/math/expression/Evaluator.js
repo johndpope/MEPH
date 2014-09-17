@@ -48,6 +48,12 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 case Expression.type.sec:
                 case Expression.type.sin:
                 case Expression.type.csc:
+                case Expression.type.cosh:
+                case Expression.type.tanh:
+                case Expression.type.sech:
+                case Expression.type.coth:
+                case Expression.type.sinh:
+                case Expression.type.csch:
                 case Expression.type.cot:
                     return Evaluator.evalTrig(expression, options);
                 case Expression.type.sqrt:
@@ -74,6 +80,25 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 var val;
 
                 switch (expression.type) {
+                    case Expression.type.csch:
+                        val = Math.csch(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.cosh:
+                        val = Math.cosh(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.sech:
+                        val = Math.sech(Factor.getNumerical(x));
+                        break;
+
+                    case Expression.type.tanh:
+                        val = Math.tanh(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.sinh:
+                        val = Math.sinh(Factor.getNumerical(x));
+                        break;
+                    case Expression.type.coth:
+                        val = Math.coth(Factor.getNumerical(x));
+                        break;
                     case Expression.type.csc:
                         val = Math.csc(Factor.getNumerical(x));
                         break;
@@ -102,6 +127,18 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             };
 
             switch (expression.type) {
+                case Expression.type.coth:
+                    return Expression.coth(Evaluator.evaluate(x, options));
+                case Expression.type.csch:
+                    return Expression.csch(Evaluator.evaluate(x, options));
+                case Expression.type.cosh:
+                    return Expression.cosh(Evaluator.evaluate(x, options));
+                case Expression.type.sech:
+                    return Expression.sech(Evaluator.evaluate(x, options));
+                case Expression.type.tanh:
+                    return Expression.tanh(Evaluator.evaluate(x, options));
+                case Expression.type.sinh:
+                    return Expression.sinh(Evaluator.evaluate(x, options));
                 case Expression.type.sec:
                     return Expression.sec(Evaluator.evaluate(x, options));
                 case Expression.type.tan:

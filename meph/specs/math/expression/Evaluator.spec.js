@@ -526,4 +526,245 @@
 
         expect(result.type === Expression.type.division).toBeTruthy();
     });
+
+
+    it('can evalutate a derivative of general formula 24 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.cos('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula24a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evalutate a derivative of general formula 25 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.tan('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula25a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evalutate a derivative of general formula 26 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.cot('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula26a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 27 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.csc('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula27a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 28 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.sec('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula28a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+
+    });
+
+
+    it('can evalutate a derivative of general formula 29 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.sinh('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula29a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.cosh).toBeTruthy();
+
+    });
+
+    it('can evalutate a derivative of general formula 30 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.cosh('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula30a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.sinh).toBeTruthy();
+
+    });
+
+    it('can evalutate a derivative of general formula 31 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.tanh('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula31a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.sech).toBeTruthy();
+
+    });
+
+    it('can evalutate a derivative of general formula 32 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.coth('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+        });
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
+    it('can evalutate a derivative of general formula 33 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.csch('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
+    it('can evalutate a derivative of general formula 34 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.sech('x'), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d);
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
+
+
+    it('can evalutate a derivative of general formula 35 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.sinh('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula35a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evalutate a derivative of general formula 36 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.cosh('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula36a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 37 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.tanh('x'), -1), 1, null, 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula37a;
+                });
+            }
+        });
+        expect(called).toBeTruthy();
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+    it('can evalutate a derivative of general formula 38 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.coth('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula38a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.division).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 39 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.csch('x'), -1), 1, null, 'x');
+
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula39a;
+                });
+            }
+        });
+
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+    });
+
+
+    it('can evalutate a derivative of general formula 40 of derivative rules ', function () {
+        var d = Expression.derivative(Expression.power(Expression.sech('x'), -1), 1, null, 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Derivation.GeneralFormula40a;
+                });
+            }
+        });
+        expect(called).toBeTruthy();
+        expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
 });
