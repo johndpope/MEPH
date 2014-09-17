@@ -74,6 +74,9 @@ MEPH.define('MEPH.math.Expression', {
                 SimpleVariableA: 'SimpleVariableA',
                 SimpleVariableB: 'SimpleVariableB'
             },
+            Integration:{
+
+            },
             IntegralConstMultiply: 'IntegralConstMultiply',
             MultiplyIntegralofFx: 'MultiplyIntegralofFx',
             IntegralConst: 'IntegralConst',
@@ -1963,8 +1966,41 @@ MEPH.define('MEPH.math.Expression', {
                     addition.name(Expression.RuleType.TrigonometricFormula11B);
 
                     return addition;
-                }
+                },
+                IGeneralFormula12a: function () {
 
+                    var x = Expression.anything();
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var tan = Expression.tan(x);
+
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var integral = Expression.integral(x, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula12a);
+
+                    return integral;
+                },
+                IGeneralFormula12b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var sec = Expression.sec(x);
+
+                    var abs = Expression.abs(sec);
+
+                    var ln = Expression.ln(abs);
+
+                    var c = Expression.variable('c');
+
+                    var addition = Expression.addition(ln, c);
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula12b);
+
+                    return addition;
+                },
             }
         },
         /**
@@ -3388,5 +3424,10 @@ MEPH.define('MEPH.math.Expression', {
     [].interpolate(0, 100, function (x) {
         Expression.RuleType.Derivation['GeneralFormula' + x + 'b'] = 'GeneralFormula' + x + 'b';
         Expression.RuleType.Derivation['GeneralFormula' + x + 'a'] = 'GeneralFormula' + x + 'a';
-    })
+    });
+
+    [].interpolate(0, 100, function (x) {
+        Expression.RuleType.Integration['IGeneralFormula' + x + 'b'] = 'IGeneralFormula' + x + 'b';
+        Expression.RuleType.Integration['IGeneralFormula' + x + 'a'] = 'IGeneralFormula' + x + 'a';
+    });
 });;

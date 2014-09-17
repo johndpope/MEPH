@@ -516,6 +516,12 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             var rules = Expression.getMatchingRules(expression);
             var integralRules = rules.where(function (x) { return x.type === Expression.type.integral; });
 
+            if (options && integralRules.length > 1) {
+                if (options.strategy) {
+                    integralRules = options.strategy(integralRules);
+                }
+            }
+
             if (integralRules.length === 1) {
                 var rule = integralRules.first().rule;
 

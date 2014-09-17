@@ -169,6 +169,11 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Derivation.GeneralFormula40b:
                     return ExpressionTranslation.derivation.translateGeneralFormula40(a, b);
 
+
+                case Expression.RuleType.Integration.IGeneralFormula12a:
+                case Expression.RuleType.Integration.IGeneralFormula12b:
+                    return ExpressionTranslation.derivation.translateIGeneralFormula12(a, b);
+
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
             }
@@ -196,6 +201,10 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             res.push([Expression.RuleType.Derivation.SimpleVariableA, Expression.RuleType.Derivation.SimpleVariableB]);
             [].interpolate(0, 100, function (x) {
                 res.push([Expression.RuleType.Derivation['GeneralFormula' + x + 'a'], Expression.RuleType.Derivation['GeneralFormula' + x + 'b']]);
+            });
+
+            [].interpolate(0, 100, function (x) {
+                res.push([Expression.RuleType.Integration['IGeneralFormula' + x + 'a'], Expression.RuleType.Integration['IGeneralFormula' + x + 'b']]);
             });
             return res;
         },
@@ -610,6 +619,11 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 return ExpressionTranslation.derivation.trigstandard(a, b,
                     Expression.RuleType.Derivation.GeneralFormula38a,
                     Expression.RuleType.Derivation.GeneralFormula38b);
+            },
+            translateIGeneralFormula12: function (a, b) {
+                return ExpressionTranslation.derivation.trigstandard(a, b,
+                    Expression.RuleType.Integration.IGeneralFormula12a,
+                    Expression.RuleType.Integration.IGeneralFormula12b);
             },
             trigstandard: function (a, b, name1, name2) {
                 var transformation = {

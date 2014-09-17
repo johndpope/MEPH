@@ -202,7 +202,11 @@
 
     it('can evaluate an integral of general formula 2 of Integration rules.', function () {
         var integral = Expression.integral(Expression.multiplication('a', 'x'), 'x');
-        var result = Evaluator.evaluate(integral);
+        var result = Evaluator.evaluate(integral, {
+            strategy: function (rules) {
+                return [rules.first()]
+            }
+        });
         console.log(result.latex());
 
         expect(result.type === Expression.type.multiplication).toBeTruthy();
@@ -227,7 +231,11 @@
     it('can evaluate an integral of general formula 3 of Integration rules ', function () {
         var integral = Expression.integral(Expression.power(Expression.variable('x'), Expression.variable(3)), 'x');
 
-        var result = Evaluator.evaluate(integral);
+        var result = Evaluator.evaluate(integral, {
+            strategy: function (rules) {
+                return [rules.first()];
+            }
+        });
         console.log(result.latex());
 
         expect(result.type === Expression.type.addition).toBeTruthy();
@@ -764,6 +772,23 @@
         });
         expect(called).toBeTruthy();
         expect(result.type === Expression.type.multiplication).toBeTruthy();
+
+    });
+
+
+    it('can evalutate an integral of general formula 12 of integral rules ', function () {
+        var d = Expression.integral(Expression.tan('x'), 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula12a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(result.type === Expression.type.addition).toBeTruthy();
 
     });
 
