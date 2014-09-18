@@ -314,6 +314,9 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             do {
                 if (currentval === undefined) {
                     currentval = parts[index] instanceof Expression ? parts[index].value() : parts[index];
+                    if (!Factor.isNumerical(currentval) && !(currentval instanceof Expression)) {
+                        currentval = Expression.variable(currentval);
+                    }
                 }
                 else {
                     if (Factor.isNumerical(parts[index])) {

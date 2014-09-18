@@ -171,10 +171,16 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula16b:
                 case Expression.RuleType.Integration.IGeneralFormula17a:
                 case Expression.RuleType.Integration.IGeneralFormula17b:
+                case Expression.RuleType.Integration.IGeneralFormula20a:
+                case Expression.RuleType.Integration.IGeneralFormula20b:
+                case Expression.RuleType.Integration.IGeneralFormula21a:
+                case Expression.RuleType.Integration.IGeneralFormula21b:
                     return ExpressionTranslation.derivation.translateGeneralFormula40(a, b);
 
                 case Expression.RuleType.Integration.IGeneralFormula18a:
                 case Expression.RuleType.Integration.IGeneralFormula18b:
+                case Expression.RuleType.Integration.IGeneralFormula19a:
+                case Expression.RuleType.Integration.IGeneralFormula19b:
                     return ExpressionTranslation.derivation.translateIGeneralFormula18(a, b);
 
 
@@ -186,7 +192,30 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula14b:
                 case Expression.RuleType.Integration.IGeneralFormula15a:
                 case Expression.RuleType.Integration.IGeneralFormula15b:
+                case Expression.RuleType.Integration.IGeneralFormula26a:
+                case Expression.RuleType.Integration.IGeneralFormula26b:
+                case Expression.RuleType.Integration.IGeneralFormula27a:
+                case Expression.RuleType.Integration.IGeneralFormula27b:
+                case Expression.RuleType.Integration.IGeneralFormula28a:
+                case Expression.RuleType.Integration.IGeneralFormula28b:
+                case Expression.RuleType.Integration.IGeneralFormula29a:
+                case Expression.RuleType.Integration.IGeneralFormula29b:
+                case Expression.RuleType.Integration.IGeneralFormula30a:
+                case Expression.RuleType.Integration.IGeneralFormula30b:
+                case Expression.RuleType.Integration.IGeneralFormula31a:
+                case Expression.RuleType.Integration.IGeneralFormula31b:
+                case Expression.RuleType.Integration.IGeneralFormula32a:
+                case Expression.RuleType.Integration.IGeneralFormula32b:
+                case Expression.RuleType.Integration.IGeneralFormula33a:
+                case Expression.RuleType.Integration.IGeneralFormula33b:
                     return ExpressionTranslation.derivation.translateIGeneralFormulaSingleVariable(a, b);
+
+                case Expression.RuleType.Integration.IGeneralFormula24a:
+                case Expression.RuleType.Integration.IGeneralFormula24b:
+                    return ExpressionTranslation.derivation.translateIGeneralFormula24(a, b);
+                case Expression.RuleType.Integration.IGeneralFormula25a:
+                case Expression.RuleType.Integration.IGeneralFormula25b:
+                    return ExpressionTranslation.derivation.translateIGeneralFormula25(a, b);
 
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
@@ -204,6 +233,9 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             res.push([Expression.RuleType.IntegralConstMultiply, Expression.RuleType.MultiplyIntegralofFx]);
             res.push([Expression.RuleType.PowerIntegrate, Expression.RuleType.Power]);
             res.push([Expression.RuleType.IntegrationAddition, Expression.RuleType.AdditionIntegral]);
+            res.push([Expression.RuleType.TrigonometricFormula10A, Expression.RuleType.TrigonometricFormula10B]);
+            res.push([Expression.RuleType.TrigonometricFormula11A, Expression.RuleType.TrigonometricFormula11B]);
+
 
             //Derivatives
             res.push([Expression.RuleType.Derivation.GeneralFormula1a, Expression.RuleType.Derivation.GeneralFormula1b]);
@@ -692,10 +724,50 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                     a.name(),
                     Expression.RuleType.Derivation.GeneralFormula40b);
             },
-            translateIGeneralFormula18: function(a,b){
+            translateIGeneralFormula18: function (a, b) {
                 return ExpressionTranslation.derivation.trigTwoX(a, b,
                                   Expression.RuleType.Derivation.GeneralFormula40b,
                                   a.name());
+            },
+            translateIGeneralFormula25: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula25a,
+                        from: Expression.RuleType.Integration.IGeneralFormula25b
+                    },
+                    X1: 'X',
+                    X2: 'X',
+                    X3: 'X',
+                    dx: 'dx',
+                    N1: 'N',
+                    N2: 'N',
+                    N3: 'N',
+                    N4: 'N',
+                    N5: 'N'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateIGeneralFormula24: function (a, b, c, d) {
+                var transformation = {
+                    transformation: {
+                        to: c || Expression.RuleType.Integration.IGeneralFormula24a,
+                        from: d || Expression.RuleType.Integration.IGeneralFormula24b
+                    },
+                    X1: 'X',
+                    X2: 'X',
+                    X3: 'X',
+                    dx: 'dx',
+                    N1: 'N',
+                    N2: 'N',
+                    N3: 'N',
+                    N4: 'N',
+                    N5: 'N'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
             },
             trigTwoX: function (a, b, name1, name2) {
                 var transformation = {

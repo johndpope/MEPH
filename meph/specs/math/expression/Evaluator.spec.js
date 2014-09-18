@@ -789,7 +789,7 @@
         });
         //expect(called).toBeTruthy();
         expect(result.type === Expression.type.addition).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula12b()));
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula12b())).toBeTruthy();;
     });
 
     it('can evalutate an integral of general formula 13 of integral rules ', function () {
@@ -805,7 +805,7 @@
         });
         //expect(called).toBeTruthy();
         expect(result.type === Expression.type.addition).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula13b()));
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula13b())).toBeTruthy();;
     });
 
 
@@ -820,13 +820,13 @@
                 });
             }
         });
-        //expect(called).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula14b()));
+
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula14b())).toBeTruthy();
     });
 
 
     it('can evalutate an integral of general formula 15 of integral rules ', function () {
-        var d = Expression.integral(Expression.power(Expression.sec('x'), 2), 'x');
+        var d = Expression.integral(Expression.power(Expression.csc('x'), 2), 'x');
         var called;
         var result = Evaluator.evaluate(d, {
             strategy: function (rules) {
@@ -837,7 +837,7 @@
             }
         });
         //expect(called).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula15b()));
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula15b())).toBeTruthy();;
     });
 
 
@@ -853,7 +853,7 @@
             }
         });
         //expect(called).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula16b()));
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula16b())).toBeTruthy();;
     });
 
     it('can evalutate an integral of general formula 17 of integral rules ', function () {
@@ -868,7 +868,7 @@
             }
         });
         //expect(called).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula17b()));
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula17b())).toBeTruthy();;
     });
 
     it('can evalutate an integral of general formula 18 of integral rules ', function () {
@@ -883,7 +883,244 @@
             }
         });
         //expect(called).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula18b()));
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula18b())).toBeTruthy();;
     });
+
+    it('can evalutate an integral of general formula 18 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(Expression.sec(Expression.multiplication(2, 'x')), Expression.tan('x')), 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula18a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(!Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula18b())).toBeTruthy();;
+    });
+
+
+
+    it('can evalutate an integral of general formula 19 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(Expression.csc('x'), Expression.cot('x')), 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula19a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula19b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 19 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(Expression.csc(Expression.multiplication(2, 'x')), Expression.cot('x')), 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula19a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(!Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula19b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 20 of integral rules ', function () {
+        var d = Expression.integral(Expression.sec('x'), 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula20a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula20b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 21 of integral rules ', function () {
+        var d = Expression.integral(Expression.csc('x'), 'x');
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula21a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula21b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 24 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.sin('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula24a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(result.latex()).toBe('-11 / 2\\sin (x)^{1}\\cos (x) + 1 / 2(-1\\cos (x) + c)');;
+    });
+
+
+    it('can evalutate an integral of general formula 25 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.cos('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula25a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        console.log(result.latex())
+
+        expect(result.latex()).toBe('1 / 2\\cos (x)^{1}\\sin (x) + 1 / 2(\\sin (x) + c)');
+    });
+
+
+    it('can evalutate an integral of general formula 26 of integral rules ', function () {
+        var d = Expression.integral(Expression.sinh('x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula26a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula26b())).toBeTruthy();;
+
+    });
+
+
+    it('can evalutate an integral of general formula 27 of integral rules ', function () {
+        var d = Expression.integral(Expression.cosh('x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula27a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula27b())).toBeTruthy();;
+
+    });
+
+    it('can evalutate an integral of general formula 28 of integral rules ', function () {
+        var d = Expression.integral(Expression.tanh('x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula28a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula28b())).toBeTruthy();;
+
+    });
+
+    it('can evalutate an integral of general formula 29 of integral rules ', function () {
+        var d = Expression.integral(Expression.coth('x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula29a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula29b())).toBeTruthy();;
+
+    });
+
+    it('can evalutate an integral of general formula 30 of integral rules ', function () {
+        var d = Expression.integral(Expression.sech('x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula30a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula30b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 31 of integral rules ', function () {
+        var d = Expression.integral(Expression.csch('x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula31a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula31b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 32 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.sech('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula32a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula32b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 33 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.csch('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula33a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula33b())).toBeTruthy();;
+    });
+
 
 });
