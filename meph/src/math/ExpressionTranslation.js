@@ -183,6 +183,8 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula38b:
                 case Expression.RuleType.Integration.IGeneralFormula39a:
                 case Expression.RuleType.Integration.IGeneralFormula39b:
+                case Expression.RuleType.Integration.IGeneralFormula42a:
+                case Expression.RuleType.Integration.IGeneralFormula42b:
                     return ExpressionTranslation.derivation.translateGeneralFormula40(a, b);
 
                 case Expression.RuleType.Integration.IGeneralFormula18a:
@@ -220,6 +222,8 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula32b:
                 case Expression.RuleType.Integration.IGeneralFormula33a:
                 case Expression.RuleType.Integration.IGeneralFormula33b:
+                case Expression.RuleType.Integration.IGeneralFormula40a:
+                case Expression.RuleType.Integration.IGeneralFormula40b:
                     return ExpressionTranslation.derivation.translateIGeneralFormulaSingleVariable(a, b);
 
                 case Expression.RuleType.Integration.IGeneralFormula24a:
@@ -228,6 +232,20 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula25a:
                 case Expression.RuleType.Integration.IGeneralFormula25b:
                     return ExpressionTranslation.derivation.translateIGeneralFormula25(a, b);
+
+
+                case Expression.RuleType.Integration.IGeneralFormula41a:
+                case Expression.RuleType.Integration.IGeneralFormula41b:
+                    return ExpressionTranslation.derivation.translateIGeneralFormula41(a, b);
+
+                case Expression.RuleType.Integration.IGeneralFormula43a:
+                case Expression.RuleType.Integration.IGeneralFormula43b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula43(a, b);
+
+
+                case Expression.RuleType.Integration.IGeneralFormula44a:
+                case Expression.RuleType.Integration.IGeneralFormula44b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula44(a, b);
 
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
@@ -740,6 +758,50 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 return ExpressionTranslation.derivation.trigTwoX(a, b,
                                   Expression.RuleType.Derivation.GeneralFormula40b,
                                   a.name());
+            },
+            translateGeneralFormula44: function(a,b){
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula44a,
+                        from: Expression.RuleType.Integration.IGeneralFormula44b
+                    },
+                    X1: 'X1',
+                    A1: 'A',
+                    A2: 'A',
+                    A3: 'A',
+                    X2: 'X2'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula43: function(a,b){
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula43a,
+                        from: Expression.RuleType.Integration.IGeneralFormula43b
+                    },
+                    X1: 'X', 
+                    A: 'A',
+                    X2: 'X'
+                }
+                
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateIGeneralFormula41: function(a,b){
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula41a,
+                        from: Expression.RuleType.Integration.IGeneralFormula41b
+                    },
+                    X: 'X', 
+                    A1: 'A',
+                    A2: 'A'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
             },
             translateIGeneralFormula25: function (a, b) {
                 var transformation = {
