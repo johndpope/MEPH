@@ -175,12 +175,24 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula20b:
                 case Expression.RuleType.Integration.IGeneralFormula21a:
                 case Expression.RuleType.Integration.IGeneralFormula21b:
+                case Expression.RuleType.Integration.IGeneralFormula34a:
+                case Expression.RuleType.Integration.IGeneralFormula34b:
+                case Expression.RuleType.Integration.IGeneralFormula35a:
+                case Expression.RuleType.Integration.IGeneralFormula35b:
+                case Expression.RuleType.Integration.IGeneralFormula38a:
+                case Expression.RuleType.Integration.IGeneralFormula38b:
+                case Expression.RuleType.Integration.IGeneralFormula39a:
+                case Expression.RuleType.Integration.IGeneralFormula39b:
                     return ExpressionTranslation.derivation.translateGeneralFormula40(a, b);
 
                 case Expression.RuleType.Integration.IGeneralFormula18a:
                 case Expression.RuleType.Integration.IGeneralFormula18b:
                 case Expression.RuleType.Integration.IGeneralFormula19a:
                 case Expression.RuleType.Integration.IGeneralFormula19b:
+                case Expression.RuleType.Integration.IGeneralFormula36a:
+                case Expression.RuleType.Integration.IGeneralFormula36b:
+                case Expression.RuleType.Integration.IGeneralFormula37a:
+                case Expression.RuleType.Integration.IGeneralFormula37b:
                     return ExpressionTranslation.derivation.translateIGeneralFormula18(a, b);
 
 

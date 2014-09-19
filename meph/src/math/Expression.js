@@ -2718,9 +2718,9 @@ MEPH.define('MEPH.math.Expression', {
                     var x = Expression.anything('x');
                     x.mark('X');
 
-                     
+
                     var tanh = Expression.tanh(x);
-                     
+
                     var addition = Expression.addition(tanh, c);
 
                     addition.name(Expression.RuleType.Integration.IGeneralFormula32b);
@@ -2759,6 +2759,236 @@ MEPH.define('MEPH.math.Expression', {
                     var addition = Expression.addition(mul, c);
 
                     addition.name(Expression.RuleType.Integration.IGeneralFormula33b);
+
+                    return addition;
+                },
+                IGeneralFormula34a: function () {
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var x = Expression.anything('x');
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var tanh = Expression.tanh(x);
+
+                    var power = Expression.power(tanh, 2);
+
+                    var integral = Expression.integral(power, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula34a);
+
+                    return integral;
+                },
+                IGeneralFormula34b: function () {
+                    var c = Expression.variable('c');
+
+                    var x = Expression.anything('x');
+                    x.mark('X1');
+
+                    var x2 = Expression.anything('x');
+                    x2.mark('X2');
+
+
+                    var tanh = Expression.tanh(x);
+
+                    var mul = Expression.multiplication(-1, tanh);
+
+                    var addition = Expression.addition(x2, mul, c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula34b);
+
+                    return addition;
+                },
+                IGeneralFormula35a: function () {
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var x = Expression.anything('x');
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var coth = Expression.coth(x);
+
+                    var power = Expression.power(coth, 2);
+
+                    var integral = Expression.integral(power, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula35a);
+
+                    return integral;
+                },
+                IGeneralFormula35b: function () {
+                    var c = Expression.variable('c');
+
+                    var x = Expression.anything('x');
+                    x.mark('X1');
+
+                    var x2 = Expression.anything('x');
+                    x2.mark('X2');
+
+
+                    var coth = Expression.coth(x);
+
+                    var mul = Expression.multiplication(-1, coth);
+
+                    var addition = Expression.addition(x2, mul, c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula35b);
+
+                    return addition;
+                },
+                IGeneralFormula36a: function () {
+
+                    var x = Expression.anything();
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X1');
+
+                    var x2 = Expression.anything();
+                    x2.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x2.mark('X2');
+
+                    var sech = Expression.sech(x);
+                    var tanh = Expression.tanh(x2);
+                    var multiplication = Expression.multiplication(sech, tanh);
+
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var integral = Expression.integral(multiplication, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula36a);
+                    integral.dependency('stay:', '', function (e, s) {
+                        return Expression.Dependency.Matches(['X2', 'X1'], e, s);
+                    }, true);
+
+                    return integral;
+                },
+                IGeneralFormula36b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var sech = Expression.sech(x);
+
+                    var c = Expression.variable('c');
+                    var mul = Expression.multiplication(-1, sech);
+                    var addition = Expression.addition(mul, c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula36b);
+
+                    return addition;
+                },
+                IGeneralFormula37a: function () {
+
+                    var x = Expression.anything();
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X1');
+
+                    var x2 = Expression.anything();
+                    x2.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x2.mark('X2');
+
+                    var csch = Expression.csch(x);
+                    var coth = Expression.coth(x2);
+                    var multiplication = Expression.multiplication(csch, coth);
+
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var integral = Expression.integral(multiplication, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula37a);
+                    integral.dependency('stay:', '', function (e, s) {
+                        return Expression.Dependency.Matches(['X2', 'X1'], e, s);
+                    }, true);
+
+                    return integral;
+                },
+                IGeneralFormula37b: function () {
+                    var x = Expression.anything();
+                    x.mark('X');
+
+                    var csch = Expression.csch(x);
+
+                    var c = Expression.variable('c');
+                    var mul = Expression.multiplication(-1, csch);
+                    var addition = Expression.addition(mul, c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula37b);
+
+                    return addition;
+                },
+                IGeneralFormula38a: function () {
+
+                    var x = Expression.anything();
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var sinh = Expression.sinh(x);
+                    var power = Expression.power(sinh, 2);
+
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var integral = Expression.integral(power, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula38a);
+
+                    return integral;
+                },
+                IGeneralFormula38b: function () {
+                    var x = Expression.anything();
+                    x.mark('X1');
+
+                    var x2 = Expression.anything();
+                    x2.mark('X2');
+
+                    var sinh = Expression.sinh(Expression.multiplication(2, x));
+
+                    var c = Expression.variable('c');
+
+                    var divi = Expression.division(sinh, 4);
+                    var divi2 = Expression.division(x2, 2);
+                    var addition = Expression.addition(divi, Expression.multiplication(-1, divi2), c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula38b);
+
+                    return addition;
+                },
+                IGeneralFormula39a: function () {
+
+                    var x = Expression.anything();
+                    x.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x.mark('X');
+
+                    var cosh = Expression.cosh(x);
+                    var power = Expression.power(cosh, 2);
+
+                    var dx = Expression.variable('x');
+                    dx.mark('dx');
+
+                    var integral = Expression.integral(power, dx);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula39a);
+
+                    return integral;
+                },
+                IGeneralFormula39b: function () {
+                    var x = Expression.anything();
+                    x.mark('X1');
+
+                    var x2 = Expression.anything();
+                    x2.mark('X2');
+
+                    var sinh = Expression.sinh(Expression.multiplication(2, x));
+
+                    var c = Expression.variable('c');
+
+                    var divi = Expression.division(sinh, 4);
+                    var divi2 = Expression.division(x2, 2);
+                    var addition = Expression.addition(divi, divi2  , c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula39b);
 
                     return addition;
                 }

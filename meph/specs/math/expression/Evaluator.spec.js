@@ -1122,5 +1122,99 @@
         expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula33b())).toBeTruthy();;
     });
 
+    it('can evalutate an integral of general formula 34 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.tanh('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula34a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula34b())).toBeTruthy();;
+    });
+
+
+    it('can evalutate an integral of general formula 35 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.coth('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula35a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula35b())).toBeTruthy();;
+    });
+
+
+
+    it('can evalutate an integral of general formula 36 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(Expression.sech('x'), Expression.tanh('x')), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula36a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula36b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 37 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(Expression.csch('x'), Expression.coth('x')), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula37a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula37b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 38 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.sinh('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula38a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula38b())).toBeTruthy();;
+    });
+
+
+    it('can evalutate an integral of general formula 39 of integral rules ', function () {
+        var d = Expression.integral(Expression.power(Expression.cosh('x'), 2), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula39a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula39b())).toBeTruthy();;
+    });
+
 
 });
