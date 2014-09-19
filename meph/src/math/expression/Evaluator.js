@@ -14,8 +14,15 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evaluate: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
             expression = Evaluator.preprocess(expression);
+            options = options || {};
+            options.count = options.count || 0;
+            options.count++;
+
             if (!expression instanceof Expression) {
                 throw 'incorrect input.';
+            }
+            if (options.count > 30) {
+                return expression.copy();
             }
             switch (expression.type) {
                 case Expression.type.addition:
@@ -41,6 +48,8 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                     return Evaluator.evalLn(expression, options);
                 case Expression.type.abs:
                     return Evaluator.evalAbs(expression, options);
+                case Expression.type.summation:
+                    return Evaluator.evalSummation(expression, options);
                 case Expression.type.log:
                     return Evaluator.evalLog(expression, options);
                 case Expression.type.cos:
@@ -183,6 +192,10 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             };
             ;
             return Expression.sqrt(Evaluator.evaluate(x, options));
+        },
+        evalSummation: function (expression) {
+            console.log('Need to actually implement summation.')
+            return expression.copy();
         },
         evalAbs: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
@@ -418,6 +431,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalSubtraction: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
             var Factor = MEPH.math.expression.Factor;
+
             if (Evaluator.allNumbers(expression)) {
                 var result = expression.getParts().summation(function (x, t, i) {
                     if (i === 0) {

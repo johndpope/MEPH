@@ -229,10 +229,14 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula24a:
                 case Expression.RuleType.Integration.IGeneralFormula24b:
                     return ExpressionTranslation.derivation.translateIGeneralFormula24(a, b);
+
                 case Expression.RuleType.Integration.IGeneralFormula25a:
                 case Expression.RuleType.Integration.IGeneralFormula25b:
                     return ExpressionTranslation.derivation.translateIGeneralFormula25(a, b);
 
+                case Expression.RuleType.Integration.IGeneralFormula45a:
+                case Expression.RuleType.Integration.IGeneralFormula45b:
+                    return ExpressionTranslation.derivation.translateIGeneralFormula45(a, b);
 
                 case Expression.RuleType.Integration.IGeneralFormula41a:
                 case Expression.RuleType.Integration.IGeneralFormula41b:
@@ -246,6 +250,14 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula44a:
                 case Expression.RuleType.Integration.IGeneralFormula44b:
                     return ExpressionTranslation.derivation.translateGeneralFormula44(a, b);
+
+                case Expression.RuleType.Integration.IGeneralFormula47a:
+                case Expression.RuleType.Integration.IGeneralFormula47b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula47(a, b);
+
+                case Expression.RuleType.Integration.IGeneralFormula48a:
+                case Expression.RuleType.Integration.IGeneralFormula48b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula48(a, b);
 
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
@@ -759,7 +771,53 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                                   Expression.RuleType.Derivation.GeneralFormula40b,
                                   a.name());
             },
-            translateGeneralFormula44: function(a,b){
+            translateGeneralFormula47: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula47a,
+                        from: Expression.RuleType.Integration.IGeneralFormula47b
+                    },
+                    dx: 'dx',
+                    N1: 'N',
+                    N2: 'N',
+                    N3: 'N',
+                    X1: 'X1',
+                    A1: 'A',
+                    A2: 'A',
+                    A3: 'A',
+                    A4: 'A',
+                    X4: 'X2',
+                    X3: 'X2',
+                    X2: 'X2'
+                }
+                
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula48: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula48a,
+                        from: Expression.RuleType.Integration.IGeneralFormula48b
+                    },
+                    dx: 'dx',
+                    N1: 'N',
+                    N2: 'N',
+                    N3: 'N',
+                    X1: 'X1',
+                    A1: 'A',
+                    A2: 'A',
+                    A3: 'A',
+                    X4: 'X2',
+                    X3: 'X2',
+                    X2: 'X2'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                debugger
+                return result;
+            },
+            translateGeneralFormula44: function (a, b) {
                 var transformation = {
                     transformation: {
                         to: Expression.RuleType.Integration.IGeneralFormula44a,
@@ -775,29 +833,44 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 var result = Expression.translation.Transform(transformation, a, b);
                 return result;
             },
-            translateGeneralFormula43: function(a,b){
+            translateGeneralFormula43: function (a, b) {
                 var transformation = {
                     transformation: {
                         to: Expression.RuleType.Integration.IGeneralFormula43a,
                         from: Expression.RuleType.Integration.IGeneralFormula43b
                     },
-                    X1: 'X', 
+                    X1: 'X',
                     A: 'A',
                     X2: 'X'
                 }
-                
+
                 var result = Expression.translation.Transform(transformation, a, b);
                 return result;
             },
-            translateIGeneralFormula41: function(a,b){
+            translateIGeneralFormula41: function (a, b) {
                 var transformation = {
                     transformation: {
                         to: Expression.RuleType.Integration.IGeneralFormula41a,
                         from: Expression.RuleType.Integration.IGeneralFormula41b
                     },
-                    X: 'X', 
+                    X: 'X',
                     A1: 'A',
                     A2: 'A'
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateIGeneralFormula45: function (a, b) {
+
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula45a,
+                        from: Expression.RuleType.Integration.IGeneralFormula45b
+                    },
+                    A: 'A',
+                    X1: 'X1',
+                    X2: 'X2'
                 }
 
                 var result = Expression.translation.Transform(transformation, a, b);

@@ -1299,4 +1299,94 @@
     });
 
 
+    it('can evalutate an integral of general formula 45 of integral rules ', function () {
+        var d = Expression.integral(Expression.division(
+            Expression.e(Expression.multiplication('a', 'x')), 'x'), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula45a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula45b())).toBeTruthy();;
+    });
+
+
+    it('can evalutate an integral of general formula 45 of integral rules ', function () {
+        var d = Expression.integral(Expression.division('x', Expression.e(Expression.multiplication('a', 'x'))), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula45a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        expect(!Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula45b())).toBeTruthy();;
+    });
+
+
+    it('can evalutate an integral of general formula 47 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(
+                    Expression.power('x', '3'),
+                    Expression.e(Expression.multiplication('a', 'x'))
+                ), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula47a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        console.log(result.latex());
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula47b())).toBeTruthy();;
+    });
+
+
+    it('can evalutate an integral of general formula 48 of integral rules ', function () {
+        var d = Expression.integral(Expression.division(
+                    Expression.e(Expression.multiplication('a', 'x')),
+                    Expression.power('x', '2')
+                ), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula48a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        console.log(result.latex());
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula48b())).toBeTruthy();;
+    });
+
+    it('can evalutate an integral of general formula 48 of integral rules ', function () {
+        var d = Expression.integral(Expression.division(
+                    Expression.power('x', '2'),
+                    Expression.e(Expression.multiplication('a', 'x'))
+                ), Expression.variable('x'));
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula48a;
+                });
+            }
+        });
+        //expect(called).toBeTruthy();
+        console.log(result.latex());
+        expect(!Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula48b())).toBeTruthy();;
+    });
 });
