@@ -1427,4 +1427,24 @@
 
         expect(result.partOrDefault(Expression.type.variable)).toBe(-3);
     });
+
+    it('can evalutate an integral of general formula 49 of integral rules ', function () {
+        var d = Expression.integral(Expression.multiplication(
+                Expression.power('x','n'),
+                Expression.ln('x')
+            ), Expression.variable('x'));
+
+        var called;
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.IGeneralFormula49a;
+                });
+            }
+        });
+
+        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula49b())).toBeTruthy();;
+
+    });
 });

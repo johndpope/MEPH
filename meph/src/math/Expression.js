@@ -3547,6 +3547,89 @@ MEPH.define('MEPH.math.Expression', {
                     addition.name(Expression.RuleType.Integration.IGeneralFormula48b);
 
                     return addition;
+                },
+                IGeneralFormula49a: function () {
+
+                    var x2 = Expression.anything();
+                    x2.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x2.mark('X2');
+
+                    var ln = Expression.ln(x2);
+
+                    var n = Expression.anything();
+                    n.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.ConstRelation);
+                    n.mark('N');
+
+                    var x1 = Expression.anything();
+                    x1.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x1.mark('X1');
+
+                    var power = Expression.power(x1, n);
+
+                    var mul = Expression.multiplication(power, ln);
+
+                    var dx = Expression.anything('x');
+                    dx.mark('dx');
+
+                    var integral = Expression.integral(mul, dx);
+
+                    integral.dependency('stay:', '', function (e, s) {
+                        return Expression.Dependency.Matches(['X2', 'X1'], e, s);
+                    }, true);
+
+                    integral.name(Expression.RuleType.Integration.IGeneralFormula49a);
+
+                    return integral;
+                },
+                IGeneralFormula49b: function () {
+
+                    var n3 = Expression.anything();
+                    //n3.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.ConstRelation);
+                    n3.mark('N3');
+
+                    var add2 = Expression.addition(n3, 1);
+
+                    var x2 = Expression.anything();
+                    //x2.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x2.mark('X2');
+
+                    var lnx = Expression.ln(x2);
+
+                    var mul2 = Expression.multiplication(add2, lnx)
+
+                    var middleplus = Expression.addition(mul2, -1);
+
+                    var n1 = Expression.anything();
+                    //n1.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.ConstRelation);
+                    n1.mark('N1');
+
+                    var plus = Expression.addition(n1, 1);
+
+                    var x1 = Expression.anything();
+                    //x1.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.VariableRelation);
+                    x1.mark('X1');
+
+                    var top = Expression.power(x1, plus);
+
+                    var n2 = Expression.anything();
+                    //n2.dependency('up:.integral', Expression.function.respectTo, Expression.Dependency.ConstRelation);
+                    n2.mark('N2');
+
+                    var add = Expression.addition(n2, 1);
+
+                    var bottom = Expression.power(add, 2);
+
+                    var frac = Expression.division(top, bottom);
+
+                    var mul = Expression.multiplication(frac, middleplus);
+                    
+                    var c = Expression.variable('c');
+
+                    var addition = Expression.addition(mul, c);
+
+                    addition.name(Expression.RuleType.Integration.IGeneralFormula49b);
+
+                    return addition;
                 }
             }
         },

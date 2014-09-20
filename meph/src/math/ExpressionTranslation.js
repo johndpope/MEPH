@@ -259,6 +259,10 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula48b:
                     return ExpressionTranslation.derivation.translateGeneralFormula48(a, b);
 
+                case Expression.RuleType.Integration.IGeneralFormula49a:
+                case Expression.RuleType.Integration.IGeneralFormula49b:
+                    return ExpressionTranslation.derivation.translateGeneralFormula49(a, b);
+
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
             }
@@ -795,6 +799,24 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 }
 
                 var result = Expression.translation.Transform(transformation, a, b);
+                return result;
+            },
+            translateGeneralFormula49: function(a,b){
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Integration.IGeneralFormula49a,
+                        from: Expression.RuleType.Integration.IGeneralFormula49b
+                    },
+                    X2: 'X1',
+                    X1: 'X1',
+                    N3: 'N',
+                    N1: 'N',
+                    N2: 'N',
+
+                }
+
+                var result = Expression.translation.Transform(transformation, a, b);
+
                 return result;
             },
             translateGeneralFormula48: function (a, b) {
