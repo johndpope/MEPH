@@ -277,6 +277,11 @@
         expect(Expression.isOne(one)).toBeTruthy();
     });
 
+    it('Expression.isOne(exp) detects if the expression equals one.', function () {
+        var one = 1
+        expect(Expression.isOne(one)).toBeTruthy();
+    });
+
     it('Can remove a one from an expression', function () {
 
         var one = Expression.one();

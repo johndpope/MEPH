@@ -117,9 +117,12 @@ MEPH.define('MEPH.math.Expression', {
                 var t = marks.select(function (x) {
                     return expression.getMark(x);
                 });
-                return t.subset(1).all(function (x) {
-                    return t.first().equals(x, { exact: true });
-                })
+                if (t.length === t.count(function (x) { return x; })) {
+                    return t.subset(1).all(function (x) {
+                        return t.first().equals(x, { exact: true });
+                    })
+                }
+                return false;
             },
             OrderRequired: function (marks, parentMark, expression) {
                 var parent = expression.getMark(parentMark);
@@ -3452,7 +3455,7 @@ MEPH.define('MEPH.math.Expression', {
                     }, true);
 
                     integral.dependency('stay:', '', function (e, s) {
-                        
+
                         return Expression.Dependency.OrderRequired(['EAX', 'POWX'], 'PARENT', e, s);
                     }, true);
 
@@ -3895,7 +3898,7 @@ MEPH.define('MEPH.math.Expression', {
          * @return {MEPH.math.Expression}
          **/
         isOne: function (exp) {
-            return Expression.one().equals(exp, { exact: true });
+            return Expression.one().equals(Expression.variableOr(exp), { exact: true });
         },
         /**
          * Removes all the parts of an expression representing one.
@@ -3934,7 +3937,7 @@ MEPH.define('MEPH.math.Expression', {
         summation: function (exp, a, b, respectTo) {
             var expression = new Expression();
             expression.setExp(Expression.type.summation);
-            expression.addPart(Expression.function.expression, exp);
+            expression.addPart(Expression.function.input, exp);
             if (a && !(a instanceof Expression)) {
                 a = Expression.variable(a);
             }
@@ -4008,6 +4011,9 @@ MEPH.define('MEPH.math.Expression', {
             expression.setExp(Expression.type.abs);
             expression.addPart(Expression.function.input, x);
             return expression;
+        },
+        variableOr: function (input) {
+            return input instanceof Expression ? input : Expression.variable(input);
         },
         /**
          * Expresses log
@@ -4654,6 +4660,15 @@ MEPH.define('MEPH.math.Expression', {
                 break;
             case Expression.type.theta:
                 return '\\theta';
+            case Expression.type.factorial:
+                var facttext = me.partLatex(me.partOrDefault(Expression.function.input)) + '!';
+                return facttext;
+            case Expression.type.summation:
+                //\displaystyle\sum_{n=1}^{10} n^{2}
+                var summationtext = '\\displaystyle\\sum_{' + me.partLatex(Expression.function.respectTo) +
+                    '=' + me.partLatex(Expression.function.start) +
+                    '}^{' + me.partLatex(Expression.function.end) + '} ' + me.partLatex(Expression.function.input) + '';
+                return summationtext;
             case Expression.type.tanh:
             case Expression.type.sinh:
             case Expression.type.cosh:

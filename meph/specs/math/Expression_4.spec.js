@@ -88,7 +88,7 @@
         var exp = Expression.addition(Expression.multiplication('4', 'x'), Expression.multiplication('4', 'x'));
 
         var denom = Expression.GreatestCommonDenominator(exp);
-
+        
         expect(denom.latex() === '4x').toBeTruthy();
     });
 

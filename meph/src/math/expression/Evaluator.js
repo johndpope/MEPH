@@ -21,7 +21,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             if (!expression instanceof Expression) {
                 throw 'incorrect input.';
             }
-            if (options.count > 30) {
+            if (options.count > 256) {
                 return expression.copy();
             }
             switch (expression.type) {
@@ -251,10 +251,13 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             exponent = Evaluator.evaluate(exponent, options);
 
             if (Factor.isNumerical(exponent)) {
-                if (exponent === 0) {
+                if (Expression.isZero(exponent)) {
                     return Expression.one();
                 }
-                else if (exponent === 1) {
+                else if (Expression.isOne(exponent)) {
+                    if (base instanceof Expression) {
+                        return base.copy();
+                    }
                     return Expression.variable(base);
                 }
                 if (Factor.isNumerical(base)) {
@@ -273,9 +276,10 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             var multiplyNums = function (exps) {
                 return exps.summation(function (x, t, i) {
                     if (i === 0) {
-                        return Evaluator.evaluate(x, options);
+                        var temp = Evaluator.evaluate(x, options);
+                        return Factor.getNumerical(temp);
                     }
-                    return t * Evaluator.evaluate(x, options);
+                    return t * Factor.getNumerical(Evaluator.evaluate(x, options));
                 });
             }
             var parts = expression.getParts().select(function (x) {
@@ -286,21 +290,28 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 return Expression.variable(result);
             }
             var numerparts = parts.where(function (x) {
-                return Factor.isNumerical(x);
+                return Factor.isNumerical(x) && !Expression.isOne(x);
             });
             var notnumbers = parts.where(function (x) {
                 return !Factor.isNumerical(x);
             });
 
             var numexp = Expression.variable(multiplyNums(numerparts));
-            if (numerparts.length && notnumbers.length) {
+
+            if (!Expression.isOne(numexp) && numerparts.length && notnumbers.length) {
                 return Expression.multiplication.apply(this, [numexp].concat(notnumbers));
             }
             else if (notnumbers.length) {
-                return Expression.multiplication.apply(this, notnumbers);
+                if (notnumbers.length > 1) {
+                    return Expression.multiplication.apply(this, notnumbers);
+                }
+                else {
+                    var t = notnumbers.first();
+                    return Expression.variableOr(t).copy();
+                }
             }
-            else if (numerparts.length) {
-                return numexp;
+            else {
+                return Expression.variableOr(numexp).copy();
             }
         },
         /**
@@ -362,24 +373,6 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             else {
                 return Expression.variable(currentval);
             }
-            //if (Evaluator.allNumbers(expression)) {
-            //    var result = divideNums(expression.getParts());
-            //    return Expression.variable(result);
-            //}
-            //else {
-            //    var index = expression.getParts().indexWhere(function (x) {
-            //        return !Factor.isNumerical(x.val);
-            //    }).first();
-            //    if (index !== null) {
-            //        var numerparts = expression.getParts().subset(0, index);
-            //        var numexp = Expression.variable(divideNums(numerparts));
-            //        var therest = expression.getParts().subset(index);
-            //        return Expression.division.apply(this, [numexp].concat(therest));
-            //    }
-            //    else {
-            //        return expression;
-            //    }
-            //}
         },
         /**
          * Evaluates  an addition expression.
@@ -422,6 +415,45 @@ MEPH.define('MEPH.math.expression.Evaluator', {
                 }
             }
         },
+        orderDependentEval: function (parts, evalFunc, expFunc) {
+            var Evaluator = MEPH.math.expression.Evaluator;
+            var Factor = MEPH.math.expression.Factor;
+            var currentval, index = 0;
+
+            do {
+                if (currentval === undefined) {
+                    currentval = parts[index] instanceof Expression ? parts[index].value() : parts[index];
+                    if (!Factor.isNumerical(currentval) && !(currentval instanceof Expression)) {
+                        currentval = Expression.variable(currentval);
+                    }
+                }
+                else {
+                    if (Factor.isNumerical(parts[index])) {
+
+                        currentval = evalFunc(parts[index], currentval);
+
+                        if (currentval instanceof Expression) {
+                            break;
+                        }
+                    }
+                    else {
+                        currentval = Expression.variable(currentval);
+                        break;
+                    }
+                }
+                index++;
+            }
+            while ((typeof currentval === 'number') && index < parts.length);
+
+            if (currentval instanceof Expression) {
+                return expFunc.apply(this, [currentval].concat(parts.subset(index)));
+                //Expression.subtraction.apply(this, [currentval].concat(parts.subset(index));
+            }
+            else {
+                return Expression.variable(currentval);
+            }
+
+        },
         /**
          * Evaluates  an subtraction expression.
          * @param {MEPH.math.Expression} expression
@@ -432,47 +464,107 @@ MEPH.define('MEPH.math.expression.Evaluator', {
             var Evaluator = MEPH.math.expression.Evaluator;
             var Factor = MEPH.math.expression.Factor;
 
-            if (Evaluator.allNumbers(expression)) {
-                var result = expression.getParts().summation(function (x, t, i) {
-                    if (i === 0) {
-                        return Evaluator.evaluate(x.val, options) + t;
-                    }
-                    else
-                        return t - Evaluator.evaluate(x.val, options);
-                });
-                return Expression.variable(result);
-            }
-            else {
-                var copied = expression.copy(),
-                    numberfirst;
-
-                var number = copied.getParts().where(function (x, index) {
-                    x.index = index;
-                    return Factor.isNumerical(x.val);
-                }).summation(function (x, t, i) {
-                    if (x.index === 0) {
-                        numberfirst = true;
-                        return Evaluator.evaluate(x.val, options) + t
-                    }
-                    else
-                        return -Evaluator.evaluate(x.val, options) + t;
-                });
-
-                var notnumbers = copied.getParts().where(function (x) {
-                    return !Factor.isNumerical(x.val);
-                });
-
-                if (numberfirst) {
-                    return Expression.subtraction.apply(this, [Expression.variable(number)].concat(notnumbers));
+            var parts = expression.getParts().select(function (x, i) {
+                if (i === 0) {
+                    if (x.val instanceof Expression)
+                        return x.val.copy();
+                    return Expression.variable(x.val);
                 }
                 else {
-                    var first = notnumbers.first(function (x) { return x.index === 0; });
-                    var start = !!number ? [first.val, number] : [first.val];
-                    return Expression.subtraction.apply(this, start.concat(notnumbers.where(function (x) {
-                        return x !== first;
-                    }).select(function (x) { return x.val; })));
+                    if (x.val instanceof Expression)
+                        return Expression.multiplication(-1, x.val.copy());
+                    return Expression.multiplication(-1, x.val);
                 }
+                //return Evaluator.evaluate(x.val, options);
+            });
+
+            var result = Evaluator.evaluate(Expression.addition.apply(this, parts), options);
+
+            parts = result.getParts().select(function (x, i) {
+                if (i === 0) {
+                    if (x.val instanceof Expression)
+                        return x.val.copy();
+                    return Expression.variable(x.val);
+                }
+                else {
+                    var t;
+                    t = Expression.Flatten(Expression.multiplication(-1,
+                        (x.val instanceof Expression) ?
+                         x.val.copy() :
+                         x.val), Expression.type.multiplication);
+                    if (t === null) {
+                        throw 'invalid value for t : Evaluator.js';
+                    }
+
+
+
+                    return Evaluator.evaluate(t, options);
+                }
+            });
+
+            var result = Evaluator.orderDependentEval(parts, function evalFunc(partsindex, currentval) {
+                var pi = Factor.getNumerical(partsindex);
+
+                if (pi === 0) {
+                    if (currentval > 0)
+                        return Expression.variable(Number.POSITIVE_INFINITY);
+                    else
+                        return Expression.variable(Number.NEGATIVE_INFINITY);
+                }
+                if ((currentval - pi) % 1 === 0) {
+                    currentval = currentval - pi;
+                }
+                else {
+                    currentval = Expression.variable(currentval);
+                }
+                return currentval;
+            }, Expression.subtraction);
+
+            if (!(result instanceof Expression)) {
+                result = Expression.variable(result);
             }
+            return result;
+            //if (Evaluator.allNumbers(expression)) {
+            //    var result = expression.getParts().summation(function (x, t, i) {
+            //        if (i === 0) {
+            //            return Evaluator.evaluate(x.val, options) + t;
+            //        }
+            //        else
+            //            return t - Evaluator.evaluate(x.val, options);
+            //    });
+            //    return Expression.variable(result);
+            //}
+            //else {
+            //    var copied = expression.copy(),
+            //        numberfirst;
+
+            //    var number = copied.getParts().where(function (x, index) {
+            //        x.index = index;
+            //        return Factor.isNumerical(x.val);
+            //    }).summation(function (x, t, i) {
+            //        if (x.index === 0) {
+            //            numberfirst = true;
+            //            return Evaluator.evaluate(x.val, options) + t
+            //        }
+            //        else
+            //            return -Evaluator.evaluate(x.val, options) + t;
+            //    });
+
+            //    var notnumbers = copied.getParts().where(function (x) {
+            //        return !Factor.isNumerical(x.val);
+            //    });
+
+            //    if (numberfirst) {
+            //        return Expression.subtraction.apply(this, [Expression.variable(number)].concat(notnumbers));
+            //    }
+            //    else {
+            //        var first = notnumbers.first(function (x) { return x.index === 0; });
+            //        var start = !!number ? [first.val, number] : [first.val];
+            //        return Expression.subtraction.apply(this, start.concat(notnumbers.where(function (x) {
+            //            return x !== first;
+            //        }).select(function (x) { return x.val; })));
+            //    }
+            //}
         },
         /**
          * Evaluates a derivative expression.
@@ -530,6 +622,11 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalIntegral: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
             var Factor = MEPH.math.expression.Factor;
+            var input = expression.partOrDefault(Expression.function.input);
+            expression.remove(input);
+            input = Evaluator.evaluate(input, options);
+            expression.addPart(Expression.function.input, Expression.variableOr(input));
+
             var rules = Expression.getMatchingRules(expression);
             var integralRules = rules.where(function (x) { return x.type === Expression.type.integral; });
 

@@ -4,7 +4,7 @@
  **/
 MEPH.define('MEPH.math.ExpressionTranslation', {
     alternateNames: 'ExpressionTranslation',
-    requires: ['MEPH.math.Set'],
+    requires: ['MEPH.math.Set','MEPH.math.expression.Evaluator'],
     statics: {
         translate: function (a, b) {
             switch (a.name()) {
@@ -365,6 +365,9 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                         if (Array.isArray(a_mark)) {
                             a_mark = ExpressionTranslation.convertSiblingsToAnExpression(a_mark);
                         }
+                        //var Evaluator = MEPH.math.expression.Evaluator;
+                        //a_mark = Evaluator.evaluate(a_mark);
+
                         b_copy.swap(bi, a_mark);
 
                         if (b_copy === b_copy.getMark(bi)) {
@@ -790,7 +793,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                     X3: 'X2',
                     X2: 'X2'
                 }
-                
+
                 var result = Expression.translation.Transform(transformation, a, b);
                 return result;
             },
@@ -814,7 +817,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 }
 
                 var result = Expression.translation.Transform(transformation, a, b);
-                debugger
+
                 return result;
             },
             translateGeneralFormula44: function (a, b) {

@@ -154,8 +154,7 @@
 
 
             expect(result.type === Expression.type.subtraction).toBeTruthy();
-            expect(result.getParts().length === 3).toBeTruthy();
-            expect(result.getParts().first().val.partOrDefault(Expression.type.variable) === 0).toBeTruthy()
+            expect(result.getParts().length === 2).toBeTruthy();
         }).catch(function (e) {
             expect(e).caught();
         }).then(function (x) {
@@ -372,7 +371,14 @@
     it('can evaluate a quotient rule , derivative of general formula 7 of derivative rules', function () {
         var d = Expression.derivative(Expression.division(Expression.multiplication(2, 'x'), Expression.multiplication(4, 'x')), 1, null, 'x');
 
-        var result = Evaluator.evaluate(d);
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.GeneralFormula7a;
+                });
+            }
+        });
 
         expect(result.type === Expression.type.division).toBeTruthy();
     });
@@ -380,7 +386,15 @@
     it('can evaluate the power rule , derivative of general formula 10 of derivative rules', function () {
         var d = Expression.derivative(Expression.power(Expression.variable('x'), 10), 1, null, 'x');
 
-        var result = Evaluator.evaluate(d);
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.GeneralFormula10a;
+                });
+            }
+        });
+
         expect("10x^{9}" === result.latex()).toBeTruthy();
         expect(result.type === Expression.type.multiplication).toBeTruthy();
     });
@@ -388,8 +402,16 @@
     it('can evaluate the power rule , derivative of general formula 10 of derivative rules', function () {
         var d = Expression.derivative(Expression.power(Expression.power(Expression.variable('x'), 2), 4), 1, null, 'x');
 
-        var result = Evaluator.evaluate(d);
-        expect("4x^{2}^{3}2x^{1}" === result.latex()).toBeTruthy();
+        var result = Evaluator.evaluate(d, {
+            strategy: function (rules) {
+                return rules.where(function (x) {
+                    called = true;
+                    return x.rule.name() === Expression.RuleType.Integration.GeneralFormula10a;
+                });
+            }
+        });
+        
+        expect("4x^{2}^{3}2x" === result.latex()).toBeTruthy();
         expect(result.type === Expression.type.multiplication).toBeTruthy();
     });
 
@@ -975,7 +997,7 @@
             }
         });
         //expect(called).toBeTruthy();
-        expect(result.latex()).toBe('-11 / 2\\sin (x)^{1}\\cos (x) + 1 / 2(-1\\cos (x) + c)');;
+        expect(result.latex()).toBe('-11 / 2\\sin (x)\\cos (x) + 1 / 2(-1\\cos (x) + c)');;
     });
 
 
@@ -993,7 +1015,7 @@
         //expect(called).toBeTruthy();
         console.log(result.latex())
 
-        expect(result.latex()).toBe('1 / 2\\cos (x)^{1}\\sin (x) + 1 / 2(\\sin (x) + c)');
+        expect(result.latex()).toBe('1 / 2\\cos (x)\\sin (x) + 1 / 2(\\sin (x) + c)');
     });
 
 
@@ -1260,7 +1282,9 @@
             }
         });
         //expect(called).toBeTruthy();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula42b())).toBeTruthy();;
+        
+        expect(result.latex()).toBe('x-1 - -1\\ln x + c');
+        //expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula42b())).toBeTruthy();;
     });
 
 
@@ -1277,8 +1301,8 @@
             }
         });
         //expect(called).toBeTruthy();
-        result.latex();
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula43b())).toBeTruthy();;
+        expect(result.latex()).toBe("x / \\ln a-1 - -1\\ln x + c");
+        // expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula43b())).toBeTruthy();;
     });
 
 
@@ -1348,7 +1372,8 @@
         });
         //expect(called).toBeTruthy();
         console.log(result.latex());
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula47b())).toBeTruthy();;
+        expect(result.latex()).toBe('e^ax1 / ax^{3} - e^ax1 / ax^{2} - 2 / a(e^a / a^{2}-1 - -1ax + c)3 / a');
+        //expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula47b())).toBeTruthy();;
     });
 
 
@@ -1367,8 +1392,8 @@
             }
         });
         //expect(called).toBeTruthy();
-        console.log(result.latex());
-        expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula48b())).toBeTruthy();;
+        expect(result.latex()).toBe('(-1e^ax / x + a(\\ln |x| + \\displaystyle\\sum_{i=1}^{Infinity} ax^{i} / i! + c)) + c');
+        //expect(Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula48b())).toBeTruthy();;
     });
 
     it('can evalutate an integral of general formula 48 of integral rules ', function () {
@@ -1388,5 +1413,18 @@
         //expect(called).toBeTruthy();
         console.log(result.latex());
         expect(!Expression.matchRule(result, Expression.Rules.Integration.IGeneralFormula48b())).toBeTruthy();;
+    });
+
+    it('can evaluate a subtraction', function () {
+        var result = Evaluator.evaluate(Expression.subtraction(5, 4));
+
+        expect(result.partOrDefault(Expression.type.variable)).toBe(1);
+    });
+
+
+    it('can evaluate a subtraction', function () {
+        var result = Evaluator.evaluate(Expression.subtraction(Expression.subtraction(5, 4), 4));
+
+        expect(result.partOrDefault(Expression.type.variable)).toBe(-3);
     });
 });
