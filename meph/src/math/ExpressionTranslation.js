@@ -4,7 +4,7 @@
  **/
 MEPH.define('MEPH.math.ExpressionTranslation', {
     alternateNames: 'ExpressionTranslation',
-    requires: ['MEPH.math.Set','MEPH.math.expression.Evaluator'],
+    requires: ['MEPH.math.Set', 'MEPH.math.expression.Evaluator'],
     statics: {
         translate: function (a, b) {
             switch (a.name()) {
@@ -263,6 +263,10 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 case Expression.RuleType.Integration.IGeneralFormula49b:
                     return ExpressionTranslation.derivation.translateGeneralFormula49(a, b);
 
+                case Expression.RuleType.Derivation.ChainRuleA:
+                case Expression.RuleType.Derivation.ChainRuleB:
+                    return ExpressionTranslation.derivation.chainRule(a, b);
+
                 default:
                     throw new Error('Unhandled case : ExpressionTranslation');
             }
@@ -289,6 +293,8 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
             res.push([Expression.RuleType.Derivation.GeneralFormula3a, Expression.RuleType.Derivation.GeneralFormula3b]);
             res.push([Expression.RuleType.Derivation.GeneralFormula4a, Expression.RuleType.Derivation.GeneralFormula4b]);
             res.push([Expression.RuleType.Derivation.GeneralFormula5a, Expression.RuleType.Derivation.GeneralFormula5b]);
+            res.push([Expression.RuleType.Derivation.ChainRuleA, Expression.RuleType.Derivation.ChainRuleB]);
+
 
             res.push([Expression.RuleType.Derivation.SimpleVariableA, Expression.RuleType.Derivation.SimpleVariableB]);
             [].interpolate(0, 100, function (x) {
@@ -801,7 +807,23 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                 var result = Expression.translation.Transform(transformation, a, b);
                 return result;
             },
-            translateGeneralFormula49: function(a,b){
+            chainRule: function (a, b) {
+                var transformation = {
+                    transformation: {
+                        to: Expression.RuleType.Derivation.ChainRuleA,
+                        from: Expression.RuleType.Derivation.ChainRuleB
+                    },
+                    Gx: 'Gx',
+                    Fx: 'Fx',
+                    dx1: 'dx',
+                    dx2: 'dx'
+                }
+                
+                var result = Expression.translation.Transform(transformation, a, b);
+
+                return result;
+            },
+            translateGeneralFormula49: function (a, b) {
                 var transformation = {
                     transformation: {
                         to: Expression.RuleType.Integration.IGeneralFormula49a,
@@ -811,8 +833,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                     X1: 'X1',
                     N3: 'N',
                     N1: 'N',
-                    N2: 'N',
-
+                    N2: 'N'
                 }
 
                 var result = Expression.translation.Transform(transformation, a, b);

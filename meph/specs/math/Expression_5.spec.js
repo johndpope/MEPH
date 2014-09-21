@@ -38,4 +38,12 @@
         expect(e.latex() === 'e^x').toBeTruthy();
     });
 
+    it('can set a properties on an expression', function () {
+        var e = Expression.variable('x');
+        e.setProperties({ val: true });
+
+        var result = e.getProperties();
+        expect(result.val).toBe(true);
+    })
+
 });

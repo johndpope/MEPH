@@ -113,6 +113,57 @@ MEPH.define('MEPH.math.Expression', {
                 var inRespectTo = x && x.val && x.val.part ? x.val.part('variable').val : x.val;
                 return c.respects().contains(function (x) { return x === inRespectTo; });
             },
+            ChainRule: function (Gx, Fx, expression) {
+                
+                var fx = expression.getMark(Fx);
+                var gx = Expression.Dependency.GetGx(fx);
+                if (gx) {
+                    gx.mark(Gx);
+                    return true;
+                }
+                return false;
+            },
+            AlreadyChainedRule: function (Gx, Fx, expression) {
+                var properties = expression.getProperties();
+                
+                return !!!properties.chained;
+            },
+            GetGx: function (Fx) {
+                switch (Fx.type) {
+                    case Expression.type.fraction:
+                    case Expression.type.division:
+                    case Expression.type.subtraction:
+                    case Expression.type.addition:
+                    case Expression.type.multiplication:
+                    case Expression.type.variable:
+                    case Expression.type.integral:
+                    case Expression.type.derivative:
+                    case Expression.type.abs:
+                    case Expression.type.summation:
+                        return null;
+                    case Expression.type.power:
+                        return Fx.partOrDefault(Expression.function.power);
+                    case Expression.type.ln:
+                    case Expression.type.e:
+                    case Expression.type.log:
+                    case Expression.type.cos:
+                    case Expression.type.tan:
+                    case Expression.type.sec:
+                    case Expression.type.sin:
+                    case Expression.type.csc:
+                    case Expression.type.cosh:
+                    case Expression.type.tanh:
+                    case Expression.type.sech:
+                    case Expression.type.coth:
+                    case Expression.type.sinh:
+                    case Expression.type.csch:
+                    case Expression.type.cot:
+                    case Expression.type.sqrt:
+                        return Fx.partOrDefault(Expression.function.input);
+                    default:
+                        throw new Error('unhandled case: ' + Fx.type + ', Expression.js(GetGx)')
+                }
+            },
             Matches: function (marks, expression) {
                 var t = marks.select(function (x) {
                     return expression.getMark(x);
@@ -587,6 +638,51 @@ MEPH.define('MEPH.math.Expression', {
                     division.name(Expression.RuleType.Derivation.GeneralFormula7b);
 
                     return division;
+                },
+                /**
+                 * Chain rule.
+                 * In calculus, the chain rule is a formula for computing the derivative of the composition of two or more functions. 
+                 * @return {MEPH.math.Expression}
+                 */
+                ChainRuleA: function () {
+                    var expression = Expression.anything();
+                    expression.mark('Fx');
+                    expression.dependency('up:.derivative', Expression.function.denominator, Expression.Dependency.VariableRelation);
+
+                    var denom = Expression.variable('d');
+                    denom.mark('dx');
+
+                    var diff = Expression.derivative(expression, 1, null, denom);
+                    diff.name(Expression.RuleType.Derivation.ChainRuleA);
+                    diff.dependency('stay:', '', Expression.Dependency.AlreadyChainedRule.bind(this, 'Gx', 'Fx'), true);
+                    diff.dependency('stay:', '', Expression.Dependency.ChainRule.bind(this, 'Gx', 'Fx'), true);
+
+                    return diff;
+                },
+                ChainRuleB: function () {
+
+                    var Gx = Expression.anything();
+                    Gx.mark('Gx');
+
+                    var Fx = Expression.anything();
+                    Fx.mark('Fx');
+
+                    var dx = Expression.variable('x');
+                    dx.mark('dx1');
+
+                    var dx2 = Expression.variable('x');
+                    dx2.mark('dx2');
+
+                    var dG = Expression.derivative(Gx, 1, null, dx2);
+
+                    var dF = Expression.derivative(Fx, 1, null, dx);
+                    dF.setProperties({ chained: true });
+
+                    var multiplication = Expression.multiplication(dF, dG);
+
+                    multiplication.name(Expression.RuleType.Derivation.ChainRuleB);
+
+                    return multiplication;
                 },
                 GeneralFormula10a: function () {
                     var n = Expression.anything();
@@ -3622,7 +3718,7 @@ MEPH.define('MEPH.math.Expression', {
                     var frac = Expression.division(top, bottom);
 
                     var mul = Expression.multiplication(frac, middleplus);
-                    
+
                     var c = Expression.variable('c');
 
                     var addition = Expression.addition(mul, c);
@@ -4377,12 +4473,31 @@ MEPH.define('MEPH.math.Expression', {
         }
         return [];
     },
+    /**
+     * Sets properties on the expression.
+     * @param {Object} props
+     **/
+    setProperties: function (props) {
+        var me = this;
+        me.properties = me.properties || {};
+        MEPH.apply(props, me.properties);
+    },
+    /**
+     * Gets properties set on the expression.
+     * @return {Object}
+     */
+    getProperties: function () {
+        var me = this;
+        me.properties = me.properties || {};
+        return me.properties;
+    },
     copy: function () {
         var me = this;
         var expression = new Expression();
         expression.type = me.type;
         expression.mark(me.mark());
         expression.name(me.name());
+        expression.setProperties(me.getProperties());
         expression.repeat = me.repeat;
         expression.parts = me.getParts().select(function (x) {
             var copy = x.val.copy ? x.val.copy() : x.val;
@@ -5111,6 +5226,9 @@ MEPH.define('MEPH.math.Expression', {
         Expression.RuleType.Derivation['GeneralFormula' + x + 'b'] = 'GeneralFormula' + x + 'b';
         Expression.RuleType.Derivation['GeneralFormula' + x + 'a'] = 'GeneralFormula' + x + 'a';
     });
+
+    Expression.RuleType.Derivation.ChainRuleA = 'ChainRuleA';
+    Expression.RuleType.Derivation.ChainRuleB = 'ChainRuleB';
 
     [].interpolate(0, 100, function (x) {
         Expression.RuleType.Integration['IGeneralFormula' + x + 'b'] = 'IGeneralFormula' + x + 'b';
