@@ -641,7 +641,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             });
         if (filetype == javascriptType) {
             if ((!document) || ((document) && !document.getElementsByTagName)) {
-               
+
                 importScripts(filename);
                 setTimeout(function () {
                     try {
@@ -665,6 +665,22 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 head.appendChild(script);
             }
             toResolve(filename, filetype);
+        }
+        else if (filetype === 'mp3') {
+
+            var XHR = new XMLHttpRequest();
+            XHR.open('GET', filename, true);
+            XHR.responseType = 'arraybuffer';
+            XHR.onload = function () {
+                
+                toResolve({ response: XHR.response })
+            };
+
+            XHR.onerror = function () {
+                toFail({error: new Error('AudioSampleLoader: XMLHttpRequest called onerror')})
+            };
+            XHR.send();
+
         }
         else if (filetype == "css") { //if filename is an external CSS file
             var fileref = document.createElement("link")

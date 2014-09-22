@@ -70,6 +70,7 @@
                     i,
                     tests = [
                         'MEPH.spec.js',
+                        'audio/Audio.spec.js',
                         'application/Application.spec.js',
                         'bind/Binder.spec.js',
                         'button/Button.spec.js',
