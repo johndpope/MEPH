@@ -43,7 +43,7 @@ MEPH.define(&#39;MEPH.util.Array&#39;, {
                         var result = MEPH.util.Array.create();
                         var collection = this;
                         for (var i = 0 ; i &lt; collection.length ; i++) {
-                            if (func(collection[i])) {
+                            if (func(collection[i], i)) {
                                 result.push(collection[i]);
                             }
                         }
@@ -116,7 +116,24 @@ MEPH.define(&#39;MEPH.util.Array&#39;, {
                     }
                 });
             }
-
+            if (!array.intersectFluent) {
+                Object.defineProperty(array, &#39;intersectFluent&#39;, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = [];
+                        func = func || function (x, y) { return x === y; };
+                        result.push.apply(result, collection[0]);
+                        collection = collection.subset(1);
+                        collection.foreach(function (x) {
+                            result = result.intersection(x, func);
+                        });
+                        return result;
+                    }
+                });
+            }
             if (!array.count) {
                 Object.defineProperty(array, &#39;count&#39;, {
                     enumerable: false,
@@ -281,6 +298,7 @@ MEPH.define(&#39;MEPH.util.Array&#39;, {
                     value: function (func) {
                         var result = null,
                             resultValue = null;
+                        func = func || function (x) { return x; }
                         var collection = this;
                         for (var i = 0 ; i &lt; collection.length; i++) {
                             if (resultValue == null || func(collection[i]) &gt; resultValue) {
@@ -535,9 +553,9 @@ MEPH.define(&#39;MEPH.util.Array&#39;, {
                     writable: true,
                     configurable: true,
                     value: function (func) {
-                        var result;
+                        var result = 0;
                         var collection = this;
-                        for (var i = collection.length ; i--;) {
+                        for (var i = 0; i &lt; collection.length ; i++) {
                             result = func(collection[i], result, i);
                         }
                         return result;

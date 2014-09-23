@@ -21,7 +21,6 @@
                 'MEPH.input.URL',
                 'MEPH.input.Week'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     onLoaded: function () {

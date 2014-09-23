@@ -26,7 +26,7 @@ MEPH.define(&#39;MEPH.math.jax.MathJax&#39;, {
             MEPHJax.$promise = MEPHJax.$promise.then(function () {
                 if (!MEPHJax.$loaded) {
                     var toresolve;
-                    return MEPH.loadJSCssFile(&#39;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML-full&#39;, &#39;.js&#39;, function () {
+                    return MEPH.loadJSCssFile(&#39;../external/MathJax-2.3-latest/MathJax-2.3-latest/MathJax.js?config=TeX-AMS_HTML-full&#39;, &#39;.js&#39;, function () {
                         MEPHJax.$loaded = true;
                         toresolve(MEPHJax.$loaded);
                     }).then(function () {

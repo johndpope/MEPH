@@ -7,7 +7,6 @@
                 'MEPH.pad.DrawingSurface',
                 'MEPH.panel.Panel'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     onLoaded: function () {

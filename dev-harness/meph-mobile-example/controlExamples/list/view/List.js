@@ -5,7 +5,6 @@
     mixins: ['MEPH.mobile.mixins.Activity'],
     requires: ['MEPH.mobile.activity.view.ActivityView', 'MEPH.list.List'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     onLoaded: function () {

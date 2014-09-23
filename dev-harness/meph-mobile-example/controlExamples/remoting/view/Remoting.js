@@ -8,7 +8,6 @@
                 'MEPH.input.Checkbox',
                 'MEPH.list.List'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     onLoaded: function () {

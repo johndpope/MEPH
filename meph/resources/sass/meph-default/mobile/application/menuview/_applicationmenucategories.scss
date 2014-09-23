@@ -7,30 +7,22 @@ $meph-border-radius:3px;
 {
 }
 .meph-application-menu-categories-item {
-	height: $meph-application-menu-categories-item-height;
-	background-color: $meph-color-white;
 	margin: 10px;
 	color: $meph-color-primary-2;
-	box-shadow: 1px 1px 1px 1px $meph-color-primary-2;
 	opactiy: 1.0;
 	border-radius: $meph-border-radius;
 	@include transition( .2s, .1s);
 	cursor: pointer;
-	@include big-screen {
-		float: left;
-		height: $meph-application-menu-categories-item-height;
-		width:  $meph-application-menu-categories-item-width;
-	}
+	
 }
- 
+/**/ 
 .meph-application-menu-categories-item-details {
 	display: block;
 	padding-left: 8px;
 }
 .meph-application-menu-categories-item-description {
 	padding: 14px;
-	height: $meph-application-menu-categories-item-height;
-}
+	}
 
 .meph-appliation-menu-categories-item-title {
 	padding: 0;
@@ -38,12 +30,11 @@ $meph-border-radius:3px;
 	padding-top: 10px;
 	padding-bottom: 10px;
 }
-
+ 
 .meph-item-removal.meph-application-menu-categories-item-details,
 .meph-item-removal.meph-application-menu-categories-item-description,
 .meph-item-removal.meph-application-menu-categories-item {
-	height: $meph-application-small-size;
-	width: $meph-application-small-size;
 	opactiy: 0;
 	font-size: 0em;
 }
+   

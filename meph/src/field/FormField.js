@@ -40,6 +40,7 @@ MEPH.define('MEPH.field.FormField', {
          * Css classes to apply to the input field.
          */
         inputCls: null,
+        inputCssClass: 'form-control',
         /**
          * Value of the input field
          */
@@ -113,6 +114,7 @@ MEPH.define('MEPH.field.FormField', {
                                                 'descriptionCls',
                                                 'baseComponentCls',
                                                 'componentCls',
+                                                'inputCssClass',
                                                 'labelClsBase',
                                                 'labelClsComponent']);
 
@@ -126,7 +128,7 @@ MEPH.define('MEPH.field.FormField', {
     },
     defineDependentProperties: function () {
         var me = this;
-        me.combineClsIntoDepenendProperty('formFieldCls', ['cls', 'baseComponentCls', 'componentCls']);
+        me.combineClsIntoDepenendProperty('formFieldCls', ['cls', 'inputCssClass', 'baseComponentCls', 'componentCls']);
         me.combineClsIntoDepenendProperty('labelCls', ['labelClsBase', 'labelClsComponent']);
         Observable.defineDependentProperty('validationCls', me, ['validationError'], me.validationErrorChange.bind(me));
     },

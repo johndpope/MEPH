@@ -6,7 +6,6 @@
     requires: [ 'MEPH.mobile.activity.view.ActivityView',
                 'MEPH.panel.Panel'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     onLoaded: function () {

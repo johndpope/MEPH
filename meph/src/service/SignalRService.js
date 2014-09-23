@@ -53,33 +53,38 @@
                 toresolve = resolve;
                 tofail = failed;
             });
-        me.hub.client.broadcastMessage = function (message) {
-            var message = JSON.parse(decodeURIComponent(message)), errors = [];
-            if (message.channelId && message.source !== me.id) {
-                var channel = me.getChannel(message.channelId);
-                if (channel) {
-                    channel.callbacks.foreach(function (x) {
-                        try {
-                            x(message);
-                        }
-                        catch (error) {
-                            errors.push(error);
-                        }
-                    });
-                    errors.foreach(function (x) {
-                        MEPH.Log(x);
-                    });
+        if (me.hub) {
+            me.hub.client.broadcastMessage = function (message) {
+                var message = JSON.parse(decodeURIComponent(message)), errors = [];
+                if (message.channelId && message.source !== me.id) {
+                    var channel = me.getChannel(message.channelId);
+                    if (channel) {
+                        channel.callbacks.foreach(function (x) {
+                            try {
+                                x(message);
+                            }
+                            catch (error) {
+                                errors.push(error);
+                            }
+                        });
+                        errors.foreach(function (x) {
+                            MEPH.Log(x);
+                        });
+                    }
                 }
-            }
-        };
+            };
 
-        me.head.start().done(function () {
-            me.started();
-            toresolve();
-        }).fail(function () {
-            me.failed();
+            me.head.start().done(function () {
+                me.started();
+                toresolve();
+            }).fail(function () {
+                me.failed();
+                tofail();
+            });
+        }
+        else {
             tofail();
-        });
+        }
         return promise;
     },
     getChannel: function (channelId) {

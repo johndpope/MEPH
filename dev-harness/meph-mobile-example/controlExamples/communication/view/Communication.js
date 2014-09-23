@@ -9,7 +9,6 @@
                  'MEPH.input.Text',
                 'MEPH.panel.Panel'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     onLoaded: function () {

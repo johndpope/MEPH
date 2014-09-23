@@ -52,12 +52,15 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         var me = this,
             state = evnt.state,
             activity;
+        MEPH.Log('on pop state ');
         if (state) {
             activity = me.getActivity(state.activityId);
             if (activity) {
+                MEPH.Log('showing an activity');
                 return me.showActivity(activity);
             }
             else {
+                MEPH.Log('start activity from path.');
                 return me.startActivityFromPath(state.path, false)
             }
         }
@@ -85,7 +88,14 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                     return Promise.resolve();
                 });
             }
-        });
+        }).then(function () {
+
+            MEPH.Log('activity started from path.');
+        }).catch(function (e) {
+
+            MEPH.Log('activity failed to start.');
+            throw e;
+        });;
     },
     replaceState: function (window, state, pageName, pagePath) {
         window.history.replaceState((state), pageName, pagePath);
@@ -164,12 +174,15 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
      */
     onStartView: function (type, options) {
         var me = this;
+        MEPH.Log('onstartview');
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
             return me.startActivity(options).catch(function () {
                 MEPH.Log.apply(MEPH, arguments);
             });
         }).catch(function (e) {
             MEPH.Log(e);
+        }).then(function(){
+            MEPH.Log('view started');
         });
     },
     //onShowView: function (type, options) {

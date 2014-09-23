@@ -1,7 +1,12 @@
 ﻿.meph-application-menu {
-	position: absolute;
+    position: absolute;
 }
 
-.meph-application-flyout-menu { 
-	background-color: $meph-color-primary-3;
+.application-menu-list {
+    color: black;
+    cursor: pointer;
+}
+
+.meph-application-flyout-menu {
+    background-color: $meph-color-primary-3;
 }

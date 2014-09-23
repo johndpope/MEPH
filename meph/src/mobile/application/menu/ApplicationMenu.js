@@ -181,7 +181,7 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
 
         }
         else {
-            throw new Error('ApplicationMenu : no provider found with data.');
+            MEPH.Log(new Error('ApplicationMenu : no provider found with data.'));
         }
     },
     /** 
@@ -228,7 +228,7 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
             var source = Dom.getEventSource(evnt), anscestor, domTemplate = me.getDomTemplate();
             if (domTemplate) {
                 anscestor = domTemplate.first(function (x) {
-                    return Dom.isDomDescendant(source, x)
+                    return Dom.isDomDescendant(source, x) || !Dom.isDomDescendant(source, document.body)
                 });
             }
             if (me.opened && !anscestor && !me.opening) {
@@ -243,11 +243,13 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
     open: function () {
         var me = this;
         if (!me.opened) {
+            MEPH.Log('open application menu');
             me.opening = true;
             me.$applicationMenuPromise = me.$applicationMenuPromise.then(function () {
                 return me.flyoutPanel.open().then(function () {
                     me.opened = true;
                     me.opening = false;
+                    MEPH.Log('application menu opened');
                 });
             });
         }
@@ -259,10 +261,13 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
     */
     close: function () {
         var me = this;
+        
         if (me.opened) {
+            MEPH.Log('close application menu');
             me.$applicationMenuPromise = me.$applicationMenuPromise.then(function () {
                 return me.flyoutPanel.close().then(function () {
                     me.opened = false;
+                    MEPH.Log('application menu closed');
                 });
             });
         }
@@ -282,9 +287,11 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
         var me = this;
 
         if (!me.opening) {
+            MEPH.Log('open application menu');
             me.opening = true;
             me.$applicationMenuPromise = me.open().then(function () {
                 me.opening = false;
+                MEPH.Log('application menu opened');
             });
         }
     }

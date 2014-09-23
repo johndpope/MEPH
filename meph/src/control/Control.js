@@ -38,6 +38,7 @@ MEPH.define('MEPH.control.Control', {
         $uniqueId: null,
         injectControls: null,
         $window: null,
+        $removeHomePageCls: 'meph-view-remove',
         applicationLoaded: false,
         $isDestroyed: false,
         data: null,

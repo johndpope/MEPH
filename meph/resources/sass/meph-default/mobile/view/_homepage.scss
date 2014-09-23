@@ -1,7 +1,7 @@
 ﻿.meph-home-page-view
 {
     position: absolute;
-    @include transition( 1s, 1s);
+    @include transition( .1s, .1s);
     height: 100%;
     width: 100%;
     transform: translateX(0%);

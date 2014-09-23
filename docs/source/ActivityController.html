@@ -188,6 +188,7 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
         }).catch(function (e) {
             MEPH.Log(e);
         });
+        return me.activityControllerPromise;
     },
     //onShowView: function (type, options) {
     //    var me = this;
@@ -223,6 +224,7 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
         }).then(function () {
             me.setCurrentActivity(null);
         });
+        return me.activityControllerPromise;
     },
     getCombinedPath: function (path) {
         var me = this;
@@ -244,7 +246,7 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
     startActivity: function (activityConfig, querystring) {
         var me = this, currentActivity = me.getCurrentActivity();
 
-        return Promise.resolve().then(function () {
+        me.activityControllerPromise = me.activityControllerPromise.then(function () {
             if (currentActivity) {
                 return currentActivity.initHide()
             }
@@ -274,7 +276,9 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
             }).catch(function (error) {
                 MEPH.Log(error);
             });;
-        })
+        });
+
+        return me.activityControllerPromise;
     },
 <span id='MEPH-mobile-activity-ActivityController-method-createActivity'>    /**
 </span>     * Creates an activity from the configuration.
@@ -284,7 +288,7 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
     createActivity: function (activityConfig) {
         var me = this,
             ac = MEPH.mobile.activity.ActivityController,
-            promise = Promise.resolve();
+            promise = me.activityControllerPromise ;
         promise = promise.then(function () {
             return MEPH.MobileServices.get(ac.viewProvider).then(function (viewProvider) {
                 return viewProvider.getView(activityConfig);
@@ -336,7 +340,8 @@ MEPH.define(&#39;MEPH.mobile.activity.ActivityController&#39;, {
                 view: true
             }], dom);
         });
-        return promise;
+        me.activityControllerPromise = promise;
+        return me.activityControllerPromise;
     },
 <span id='MEPH-mobile-activity-ActivityController-method-getAncestorActivities'>    /**
 </span>     * Get the complete ancestor chain of an activity.

@@ -8,7 +8,6 @@
         'MEPH.graph.GraphControl',
         'MEPH.button.IconButton'],
     properties: {
-        $removeHomePageCls: 'meph-view-remove',
         name: null
     },
     initialize: function () {
