@@ -39,6 +39,16 @@ MEPH.define('MEPH.mobile.services.MobileServices', {
                 return instance;
             });
         },
+        add: function (instance, serviceConfig) {
+            var cache = MEPH.Array(MEPH.MobileServices.cache);
+            MEPH.IOC.register(serviceConfig);
+            cache.push({
+                name: serviceConfig.name,
+                config: serviceConfig.config,
+                type: serviceConfig.type,
+                instance: instance
+            });
+        },
         /**
          * Creates an instance based on the config.
          **/

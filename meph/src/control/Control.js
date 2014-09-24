@@ -6,6 +6,7 @@ MEPH.define('MEPH.control.Control', {
     requires: ['MEPH.dom.ControlLoader',
                 'MEPH.mixins.Referrerable',
                 'MEPH.util.Dom',
+                'MEPH.util.Observable',
                'MEPH.mixins.Observable'],
     mixins: {
         observable: 'MEPH.mixins.Observable',
@@ -463,6 +464,25 @@ MEPH.define('MEPH.control.Control', {
         me.un();
         me.dun();
     },
+
+    /**
+     * Combines the clsProperties into the new property.
+     * @param {String} property
+     * @param {Array} clsProperties
+     */
+    combineClsIntoDepenendProperty: function (property, clsProperties) {
+        var me = this;
+        MEPH.util.Observable.defineDependentProperty(property, me, clsProperties, function (clsProperties) {
+            var result = [];
+            MEPH.Array(clsProperties).foreach(function (prop) {
+                if (me[prop]) {
+                    result.push(me[prop]);
+                }
+            })
+            return result.join(' ');
+        }.bind(me, clsProperties));
+    },
+
     getApplication: function () {
         var me = this;
         return me.application;

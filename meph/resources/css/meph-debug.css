@@ -9564,6 +9564,13 @@ iframe.u4-iframe {
   background-color: #FF9966;
 }
 
+/* line 2, ../sass/meph-default/controls/view/_misc.scss */
+.dropbox {
+  border: 10px dashed #ccc;
+  margin: 20px auto;
+  height: 300px;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

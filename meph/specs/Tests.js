@@ -20,7 +20,22 @@
                 })
             }
         }
-
+        MEPH.render = function (type, tagname) {
+            var app;
+            return MEPH.requires(type, 'MEPHTests.helper.Application').then(function () {
+                app = new MEPHTests.helper.Application();
+                dom = app.createAppSpace(), div = document.createElement('div');
+                div.innerHTML = '<' + tagname + '></' + tagname + '>';
+                return app.create(type, div.firstElementChild);
+            }).then(function (results) {
+                return app.loadViewObject([results], dom);
+            }).then(function (results) {
+                return {
+                    res: results,
+                    app: app
+                };
+            })
+        }
         MEPH.customMatchers = {
             caught: function (util, customEqualityTesters) {
                 return {
@@ -71,6 +86,7 @@
                     tests = [
                         'MEPH.spec.js',
                         'audio/Audio.spec.js',
+                        'audio/view/Visualizer.spec.js',
                         'application/Application.spec.js',
                         'bind/Binder.spec.js',
                         'button/Button.spec.js',
@@ -80,6 +96,7 @@
                         'dom/ControlLoader.spec.js',
                         'dom/ControlReader.spec.js',
                         'field/FormField.spec.js',
+                        'file/Dropbox.spec.js',
                         'gpu/Context.spec.js',
                         'graph/ActiveZone.spec.js',
                         'graph/ConnectionHandler.spec.js',

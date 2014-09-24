@@ -23,7 +23,7 @@
                 config: 'serviceConfig'
             }).then(function () {
                 var services = MEPH.IOC.getServices();
-                expect(services.first().name === 'serviceName').theTruth('The service was not found');
+                expect(services.first(function (x) { return x.name === 'serviceName' })).theTruth('The service was not found');
 
                 MEPH.IOC.unregister('serviceName');
 

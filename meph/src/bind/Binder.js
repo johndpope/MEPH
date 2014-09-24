@@ -348,27 +348,32 @@ MEPH.define('MEPH.bind.Binder', {
         }
         objectsToList.foreach(function (temp) {
             //var obj = temp.ref;
-            var bindingInformation = temp.bindingInformation;
-            temp.ref.on(altered, function (eventType, args) {
+            //var bindingInformation = temp.bindingInformation;
+            temp.ref.on(altered, function (bindingInformation, eventType, args) {
                 var instructionPath;
-                for (i in bindingInformation) {
-                    if (bindingInformation.hasOwnProperty(i)) {
-                        bi = bindingInformation[i];
-                        instructions = me.parseInstructionString(bi, obj);
-                        instruction = instructions.first();
+                try {
+                    for (var i in bindingInformation) {
+                        var bi = bindingInformation[i];
+                        if (bi) {
+                            var instructions = me.parseInstructionString(bi, obj);
+                            var instruction = instructions.first();
 
-                        if (connectables.some(function (x) {
-                            return x === instruction.shortCut.type;
-                        })) {
-                            target = me.getConnection(obj, instruction.shortCut.type);
-                            instructionPath = instruction.path.subset(1).join('.');
-                            if (target && Binder.isOnPath(instructionPath, args.path)) {
-                                me.executeInstructions(dom, instructionPath, altered, instructions, obj, i, false, args);//me, ;
+                            if (connectables.some(function (x) {
+                                return x === instruction.shortCut.type;
+                            })) {
+                                var target = me.getConnection(obj, instruction.shortCut.type);
+                                instructionPath = instruction.path.subset(1).join('.');
+                                if (target && Binder.isOnPath(instructionPath, args.path)) {
+                                    me.executeInstructions(dom, instructionPath, altered, instructions, obj, i, false, args);//me, ;
+                                }
                             }
                         }
                     }
                 }
-            }, temp.ref);
+                catch (e) {
+                    console.log(e);
+                }
+            }.bind(me, temp.bindingInformation), temp.ref);
         })
     },
     /**

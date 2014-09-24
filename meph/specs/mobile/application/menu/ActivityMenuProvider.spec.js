@@ -1,4 +1,4 @@
-﻿describe("MEPH/mobile/application/menu/ActivityMenuProvider.spec.js", function () {
+﻿describe("MEPH/mobile/application/menu/ActivityMenuProvider.spec.js", 'MEPH.mobile.activity.ActivityController', function () {
 
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
@@ -59,21 +59,34 @@
 
     it('when an activity is started , the source is updated', function (done) {
         MEPH.create('MEPH.mobile.application.menu.ActivityMenuProvider').then(function ($class) {
+            var c = new MEPH.mobile.activity.ActivityController();
+            c.activities.push({
+                activity: {
+                    getPath: function () {
+                        return 'asdf'
+                    },
+                    getActivityId: function () {
+                        return 'asdf'
+                    }
+                }
+            });
+            var old = MEPH.ActivityController;
+            MEPH.ActivityController = c;
             var menu = new $class(),
                 changed;
+
+            menu.controller = c;
             menu.source.on('changed', function () {
                 changed = true;
             });
-            MEPH.ActivityController.getActivities = function () {
-                return [{
-                    activity: {
-                        getPath: function () { return 'asdfa'; },
-                        getActivityId: function () { return 'asdf'; }
-                    }
-                }];
-            };
             MEPH.publish(MEPH.Constants.ActivityStarted, {});
-            expect(changed).toBeTruthy()
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(changed).toBeTruthy()
+                    MEPH.ActivityController = old;
+                    r();
+                }, 100)
+            })
         }).catch(function (error) {
             expect(error).caught();
         }).then(function (x) {

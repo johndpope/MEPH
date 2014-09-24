@@ -337,6 +337,13 @@ MEPH.define('MEPH.application.Application', {
         me.controlReader = new ControlReader();
         me.controlLoader = new ControlLoader();
         me.activityController = new ActivityController();
+        
+        MEPH.MobileServices.add(me.activityController, {
+            'static': true,
+            name: 'activitycontroller',
+            config: null,
+            type: 'MEPH.mobile.activity.ActivityController'
+        })
         MEPH.ActivityController = me.activityController;
         if (config) {
             MEPH.apply(config, me);

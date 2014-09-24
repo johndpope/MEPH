@@ -145,7 +145,7 @@
                                          return $window;
                                      }
                                  });
-                                 
+
                                  return activityController.startActivity({
                                      viewId: fakeActivityId,
                                      path: 'path/is/right'
@@ -821,7 +821,7 @@
     });
 
     it('activity controller by default will open up whatever activity requested.', function (done) {
-        var called, channelcallback;
+        var called, channelcallback, oldac;
         MEPH.requires('MEPH.mobile.services.MobileServices',
                         'MEPH.mobile.activity.ActivityController',
                         'MEPH.remoting.RemotingController').then(function () {
@@ -850,6 +850,7 @@
                         }).then(function () {
                             return MEPH.create('MEPH.remoting.RemotingController').then(function ($class) {
                                 var activityController = new $class();
+                                oldac = MEPH.ActivityController;
                                 MEPH.ActivityController = {
                                     startActivity: function (request) {
                                         called = true;
@@ -872,7 +873,7 @@
                         }).catch(function (error) {
                             expect(error).caught();
                         }).then(function () {
-
+                            MEPH.ActivityController = oldac;
                             MEPH.undefine('Fake.Service');
                             done();
                         });

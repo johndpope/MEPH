@@ -3,29 +3,32 @@
  * An activity menu provider.
  */
 MEPH.define('MEPH.mobile.application.menu.ActivityMenuProvider', {
-    requires: ['MEPH.util.Observable', 'MEPH.Constants'],
+    requires: ['MEPH.util.Observable', 'MEPH.mobile.application.menu.ApplicationMenu', 'MEPH.Constants'],
     properties: {
         name: 'Activity',
         type: 'activity',
         source: null
     },
-    initialize: function () {
+    initialize: function (controller) {
         var me = this;
         me.source = MEPH.util.Observable.observable([]);
         MEPH.subscribe(MEPH.Constants.ActivityStarted, me.onActivityStarted.bind(me));
         MEPH.subscribe(MEPH.Constants.ActivityDestroyed, me.onActivityStarted.bind(me));
+        me.controller = controller;
         me.onActivityStarted();
     },
     onActivityStarted: function () {
         var me = this;
         me.source.removeWhere(function (x) { return true; });
-        MEPH.ActivityController.getActivities().foreach(function (activity) {
-            me.source.push(MEPH.util.Observable.observable({
-                name: activity.activity.getPath() || activity.activity.getActivityId(),
-                id: activity.activity.getActivityId(),
-                type: MEPH.mobile.application.menu.ApplicationMenu.activityinstance
-            }));
-        });
+        if (MEPH.ActivityController || me.controller) {
+            (MEPH.ActivityController || me.controller).getActivities().foreach(function (activity) {
+                me.source.push(MEPH.util.Observable.observable({
+                    name: activity.activity.getPath() || activity.activity.getActivityId(),
+                    id: activity.activity.getActivityId(),
+                    type: MEPH.mobile.application.menu.ApplicationMenu.activityinstance
+                }));
+            });
+        }
         if (me.updateCallback) {
             me.updateCallback();
         }

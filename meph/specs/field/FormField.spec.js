@@ -30,7 +30,7 @@
             input.componentCls = 'cssclass';
 
             //Assert
-            expect(input.formFieldCls === 'cssclass').theTruth('the class wasnt set correctly');
+            expect(input.formFieldCls === 'form-control cssclass').theTruth('the class wasnt set correctly');
         }).catch(function (error) {
             expect(error).caught();
         }).then(function (x) {
