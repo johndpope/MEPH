@@ -9,6 +9,7 @@ MEPH.define('MEPH.audio.Audio', {
          * Audio context.
          */
         audioCtx: null,
+
         sourcebuffer: null
     },
     properties: {
@@ -28,18 +29,7 @@ MEPH.define('MEPH.audio.Audio', {
     /**
      * Loads a resouce.
      **/
-    load: function (file, type) {
-        //loader.ctx.decodeAudioData(
-        //  XHR.response,
-        //  function (buffer) {
-        //      loader.response = buffer;
-        //      loader.onload();
-        //  },
-        //  function () {
-        //      console.error('AudioSampleLoader: ctx.decodeAudioData() called onerror');
-        //      loader.onerror();
-        //  }
-        //);
+    load: function (file, type, options) {
         var me = this, toresolve, tofail;
         var result = me.getBufferSources()
             .first(function (x) {
@@ -53,7 +43,7 @@ MEPH.define('MEPH.audio.Audio', {
                 toresolve = r;
                 tofail = s;
             });
-            var context = me.createContext();
+            var context = me.createContext(options);
 
             context.decodeAudioData(
               result.response,
@@ -83,7 +73,7 @@ MEPH.define('MEPH.audio.Audio', {
      * @param {Number} start
      * @param {Number} end
      **/
-    copyToBuffer: function (resource, start, end) {
+    copyToBuffer: function (resource, start, end, options) {
         var buffer = resource.buffer;
         var rate = buffer.buffer.sampleRate;
         var channels = buffer.channelCount;
@@ -93,7 +83,7 @@ MEPH.define('MEPH.audio.Audio', {
         var frame_end = Math.round(end * rate);
         var frameCount = frame_end - frame_start;
         frameCount = Math.round(frameCount);
-        var audioCtx = me.createContext();
+        var audioCtx = me.createContext(options);
         var myArrayBuffer = audioCtx.createBuffer(channels, frameCount, audioCtx.sampleRate);
 
         // Fill the buffer with white noise;
@@ -124,22 +114,31 @@ MEPH.define('MEPH.audio.Audio', {
         Audio.sourcebuffer = Audio.sourcebuffer || [];
         Audio.sourcebuffer.push(options);
     },
-    createContext: function () {
+    createContext: function (options) {
         var me = this;
-        if (me.offlineContext == true) {
-            me.audioCtx = MEPH.audio.Audio.OfflineAudioContext || me.offlineAudioCtx || new (window.OfflineAudioContext)(32, 10000, 44100);
-            MEPH.audio.Audio.AudioContext = me.audioCtx;
-            return me.audioCtx;
+        if (options) {
+            var audioCtx = MEPH.audio.Audio.OfflineAudioContext || me.offlineAudioCtx || new (window.OfflineAudioContext)(options.channels || 32, options.length || 10000, options.sampleRate || 44100);
+            audioCtx.addEventListener('complete', options.oncomplete);
+            MEPH.audio.Audio.OfflineAudioContext = audioCtx;
+            //MEPH.audio.Audio.AudioContext = me.audioCtx;
+            me.currentContext = audioCtx;
+            return audioCtx;
         }
         else {
             me.audioCtx = MEPH.audio.Audio.AudioContext || me.audioCtx || new (window.AudioContext || window.webkitAudioContext)();
             MEPH.audio.Audio.AudioContext = me.audioCtx;
+
+            me.currentContext = audioCtx;
             return me.audioCtx;
         }
     },
-    buffersource: function () {
+    getContext: function () {
         var me = this;
-        var context = me.createContext();
+        return me.currentContext;
+    },
+    buffersource: function (options) {
+        var me = this;
+        var context = me.createContext(options);
         return context.createBufferSource();
     },
     buffer: function (buffer, options) {
@@ -290,7 +289,7 @@ MEPH.define('MEPH.audio.Audio', {
             return false;
         });
     },
-    complete: function () {
+    complete: function (options) {
         var me = this, last;
         me.nodes.foreach(function (x, index) {
             if (index) {
@@ -298,7 +297,7 @@ MEPH.define('MEPH.audio.Audio', {
             }
             last = x.node;
         });
-        last.connect(me.createContext().destination);
+        last.connect(me.createContext(options).destination);
         return me;
     }
 });

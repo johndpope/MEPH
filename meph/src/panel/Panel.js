@@ -4,9 +4,9 @@
     requires: ['MEPH.util.Observable'],
     extend: 'MEPH.control.Control',
     properties: {
-        basePanelHeaderCls: 'meph-panel-header',
-        basePanelFooterCls: 'meph-panel-footer',
-        basePanelBodyCls: 'meph-panel-body  meph-grid-layout-flex-height',
+        basePanelHeaderCls: 'panel-heading',
+        basePanelFooterCls: 'panel-footer',
+        basePanelBodyCls: 'panel-body',
         basePanelLeftCls: 'meph-panel-body-left',
         cls: '',
         basePanelRightCls: 'meph-panel-body-right',

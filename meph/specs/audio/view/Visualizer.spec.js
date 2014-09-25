@@ -70,4 +70,87 @@
         })
     });
 
+    it('can set height and width of visualizer', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom,
+                visualizer = results.first().classInstance;
+            ///Assert
+            visualizer.height = 400;
+            visualizer.width = 400;
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(parseInt(visualizer.canvas.height) === 400).toBeTruthy();
+                    expect(parseInt(visualizer.canvas.width) === 400).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 10)
+            })
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    })
+
+
+    it('can draw', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom,
+                visualizer = results.first().classInstance;
+            ///Assert
+            var drawn;
+            visualizer.draw = function () { drawn = true; }
+            visualizer.source = new Uint8Array(100);
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(drawn).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 199)
+            });
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+
+
+    it('draw', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom,
+                visualizer = results.first().classInstance;
+            ///Assert
+            var drawn;
+            var source = new Uint8Array(100);
+            for (var i = 0 ; i < 100 ; i++) {
+                source[i] = Math.random() * 127;
+            }
+            visualizer.source = source;
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 1000)
+            });
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
 });

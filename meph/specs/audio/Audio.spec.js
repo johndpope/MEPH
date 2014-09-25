@@ -186,4 +186,29 @@
         });
 
     });
+
+    it('can render offline', function (done) {
+        var audio = new MEPH.audio.Audio();
+
+        audio.load(audiofile, audiofiletyp, {}).then(function (resource) {
+
+            var result = audio.copyToBuffer(resource, 50, 52, {});
+
+            audio.buffer(result.buffer).complete({
+                length: 2,
+                numOfChannels: resource.buffer.channelCount,
+                sampleRate: resource.buffer.buffer.sampleRate,
+                oncomplete: function (res) {
+                    audio.disconnect();
+                    done();
+                },
+                start: true
+            });
+
+            // start the source playing
+            result.buffer.start();
+            audio.getContext().startRendering();
+        });
+    });
+
 });
