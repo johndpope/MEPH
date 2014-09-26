@@ -370,7 +370,7 @@ MEPH.define('MEPH.control.Control', {
 
             }
             return result;
-        }).concatFluent(function (x) { return x; });
+        }).concatFluentReverse(function (x) { return x; });
     },
     /**
      * Gets the dom element which meet the selector specification.
@@ -593,7 +593,7 @@ MEPH.define('MEPH.control.Control', {
             aliases = MEPH.getAllAliases(),
             dataBindPrefixes = MEPH.getDataBindPrefixes();
         promise = Promise.resolve().then(function () {
-            return dataBindPrefixes.concatFluent(function (x) {
+            return dataBindPrefixes.concatFluentReverse(function (x) {
                 return MEPH.util.Array.convert(domTemplate.querySelectorAll('[' + x + ']'));
             }).unique(function (x) {
                 return x;

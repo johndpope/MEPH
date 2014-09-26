@@ -13,6 +13,12 @@
             'path': '/list/List'
         },
         {
+            'viewId': 'MEPH0102',
+            'view': 'MEPHControls.music.view.MusicVisualizer',
+            'controller': 'MEPHControls.music.controller.Controller',
+            'path': '/music/Visualizer'
+        },
+        {
             'viewId': 'MEPH003',
             'view': 'MEPHControls.button.view.Button',
             'path': '/button/Button'

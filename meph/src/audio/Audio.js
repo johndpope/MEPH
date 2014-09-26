@@ -11,24 +11,49 @@ MEPH.define('MEPH.audio.Audio', {
         audioCtx: null,
 
         sourcebuffer: null,
+        nodeTypes: {
+            oscillator: 'oscillator',
+            gain: 'gain',
+            convolver: 'convolver',
+            delay: 'delay',
+            dynamicsCompressor: 'dynamicsCompressor',
+            waveShaper: 'waveShaper',
+            analyser: 'analyser',
+            splitter: 'splitter',
+            merger: 'merger',
+            periodicWave: 'periodicWave',
+            panner: 'panner',
+            buffer: 'buffer ',
+            biquadFilter: 'biquadFilter'
+        },
 
         analyze: function (audiofile, audiofiletyp) {
-            var audio = new MEPH.audio.Audio();
-            debugger
-            return audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var audio = new MEPH.audio.Audio(),
+                func = function (result) {
+                    audio.buffer(result.buffer).volume({ name: 'volume' }).gain({ name: 'gain', volume: 0 }).complete();
+                    return new Promise(function (r) {
 
-                var result = audio.copyToBuffer(resource, 40, 40.3);
-                audio.buffer(result.buffer).volume({ name: 'volume' }).gain({ name: 'gain', volume: 0 }).complete();
-                result.buffer.start();
-                return new Promise(function (r) {
-                    setTimeout(function () {
-                        var volume = audio.get({ name: 'volume' }).first();
-                        expect(volume.data).toBeTruthy();
-                        audio.disconnect();
-                        r(volume);
-                    }, 1000)
+                        result.buffer.onended = function () {
+                            var volume = audio.get({ name: 'volume' }).first();
+                            expect(volume.data).toBeTruthy();
+                            audio.disconnect();
+                            result.buffer.stop();
+                            r(volume);
+                        }
+                        result.buffer.start();
+
+                    });
+                };
+            if (arguments.length === 2) {
+                return audio.load(audiofile, audiofiletyp).then(function (resource) {
+
+                    var result = audio.copyToBuffer(resource, 0, resource.buffer.buffer.duration);
+                    return func(result)
                 })
-            })
+            }
+            else if (arguments.length === 1) {
+                return func({ buffer: audiofile });
+            }
         }
     },
     properties: {
@@ -49,42 +74,51 @@ MEPH.define('MEPH.audio.Audio', {
      * Loads a resouce.
      **/
     load: function (file, type, options) {
-        var me = this, toresolve, tofail;
-        var result = me.getBufferSources()
-            .first(function (x) {
+        var me = this,
+            result = me.getBufferSources().first(function (x) {
                 return x.file === file && x.type === type;
             });
         if (result) {
-            return Promise.resolve().then(function () { return result; });
+            return Promise.resolve().then(function () {
+                return result;
+            });
         }
         return MEPH.loadJSCssFile(file, type).then(function (result) {
-            var promise = new Promise(function (r, s) {
-                toresolve = r;
-                tofail = s;
-            });
-            var context = me.createContext(options);
-
-            context.decodeAudioData(
-              result.response,
-              function (buffer) {
-                  var sbuffer = me.buffersource();
-                  sbuffer.buffer = buffer;
-
-                  me.addBufferSource({
-                      buffer: sbuffer,
-                      file: file,
-                      type: type
-                  });
-
-                  toresolve(me.getBufferSources().last());
-              },
-              function (e) {
-                  tofail(e);
-              });
-            return promise;
-        }).catch(function (error) {
-            tofail(error);
+            return me.loadByteArray(result.response, options, file, type);
+        })
+    },
+    /**
+     * Loads a byte array.
+     * @param {ByteArray} bytearray
+     * @return {Promise}
+     ***/
+    loadByteArray: function (bytearray, options, file, type) {
+        var me = this, toresolve, tofail;
+        var promise = new Promise(function (r, s) {
+            toresolve = r;
+            tofail = s;
         });
+
+        var context = me.createContext(options);
+
+        context.decodeAudioData(
+          bytearray,
+          function (buffer) {
+              var sbuffer = me.buffersource();
+              sbuffer.buffer = buffer;
+
+              me.addBufferSource({
+                  buffer: sbuffer,
+                  file: file,
+                  type: type
+              });
+
+              toresolve(me.getBufferSources().last());
+          },
+          function (e) {
+              tofail(e);
+          });
+        return promise;
     },
     /**
      * Copies a section of a buffer to a new buffer,
@@ -165,7 +199,9 @@ MEPH.define('MEPH.audio.Audio', {
     },
     buffer: function (buffer, options) {
         var me = this;
-        me.nodes.push({ options: options || null, node: buffer })
+        options = options || {};
+        options.buffer = buffer;
+        me.nodes.push({ options: options || null, buffer: buffer, type: MEPH.audio.Audio.nodeTypes.buffer })
         return me;
     },
     volume: function (options) {
@@ -210,12 +246,7 @@ MEPH.define('MEPH.audio.Audio', {
      **/
     oscillator: function (options) {
         var me = this;
-        var context = me.createContext();
-
-        var oscillator = context.createOscillator();
-
-        me.nodes.push({ options: options || null, node: oscillator });
-
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.oscillator; })
         return me;
     },
     /**
@@ -227,62 +258,53 @@ MEPH.define('MEPH.audio.Audio', {
         var me = this;
         var context = me.createContext();
 
-        me.createNode(options, function () { return context.createConvolver(); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.convolver })
         return me;
     },
     delay: function (options) {
         var me = this;
-        var context = me.createContext();
 
-        me.createNode(options, function () { return context.createDelay(); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.delay })
         return me;
     },
     dynamicsCompressor: function (options) {
         var me = this;
-        var context = me.createContext();
 
-        me.createNode(options, function () { return context.createDynamicsCompressor(); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.dynamicsCompressor })
         return me;
 
     },
     waveShaper: function (options) {
         var me = this;
-        var context = me.createContext();
 
-        me.createNode(options, function () { return context.createWaveShaper(); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.waveShaper; })
         return me;
 
     },
     analyser: function (options) {
         var me = this;
-        var context = me.createContext();
 
-        me.createNode(options, function () { return context.createAnalyser(); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.analyser; })
         return me;
     },
     splitter: function (options) {
         var me = this;
         options = options || {};
 
-        var context = me.createContext();
-
-        me.createNode(options, function () { return context.createChannelSplitter(options.channels || 2); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.splitter; })
         return me;
     },
     merger: function (options) {
         var me = this;
         options = options || {};
 
-        var context = me.createContext();
-
-        me.createNode(options, function () { return context.createChannelMerger(options.channels || 2); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.merger; })
         return me;
     },
     periodicWave: function (options) {
         var me = this;
-        var context = me.createContext();
 
-        me.createNode(options, function () { return context.createPeriodicWave(options.real, options.imaginary); })
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.periodicWave; })
         return me;
 
     },
@@ -291,7 +313,7 @@ MEPH.define('MEPH.audio.Audio', {
         var context = me.createContext();
 
         me.createNode(options, function () {
-            return context.createPanner();
+            return MEPH.audio.Audio.nodeTypes.panner
         });
         return me;
 
@@ -302,16 +324,14 @@ MEPH.define('MEPH.audio.Audio', {
 
         var node = func();
 
-        me.nodes.push({ options: options || null, node: node });
+        me.nodes.push({ options: options || null, type: node });
 
         return me;
     },
     biquadFilter: function (options) {
         var me = this;
-        var context = me.createContext();
-        var bf = context.createBiquadFilter();
 
-        me.nodes.push({ options: options || null, node: bf });
+        me.nodes.push({ options: options || null, type: MEPH.audio.Audio.nodeTypes.biquadFilter });
 
         return me;
 
@@ -330,15 +350,63 @@ MEPH.define('MEPH.audio.Audio', {
     },
     gain: function (options) {
         var me = this;
-        var context = me.createContext();
 
-        var gain = context.createGain();
-        if (options && options.volume !== undefined) {
-            gain.gain.value = options.volume;
-        }
-        me.nodes.push({ options: options || null, node: gain });
+        me.nodes.push({ options: options || null, type: MEPH.audio.Audio.nodeTypes.gain });
 
         return me;
+    },
+    /**
+     * Creates an audio node based on the type.
+     * @param {String} type
+     * @return {Audio}
+     */
+    createAudioNode: function (type, options, nodeoptions) {
+        var A = MEPH.audio.Audio;
+        nodeoptions = nodeoptions || {};
+        var me = this;
+        var real = new Float32Array(2);
+        var imag = new Float32Array(2);
+
+        real[0] = 0;
+        imag[0] = 0;
+        real[1] = 1;
+        imag[1] = 0;
+
+        switch (type) {
+            case A.nodeTypes.oscillator:
+                return me.createContext(options).createOscillator();
+            case A.nodeTypes.gain:
+                return me.createContext(options).createGain();
+            case A.nodeTypes.panner:
+                return me.createContext(options).createPanner();
+
+            case A.nodeTypes.convolver:
+                return me.createContext(options).createConvolver();
+
+            case A.nodeTypes.delay:
+                return me.createContext(options).createDelay();
+            case A.nodeTypes.dynamicsCompressor:
+                return me.createContext(options).createDynamicsCompressor();
+            case A.nodeTypes.waveShaper:
+                return me.createContext(options).createWaveShaper();
+            case A.nodeTypes.analyser:
+                return me.createContext(options).createAnalyser();
+            case A.nodeTypes.splitter:
+                return me.createContext(options).createChannelSplitter(nodeoptions.channels || 2);
+            case A.nodeTypes.merger:
+                return me.createContext(options).createChannelMerger(nodeoptions.channels || 2);
+            case A.nodeTypes.periodicWave:
+                return me.createContext(options).createPeriodicWave(nodeoptions.real || real, nodeoptions.imaginary || imag);
+            case A.nodeTypes.biquadFilter:
+                return me.createContext(options).createBiquadFilter();
+            case A.nodeTypes.buffer:
+                return nodeoptions.buffer
+            case A.nodeTypes.bufferSource:
+                return me.createContext(options).createBufferSource();
+            default:
+                throw new Error('unhandled case: createAudioNode. : ' + type)
+
+        }
     },
     get: function (query) {
         var me = this;
@@ -350,9 +418,59 @@ MEPH.define('MEPH.audio.Audio', {
             return false;
         });
     },
+    /**
+     * Connects a audio to the end of this audio.
+     **/
+    connect: function (audio) {
+        var me = this;
+        if (me !== audio && !me.contains(audio) &&
+            !audio.contains(me)) {
+            me.nodes.push({ type: 'Audio', options: { audio: audio } });
+            return me;
+        }
+        throw new Error('adding node will create a circular loop.')
+    },
+    /**
+     * Returns true if node is found in descendants.
+     **/
+    contains: function (audioNode) {
+        var me = this;
+        return !!me.getAudioNodes().first(function (x) { return x.options.audio === audioNode })
+    },
+
+    getAudioNodes: function () {
+        var me = this;
+        var nodes = me.nodes.where(function (x) {
+            return x.type === 'Audio';
+        }).concatFluent(function (x) {
+            return [x].concat(x.options.audio.getAudioNodes());
+        });
+        return nodes;
+    },
+    /**
+     * Gets all the descendant nodes connected to it.
+     * @return {Array}
+     **/
+    getNodes: function () {
+        var me = this;
+        var nodes = me.nodes.concatFluent(function (x) {
+            if (x.type === 'Audio') {
+                return x.options.audio.getNodes();
+            }
+            else {
+                return [x];
+            }
+        });
+        return nodes;
+    },
     complete: function (options) {
-        var me = this, last;
-        me.nodes.foreach(function (x, index) {
+        var me = this, last,
+            nodes = me.getNodes();
+
+        nodes.foreach(function (x, index) {
+            if (!x.node) {
+                x.node = me.createAudioNode(x.type, options, x.options);
+            }
             if (index) {
                 last.connect(x.node);
             }

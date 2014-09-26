@@ -1,0 +1,30 @@
+﻿<div class="meph-view meph-view-remove">
+    <activityview data-bind='"activityName": "c$.name"'>
+        <div role="main">
+
+            <!-- Main jumbotron for a primary marketing message or call to action -->
+            <div class="jumbotron">
+                <h1>Music Visualizer!</h1>
+                <p>Drop a piece of music into the drop box..</p>
+            </div>
+
+
+
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning!</strong> This is still experimental so it might just blow up.
+            </div>
+
+            <div class="page-header">
+                <h1>
+                    Drop box
+                </h1>
+                <dropbox data-events='"filesdropped":"ct$.loadFiles"'></dropbox>
+            </div>
+
+
+        </div>
+
+
+    </activityview>
+
+</div>

@@ -157,7 +157,7 @@ MEPH.define('MEPH.math.expression.Factor', {
             var factors = [],
                 result = expression.getParts().select(function (x) {
                     return Factor.getFactors(x.val);
-                }).concatFluent(function (x) {
+                }).concatFluentReverse(function (x) {
                     return x;
                 });
 

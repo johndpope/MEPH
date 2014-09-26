@@ -189,7 +189,7 @@
         uniqueConflicts = conflictReports.where(function (x) { return x.message.conflicts; })
             .select(function (x) {
                 return x.message.conflicts;
-            }).concatFluent(function (x) {
+            }).concatFluentReverse(function (x) {
                 return x;
             }).unique(function (x) {
                 return me.reportName(x);
@@ -362,7 +362,7 @@
         var chainToKeep = me.manager.getEvent(solution.chainToKeep);
         var hasall = solution.eventsToRemove.all(function (x) { return me.manager.getEvent(x); });
         if (hasall && chainToKeep) {
-            solution.eventsToRemove.concatFluent(function (x) {
+            solution.eventsToRemove.concatFluentReverse(function (x) {
                 return me.manager.getEventChain(x);
             }).foreach(function (x) {
                 me.manager.removeEvent(x);

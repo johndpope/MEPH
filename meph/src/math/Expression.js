@@ -194,14 +194,14 @@ MEPH.define('MEPH.math.Expression', {
                 var inRespectTo = t.select(function (x) {
                     var inRespectTo = x && x.val && x.val.part ? x.val.respects() : [x.val];
                     return inRespectTo;
-                }).concatFluent(function (x) { return x; });
+                }).concatFluentReverse(function (x) { return x; });
                 return !inRespectTo.intersection(c.respects()).count();
             },
             SiblingDependence: function (c, t) {
                 var inRespectTo = t.select(function (x) {
                     var inRespectTo = x && x.val && x.val.part ? x.val.respects() : [x.val];
                     return inRespectTo;
-                }).concatFluent(function (x) { return x; });
+                }).concatFluentReverse(function (x) { return x; });
                 return inRespectTo.intersection(c.respects()).count();
             }
         },
@@ -295,7 +295,7 @@ MEPH.define('MEPH.math.Expression', {
             });
 
             var ret = preCompactedFactors.select(function (gh) {
-                return collectedFactors.concatFluent(function (x) { return x; }).where(function (x) {
+                return collectedFactors.concatFluentReverse(function (x) { return x; }).where(function (x) {
                     return x.exp.equals(gh.exp, { exact: true });
                 }).minSelect(function (y) {
                     return y.count;
@@ -3750,7 +3750,7 @@ MEPH.define('MEPH.math.Expression', {
                         }
                     }
                     else {
-                        var parts = expression.getValues().concatFluent(function (x) {
+                        var parts = expression.getValues().concatFluentReverse(function (x) {
                             if (x.type === type) {
 
                                 return Expression.Flatten(x.copy(), type, true);
@@ -3877,7 +3877,7 @@ MEPH.define('MEPH.math.Expression', {
                         });
                     });
 
-                    result = result.concatFluent(function (subresult) {
+                    result = result.concatFluentReverse(function (subresult) {
                         var subtree = ($subtree.where(function (x) {
                             return !subresult.contains(function (t) { return t === x; })
                         }));
@@ -3918,7 +3918,7 @@ MEPH.define('MEPH.math.Expression', {
          * @return {Array}
          **/
         convertGrouping: function (grouping, type) {
-            return grouping.concatFluent(function (group) {
+            return grouping.concatFluentReverse(function (group) {
                 return group.grouping.select(function (t) {
                     return Expression.convertGroup({ set: group.set, grouping: t }, type);
                 });
@@ -4638,7 +4638,7 @@ MEPH.define('MEPH.math.Expression', {
             else {
                 return null;
             }
-        }).concatFluent(function (x) {
+        }).concatFluentReverse(function (x) {
             if (x) {
                 return Array.isArray(x) ? x : [x];
             }

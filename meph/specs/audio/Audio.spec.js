@@ -44,6 +44,7 @@
         var audio = new MEPH.audio.Audio();
 
         var result = audio.oscillator({ name: 'oc' }).gain({ name: 'gain' }).complete();
+
         var gainnode = audio.get({ name: 'gain' }).first();
 
         var gainNode = gainnode.node;
@@ -211,6 +212,23 @@
         });
     });
 
+    it('can create an audio tag based on type', function () {
+        var audio = new Audio();
+
+        expect(audio.createAudioNode(Audio.nodeTypes.oscillator)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.gain)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.convolver)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.delay)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.dynamicsCompressor)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.waveShaper)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.analyser)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.splitter)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.merger)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.periodicWave)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.panner)).toBeTruthy();
+        expect(audio.createAudioNode(Audio.nodeTypes.biquadFilter)).toBeTruthy();
+    })
+
     var Audio = MEPH.audio.Audio;
     it('can analyse the volume of sounds ', function (done) {
         var audio = new Audio();
@@ -235,13 +253,78 @@
         });
     });
 
-    it('can analyse the volume of sounds silently', function (done) {
-        Audio.analyze(audiofile, audiofiletyp).then(function (res) {
-            expect(res).toBeTruthy();
+    //it('can analyse the volume of sounds silently', function (done) {
+    //    Audio.analyze(audiofile, audiofiletyp).then(function (res) {
+    //        expect(res).toBeTruthy();
+    //    }).catch(function (e) {
+    //        expect(e).caught();
+    //    }).then(done);
+    //});
+
+    it('can analyze the volume of sounds from a buffer ', function (done) {
+        var audio = new Audio();
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+
+            var result = audio.copyToBuffer(resource, 40, 42);
+
+            return Audio.analyze(result.buffer).then(function (res) {
+                expect(res).toBeTruthy();
+            });
+
         }).catch(function (e) {
             expect(e).caught();
-        }).then(done);
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can connect an audio to another audio instance ', function () {
+        var audio = new Audio();
+        var another = new Audio();
+
+        audio.gain({ name: 1 }).biquadFilter({ node: 2 });
+        another.gain({ name: 3 }).panner({ node: 4 });
+        audio.connect(another);
+
+        expect(audio.getNodes().length).toBe(4);
+
+
     })
 
+
+
+    it('cant connect an audio to another audio instance if it will make a circular looop', function () {
+        var audio = new Audio();
+        var another = new Audio();
+        var third = new Audio();
+        var thrown;
+
+        audio.gain({ name: 1 }).biquadFilter({ node: 2 });
+        another.gain({ name: 3 }).panner({ node: 4 });
+        third.gain({ name: 3 }).panner({ node: 4 });
+        audio.connect(another);
+        another.connect(third);
+
+        try {
+            third.connect(audio);
+        }
+        catch (e) {
+            thrown = true
+        }
+        expect(thrown).toBeTruthy();
+    });
+
+    it('can not connect to itself', function () {
+        var audio = new Audio();
+        var thrown;
+        try {
+            audio.connect(audio);
+        }
+        catch (e) {
+            thrown = true;
+        }
+        expect(thrown).toBeTruthy();
+    })
 
 });

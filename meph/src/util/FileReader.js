@@ -29,6 +29,9 @@ MEPH.define('MEPH.util.FileReader', {
                         };
                         console.log(file);
                         switch (options.readas) {
+                            case 'ArrayBuffer':
+                                reader.readAsArrayBuffer(file);
+                                break;
                             default:
                                 reader.readAsDataURL(file);
                                 break;

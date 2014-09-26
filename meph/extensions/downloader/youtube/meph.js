@@ -2560,8 +2560,8 @@ if (exports) {
             }
         });
     }
-    if (!array.concatFluent) {
-        Object.defineProperty(array, 'concatFluent', {
+    if (!array.concatFluentReverse) {
+        Object.defineProperty(array, 'concatFluentReverse', {
             enumerable: false,
             writable: true,
             configurable: true,

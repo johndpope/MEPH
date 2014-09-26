@@ -65,7 +65,7 @@ MEPH.define('MEPH.graph.Node', {
     handleConnectionRemoved: function (type, args) {
         var me = this;
 
-        var zones = args.removed.concatFluent(function (x) { return x.getZones(); }).where(function (x) { return x.getNode() === me; });
+        var zones = args.removed.concatFluentReverse(function (x) { return x.getZones(); }).where(function (x) { return x.getNode() === me; });
         var zone = zones.first();
         if (zone) {
             if (zone.isEnumerable()) {
@@ -111,7 +111,7 @@ MEPH.define('MEPH.graph.Node', {
     onConnectionAdded: function (type, args) {
         var me = this;
 
-        var zones = args.added.concatFluent(function (x) {
+        var zones = args.added.concatFluentReverse(function (x) {
             return x.getZones();
         }).where(function (x) {
             return x.getNode() === me;

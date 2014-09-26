@@ -153,7 +153,7 @@ MEPH.define('MEPH.math.Set', {
 
                 return result;
             });
-            return set.concatFluent(function (x) { return x; });
+            return set.concatFluentReverse(function (x) { return x; });
 
         },
         /**

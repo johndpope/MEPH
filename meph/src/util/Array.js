@@ -598,6 +598,23 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+
+            if (!array.concatFluentReverse) {
+                Object.defineProperty(array, 'concatFluentReverse', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var result = MEPH.util.Array.create();
+                        for (var i = collection.length; i--;/**/) {
+                            result = MEPH.util.Array.create(result.concat(func(collection[i], i)));
+                        }
+                        return result;
+                    }
+                });
+            }
+
             if (!array.concatFluent) {
                 Object.defineProperty(array, 'concatFluent', {
                     enumerable: false,
@@ -606,7 +623,7 @@ MEPH.define('MEPH.util.Array', {
                     value: function (func) {
                         var collection = this;
                         var result = MEPH.util.Array.create();
-                        for (var i = collection.length; i--;/**/) {
+                        for (var i = 0; i < collection.length ; i++) {
                             result = MEPH.util.Array.create(result.concat(func(collection[i], i)));
                         }
                         return result;

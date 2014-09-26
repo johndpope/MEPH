@@ -84,7 +84,7 @@ MEPH.define('MEPH.util.Queryable', {
                         }));;
 
                         return Promise.all(promises).then(function () {
-                            return resultParts.orderBy(function (x, y) { return x.index - y.index }).concatFluent(function (x) {
+                            return resultParts.orderBy(function (x, y) { return x.index - y.index }).concatFluentReverse(function (x) {
                                 return x.result;
                             });
                         });

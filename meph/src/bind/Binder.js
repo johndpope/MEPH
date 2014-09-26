@@ -528,7 +528,7 @@ MEPH.define('MEPH.bind.Binder', {
         if (dom.length !== undefined &&
             dom.nodeType !== MEPH.util.Dom.textType &&
             dom.nodeType !== MEPH.util.Dom.commentType) {
-            result = MEPH.Array(dom).concatFluent(function (d) {
+            result = MEPH.Array(dom).concatFluentReverse(function (d) {
                 return MEPH.Array(me.getSubObjects(d, depth));
             });
         }
@@ -561,7 +561,7 @@ MEPH.define('MEPH.bind.Binder', {
         if (dom.length !== undefined &&
             dom.nodeType !== MEPH.util.Dom.textType &&
             dom.nodeType !== MEPH.util.Dom.commentType) {
-            result = MEPH.Array(dom).concatFluent(function (d) {
+            result = MEPH.Array(dom).concatFluentReverse(function (d) {
                 return me.getDomObjectsForBinding(d);
             });
         }

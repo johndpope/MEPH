@@ -171,7 +171,7 @@ Promise.resolve().then(function () {
                     i,
                     dom = MEPH.util.Dom
                 if (Array.isArray(element)) {
-                    return MEPH.Array(element).concatFluent(function (x) {
+                    return MEPH.Array(element).concatFluentReverse(function (x) {
                         return dom.getComments(x);
                     });
                 }
