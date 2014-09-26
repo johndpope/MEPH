@@ -5,7 +5,8 @@
     mixins: ['MEPH.mobile.mixins.Activity'],
     requires: ['MEPH.mobile.activity.view.ActivityView', 'MEPH.file.Dropbox', 'MEPH.list.List', 'MEPH.audio.view.Visualizer'],
     properties: {
-        name: null
+        name: null,
+        data: null
     },
     observable: {
         filelist: null
@@ -18,5 +19,11 @@
     onLoaded: function () {
         var me = this;
         me.name = 'Dropbox';
+    },
+    drawBytes: function (res) {
+        var me = this;
+        me.data = res.data.select(function (x) {
+            return x.channels[0].amplitude;
+        })
     }
 });

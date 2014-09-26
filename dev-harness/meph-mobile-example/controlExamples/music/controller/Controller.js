@@ -17,8 +17,8 @@
     loadBytes: function (songBytes) {
         var me = this;
         var audio = new MEPH.audio.Audio();
-        return audio.loadByteArray(songBytes).then(function (result) {
-            return MEPH.audio.Audio.analyze(result);
+        return audio.loadByteArray(songBytes.res).then(function (result) {
+            return MEPH.audio.Audio.analyze(result.buffer);
         })
     }
 });

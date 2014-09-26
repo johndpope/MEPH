@@ -18,10 +18,10 @@
                 <h1>
                     Drop box
                 </h1>
-                <dropbox data-events='"filesdropped":"ct$.loadFiles"'></dropbox>
+                <dropbox data-events='"filesdropped":"ct$.loadFiles | ct$.loadBytes | v$.drawBytes"'></dropbox>
             </div>
 
-
+            <visualizer source="v$.data"></visualizer>
         </div>
 
 

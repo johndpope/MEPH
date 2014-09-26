@@ -35,7 +35,6 @@ MEPH.define('MEPH.audio.Audio', {
 
                         result.buffer.onended = function () {
                             var volume = audio.get({ name: 'volume' }).first();
-                            expect(volume.data).toBeTruthy();
                             audio.disconnect();
                             result.buffer.stop();
                             r(volume);
@@ -371,12 +370,14 @@ MEPH.define('MEPH.audio.Audio', {
         imag[0] = 0;
         real[1] = 1;
         imag[1] = 0;
-
+        var nodel
         switch (type) {
             case A.nodeTypes.oscillator:
                 return me.createContext(options).createOscillator();
             case A.nodeTypes.gain:
-                return me.createContext(options).createGain();
+                node = me.createContext(options).createGain();
+                node.gain.value = nodeoptions.volume === undefined || nodeoptions.volume === null ? 1 : nodeoptions.volume;
+                return node;
             case A.nodeTypes.panner:
                 return me.createContext(options).createPanner();
 

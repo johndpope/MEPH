@@ -45,8 +45,8 @@ MEPH.define('MEPH.audio.view.Visualizer', {
         me.draw(args.value);
     },
     draw: function () {
+        var me = this;
         requestAnimationFrame(function () {
-            var me = this;
             var HEIGHT = me.height;
             var WIDTH = me.width;
             var dataArray = me.source;
