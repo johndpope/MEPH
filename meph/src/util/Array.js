@@ -411,6 +411,22 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.skipEvery) {
+                Object.defineProperty(array, 'skipEvery', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (skip, func) {
+                        var collection = this;
+                        skip = Math.abs(skip);
+                        func = func || function (x) { return x; };
+                        for (var i = start; i < stop ; i = i + skip) {
+                            collection.push(func(i));
+                        }
+                        return collection;
+                    }
+                });
+            }
 
             if (!array.interpolate) {
                 Object.defineProperty(array, 'interpolate', {
@@ -645,4 +661,8 @@ MEPH.define('MEPH.util.Array', {
     }
 }).then(function () {
     MEPH.util.Array.create(Array.prototype, true);
+    if (Float32Array)
+        MEPH.util.Array.create(Float32Array.prototype, true);
+    if (Float64Array)
+        MEPH.util.Array.create(Float64Array.prototype, true);
 })

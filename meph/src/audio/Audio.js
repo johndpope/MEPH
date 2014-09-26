@@ -10,7 +10,26 @@ MEPH.define('MEPH.audio.Audio', {
          */
         audioCtx: null,
 
-        sourcebuffer: null
+        sourcebuffer: null,
+
+        analyze: function (audiofile, audiofiletyp) {
+            var audio = new MEPH.audio.Audio();
+            debugger
+            return audio.load(audiofile, audiofiletyp).then(function (resource) {
+
+                var result = audio.copyToBuffer(resource, 40, 40.3);
+                audio.buffer(result.buffer).volume({ name: 'volume' }).gain({ name: 'gain', volume: 0 }).complete();
+                result.buffer.start();
+                return new Promise(function (r) {
+                    setTimeout(function () {
+                        var volume = audio.get({ name: 'volume' }).first();
+                        expect(volume.data).toBeTruthy();
+                        audio.disconnect();
+                        r(volume);
+                    }, 1000)
+                })
+            })
+        }
     },
     properties: {
         /**
@@ -116,9 +135,12 @@ MEPH.define('MEPH.audio.Audio', {
     },
     createContext: function (options) {
         var me = this;
-        if (options) {
+        if (options || me.offlineMode) {
+            me.offlineMode = true;
             var audioCtx = MEPH.audio.Audio.OfflineAudioContext || me.offlineAudioCtx || new (window.OfflineAudioContext)(options.channels || 32, options.length || 10000, options.sampleRate || 44100);
-            audioCtx.addEventListener('complete', options.oncomplete);
+            if (options) {
+                audioCtx.addEventListener('complete', options.oncomplete);
+            }
             MEPH.audio.Audio.OfflineAudioContext = audioCtx;
             //MEPH.audio.Audio.AudioContext = me.audioCtx;
             me.currentContext = audioCtx;
@@ -144,6 +166,43 @@ MEPH.define('MEPH.audio.Audio', {
     buffer: function (buffer, options) {
         var me = this;
         me.nodes.push({ options: options || null, node: buffer })
+        return me;
+    },
+    volume: function (options) {
+        var me = this;
+        var context = me.createContext();
+
+        // Create a ScriptProcessorNode with a bufferSize of 4096 and a single input and output channel
+        var scriptNode = context.createScriptProcessor(4096, 1, 1);
+
+        var nodecontext = { options: options || null, node: scriptNode };
+        me.nodes.push(nodecontext);
+        nodecontext.data = [];
+        // Give the node a function to process audio events
+        scriptNode.onaudioprocess = function (nodecontext, audioProcessingEvent) {
+            // The input buffer is the song we loaded earlier
+            var inputBuffer = audioProcessingEvent.inputBuffer;
+
+            // The output buffer contains the samples that will be modified and played
+            var outputBuffer = audioProcessingEvent.outputBuffer;
+            var data = {};
+            // Loop through the output channels (in this case there is only one)
+            for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+                var inputData = inputBuffer.getChannelData(channel);
+                var outputData = outputBuffer.getChannelData(channel);
+                data[channel] = { amplitude: 0, num: 0 };
+                // Loop through the 4096 samples
+                for (var sample = 0; sample < inputBuffer.length; sample++) {
+                    // make output equal to the same as the input
+                    outputData[sample] = inputData[sample];
+                    if ((sample % 16) === 0) {
+                        data[channel].amplitude += Math.abs(inputData[sample]);
+                        data[channel].num++;
+                    }
+                }
+            }
+            nodecontext.data.push({ channels: data });
+        }.bind(me, nodecontext);
         return me;
     },
     /**
@@ -274,7 +333,9 @@ MEPH.define('MEPH.audio.Audio', {
         var context = me.createContext();
 
         var gain = context.createGain();
-
+        if (options && options.volume !== undefined) {
+            gain.gain.value = options.volume;
+        }
         me.nodes.push({ options: options || null, node: gain });
 
         return me;

@@ -211,4 +211,37 @@
         });
     });
 
+    var Audio = MEPH.audio.Audio;
+    it('can analyse the volume of sounds ', function (done) {
+        var audio = new Audio();
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+
+            var result = audio.copyToBuffer(resource, 40, 40.3);
+            audio.buffer(result.buffer).volume({ name: 'volume' }).gain({ name: 'gain', volume: 0 }).complete();
+            result.buffer.start();
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    var volume = audio.get({ name: 'volume' }).first();
+                    expect(volume.data).toBeTruthy();
+                    audio.disconnect();
+                    r();
+                }, 1000)
+            })
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can analyse the volume of sounds silently', function (done) {
+        Audio.analyze(audiofile, audiofiletyp).then(function (res) {
+            expect(res).toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
+    })
+
+
 });
