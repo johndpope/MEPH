@@ -217,7 +217,7 @@ MEPH.define('MEPH.bind.Binder', {
                         if (reference) {
                             connection = parentControl.getConnection(reference.type);
                             subcontrolPrefix = MEPH.getBindPrefixShortCuts().first(function (x) {
-                                return x.type === 'subcontrol';
+                                return x.type === 'self';
                             }).prefix;
                             result[path.subset(1).join(MEPH.pathDelimiter)] = subcontrolPrefix + MEPH.pathDelimiter + i;
                         }
@@ -474,6 +474,9 @@ MEPH.define('MEPH.bind.Binder', {
                 switch (prop) {
                     case 'type':
                     case 'for':
+                    case 'step':
+                    case 'max':
+                    case 'min':
                         dom.setAttribute(prop, value);
                         break;
                     case 'class':

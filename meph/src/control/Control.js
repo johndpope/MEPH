@@ -24,6 +24,7 @@ MEPH.define('MEPH.control.Control', {
             model: 'model',
             controller: 'controller',
             html: 'html',
+            self: 'self',
             subcontrol: 'subcontrol'
         }
     },
@@ -120,8 +121,10 @@ MEPH.define('MEPH.control.Control', {
      * @param {Object} attributeOptions.selector
      **/
     addTransferableAttribute: function (attributeName, attributeOptions) {
-        var me = this
-        me.getListOfTransferableAttributes().push({ name: attributeName, options: attributeOptions });
+        var me = this;
+        if (!me.getListOfTransferableAttributes().some(function (x) { return x.name === attributeName; })) {
+            me.getListOfTransferableAttributes().push({ name: attributeName, options: attributeOptions });
+        }
     },
     /**
      * @private
@@ -130,9 +133,28 @@ MEPH.define('MEPH.control.Control', {
     applyTransferableAttribute: function () {
         var me = this, isShortCut,
             type;
-
+        MEPH.Array(me.getInstanceTemplate().attributes).select(function (prop) { return prop.name; }).foreach(function (prop) {
+            var prefix = MEPH.getDataBindPrefixes().first(function (x) {
+                return prop.indexOf(x + MEPH.bindPrefixDelimiter) !== -1;
+            });
+            if (prefix) {
+                prefix += MEPH.bindPrefixDelimiter;
+                var path = prop.substring(prefix.length, prop.length);
+                me.addTransferableAttribute(path, {
+                    object: me,
+                    path: path
+                });
+            }
+        })
         me.getListOfTransferableAttributes().foreach(function (transferrableConfig) {
             var value = me.getInstanceTemplate().getAttribute(transferrableConfig.name);
+
+            if (value === null || value === undefined) {
+                value = MEPH.getDataBindPrefixes().selectFirst(function (x) {
+                    return me.getInstanceTemplate().getAttribute(x + MEPH.bindPrefixDelimiter + transferrableConfig.name);
+                });
+            }
+
             if (value !== null) {
                 me.getDomTemplate().where(function (x) { return x.nodeType === Dom.elementType; }).foreach(function (dom) {
                     var options = transferrableConfig.options;

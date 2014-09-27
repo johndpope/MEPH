@@ -1,2 +1,4 @@
-﻿<div class="dropbox col-md-3" data-bind='"class": "c$.dropboxCls"'
-     data-events='"dragover" : "c$.dragovercssclass | c$.hoverCls | c$.cancelEvent", "dragout" : "c$.dragoutcssclass | c$.hoverCls | c$.cancelEvent", "drop" : "c$.fileDrop | c$.cancelEvent"'></div>
+﻿<div class="dropbox" data-bind='"class": "c$.dropboxCls"'
+     meph-event-dragover="c$.dragovercssclass | c$.hoverCls | c$.cancelEvent" 
+     meph-event-dragout="c$.dragoutcssclass | c$.hoverCls | c$.cancelEvent"
+     meph-event-drop="c$.fileDrop | c$.cancelEvent"></div>

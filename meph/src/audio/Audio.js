@@ -27,10 +27,13 @@ MEPH.define('MEPH.audio.Audio', {
             biquadFilter: 'biquadFilter'
         },
 
-        analyze: function (audiofile, audiofiletyp) {
+        analyze: function (audiofile, audiofiletyp, resolution) {
             var audio = new MEPH.audio.Audio(),
                 func = function (result) {
-                    audio.buffer(result.buffer).volume({ name: 'volume' }).gain({ name: 'gain', volume: 0 }).complete();
+                    if (resolution === undefined) {
+                        resolution = Math.max(1, Math.round((result.buffer.buffer.duration * result.buffer.buffer.sampleRate) / 5760));
+                    }
+                    audio.buffer(result.buffer).volume({ name: 'volume', resolution: resolution }).gain({ name: 'gain', volume: 0 }).complete();
                     return new Promise(function (r) {
 
                         result.buffer.onended = function () {
@@ -53,6 +56,19 @@ MEPH.define('MEPH.audio.Audio', {
             else if (arguments.length === 1) {
                 return func({ buffer: audiofile });
             }
+        },
+        /**
+         * Extracts a clip from a resoure
+         * @param {Object} resource
+         * @param {Number} from
+         * @param {Number} to
+         ***/
+        clip: function (resource, from, to) {
+
+            var audio = new MEPH.audio.Audio();
+
+
+            return audio.copyToBuffer(resource, from, to, {});
         }
     },
     properties: {
@@ -203,6 +219,11 @@ MEPH.define('MEPH.audio.Audio', {
         me.nodes.push({ options: options || null, buffer: buffer, type: MEPH.audio.Audio.nodeTypes.buffer })
         return me;
     },
+    /**
+     * Analyses the volume.
+     * @param {Object} options
+     * @param {Number} options.resolution
+     **/
     volume: function (options) {
         var me = this;
         var context = me.createContext();
@@ -220,23 +241,24 @@ MEPH.define('MEPH.audio.Audio', {
 
             // The output buffer contains the samples that will be modified and played
             var outputBuffer = audioProcessingEvent.outputBuffer;
-            var data = {};
             // Loop through the output channels (in this case there is only one)
             for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
                 var inputData = inputBuffer.getChannelData(channel);
                 var outputData = outputBuffer.getChannelData(channel);
-                data[channel] = { amplitude: 0, num: 0 };
+
                 // Loop through the 4096 samples
                 for (var sample = 0; sample < inputBuffer.length; sample++) {
                     // make output equal to the same as the input
                     outputData[sample] = inputData[sample];
-                    if ((sample % 16) === 0) {
-                        data[channel].amplitude += Math.abs(inputData[sample]);
+                    var data = {};
+                    if (sample % (options.resolution || 32) === 0) {
+                        data[channel] = { amplitude: 0, num: 0 };
+                        data[channel].amplitude += Math.pow((inputData[sample]), 2);
                         data[channel].num++;
+                        nodecontext.data.push({ channels: data });
                     }
                 }
             }
-            nodecontext.data.push({ channels: data });
         }.bind(me, nodecontext);
         return me;
     },

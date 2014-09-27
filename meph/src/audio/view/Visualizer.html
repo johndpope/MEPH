@@ -1,3 +1,9 @@
-﻿<div class="visualizer col-md-3" data-bind='"class": "c$.visualizerCls", "height":"c$.height", "width":"c$.width"'>
-    <canvas mephid="canvas" data-bind='"height":"c$.height", "width":"c$.width"'></canvas>
+﻿<div><!-- "name":"precanvas" -->
+    <div class="visualizer col-md-12"
+         mephid="container"
+         meph-data-class="c$.visualizerCls"
+         meph-data-height="c$.height"
+         data-bind='"scrollLeft" : "c$.scrollleft | c$.calculateLeft"'>
+        <canvas mephid="canvas" meph-data-height="c$.height" meph-data-width="c$.width"></canvas>
+    </div><!-- "name":"canvas" -->
 </div>

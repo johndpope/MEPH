@@ -14,14 +14,64 @@
                 <strong>Warning!</strong> This is still experimental so it might just blow up.
             </div>
 
-            <div class="page-header">
+            <div class="page-header col-md-2">
                 <h1>
                     Drop box
                 </h1>
-                <dropbox data-events='"filesdropped":"ct$.loadFiles | ct$.loadBytes | v$.drawBytes"'></dropbox>
-            </div>
+                <dropbox data-events='"filesdropped":"ct$.loadFiles "'></dropbox><!---->
 
-            <visualizer source="v$.data"></visualizer>
+
+            </div>
+            <div class="page-header col-md-2">
+                <h1>File Resources</h1>
+                <list meph-data-source="ct$.fileResources">
+                    <template name="music_visualizer_page">
+                        <li class="list-group-item" meph-event-click="ct$.visualizeFile, c$.data.file, c$.data.res | ct$.loadBytes | v$.drawBytes ">
+                            <div class="meph-application-menu-categories-item-details">
+                                <span>File</span>
+                                <span data-bind='"innerHTML": "c$.data.file.name"'></span>
+                            </div>
+                        </li>
+                    </template>
+                </list>
+
+            </div>
+            <div class="page-header col-md-2">
+                <h1>Controls</h1>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <range descriptiontext="Magnification" labeltext="Magnification" meph-data-value="ct$.magnification" meph-data-step="0.01" meph-data-min="1" meph-data-max="100"></range>
+                    </li>
+                    <li class="list-group-item">
+                        <range descriptiontext="Time Scroll" labeltext="Time Scroll" meph-data-value="ct$.timeScroll" meph-data-step="0.01" meph-data-min="1" meph-data-max="100"></range>
+                    </li>
+                    <li class="list-group-item">
+                        <range descriptiontext="Vertical Offset" labeltext="Vertical Offset" meph-data-value="v$.verticalScroll" meph-data-step="0.01" meph-data-min="-10" meph-data-max="10"></range>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h1>
+                    Visualizer
+                </h1>
+
+                <div class="alert alert-info" role="alert">
+                    <strong>Time : </strong> <span data-bind='"innerHTML": "ct$.timeScroll"'></span>%
+                    <strong>Magnification : </strong> <span data-bind='"innerHTML": "ct$.magnification"'></span>%
+                </div>
+                <visualizer source="v$.data" meph-data-scrollleft="ct$.timeScroll" meph-data-vertical="v$.verticalScroll" scrollmutiplier="ct$.magnification"></visualizer>
+            </div>
+            <div class="col-md-6">
+                <h1>
+                    Visual Selector
+                </h1>
+
+                <div class="alert alert-info" role="alert">
+                    <strong>Time : </strong> <span data-bind='"innerHTML": "ct$.timeScroll"'></span>%
+                    <strong>Magnification : </strong> <span data-bind='"innerHTML": "ct$.magnification"'></span>%
+                </div>
+                <visualselector source="v$.data" meph-data-scrollleft="ct$.timeScroll" meph-data-vertical="v$.verticalScroll" scrollmutiplier="ct$.magnification"></visualselector>
+            </div>
         </div>
 
 

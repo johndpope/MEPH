@@ -184,8 +184,21 @@
                 done();
             }, 2000)
 
-        });
+        })
 
+    });
+
+    it('can extract a part of a sound  ', function (done) {
+        var audio = new MEPH.audio.Audio();
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+
+            var result = MEPH.audio.Audio.clip(resource, 40, 41);
+            expect(result).toBeTruthy();
+
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
     });
 
     it('can render offline', function (done) {

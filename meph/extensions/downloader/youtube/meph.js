@@ -1741,6 +1741,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                                 // Add a new ._super() method that is the same method
                                 // but on the super-class
                                 this.callParent = _super[name];
+                                this.super = _super[name].bind(this, arguments);
                             }
                             //for (var i = 0; i < tempclassnames.length; i++) {
                             MEPH.Array(tempclassnames).foreach(function (t, i) {

@@ -201,6 +201,7 @@ MEPH.define('MEPH.dom.ControlLoader', {
             classInstance = controlPackage.classInstance,
             attribute;
         subClassInstance.addReferenceConnection(MEPH.control.Control.connectables.subcontrol, classInstance);
+        subClassInstance.addReferenceConnection(MEPH.control.Control.connectables.self, subClassInstance);
 
         if (!subClassInstance.parent) {
             Object.defineProperty(subClassInstance, 'parent', {

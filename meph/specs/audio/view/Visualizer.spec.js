@@ -70,6 +70,39 @@
         })
     });
 
+
+    it('mouse wheel event will change the width of the visualizer', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom,
+                visualizer = results.first().classInstance;
+            ///Assert
+            expect(visualizer.canvas).toBeTruthy();
+
+            dom = visualizer.getDomTemplate()[0];
+            dom.dispatchEvent(MEPH.createEvent('mousewheel', { wheelDelta: 1 }));
+
+            var p = new Promise(function (r, s) {
+                setTimeout(function () {
+                    expect(visualizer.width == 301).toBeTruthy();
+
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 10);
+            });
+
+            return p;
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+
     it('can set height and width of visualizer', function (done) {
         MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
             var results = r.res;

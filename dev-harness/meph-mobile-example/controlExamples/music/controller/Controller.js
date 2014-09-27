@@ -1,6 +1,19 @@
 ﻿MEPH.define('MEPHControls.music.controller.Controller', {
     extend: 'MEPH.controller.Controller',
-    requires: ['MEPH.util.FileReader', 'MEPH.audio.Audio'],
+    requires: ['MEPH.util.FileReader', 'MEPH.audio.Audio', 'MEPH.util.Observable'],
+    properties: {
+        fileResources: null,
+        range: 100,
+        timeScroll: 100,
+        magnification: 0
+    },
+    initialize: function () {
+        var me = this;
+        me.super();
+        var source = [];
+        MEPH.util.Observable.observable(source)
+        me.fileResources = source;
+    },
     loadFiles: function () {
         var me = this;
         var args = MEPH.util.Array.convert(arguments);
@@ -9,10 +22,22 @@
         var files = args.last();
 
         return FileReader.readFileList(files.domEvent.files, { readas: 'ArrayBuffer' }).then(function (res) {
-            return res.first();
+            res.foreach(function (t) {
+                me.fileResources.push(t);
+            })
         }).catch(function (e) {
             console.log(e);
         });
+    },
+    visualizeFile: function (file, res) {
+        
+        switch (file.type) {
+            case 'audio/wav':
+            case 'audio/mp3':
+                return { res: res };
+            default:
+                return null;
+        }
     },
     loadBytes: function (songBytes) {
         var me = this;

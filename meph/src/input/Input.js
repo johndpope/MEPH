@@ -11,6 +11,16 @@ MEPH.define('MEPH.input.Input', {
     extend: 'MEPH.field.FormField',
     templates: true,
     properties: {
+        step: null,
+        disabled: null,
+        max: null,
+        maxlength: null,
+        min: null,
+        pattern: null,
+        readonly: null,
+        required: null,
+        placeholder: null,
+        size: null
     },
     initialize: function () {
         var me = this,
