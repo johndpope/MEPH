@@ -3,6 +3,7 @@
     requires: ['MEPH.util.FileReader', 'MEPH.audio.Audio', 'MEPH.util.Observable'],
     properties: {
         fileResources: null,
+        soundFileMarks: null,
         range: 100,
         timeScroll: 100,
         magnification: 0
@@ -12,6 +13,7 @@
         me.super();
         var source = [];
         MEPH.util.Observable.observable(source)
+        me.soundFileMarks = MEPH.util.Observable.observable([])
         me.fileResources = source;
     },
     loadFiles: function () {
@@ -30,7 +32,7 @@
         });
     },
     visualizeFile: function (file, res) {
-        
+
         switch (file.type) {
             case 'audio/wav':
             case 'audio/mp3':
@@ -45,5 +47,10 @@
         return audio.loadByteArray(songBytes.res).then(function (result) {
             return MEPH.audio.Audio.analyze(result.buffer);
         })
+    },
+    createSnippets: function () {
+        var me = this;
+        console.log('create snippets of files');
+        console.log(arguments);
     }
 });

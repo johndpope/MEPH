@@ -1,6 +1,21 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "precanvas", "before" : true -->
-<range descriptiontext="start" meph-data-value="c$.start" meph-data-step="0.0001" meph-data-min="0" meph-data-max="100"></range>
+<range descriptiontext="start" meph-data-value="c$.position" meph-event-change="c$.updateMarker" meph-data-step="0.000001" meph-data-min="0" meph-data-max="1"></range>
+<div style="display:none">
+    <div mephid="markerBtnTemplate" class="btn btn-danger btn-xs" style="position:absolute; z-index:100">
+        <div style="position:relative;">
+            <span class="glyphicon glyphicon-remove"></span>
+        </div>
+    </div>
+</div>
 <!-- "instruction": true, "name" : "injectop", "close": true -->
 <!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "canvas", "before" : true -->
-<range descriptiontext="stop" meph-data-value="c$.stop" meph-data-step="0.0001" meph-data-min="0" meph-data-max="100"></range>
+<div>
+    <button type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addMark | c$.cancelEvent">
+        <span class="glyphicon glyphicon-plus"></span>
+    </button> <!-- "name": "buttonpanel" -->
+</div>
+<!-- "instruction": true, "name" : "injectop", "close": true -->
+<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "beforecanvas", "before" : true -->
+<canvas mephid="markCanvas" style="position:absolute; top:0; z-index:19;" meph-data-height="c$.height" meph-data-width="c$.width"></canvas>
+<canvas mephid="markerCanvas" style="position:absolute; top:0; z-index:31;" meph-data-height="c$.height" meph-data-width="c$.width"></canvas>
 <!-- "instruction": true, "name" : "injectop", "close": true -->

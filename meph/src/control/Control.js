@@ -237,6 +237,12 @@ MEPH.define('MEPH.control.Control', {
         var promise = Promise.resolve();
         return promise;
     },
+    cancelEvent: function () {
+        var evntArgs = MEPH.util.Array.convert(arguments).last();
+        console.log('cancel event')
+        evntArgs.domEvent.preventDefault();
+        return false;
+    },
     handleDomTemplate: function () {
         var me = this,
             nodes, out = {},

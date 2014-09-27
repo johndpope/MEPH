@@ -42,10 +42,9 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             if (args.path === 'source') {
                 me.sourceChanged(args);
             }
-            if (args.path)
-                if (args.path === 'vertical' || args.path === 'scrollMutiplier') {
-                    me.updateWidth(args).then(me.setLeft.bind(me));
-                }
+            if (args.path === 'vertical' || args.path === 'scrollMutiplier') {
+                me.updateWidth(args).then(me.setLeft.bind(me));
+            }
         })
     },
     sourceChanged: function (args) {

@@ -87,6 +87,7 @@
                         'MEPH.spec.js',
                         'audio/Audio.spec.js',
                         'audio/view/Visualizer.spec.js',
+                        'audio/view/VisualSelector.spec.js',
                         'application/Application.spec.js',
                         'bind/Binder.spec.js',
                         'button/Button.spec.js',

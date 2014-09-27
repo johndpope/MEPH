@@ -42,13 +42,6 @@ MEPH.define('MEPH.file.Dropbox', {
         }));
 
     },
-    cancelEvent: function () {
-        var evntArgs = MEPH.util.Array.convert(arguments).last();
-        console.log('cancel event')
-        evntArgs.domEvent.preventDefault();
-        return false;
-    }
-    ,
     /**
      * @private
      * Adds transferable properties.

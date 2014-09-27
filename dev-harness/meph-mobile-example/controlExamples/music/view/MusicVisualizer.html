@@ -50,17 +50,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="col-md-6">
-                <h1>
-                    Visualizer
-                </h1>
 
-                <div class="alert alert-info" role="alert">
-                    <strong>Time : </strong> <span data-bind='"innerHTML": "ct$.timeScroll"'></span>%
-                    <strong>Magnification : </strong> <span data-bind='"innerHTML": "ct$.magnification"'></span>%
-                </div>
-                <visualizer source="v$.data" meph-data-scrollleft="ct$.timeScroll" meph-data-vertical="v$.verticalScroll" scrollmutiplier="ct$.magnification"></visualizer>
-            </div>
             <div class="col-md-6">
                 <h1>
                     Visual Selector
@@ -70,7 +60,16 @@
                     <strong>Time : </strong> <span data-bind='"innerHTML": "ct$.timeScroll"'></span>%
                     <strong>Magnification : </strong> <span data-bind='"innerHTML": "ct$.magnification"'></span>%
                 </div>
-                <visualselector source="v$.data" meph-data-scrollleft="ct$.timeScroll" meph-data-vertical="v$.verticalScroll" scrollmutiplier="ct$.magnification"></visualselector>
+                <visualselector source="v$.data"
+                                meph-data-scrollleft="ct$.timeScroll"
+                                meph-data-vertical="v$.verticalScroll"
+                                meph-data-marks="ct$.soundFileMarks"
+                                meph-data-height="300"
+                                scrollmutiplier="ct$.magnification">
+                    <button type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.createSnippets, ct$.soundFileMarks | c$.cancelEvent">
+                        <span class="glyphicon glyphicon-ok"></span>
+                    </button>
+                </visualselector>
             </div>
         </div>
 

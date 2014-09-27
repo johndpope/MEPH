@@ -238,13 +238,13 @@
 
     it('Can load a html template ', function (done) {
         //Arrange
-        var path = MEPH.getClassPath('MEPH.input.Input') + MEPH.prefixes.templatePostFix;
+        var path = MEPH.getClassPath('MEPHTests.helper.HelperControl2') + MEPH.prefixes.templatePostFix;
 
         //Act
         MEPH.retrieveRequiredClass({
             type: 'tpl',
             path: path,
-            classifiedName: 'MEPH.input.Input'
+            classifiedName: 'MEPHTests.helper.HelperControl2'
         }).then(function (result) {
 
             //Assert
