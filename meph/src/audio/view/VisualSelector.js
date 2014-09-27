@@ -36,9 +36,11 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         me.markerBtns = [];
         me.on('altered', function (type, args) {
             if (args.path === 'marks') {
-
-                me.marks.on('changed', me.update.bind(me));
+                if (me.marks) {
+                    me.marks.on('changed', me.update.bind(me));
+                }
                 me.update();
+
             }
 
             if (args.path === 'vertical' || args.path === 'scrollMutiplier' || args.path === 'scrollleft') {

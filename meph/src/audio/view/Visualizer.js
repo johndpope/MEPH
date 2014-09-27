@@ -70,6 +70,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             cancelAnimationFrame(me.frame)
         return new Promise(function (r) {
             me.frame = requestAnimationFrame(function () {
+                if (!me.canvas) return;
                 var HEIGHT = me.height;
                 var WIDTH = me.width;
                 var dataArray = me.source;
@@ -83,7 +84,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
                 canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
 
                 canvasCtx.beginPath();
-                if (me.source) {
+                if (me.source && me.source.max) {
                     var max = me.source.max(function (x) { return Math.abs(x); });
                     var bufferLength = me.source.length;
                     var sliceWidth = WIDTH * 1.0 / bufferLength;

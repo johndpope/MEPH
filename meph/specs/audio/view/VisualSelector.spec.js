@@ -64,7 +64,7 @@
                 visualizer = results.first().classInstance;
             ///Assert
             visualizer.render = function () { rendered = true; }
-            visualizer.marks = MEPH.util.Observable([{ position: .1, type: 'start' }]);
+            visualizer.marks = MEPH.util.Observable.observable([{ position: .1, type: 'start' }]);
 
             return new Promise(function (r) {
                 setTimeout(function () {
@@ -87,14 +87,17 @@
 
         //Assert
         var input = new MEPH.audio.view.VisualSelector();
-        input.marks = [];
+        input.draw = function () { }
+        input.marks = MEPH.util.Observable.observable([]);
         input.position = 0;
-        input.scrollleft = 0;
-        input.canvas = { clientWidth: 400 };
+        input.source = [];
+        input.scrollleft = 1;
+        input.canvas = { clientWidth: 400, getContext: function () { return null; } };
         input.container = { clientWidth: 400 };
         input.addMark();
         expect(input).toBeTruthy();
-        expect(input.marks.first().position === 0).toBeTruthy();
+        
+        expect(input.marks.first()).toBeTruthy();
 
     });
 
