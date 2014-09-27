@@ -231,6 +231,32 @@
         });
     });
 
+    it('a binder can parse the data-bind attributes and meph-data-value', function (done) {
+        //Arrange
+        var dom = createDomObjectWithDataBind('div', '"innerHTML":"c$.prop"'),
+            object = {};
+        MEPH.addDataBindPrefix('meph-data');
+        dom.setAttribute('meph-data-value', '"c$.transform"');
+        MEPH.create('MEPH.bind.Binder').then(function ($class) {
+            try {
+                var binder = new $class();
+                var result = binder.parseDomAttributes(dom);
+                expect(result).toBeTruthy();
+                expect(result.innerHTML).toBeTruthy();
+                expect(result.innerHTML === 'c$.prop').toBeTruthy();
+                expect(result.value === '"c$.transform"').toBeTruthy();
+            }
+            catch (error) {
+                expect(false).toBeTruthy();
+            }
+            finally {
+                done();
+            }
+        });
+    });
+
+
+
     it('a binder can parse the data-bind attributes and data-bind-value and custom d-binder-tutut', function (done) {
         //Arrange
         var dom = createDomObjectWithDataBind('div', '"innerHTML":"c$.prop"'),
@@ -826,6 +852,53 @@
                      dhc.function = function () {
                          called = true;
                      }
+                     //Act    
+                     MEPH.Binder.bindDomControl({
+                         classInstance: dhc
+                     }, {
+                         classInstance: hc,
+                         templateNode: MEPH.Array([helperCompositeNode])
+                     }, helperCompositeNode);
+
+                     helperCompositeNode.dispatchEvent(MEPH.createEvent('click', {}));
+                     //Assert
+                     setTimeout(function () {
+                         expect(called).theTruth('the click event was not propogated to the parent node');
+                         done();
+                     }, 10);
+
+                 }
+                 catch (error) {
+                     expect(error).caught();
+                 }
+                 finally {
+                 }
+             });
+    });
+
+    it('when a click event occurs, the clicked function will get called. with meph-event-click', function (done) {
+        //Arrange
+        var dom = createDomObjectWithDataBind('div', '');
+        helperCompositeNode = ' <helpercomposite mephid="helperComposite"' +
+        ' meph-event-click="c$.function"' +
+        ' mephuniqueid="f6f0b8c8-ac52-401c-b2ec-e0adaec4e963">' +
+        '</helpercomposite>';
+        dom.innerHTML = helperCompositeNode,
+        helperCompositeNode = dom.firstElementChild;
+
+
+        MEPH.requires('MEPH.bind.Binder',
+             'MEPHTests.helper.composite.DeepHelperComposite',
+             'MEPHTests.helper.composite.HelperComposite').then(function () {
+                 try {
+                     var dhc = new MEPHTests.helper.composite.DeepHelperComposite(),
+                         called,
+                         hc = new MEPHTests.helper.composite.HelperComposite();
+                     hc.setUniqueId(MEPH.GUID());
+                     dhc.function = function () {
+                         called = true;
+                     }
+                     MEPH.addEventDataBindingPrefixes('meph-event');
                      //Act    
                      MEPH.Binder.bindDomControl({
                          classInstance: dhc

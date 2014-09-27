@@ -672,12 +672,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             XHR.open('GET', filename, true);
             XHR.responseType = 'arraybuffer';
             XHR.onload = function () {
-                
+
                 toResolve({ response: XHR.response })
             };
 
             XHR.onerror = function () {
-                toFail({error: new Error('AudioSampleLoader: XMLHttpRequest called onerror')})
+                toFail({ error: new Error('AudioSampleLoader: XMLHttpRequest called onerror') })
             };
             XHR.send();
 
@@ -894,7 +894,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.addReverseDataBindPrefx = function (prefix) {
         var has = reverseBindingPrefixes.some(function (x) { return x === prefix; });
 
-        if (has) {
+        if (!has) {
             reverseBindingPrefixes.push(prefix);
         }
     }
@@ -906,7 +906,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      **/
     meph.addEventDataBindingPrefixes = function (prefix) {
         var has = eventDataBindingPrefixes.some(function (x) { return x === prefix; });
-        if (has) {
+        if (!has) {
             eventDataBindingPrefixes.push(prefix);
         }
     }
@@ -925,6 +925,10 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      * @param {String} prefix;
      **/
     meph.removeEventDataBindingPrefix = function (prefix) {
+        var has = eventDataBindingPrefixes.some(function (x) { return x === prefix; });
+        if (has) {
+            eventDataBindingPrefixes.removeWhere(function (x) { return x === prefix; });
+        }
     }
     /**
      * @method removeReverseDataBindPrefix
@@ -1932,7 +1936,9 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.frameWorkPathSource = $frameWorkPath + '/meph.js';
 
 
-
+    ///////////////// Standard prefixes.
+    meph.addEventDataBindingPrefixes('meph-event');
+    meph.addDataBindPrefix('meph-data');
 
 
     return { framework: meph, promise: loadpromise };
