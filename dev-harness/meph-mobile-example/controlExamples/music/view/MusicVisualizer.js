@@ -5,6 +5,7 @@
     mixins: ['MEPH.mobile.mixins.Activity'],
     requires: ['MEPH.mobile.activity.view.ActivityView',
         'MEPH.file.Dropbox',
+        'MEPH.audio.Audio',
         'MEPH.list.List',
         'MEPH.input.Range',
         'MEPH.audio.view.Visualizer',
@@ -21,6 +22,17 @@
         var me = this;
         me.callParent.apply(me, arguments);
         me.on('load', me.onLoaded.bind(me));
+    },
+    playSnippet: function (snippet) {
+        if (snippet) {
+            var audio = new MEPH.audio.Audio();
+            audio.buffer(snippet.buffer).gain({ name: 'gain', volume: 1 }).complete();
+
+            snippet.buffer.onended = function () {
+                delete snippet.buffer;
+            }
+            snippet.buffer.start();
+        }
     },
     onLoaded: function () {
         var me = this;

@@ -49,7 +49,7 @@
             return null;
         }
         var audio = new MEPH.audio.Audio();
-        var magnification = parseFloat(me.magnification || 100) ;
+        var magnification = parseFloat(me.magnification || 100);
         var timeScroll = parseFloat(me.timeScroll || 0) / 100;
         if (me.lastSong === songBytes) {
             var start = timeScroll * me.result.buffer.buffer.duration;
@@ -58,6 +58,9 @@
             return res.first().data;
         }
         else {
+            if (me.lastSong) {
+                me.lastSong = null;
+            }
             me.lastSong = songBytes;
             return audio.loadByteArray(songBytes.res).then(function (result) {
                 me.result = result;
@@ -67,6 +70,27 @@
                 return res.first().data;
             })
         }
+    },
+    getSnippet: function () {
+        var me = this;
+        if (!me.result) {
+            return null;
+        }
+        var audio = new MEPH.audio.Audio();
+        var magnification = parseFloat(me.magnification || 100);
+        var timeScroll = parseFloat(me.timeScroll || 0) / 100;
+        var start = timeScroll * me.result.buffer.buffer.duration;
+        var time = me.result.buffer.buffer.duration / magnification;
+
+
+
+        var res = MEPH.audio.Audio.clip(me.result, start, Math.min(me.result.buffer.buffer.duration, time + start));
+        return res;
+
+    },
+    captureSnippet: function () {
+        var me = this;
+        return me.getSnippet();
     },
     createSnippets: function () {
         var me = this;

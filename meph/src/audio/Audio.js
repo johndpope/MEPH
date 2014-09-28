@@ -87,12 +87,12 @@ MEPH.define('MEPH.audio.Audio', {
          * @param {Number} from
          * @param {Number} to
          ***/
-        clip: function (resource, from, to) {
+        clip: function (resource, from, to, options) {
 
             var audio = new MEPH.audio.Audio();
 
 
-            return audio.copyToBuffer(resource, from, to, {});
+            return audio.copyToBuffer(resource, from, to, options);
         }
     },
     properties: {
