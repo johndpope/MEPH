@@ -27,6 +27,30 @@ MEPH.define('MEPH.audio.Audio', {
             biquadFilter: 'biquadFilter'
         },
 
+        /**
+         * Does a quick analysis of resource.
+         **/
+        quickAnalysis: function (resource, start, end, frames) {
+            var result = [];
+
+            start = start || 0;
+            end = end || resource.buffer.buffer.duration;
+
+            var sampleRate = resource.buffer.buffer.sampleRate;
+            var startframe = sampleRate * start;
+            var endFrame = sampleRate * end;
+            var frameCount = endFrame - startframe;
+            frames = frames || 2000;
+            frames = Math.min(frames, 2000);
+            frames = Math.round(Math.max(1, frameCount / frames));
+            for (var i = 0 ; i < resource.buffer.channelCount; i++) {
+                var channeldata = resource.buffer.buffer.getChannelData(i);
+                var subres = channeldata.skipEveryFromTo(Math.round(frames), Math.round(startframe), Math.round(endFrame), function (x) { return x; });
+                result.push({ channel: i, data: subres });
+            }
+            return result;
+        },
+
         analyze: function (audiofile, audiofiletyp, resolution) {
             var audio = new MEPH.audio.Audio(),
                 func = function (result) {

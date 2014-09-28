@@ -249,6 +249,7 @@
         audio.load(audiofile, audiofiletyp).then(function (resource) {
 
             var result = audio.copyToBuffer(resource, 40, 40.3);
+
             audio.buffer(result.buffer).volume({ name: 'volume' }).gain({ name: 'gain', volume: 0 }).complete();
             result.buffer.start();
             return new Promise(function (r) {
@@ -259,6 +260,22 @@
                     r();
                 }, 1000)
             })
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can do a quick analysis from the raw data ', function (done) {
+        var audio = new Audio();
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+
+            var result = audio.copyToBuffer(resource, 40, 40.3);
+
+            var res = Audio.quickAnalysis(result);
+            expect(res).toBeTruthy();
         }).catch(function (e) {
             expect(e).caught();
         }).then(function () {
@@ -278,12 +295,11 @@
         var audio = new Audio();
 
         audio.load(audiofile, audiofiletyp).then(function (resource) {
-
+            
             var result = audio.copyToBuffer(resource, 40, 42);
 
-            return Audio.analyze(result.buffer).then(function (res) {
-                expect(res).toBeTruthy();
-            });
+            var res = Audio.quickAnalysis(result);
+            expect(res).toBeTruthy();
 
         }).catch(function (e) {
             expect(e).caught();

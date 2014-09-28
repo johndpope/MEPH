@@ -138,7 +138,7 @@
                 visualizer = results.first().classInstance;
             ///Assert
             var drawn;
-            visualizer.draw = function () { drawn = true; }
+            visualizer.draw = function () { drawn = true; return Promise.resolve(); }
             visualizer.source = new Uint8Array(100);
             return new Promise(function (r) {
                 setTimeout(function () {

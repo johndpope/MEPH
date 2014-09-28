@@ -28,11 +28,9 @@
     },
     drawBytes: function (res) {
         var me = this;
-        me.data = res.data.select(function (x) {
-
-            var val = (x.channels[0].amplitude / x.channels[0].num);
-            if (Number.NEGATIVE_INFINITY === val) return 0;
-            return val;
-        })
+        if (!res) {
+            return null;
+        }
+        me.data = res
     }
 });

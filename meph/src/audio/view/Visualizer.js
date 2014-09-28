@@ -39,11 +39,11 @@ MEPH.define('MEPH.audio.view.Visualizer', {
         me.addTransferables();
         me.defineDependentProperties();
         me.on('altered', function (type, args) {
-            if (args.path === 'source') {
-                me.sourceChanged(args);
-            }
-            if (args.path === 'vertical' || args.path === 'scrollMutiplier') {
-                me.updateWidth(args).then(me.setLeft.bind(me));
+
+            if (args.path === 'source' || args.path === 'vertical' || args.path === 'scrollMutiplier') {
+                me.updateWidth(args).then(me.setLeft.bind(me)).then(function () {
+                    me.sourceChanged(args);
+                });
             }
         })
     },
@@ -80,7 +80,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
                 canvasCtx.fillStyle = 'rgb(200, 200, 200)';
                 canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-                canvasCtx.lineWidth = 2;
+                canvasCtx.lineWidth = 1;
                 canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
 
                 canvasCtx.beginPath();
@@ -121,9 +121,12 @@ MEPH.define('MEPH.audio.view.Visualizer', {
     },
     updateWidth: function () {
         var me = this;
-        if (me.scrollMutiplier) {
+        if (parseFloat(me.scrollMutiplier)) {
             me.width = (me.maxsize * parseFloat(me.scrollMutiplier) / 100);
             return me.draw();
+        }
+        else {
+            me.width = me.container.clientWidth;
         }
         return Promise.resolve();
     },

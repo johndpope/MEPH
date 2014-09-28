@@ -87,7 +87,7 @@
 
         //Assert
         var input = new MEPH.audio.view.VisualSelector();
-        input.draw = function () { }
+        input.draw = function () { return Promise.resolve(); }
         input.marks = MEPH.util.Observable.observable([]);
         input.position = 0;
         input.source = [];
