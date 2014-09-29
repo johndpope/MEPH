@@ -272,10 +272,12 @@ MEPH.define('MEPH.bind.Binder', {
             }).foreach(function (dom) {
                 dom.addEventListener(i, function (eventType, evnt) {
                     evnt.stopPropagation();
-                    subcontrolPackage.classInstance.fire(Binder.events.domevent, {
-                        eventType: eventType,
-                        domEvent: evnt
-                    });
+                    if (!evnt.cancelled) {
+                        subcontrolPackage.classInstance.fire(Binder.events.domevent, {
+                            eventType: eventType,
+                            domEvent: evnt
+                        });
+                    }
                 }.bind(me, i));
             });
         }

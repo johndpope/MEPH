@@ -51,6 +51,11 @@ MEPH.define('MEPH.audio.Audio', {
             return result;
         },
 
+        copy: function (resource, options) {
+            var audio = new MEPH.audio.Audio();
+            return audio.copyToBuffer(resource, 0, resource.buffer.buffer.duration, options);
+
+        },
         analyze: function (audiofile, audiofiletyp, resolution) {
             var audio = new MEPH.audio.Audio(),
                 func = function (result) {

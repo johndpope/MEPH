@@ -239,8 +239,11 @@ MEPH.define('MEPH.control.Control', {
     },
     cancelEvent: function () {
         var evntArgs = MEPH.util.Array.convert(arguments).last();
-        console.log('cancel event')
         evntArgs.domEvent.preventDefault();
+        evntArgs.domEvent.cancelBubble = true;
+        evntArgs.domEvent.stopPropagation();
+        evntArgs.domEvent.cancelled = true;
+        console.log('cancel event')
         return false;
     },
     handleDomTemplate: function () {
