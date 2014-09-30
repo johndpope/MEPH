@@ -20,6 +20,12 @@
 					'itemType': 'launch',
 					'path': '/music/Visualizer'
 				},{
+					'viewId': 'MEPH0302',
+					'description': 'Spread sheet',
+					'iconType': 'launch',
+					'itemType': 'launch',
+					'path': '/spreadsheet'
+				},{
 					'viewId': 'MEPH108',
 					'description': 'Dropbox',
 					'iconType': 'launch',

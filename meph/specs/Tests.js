@@ -155,6 +155,7 @@
                         'synchronization/SyncConflictNegotiator.spec.js',
                         'synchronization/SyncMembrane.spec.js',
                         'synchronization/SyncObject.spec.js',
+                        'table/SpreadSheet.spec.js',
                         'tree/Tree.spec.js',
                         'util/DataModel.spec.js',
                         'util/Dom.spec.js',

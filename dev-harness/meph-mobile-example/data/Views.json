@@ -19,6 +19,11 @@
             'path': '/music/Visualizer'
         },
         {
+            'viewId': 'MEPH0302',
+            'view': 'MEPHControls.table.view.SpreadSheet',
+            'path': '/spreadsheet'
+        },
+        {
             'viewId': 'MEPH003',
             'view': 'MEPHControls.button.view.Button',
             'path': '/button/Button'
