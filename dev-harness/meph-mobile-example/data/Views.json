@@ -19,6 +19,11 @@
             'path': '/music/Visualizer'
         },
         {
+            'viewId': 'scrollbar',
+            'view': 'MEPHControls.scrollbar.view.Scrollbar',
+            'path': '/scrollbar'
+        },
+        {
             'viewId': 'MEPH0302',
             'view': 'MEPHControls.table.view.SpreadSheet',
             'path': '/spreadsheet'

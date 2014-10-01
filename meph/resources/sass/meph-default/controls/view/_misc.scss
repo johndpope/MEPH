@@ -1,4 +1,5 @@
 ﻿
+
 .dropbox {
     border: 10px dashed #ccc;
     margin: 20px auto;
@@ -8,4 +9,44 @@
 .spreadsheetbody,
 .spreadsheet {
     height: 100%;
+    width: 100%;
+}
+
+.spreadsheetbody {
+    position: relative;
+    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.spreadsheetscrollbarright {
+    position: absolute;
+    right: 0;
+    z-index: 10;
+    height: 100%;
+    background-color: white;
+    top: 0px;
+}
+
+.spreadsheetscrollbarbotom {
+    width: 100%;
+    background-color: white;
+    left: 0px;
+}
+
+.scrollbarhandle {
+    background-color: #c1c1c1;
+    position: absolute;
+}
+
+.scrollbar {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+    border: 1px solid #c1c1c1;
 }

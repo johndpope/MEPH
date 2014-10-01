@@ -20,6 +20,12 @@
 					'itemType': 'launch',
 					'path': '/music/Visualizer'
 				},{
+					'viewId': 'scrollbar',
+					'description': 'Scrollbar',
+					'iconType': 'launch',
+					'itemType': 'launch',
+					'path': '/scrollbar'
+				},{
 					'viewId': 'MEPH0302',
 					'description': 'Spread sheet',
 					'iconType': 'launch',

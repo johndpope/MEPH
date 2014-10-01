@@ -11,9 +11,19 @@
             dom.style.height = parseFloat(height) + 'px';
             dom.height = parseFloat(height);
         },
+        clear: function (dom, prop) {
+            dom.style.removeProperty(prop);
+            dom[prop] = '';
+        },
         width: function (dom, width) {
             dom.style.width = parseFloat(width) + 'px';
             dom.width = parseFloat(width);
+        },
+        top: function (dom, top) {
+            dom.style.top = parseFloat(top) + 'px';
+        },
+        left: function (dom, left) {
+            dom.style.left = parseFloat(left) + 'px';
         },
         getOffset: function (dom, to) {
             var helper = function (_dom) {

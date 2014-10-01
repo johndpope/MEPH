@@ -147,6 +147,7 @@
                         'panel/Panel.spec.js',
                         'qrcode/Qrcode.spec.js',
                         'remoting/RemotingController.spec.js',
+                        'scrollbar/Scrollbar.spec.js',
                         'service/rtc/Connection.spec.js',
                         'service/ServiceCaller.spec.js',
                         'service/SignalRService.spec.js',

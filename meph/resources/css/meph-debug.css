@@ -9601,17 +9601,61 @@ input[type="range"]::-webkit-slider-thumb {
   background-color: #FF9966;
 }
 
-/* line 2, ../sass/meph-default/controls/view/_misc.scss */
+/* line 3, ../sass/meph-default/controls/view/_misc.scss */
 .dropbox {
   border: 10px dashed #ccc;
   margin: 20px auto;
   height: 300px;
 }
 
-/* line 8, ../sass/meph-default/controls/view/_misc.scss */
+/* line 9, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheetbody,
 .spreadsheet {
   height: 100%;
+  width: 100%;
+}
+
+/* line 15, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheetbody {
+  position: relative;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* line 26, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheetscrollbarright {
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  height: 100%;
+  background-color: white;
+  top: 0px;
+}
+
+/* line 35, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheetscrollbarbotom {
+  width: 100%;
+  background-color: white;
+  left: 0px;
+}
+
+/* line 41, ../sass/meph-default/controls/view/_misc.scss */
+.scrollbarhandle {
+  background-color: #c1c1c1;
+  position: absolute;
+}
+
+/* line 46, ../sass/meph-default/controls/view/_misc.scss */
+.scrollbar {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  border: 1px solid #c1c1c1;
 }
 
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */

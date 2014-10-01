@@ -1,3 +1,16 @@
-﻿<div class="spreadsheetbody col-md-12" mephid="body">
-    <canvas class="col-md-12 spreadsheet" mephid="canvas"></canvas>
-</div>
+﻿<div class="spreadsheetbody col-md-12">
+    <div class="spreadsheetbody" mephid="body">
+        <canvas class="topheader" mephid="topheader"></canvas>
+        <canvas class="leftheader" mephid="leftheader"></canvas>
+        <canvas class="spreadsheet" mephid="canvas"></canvas>
+    </div>
+    <div class="spreadsheetscrollbarright">
+        <scrollbar meph-data-virtualsize="6000"
+                   meph-data-horizontal="false"
+                   meph-data-scrollbarposition="c$.scrollbarposition"></scrollbar>
+    </div>
+    <div class="spreadsheetscrollbarbotom" mephid="bottombar">
+        <scrollbar meph-data-virtualsize="6000"
+                   meph-data-scrollbarposition="c$.scrollbarposition"></scrollbar>
+    </div>
+</div> 
