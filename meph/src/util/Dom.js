@@ -248,6 +248,31 @@ Promise.resolve().then(function () {
             getEventSource: function (evnt) {
                 return evnt.target || evnt.srcElement;;
             },
+            getPosition: function (element) {
+                var xPosition = 0;
+                var yPosition = 0;
+
+                while (element) {
+                    xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+                    yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+                    element = element.offsetParent;
+                }
+                return { x: xPosition, y: yPosition };
+            },
+            getEventPositions: function (evt, element) {
+                var positions = [];
+                if (evt.changedTouches) {
+                    var pos = MEPH.util.Dom.getPosition(element);
+                    for (i = evt.changedTouches.length; i--;) {
+                        touch = evt.changedTouches[i];
+                        positions.push({ x: touch.pageX - pos.x, y: touch.pageY - pos.y, identifier: touch.identifier });
+                    }
+                }
+                else {
+                    positions.push({ x: evt.offsetX || evt.pageX, y: evt.offsetY || evt.pageY });
+                }
+                return positions;
+            },
             tryParseAttributeJson: function (str) {
                 try {
                     return JSON.parse('{' + str + '}');

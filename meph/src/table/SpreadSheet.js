@@ -6,7 +6,7 @@
 MEPH.define('MEPH.table.SpreadSheet', {
     alias: 'spreadsheet',
     templates: true,
-    requires: ['MEPH.util.Renderer', 'MEPH.util.Style'],
+    requires: ['MEPH.util.Renderer', 'MEPH.util.Style', 'MEPH.util.Dom'],
     extend: 'MEPH.control.Control',
     properties: {
         width: 0,
@@ -35,7 +35,6 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.renderer = new MEPH.util.Renderer();
         me.columnOffsets = null;
         me.rowOffsets = null;
-        window.addEventListener("resize", me.render.bind(me));
 
         me.on('altered', function (type, args) {
             var rowheaders = parseFloat(me.rowheaders);
@@ -45,19 +44,56 @@ MEPH.define('MEPH.table.SpreadSheet', {
             if (args.path === 'rowheaders' || args.path === 'columnheaders' || args.path === 'columns' || args.path === 'vertical' || args.path === 'rows') {
                 if (!me.columnOffsets && rowheaders && cols) {
                     me.columnOffsets = [].interpolate(0, cols + rowheaders, function (x) {
-                        return (x ) * me.defaultColumnWidth;
+                        return me.defaultColumnWidth;
                     });
                 }
                 if (!me.rowOffsets && rows && colheaders) {
 
                     me.rowOffsets = [].interpolate(0, rows + colheaders, function (x) {
-                        return (x ) * me.defaultRowHeight;
+                        return me.defaultRowHeight;
                     })
                 }
                 me.render();
 
             }
         });
+    },
+    onLoaded: function () {
+        var me = this;
+        me.callParent.apply(me, arguments);
+        me.appendEvents();
+    },
+    appendEvents: function () {
+        var me = this;
+        window.addEventListener("resize", me.render.bind(me));
+        me.canvas.addEventListener('click', function (evt) {
+            var canvasPos = MEPH.util.Dom.getPosition(me.canvas);
+            var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
+            var cells = me.calculateCells(pos, canvasPos);
+            me.body.dispatchEvent(MEPH.createEvent('cellclicked', { cells: cells }));
+        })
+    },
+    calculateCells: function (positions, relativePos) {
+        var me = this;
+        var cells = positions.select(function (pos) {
+            return {
+                row: me.getRelativeRow(pos.x - relativePos.x),
+                column: me.getRelativeColum(pos.y - relativePos.y),
+            }
+        });
+        return cells;
+    },
+    getRelativeRow: function (relativeX) {
+        var me = this;
+        var visi = me.visible(relativeX, me.startRow, me.rowOffsets, me.defaultRowHeight);
+
+        return visi + me.startRow;
+    },
+    getRelativeColum: function (relativeY) {
+        var me = this;
+        var visi = me.visible(relativeY, me.startColumn, me.columnOffsets, me.defaultColumnHeight);
+
+        return visi + me.startColumn;
     },
     render: function () {
         var me = this;
@@ -83,43 +119,50 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     drawGrid: function (height, width) {
         var me = this;
+        var row = 0;
         var rowDrawFunc = function (rowOffset) {
-            return {
+            var res = {
                 shape: MEPH.util.Renderer.shapes.line,
                 end: {
                     x: width,
-                    y: rowOffset
+                    y: row
                 },
                 start: {
                     x: 0,
-                    y: rowOffset
+                    y: row
                 },
                 strokeStyle: me.gridLineColor
             }
+            row += rowOffset;
+            return res;
         };
+        var col = 0;
         var colDrawFunc = function (columnOffset) {
-            return {
+
+            var res = {
                 shape: MEPH.util.Renderer.shapes.line,
                 end: {
-                    x: columnOffset,
+                    x: col,
                     y: height
                 },
                 start: {
-                    x: columnOffset,
+                    x: col,
                     y: 0
                 },
                 strokeStyle: me.gridLineColor
-            }
+            };
+            col += columnOffset;
+            return res;
         };
         var visRows = me.visibleRows(height, me.startRow)
-        var drawInstructions = me.rowOffsets.subset(me.startRow, me.startRow + visRows).select(rowDrawFunc);
+        var drawInstructions = me.rowOffsets.subset(me.startRow, me.startRow + visRows + 1).select(rowDrawFunc);
 
         if (me.rowOffsets.length < me.startRow + visRows) {
             drawInstructions = drawInstructions.concat([].interpolate(0, me.startRow + visRows - me.rowOffsets.length, rowDrawFunc));
         }
 
-        var visCols = me.visibleColumns( width, me.startColumn)
-        drawInstructions = drawInstructions.concat(me.columnOffsets.subset(me.startColumn, me.startColumn + visCols).select(colDrawFunc));
+        var visCols = me.visibleColumns(width, me.startColumn)
+        drawInstructions = drawInstructions.concat(me.columnOffsets.subset(me.startColumn, me.startColumn + visCols + 1).select(colDrawFunc));
 
         if (me.columnOffsets.length < me.startColumn + visCols) {
             drawInstructions = drawInstructions.concat([].interpolate(0, me.startColumn + visCols - me.columnOffsets.length, colDrawFunc));
@@ -133,26 +176,27 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this;
         return me.visible(width, start, me.columnOffsets, me.defaultColumnWidth);
     },
-    visibleRows: function (width, start) {
+    visibleRows: function (height, start) {
         var me = this;
-        return me.visible(width, start, me.rowOffsets, me.defaultRowHeight);
+        return me.visible(height, start, me.rowOffsets, me.defaultRowHeight);
     },
     visible: function (width, start, offsets, defaultWidth) {
         var me = this;
         var columns = 0;
+        var total = 0;
         var res = offsets.subset(start).first(function (x) {
-
-            if (x - offsets[start] < width) {
+            if (total < width) {
                 columns++;
+                total += x;
                 return false;
             }
             return true;
         });
-        var total = offsets[columns] - offsets[start];
+
         if (total < width) {
             columns += Math.ceil((width - total) / defaultWidth);
         }
 
-        return columns +1;
+        return columns + 1;
     }
 });
