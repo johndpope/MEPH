@@ -25,7 +25,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
         defaultHeaderColumnWidth: 70,
         gridlinecolor: "#d6ccf0",
         startColumn: 0,
+        vbarposition: null,
+        hbarposition: null,
         startRow: 0,
+        verticalSize: 0,
+        horizontalSize: 0,
         cache: null
     },
     initialize: function () {
@@ -43,7 +47,25 @@ MEPH.define('MEPH.table.SpreadSheet', {
             var cols = parseFloat(me.columns);
             var rows = parseFloat(me.rows);
             var colheaders = parseFloat(me.columnheaders);
-            if (args.path === 'rowheaders' || args.property === "gridlinecolor" || args.path === 'columnheaders' || args.path === 'columns' || args.path === 'vertical' || args.path === 'rows') {
+            if (args.path === 'rowheaders' ||
+                args.property === "gridlinecolor" ||
+                args.path === 'columnheaders' ||
+                args.path === 'columns' ||
+                args.path === 'vertical' ||
+                
+                args.property === 'startColumn' ||
+                args.property === 'startRow' ||
+                args.property === 'vbarposition' ||
+                args.path === 'rows') {
+
+                if (args.property === 'vbarposition') {
+                    me.setStartRow(me.vbarposition);
+                }
+
+                if (args.property === 'hbarposition') {
+                    me.setStartColumn(me.hbarposition);
+                }
+
                 if (!me.columnOffsets && rowheaders && cols) {
                     me.columnOffsets = [].interpolate(0, cols, function (x) {
                         return me.defaultColumnWidth;
@@ -91,6 +113,32 @@ MEPH.define('MEPH.table.SpreadSheet', {
         });
         return cells;
     },
+    setStartRow: function (percentage) {
+        if (!isNaN(percentage)) {
+            var me = this;
+            me.startRow = me.setStart(percentage, me.rowOffsets, me.calculateVertical());
+        }
+    },
+    setStart: function (percentage, offsets, vs) {
+        if (!isNaN(percentage)) {
+            var me = this;
+            var voffset = vs * percentage;;
+            var t = 0;
+            var index = 0;
+            offsets.first(function (x, i) {
+                t += x;
+                index = i;
+                return t > voffset;
+            });
+            return index;
+        }
+    },
+    setStartColumn: function (percentage) {
+        if (!isNaN(percentage)) {
+            var me = this;
+            me.startColumn = me.setStart(percentage, me.columnOffsets, me.calculateHorizontal());
+        }
+    },
     getRelativeRow: function (relativeX) {
         var me = this;
         var visi = me.visible(relativeX, me.startRow, me.rowOffsets, me.defaultRowHeight);
@@ -103,6 +151,16 @@ MEPH.define('MEPH.table.SpreadSheet', {
 
         return visi + me.startColumn;
     },
+    calculateVertical: function () {
+        var me = this;
+        me.verticalSize = me.verticalSize || me.rowOffsets.summation(function (x, t) { return t += x; });
+        return me.verticalSize;
+    },
+    calculateHorizontal: function () {
+        var me = this;
+        me.horizontalSize = me.horizontalSize || me.columnOffsets.summation(function (x, t) { return t += x; });
+        return me.horizontalSize;
+    },
     render: function () {
         var me = this;
         if (!me.rowOffsets || !me.columnOffsets)
@@ -112,6 +170,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
         me.animFrame = requestAnimationFrame(function () {
             var rows, columns, headers;
+            me.animFrame = null;
             if (!me.rendered) {
                 me.renderer.setCanvas(me.canvas);
                 me.leftRenderer.setCanvas(me.leftheader);
@@ -124,6 +183,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
             var topcanvasHeight = me.getTopCanvasHeight();
             canvasheight -= topcanvasHeight;
             canvaswidth -= leftcanvasWidth;
+            me.calculateVertical();
+            me.calculateHorizontal();
 
             Style.left(me.canvas, leftcanvasWidth);
             Style.top(me.canvas, topcanvasHeight);
@@ -152,6 +213,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.drawGrid(canvasheight, canvaswidth);
             me.drawTopGrid(topcanvasHeight, canvaswidth);
             me.drawLeftGrid(canvasheight, leftcanvasWidth);
+
         });
     },
     getLeftCanvasWidth: function () {
@@ -170,17 +232,17 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     drawTopGrid: function (height, width) {
         var me = this;
-        me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer);
+        me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, 0, 0);
     },
     drawLeftGrid: function (height, width) {
         var me = this;
-        me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer);
+        me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, 0, 0);
     },
     drawGrid: function (height, width) {
         var me = this;
-        me.drawSubGrid(me.canvas, me.rowOffsets, me.columnOffsets, height, width, me.renderer);
+        me.drawSubGrid(me.canvas, me.rowOffsets, me.columnOffsets, height, width, me.renderer, me.startRow, me.startColumn);
     },
-    drawSubGrid: function (canvas, rowOffsets, columnOffsets, height, width, renderer) {
+    drawSubGrid: function (canvas, rowOffsets, columnOffsets, height, width, renderer, startRow, startColumn) {
         var me = this;
         var row = 0;
         var rowDrawFunc = function (rowOffset) {
@@ -217,18 +279,18 @@ MEPH.define('MEPH.table.SpreadSheet', {
             col += columnOffset;
             return res;
         };
-        var visRows = me.visibleRows(height, me.startRow)
-        var drawInstructions = rowOffsets.subset(me.startRow, me.startRow + visRows + 1).select(rowDrawFunc);
+        var visRows = me.visibleRows(height, startRow)
+        var drawInstructions = rowOffsets.subset(startRow, startRow + visRows + 1).select(rowDrawFunc);
 
-        if (rowOffsets.length < me.startRow + visRows) {
-            drawInstructions = drawInstructions.concat([].interpolate(0, me.startRow + visRows - rowOffsets.length, rowDrawFunc));
+        if (rowOffsets.length < startRow + visRows) {
+            drawInstructions = drawInstructions.concat([].interpolate(0, startRow + visRows - rowOffsets.length, rowDrawFunc));
         }
 
-        var visCols = me.visibleColumns(width, me.startColumn)
-        drawInstructions = drawInstructions.concat(columnOffsets.subset(me.startColumn, me.startColumn + visCols + 1).select(colDrawFunc));
+        var visCols = me.visibleColumns(width, startColumn)
+        drawInstructions = drawInstructions.concat(columnOffsets.subset(startColumn, startColumn + visCols + 1).select(colDrawFunc));
 
-        if (columnOffsets.length < me.startColumn + visCols) {
-            drawInstructions = drawInstructions.concat([].interpolate(0, me.startColumn + visCols - columnOffsets.length, colDrawFunc));
+        if (columnOffsets.length < startColumn + visCols) {
+            drawInstructions = drawInstructions.concat([].interpolate(0, startColumn + visCols - columnOffsets.length, colDrawFunc));
         }
 
         Style.height(canvas, height)
