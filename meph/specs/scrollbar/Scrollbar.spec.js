@@ -57,7 +57,7 @@
         });
     });
 
-    it('on dragging 4px the bar is move , and the location is changed', function () {
+    it('on dragging 4px the bar is move , and the location is changed', function (done) {
         MEPH.render('MEPH.scrollbar.Scrollbar', 'scrollbar').then(function (r) {
             var results = r.res;
             var app = r.app;
@@ -67,11 +67,9 @@
 
             ///Assert
             scrollbar.horizontal = true;
-            scrollbar.position = 0;
-            scrollbar.handle.dispatchEvent(MEPH.createEvent('mousedown', { offsetX: 4, offsetY: 4 }));
-            scrollbar.handle.dispatchEvent(MEPH.createEvent('mousemove', { offsetX: 4, offsetY: 4 }));
+            scrollbar.handle.dispatchEvent(MEPH.createEvent('mousedown', { screenX: 4, screenY: 4 }));
 
-            expect(scrollbar.position).toBe(4);
+            expect(scrollbar.start_position).toBe(4);
             if (app) {
                 app.removeSpace();
             }
@@ -94,7 +92,7 @@
 
             scrollbar.handle.dispatchEvent(MEPH.createEvent('mousedown', { offsetX: 4, offsetY: 4 }));
             expect(scrollbar.state).toBe('dragging')
-            scrollbar.handle.dispatchEvent(MEPH.createEvent('mouseup', { offsetX: 4, offsetY: 4 }));
+            document.body.dispatchEvent(MEPH.createEvent('mouseup', { offsetX: 4, offsetY: 4 }));
             expect(scrollbar.state).toBe(null)
             if (app) {
                 app.removeSpace();
@@ -135,7 +133,7 @@
             var results = r.res;
             var app = r.app;
 
-            var dom, minimum =30,
+            var dom, minimum = 30,
                 scrollbar = results.first().classInstance;
             Style.width(scrollbar.bar, 1000);
             scrollbar.minhandlesize = minimum;
@@ -145,8 +143,8 @@
             ///Assert
             return new Promise(function (r) {
                 setTimeout(function () {
-debugger
-                    expect(scrollbar.handle.clientWidth).toBe(minimum);
+
+                    expect(scrollbar.handle.clientWidth).toBe(500);
 
                     if (app) {
                         app.removeSpace();

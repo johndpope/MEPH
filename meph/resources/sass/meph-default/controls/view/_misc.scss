@@ -10,12 +10,12 @@
 .spreadsheet {
     height: 100%;
     width: 100%;
+    z-index:11;
 }
 
 .spreadsheetbody {
     position: relative;
-    
-    -webkit-touch-callout: none;
+    /**/-webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
@@ -49,4 +49,16 @@
     position: relative;
     z-index: 10;
     border: 1px solid #c1c1c1;
+}
+
+
+.activearea {
+    display: none;
+    position: absolute;
+    border: dotted 2px #4ba2e4;
+}
+
+.activearea.active {
+    display: block;
+    z-index:10;
 }
