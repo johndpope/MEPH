@@ -41,7 +41,10 @@ MEPH.define('MEPH.table.SpreadSheet', {
         horizontalSize: 0,
         selectedleftheader: null,
         selectedtopheader: null,
-        cache: null
+        cache: null,
+        visibleleftheader: null,
+        visibletopheader: null,
+        visiblegrid: null
     },
     initialize: function () {
         var me = this;
@@ -122,7 +125,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     appendEvents: function () {
         var me = this;
-        window.addEventListener("resize", me.render.bind(me));
+        window.addEventListener("resize", me.update.bind(me));
         me.appendCanvasEvents();
         me.appendHeaderEvents();
     },
@@ -696,13 +699,26 @@ MEPH.define('MEPH.table.SpreadSheet', {
             cancelAnimationFrame(me.updateCellsAnimFrame);
         }
         me.updateCellsAnimFrame = requestAnimationFrame(function () {
-            var headerInstructions = me.getTopHeaderInstructions();
-            if (headerInstructions) { 
+            var headerInstructions = me.getTopHeaderInstructions(me.visibletopheader);
+            if (headerInstructions) {
                 me.topContentRenderer.draw(headerInstructions);
+            };
+            headerInstructions = me.getLeftHeaderInstructions(me.visibleleftheader);
+            if (headerInstructions) {
+                me.leftContentRenderer.draw(headerInstructions);
             }
+            headerInstructions = me.getMainContentInstructions(me.visiblegrid);
+            if (headerInstructions) {
+                me.rendererContent.draw(headerInstructions);
+            }
+            me.updateCellsAnimFrame = null;
         });
     },
-    getTopHeaderInstructions: function () {
+    getTopHeaderInstructions: function (visibleCellData) {
+    },
+    getLeftHeaderInstructions: function (visibleCellData) {
+    },
+    getMainContentInstructions: function (visibleCellData) {
     },
     render: function () {
         var me = this;
@@ -771,15 +787,15 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     drawTopGrid: function (height, width) {
         var me = this;
-        me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, 0, 0);
+        me.visibletopheader = me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, 0, 0);
     },
     drawLeftGrid: function (height, width) {
         var me = this;
-        me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, 0, 0);
+        me.visibleleftheader = me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, 0, 0);
     },
     drawGrid: function (height, width) {
         var me = this;
-        me.drawSubGrid(me.canvas, me.rowOffsets, me.columnOffsets, height, width, me.renderer, me.startRow, me.startColumn);
+        me.visiblegrid = me.drawSubGrid(me.canvas, me.rowOffsets, me.columnOffsets, height, width, me.renderer, me.startRow, me.startColumn);
     },
     drawSubGrid: function (canvas, rowOffsets, columnOffsets, height, width, renderer, startRow, startColumn) {
         var me = this;
@@ -838,6 +854,12 @@ MEPH.define('MEPH.table.SpreadSheet', {
         Style.height(canvas, height)
         Style.width(canvas, width);
         renderer.draw(drawInstructions);
+        return {
+            visibleColumns: visCols,
+            visibleRows: visRows,
+            row: startRow,
+            column: startColumn
+        }
     },
     /**
      * Gets the number of visible columns.

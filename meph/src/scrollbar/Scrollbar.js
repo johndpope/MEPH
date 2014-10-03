@@ -24,23 +24,28 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
         me.cache = {};
 
         me.on('altered', function (type, args) {
-            if (args.path === 'virtualsize' || args.path === 'minhandlesize' || args.path === 'horizontal') {
+            if (args.property === 'virtualsize' || args.path === 'virtualsize' || args.path === 'minhandlesize' || args.path === 'horizontal') {
                 me.horizontal = me.horizontal === 'false' || !me.horizontal ? false : true;
-                if (me.horizontal) {
-                    Style.width(me.handle, Math.max(me.minhandlesize, me.bar.clientWidth * (me.bar.clientWidth / me.virtualsize)));
-                }
-                else {
-                    Style.height(me.handle, Math.max(me.minhandlesize, me.bar.clientHeight / me.virtualsize));
-                }
+                me.sizehandle();
                 me.stylebar();
             }
         });
+        window.addEventListener('resize', me.sizehandle.bind(me));
     },
     onLoaded: function () {
         var me = this;
         me.callParent.apply(me, arguments);
         me.appendEvents();
         me.stylebar();
+    },
+    sizehandle: function () {
+        var me = this;
+        if (me.horizontal) {
+            Style.width(me.handle, Math.max(me.minhandlesize, me.bar.clientWidth * (me.bar.clientWidth / me.virtualsize)));
+        }
+        else {
+            Style.height(me.handle, Math.max(me.minhandlesize, me.bar.clientHeight / me.virtualsize));
+        }
     },
     stylebar: function () {
         var me = this;

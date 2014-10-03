@@ -4,7 +4,7 @@
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
     requires: [
-                'MEPH.input.Color', 'MEPH.mobile.activity.view.ActivityView', 'MEPH.table.SpreadSheet'],
+                'MEPH.input.Color', 'MEPH.mobile.activity.view.ActivityView', 'MEPHControls.table.view.TestSpreadSheet'],
     properties: {
     },
     onLoaded: function () {
