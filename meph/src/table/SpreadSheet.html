@@ -1,10 +1,17 @@
 ﻿<div class="spreadsheet noselect">
     <div class="spreadsheetbody" mephid="body">
         <canvas class="topheader" mephid="topheader"></canvas>
+        <canvas class="topheader bottom" mephid="topheadercontent"></canvas>
         <canvas class="leftheader" mephid="leftheader"></canvas>
+        <canvas class="leftheader bottom" mephid="leftheadercontent"></canvas>
         <canvas class="spreadsheet" mephid="canvas"></canvas>
+        <canvas class="spreadsheet bottom" mephid="canvascontent"></canvas>
+        <div class="activearea" mephid="activeareatop"></div>
+        <div class="activearea" mephid="activearealeft"></div>
         <div class="activearea" mephid="activearea"></div>
         <div class="selectarea" mephid="selectarea"></div>
+        <div class="selectarea" mephid="selectarealeft"></div>
+        <div class="selectarea" mephid="selectareatop"></div>
     </div>
     <div class="spreadsheetscrollbarright">
         <scrollbar meph-data-virtualsize="c$.verticalSize"

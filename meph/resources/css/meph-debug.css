@@ -9700,6 +9700,18 @@ input[type="range"]::-webkit-slider-thumb {
   background-color: rgba(93, 186, 204, 0.2);
 }
 
+/* line 91, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheet .bottom {
+  z-index: -1;
+}
+
+/* line 95, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheet .spreadsheet,
+.spreadsheet .topheader,
+.spreadsheet .leftheader {
+  position: absolute;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

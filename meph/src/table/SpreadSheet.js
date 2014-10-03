@@ -10,6 +10,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
     extend: 'MEPH.control.Control',
     statics: {
         states: {
+            Selectingleft: 'selectingleft',
+            Selectingtop: 'selectingtop',
             Selecting: 'selecting'
         }
     },
@@ -21,11 +23,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
         columnOffsets: null,
         rowOffsets: null,
         columnheaders: 0,
+        endselectonmouseout: false,
         rowheaders: 0,
         columns: null,
         rows: null,
         defaultRowHeight: 25,
         selectedrange: null,
+        selectedrangeleft: null,
+        selectedrangetop: null,
         defaultColumnWidth: 80,
         gridlinecolor: "#d6ccf0",
         startColumn: 0,
@@ -34,15 +39,24 @@ MEPH.define('MEPH.table.SpreadSheet', {
         startRow: 0,
         verticalSize: 0,
         horizontalSize: 0,
+        selectedleftheader: null,
+        selectedtopheader: null,
         cache: null
     },
     initialize: function () {
         var me = this;
         me.callParent.apply(me, arguments);
         me.cache = {};
+
         me.renderer = new MEPH.util.Renderer();
+        me.rendererContent = new MEPH.util.Renderer();
+
         me.leftRenderer = new MEPH.util.Renderer();
+        me.leftContentRenderer = new MEPH.util.Renderer();
+
         me.topRenderer = new MEPH.util.Renderer();
+        me.topContentRenderer = new MEPH.util.Renderer();
+
         me.columnOffsets = null;
         me.rowOffsets = null;
         me.requestActiveSelect = null;
@@ -100,10 +114,135 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this;
         me.callParent.apply(me, arguments);
         me.appendEvents();
+
+        me.rendererContent.setCanvas(me.canvascontent);
+        me.leftContentRenderer.setCanvas(me.leftheadercontent);
+        me.topContentRenderer.setCanvas(me.topheadercontent);
+
     },
     appendEvents: function () {
         var me = this;
         window.addEventListener("resize", me.render.bind(me));
+        me.appendCanvasEvents();
+        me.appendHeaderEvents();
+    },
+    appendHeaderEvents: function () {
+        var me = this;
+        me.topheader.addEventListener('click', function (evt) {
+            me.handleSingleHeaderCellCalculations(me.topheader, evt, 'topheadercellclicked', 'top');
+        });
+        me.leftheader.addEventListener('click', function (evt) {
+            me.handleSingleHeaderCellCalculations(me.leftheader, evt, 'leftheadercellclicked', 'left');
+        });
+        me.topheader.addEventListener('mousemove', function (evt) {
+            me.handleSingleHeaderCellCalculations(me.topheader, evt, 'mousemovetopheader', 'top');
+        });
+        me.leftheader.addEventListener('mousemove', function (evt) {
+            me.handleSingleHeaderCellCalculations(me.leftheader, evt, 'mousemoveleftheader', 'left');
+        });
+        me.topheader.addEventListener('mousemovetopheader', function (evt) {
+            me.handleMouseMoveHeaderCell(evt, 'top');
+        });
+        me.leftheader.addEventListener('mousemoveleftheader', function (evt) {
+            me.handleMouseMoveHeaderCell(evt, 'left');
+        });
+
+        me.leftheader.addEventListener('mousedown', me.headerMouseDownHandler.bind(me, 'left', me.leftheader));
+
+        me.leftheader.addEventListener('mousemove', me.headerMouseMoveHandler.bind(me, 'left', me.leftheader));
+
+        me.leftheader.addEventListener('mousemoveselectleft', me.headerMouseMoveSelectHandler.bind(me, 'left', me.leftheader));
+
+        me.leftheader.addEventListener('mouseup', me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
+        if (me.endselectonmouseout)
+            me.leftheader.addEventListener('mouseout', me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
+
+
+
+        me.topheader.addEventListener('mousedown', me.headerMouseDownHandler.bind(me, 'top', me.topheader));
+
+        me.topheader.addEventListener('mousemove', me.headerMouseMoveHandler.bind(me, 'top', me.topheader));
+
+        me.topheader.addEventListener('mousemoveselecttop', me.headerMouseMoveSelectHandler.bind(me, 'top', me.topheader));
+
+        me.topheader.addEventListener('mouseup', me.onHeaderMouseupSelecting.bind(me, 'top', me.topheader));
+        if (me.endselectonmouseout)
+            me.topheader.addEventListener('mouseout', me.onHeaderMouseupSelecting.bind(me, 'top', me.topheader));
+    },
+    onHeaderMouseupSelecting: function (offset, header, evt) {
+        var me = this;
+        if (me.state === MEPH.table.SpreadSheet.states.Selecting + offset) {
+            var selectedstartrow = me.getSelectedStartRow(me.selecting);
+            me['selectedrange' + offset] = me.selecting;
+            if (me['selected' + offset + 'header']) {
+                me['selected' + offset + 'header'].clear();
+                if (selectedstartrow) {
+                    [].interpolate(selectedstartrow.startrow, selectedstartrow.endrow + 1, function (x) {
+                        [].interpolate(selectedstartrow.startcolumn, selectedstartrow.endcolumn + 1, function (y) {
+                            me['selected' + offset + 'header'].push({
+                                row: x,
+                                column: y
+                            });
+                        })
+                    });
+                }
+            }
+            me.selecting = null;
+            me.state = null;
+        }
+    },
+    headerMouseMoveSelectHandler: function (offset, header, evt) {
+        var me = this; var selecting = evt.selecting;
+        if (!selecting || !selecting.end || !selecting.start) {
+            return null;
+        }
+        me.handleHeaderMouseMoveCellSelect(offset, evt);
+    },
+
+    handleHeaderMouseMoveCellSelect: function (offset, evt) {
+        var me = this;
+        if (evt.selecting) {
+            var info = me.getSelectedStartRow(evt.selecting);
+            if (info) {
+                var minCellLeftPosition = me.getCellPosition({ row: info.startrow, column: info.startcolumn }, offset);
+                var maxCellLeftPosition = me.getCellPosition({ row: info.startrow, column: info.endcolumn + 1 }, offset);
+
+                var minCellTopPosition = me.getCellPosition({ row: info.startrow, column: info.endcolumn }, offset);
+                var maxCellTopPosition = me.getCellPosition({ row: info.endrow + 1, column: info.endcolumn }, offset);
+
+                me.setHeaderActiveSelect(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y, offset)
+            }
+        }
+    },
+
+    headerMouseMoveHandler: function (offset, header, evt) {
+        var me = this;
+        if (me.state === MEPH.table.SpreadSheet.states.Selecting + offset) {
+
+            var cells = me.getHeaderCells(evt);
+            var cell = cells.first()
+            me.selecting.end = cell;
+            header.dispatchEvent(MEPH.createEvent('mousemoveselect' + offset, {
+                selecting: me.selecting
+            }));
+        }
+    },
+    headerMouseDownHandler: function (offset, header, evt) {
+        var me = this;
+        var cells = me.getHeaderCells(evt, offset);
+        var cell = cells.first()
+
+        me.selecting = {
+            start: cell
+        };
+        document.body.classList.add('noselect');
+        me.state = MEPH.table.SpreadSheet.states.Selecting + offset;
+        header.dispatchEvent(MEPH.createEvent(offset + 'selectstart', {
+            cell: cell
+        }));
+    },
+    appendCanvasEvents: function () {
+        var me = this;
         me.canvas.addEventListener('click', function (evt) {
             me.handleSingleCellCalculations(evt, 'cellclicked');
         });
@@ -149,7 +288,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
 
         me.canvas.addEventListener('mouseout', me.onMouseupSelecting.bind(me));
         me.canvas.addEventListener('mouseup', me.onMouseupSelecting.bind(me));
-        var removenoselect= function () {
+        var removenoselect = function () {
             document.body.classList.remove('noselect');
         }
         document.body.addEventListener('mouseup', removenoselect);
@@ -207,12 +346,35 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var minCellTopPosition = me.getCellPosition(minCellTop);
         var maxCellTopPosition = me.getCellPosition({ row: maxCellTop.row + 1, column: maxCellTop.column });
 
-        me.setActiveCell(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y)
+        me.setActiveCell(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y);
+    },
+    handleMouseMoveHeaderCell: function (evt, header) {
+        var me = this;
+        var minCellLeft = evt.cells.minSelect(function (x) { return x.row; });
+        var maxCellLeft = evt.cells.maxSelection(function (x) { return x.row; });
+
+        var minCellTop = evt.cells.minSelect(function (x) { return x.column });
+        var maxCellTop = evt.cells.maxSelection(function (x) { return x.column; });
+
+        var minCellLeftPosition = me.getCellPosition(minCellLeft, header);
+        var maxCellLeftPosition = me.getCellPosition({ row: maxCellLeft.row, column: maxCellLeft.column + 1 }, header);
+
+        var minCellTopPosition = me.getCellPosition(minCellTop, header);
+        var maxCellTopPosition = me.getCellPosition({ row: maxCellTop.row + 1, column: maxCellTop.column }, header);
+
+        me.setActiveHeaderCell(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y, header)
     },
     updateSelectedMouse: function () {
         var me = this;
         if (me.selectedrange) {
             me.handleMouseMoveCellSelect({ selecting: me.selectedrange });
+        }
+        if (me.selectedrangeleft) {
+
+            me.handleHeaderMouseMoveCellSelect('left', { selecting: me.selectedrangeleft });
+        }
+        if (me.selectedrangetop) {
+            me.handleHeaderMouseMoveCellSelect('top', { selecting: me.selectedrangetop });
         }
     },
     handleMouseMoveCellSelect: function (evt) {
@@ -229,6 +391,72 @@ MEPH.define('MEPH.table.SpreadSheet', {
                 me.setActiveSelect(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y)
             }
         }
+    },
+    setHeaderActiveSelect: function (x1, x2, y1, y2, header) {
+        var me = this,
+            area = {
+                x1: x1,
+                x2: x2,
+                y1: y1,
+                y2: y2
+            };
+        var requestHeaderActiveSelectheader = 'requestHeaderActiveSelectArea' + header;
+        if (me[requestHeaderActiveSelectheader] != null || me[requestHeaderActiveSelectheader] != undefined) {
+            cancelAnimationFrame(me[requestHeaderActiveSelectheader]);
+        }
+        var activeareaheader = 'selectarea' + header;
+        var activearea = 'selectArea' + header;
+
+        me[requestHeaderActiveSelectheader] = requestAnimationFrame(function () {
+            if (me[activeareaheader] && MEPH.equals(me[activeareaheader], area)) {
+            }
+            else if (arguments.length === 4) {
+                me[activearea] = area;
+
+                Style.top(me[activeareaheader], y1 + (header === 'left' ? me.getColumnHeaderHeight() : 0));
+                Style.left(me[activeareaheader], x1 + (header === 'left' ? 0 : me.getRowsHeaderWidth()));
+                Style.width(me[activeareaheader], x2 - x1);
+                Style.height(me[activeareaheader], y2 - y1);
+                me[activeareaheader].classList.add('active')
+            }
+            else {
+                me[activeareaheader].classList.remove('active')
+            }
+            me['requestHeaderActiveSelect' + header] = null;
+        }.bind(x1, x2, y1, y2))
+    },
+    setActiveHeaderCell: function (x1, x2, y1, y2, header) {
+        var me = this,
+            area = {
+                x1: x1,
+                x2: x2,
+                y1: y1,
+                y2: y2
+            };
+        var requestHeaderActiveSelectheader = 'requestHeaderActiveSelect' + header;
+        if (me[requestHeaderActiveSelectheader] != null || me[requestHeaderActiveSelectheader] != undefined) {
+            cancelAnimationFrame(me[requestHeaderActiveSelectheader]);
+        }
+        var activeareaheader = 'activearea' + header;
+        var activearea = 'activeArea' + header;
+
+        me[requestHeaderActiveSelectheader] = requestAnimationFrame(function () {
+            if (me[activeareaheader] && MEPH.equals(me[activeareaheader], area)) {
+            }
+            else if (arguments.length === 4) {
+                me[activearea] = area;
+
+                Style.top(me[activeareaheader], y1 + (header === 'left' ? me.getColumnHeaderHeight() : 0));
+                Style.left(me[activeareaheader], x1 + (header === 'left' ? 0 : me.getRowsHeaderWidth()));
+                Style.width(me[activeareaheader], x2 - x1);
+                Style.height(me[activeareaheader], y2 - y1);
+                me[activeareaheader].classList.add('active')
+            }
+            else {
+                me[activeareaheader].classList.remove('active')
+            }
+            me['requestHeaderActiveSelect' + header] = null;
+        }.bind(x1, x2, y1, y2))
     },
     setActiveSelect: function (x1, x2, y1, y2) {
         var me = this,
@@ -288,6 +516,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.requestActiveCell = null;
         }.bind(x1, x2, y1, y2))
     },
+    handleSingleHeaderCellCalculations: function (canvas, evt, outevnt, offset) {
+        var me = this;
+        var cells = me.getHeaderCells(evt, offset);
+        canvas.dispatchEvent(MEPH.createEvent(outevnt, {
+            cells: cells,
+            offset: offset
+        }));
+    },
     handleSingleCellCalculations: function (evt, outevnt) {
         var me = this;
         var cells = me.getCanvasCells(evt);
@@ -295,24 +531,59 @@ MEPH.define('MEPH.table.SpreadSheet', {
             cells: cells
         }));
     },
+    getHeaderCells: function (evt, offsets) {
+        var me = this;
+        var canvasPos = MEPH.util.Dom.getPosition(offsets === 'left' ? me.leftheader : me.topheader);
+        var pos = MEPH.util.Dom.getEventPositions(evt, offsets === 'left' ? me.leftheader : me.topheader);
+        var cells = me.calculateHeaderCells(pos, {
+            x: 0,// me.getRowsHeaderWidth(),
+            y: 0//me.getColumnHeaderHeight()
+        }, offsets);
+        return cells;
+    },
     getCanvasCells: function (evt) {
         var me = this;
         var canvasPos = MEPH.util.Dom.getPosition(me.canvas);
         var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
-        var cells = me.calculateCells(pos, { x: me.getRowsHeaderWidth(), y: me.getColumnHeaderHeight() });
+        var cells = me.calculateCells(pos, {
+            x: 0,
+            y: 0
+        });
         return cells;
     },
-    getCellPosition: function (cell) {
+    getCellPosition: function (cell, offset) {
         var me = this;
         var t = 0;
         var u = 0;
-        me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
-            t += x;
-        });
-        me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
-            u += x;
-        });
+        if (offset == 'top') {
+            me.rowHeaderOffsets.subset(me.startRow, cell.row).first(function (x) {
+                t += x;
+            });
+            //if (cell.row >= me.rowHeaderOffsets.length) {
+            //    var header = me.rowHeaderOffsets.length - cell.row;
+            //    t += Math.ceil(header / me.defaultRowHeight);
+            //}
+        }
+        else {
+            me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
+                t += x;
+            });
+        }
 
+        if (offset == 'left') {
+            me.columnHeaderOffsets.subset(me.startColumn, cell.column).first(function (x) {
+                u += x;
+            });
+            //if (cell.column >= me.columnHeaderOffsets.length) {
+            //    var header = me.columnHeaderOffsets.length - cell.column;
+            //    u += Math.ceil(header / me.defaultColumnHeight);
+            //}
+        }
+        else {
+            me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
+                u += x;
+            });
+        }
         return {
             x: u,
             y: t
@@ -331,6 +602,16 @@ MEPH.define('MEPH.table.SpreadSheet', {
             return t += x;
         });
         return me.cache.rowHeaderWidth;
+    },
+    calculateHeaderCells: function (positions, relativePos, offset) {
+        var me = this;
+        var cells = positions.select(function (pos) {
+            return {
+                row: me.getRelativeRow(pos.y - relativePos.y, offset),
+                column: me.getRelativeColum(pos.x - relativePos.x, offset),
+            }
+        });
+        return cells;
     },
     calculateCells: function (positions, relativePos) {
         var me = this;
@@ -368,15 +649,28 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.startColumn = me.setStart(percentage, me.columnOffsets, me.calculateHorizontal());
         }
     },
-    getRelativeRow: function (relativeX) {
-        var me = this;
-        var visi = me.visible(relativeX, me.startRow, me.rowOffsets, me.defaultRowHeight);
+    getRelativeRow: function (relativeX, offset) {
+        var me = this,
+            startrow = me.startRow,
+            offsets = me.rowOffsets;
+        switch (offset) {
+            case 'top':
+                offsets = me.rowHeaderOffsets;
+                break;
+        }
+        var visi = me.visible(relativeX, startrow, offsets, me.defaultRowHeight);
 
         return visi + me.startRow;
     },
-    getRelativeColum: function (relativeY) {
-        var me = this;
-        var visi = me.visible(relativeY, me.startColumn, me.columnOffsets, me.defaultColumnHeight);
+    getRelativeColum: function (relativeY, offset) {
+        var me = this,
+           offsets = me.columnOffsets;
+        switch (offset) {
+            case 'left':
+                offsets = me.columnHeaderOffsets;
+                break;
+        }
+        var visi = me.visible(relativeY, me.startColumn, offsets, me.defaultColumnWidth);
 
         return visi + me.startColumn;
     },
@@ -390,10 +684,25 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.horizontalSize = me.horizontalSize || me.columnOffsets.summation(function (x, t) { return t += x; });
         return me.horizontalSize;
     },
-    update: function(){
+    update: function () {
         var me = this;
         me.render();
         me.updateSelectedMouse();
+        me.updateCells();
+    },
+    updateCells: function () {
+        var me = this;
+        if (me.updateCellsAnimFrame !== null && me.updateCellsAnimFrame !== undefined) {
+            cancelAnimationFrame(me.updateCellsAnimFrame);
+        }
+        me.updateCellsAnimFrame = requestAnimationFrame(function () {
+            var headerInstructions = me.getTopHeaderInstructions();
+            if (headerInstructions) { 
+                me.topContentRenderer.draw(headerInstructions);
+            }
+        });
+    },
+    getTopHeaderInstructions: function () {
     },
     render: function () {
         var me = this;
@@ -421,25 +730,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.calculateVertical();
             me.calculateHorizontal();
 
-            Style.left(me.canvas, leftcanvasWidth);
-            Style.top(me.canvas, topcanvasHeight);
+            me.positionCanvas(me.canvas, leftcanvasWidth, topcanvasHeight, canvaswidth, canvasheight);
+            me.positionCanvas(me.canvascontent, leftcanvasWidth, topcanvasHeight, canvaswidth, canvasheight);
 
-            Style.width(me.canvas, canvaswidth);
-            Style.height(me.canvas, canvasheight);
+            me.positionCanvas(me.leftheader, 0, topcanvasHeight, leftcanvasWidth, canvasheight);
+            me.positionCanvas(me.leftheadercontent, 0, topcanvasHeight, leftcanvasWidth, canvasheight);
 
-            Style.position(me.leftheader, 'absolute');
-            Style.position(me.canvas, 'absolute');
-            Style.position(me.topheader, 'absolute');
-
-            Style.top(me.leftheader, topcanvasHeight);
-            Style.width(me.leftheader, leftcanvasWidth);
-            Style.height(me.leftheader, canvasheight);
-            Style.left(me.leftheader, 0);
-
-            Style.top(me.topheader, 0);
-            Style.left(me.topheader, leftcanvasWidth);
-            Style.width(me.topheader, canvaswidth);
-            Style.height(me.topheader, topcanvasHeight);
+            me.positionCanvas(me.topheader, leftcanvasWidth, 0, canvaswidth, topcanvasHeight);
+            me.positionCanvas(me.topheadercontent, leftcanvasWidth, 0, canvaswidth, topcanvasHeight);
 
             row = me.height;
             columns = me.width;
@@ -450,6 +748,12 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.drawLeftGrid(canvasheight, leftcanvasWidth);
 
         });
+    },
+    positionCanvas: function (canvas, left, top, width, height) {
+        Style.left(canvas, left);
+        Style.top(canvas, top);
+        Style.width(canvas, width);
+        Style.height(canvas, height);
     },
     getLeftCanvasWidth: function () {
         var me = this;
@@ -498,7 +802,6 @@ MEPH.define('MEPH.table.SpreadSheet', {
         };
         var col = 0;
         var colDrawFunc = function (columnOffset) {
-
             var res = {
                 shape: MEPH.util.Renderer.shapes.line,
                 end: {
@@ -536,20 +839,37 @@ MEPH.define('MEPH.table.SpreadSheet', {
         Style.width(canvas, width);
         renderer.draw(drawInstructions);
     },
+    /**
+     * Gets the number of visible columns.
+     * @param {Number} width
+     * @param {Number} start
+     ****/
     visibleColumns: function (width, start) {
         var me = this;
         return me.visible(width, start, me.columnOffsets, me.defaultColumnWidth);
     },
+    /**
+     * Gets the number of visible rows.
+     * @param {Number} height
+     * @param {Number} start
+     ****/
     visibleRows: function (height, start) {
         var me = this;
         return me.visible(height, start, me.rowOffsets, me.defaultRowHeight);
     },
+    /**
+     * Gets the number of visible parts from a set of offsets.
+     * @param {Number} width
+     * @param {Number} start
+     * @param {Array} offsets
+     * @param {Number} defaultWidth
+     ***/
     visible: function (width, start, offsets, defaultWidth) {
         var me = this;
         var columns = 0;
         var total = 0;
         var res = offsets.subset(start).first(function (x) {
-            if (total < width) {
+            if (total + x < width) {
                 columns++;
                 total += x;
                 return false;
@@ -557,7 +877,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
             return true;
         });
 
-        if (total < width) {
+        if (total + defaultWidth < width) {
             columns += Math.ceil((width - total) / defaultWidth);
         }
 

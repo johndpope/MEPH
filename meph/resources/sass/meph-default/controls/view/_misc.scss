@@ -87,3 +87,13 @@ $padding-distance: 20px;
 .selectarea.active {
     background-color: rgba(93, 186, 204, 0.2);
 }
+
+.spreadsheet .bottom {
+    z-index: -1;
+}
+
+.spreadsheet .spreadsheet,
+.spreadsheet .topheader,
+.spreadsheet .leftheader {
+    position: absolute;
+}
