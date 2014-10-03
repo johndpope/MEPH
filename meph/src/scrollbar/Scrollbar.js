@@ -74,8 +74,9 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
                 var position = MEPH.util.Dom.getScreenEventPositions(e).first();
                 me.position = me.horizontal ? position.x : position.y;
                 me.setBarPosition(me.position - me.start_position);
-                var part1 = ((me.getBarPosition() + me.handleSize()) / me.barSize());
-                me.scrollbarposition = part1 - (me.handleSize() / me.barSize()) * ((1 - part1));
+                me.scrollbarposition = me.getBarPosition() / (me.barSize() - me.handleSize());
+                //var part1 = ((me.getBarPosition() + me.handleSize()) / me.barSize());
+                //me.scrollbarposition = part1 - (me.handleSize() / me.barSize()) * ((1 - part1));
             }
         });
 

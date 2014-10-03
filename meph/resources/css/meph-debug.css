@@ -9613,12 +9613,11 @@ input[type="range"]::-webkit-slider-thumb {
 .spreadsheet {
   height: 100%;
   width: 100%;
-  z-index: 11;
+  z-index: 5;
 }
 
 /* line 16, ../sass/meph-default/controls/view/_misc.scss */
-.spreadsheetbody {
-  position: relative;
+.noselect {
   /**/
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -9628,7 +9627,20 @@ input[type="range"]::-webkit-slider-thumb {
   user-select: none;
 }
 
-/* line 26, ../sass/meph-default/controls/view/_misc.scss */
+/* line 25, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheet {
+  overflow: hidden;
+  position: relative;
+}
+
+/* line 30, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheetbody {
+  position: relative;
+  margin-right: 30px;
+  margin-bottom: 30px;
+}
+
+/* line 38, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheetscrollbarright {
   position: absolute;
   right: 0;
@@ -9636,22 +9648,29 @@ input[type="range"]::-webkit-slider-thumb {
   height: 100%;
   background-color: white;
   top: 0px;
+  padding-top: 0px;
+  padding-bottom: 20px;
 }
 
-/* line 35, ../sass/meph-default/controls/view/_misc.scss */
+/* line 49, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheetscrollbarbotom {
   width: 100%;
   background-color: white;
   left: 0px;
+  z-index: 10;
+  bottom: 0px;
+  position: absolute;
+  padding-left: 15px;
+  padding-right: 20px;
 }
 
-/* line 41, ../sass/meph-default/controls/view/_misc.scss */
+/* line 60, ../sass/meph-default/controls/view/_misc.scss */
 .scrollbarhandle {
   background-color: #c1c1c1;
   position: absolute;
 }
 
-/* line 46, ../sass/meph-default/controls/view/_misc.scss */
+/* line 65, ../sass/meph-default/controls/view/_misc.scss */
 .scrollbar {
   height: 100%;
   width: 100%;
@@ -9660,17 +9679,25 @@ input[type="range"]::-webkit-slider-thumb {
   border: 1px solid #c1c1c1;
 }
 
-/* line 55, ../sass/meph-default/controls/view/_misc.scss */
+/* line 73, ../sass/meph-default/controls/view/_misc.scss */
+.selectarea,
 .activearea {
   display: none;
   position: absolute;
   border: dotted 2px #4ba2e4;
+  pointer-events: none;
 }
 
-/* line 61, ../sass/meph-default/controls/view/_misc.scss */
+/* line 81, ../sass/meph-default/controls/view/_misc.scss */
+.selectarea.active,
 .activearea.active {
   display: block;
-  z-index: 10;
+  z-index: 4;
+}
+
+/* line 87, ../sass/meph-default/controls/view/_misc.scss */
+.selectarea.active {
+  background-color: rgba(93, 186, 204, 0.2);
 }
 
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */

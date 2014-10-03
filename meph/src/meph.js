@@ -955,7 +955,22 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.getDataBindPrefixes = function () {
         return meph.Array(dataBindPrefixes.concat([defaultBindPrefix]));
     }
-
+    /**
+     * Checks surface equality between to objects.
+     * @param {Object} i
+     * @param {Object} j
+     ***/
+    meph.equals = function equals(i, g) {
+        for (var t in i) {
+            if (i[t] !== g[t])
+                return false;
+        }
+        for (var t in g) {
+            if (i[t] !== g[t])
+                return false;
+        }
+        return true;
+    },
     /**
      * @method createEvent
      * Creates a DOM Event.

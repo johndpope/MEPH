@@ -8,6 +8,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
     templates: true,
     requires: ['MEPH.util.Renderer', 'MEPH.util.Style', 'MEPH.util.Dom', 'MEPH.scrollbar.Scrollbar'],
     extend: 'MEPH.control.Control',
+    statics: {
+        states: {
+            Selecting: 'selecting'
+        }
+    },
     properties: {
         width: 0,
         height: 0,
@@ -20,6 +25,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         columns: null,
         rows: null,
         defaultRowHeight: 25,
+        selectedrange: null,
         defaultColumnWidth: 80,
         gridlinecolor: "#d6ccf0",
         startColumn: 0,
@@ -39,6 +45,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.topRenderer = new MEPH.util.Renderer();
         me.columnOffsets = null;
         me.rowOffsets = null;
+        me.requestActiveSelect = null;
+        me.requestActiveCell = null;
 
         me.on('altered', function (type, args) {
             var rowheaders = parseFloat(me.rowheaders);
@@ -54,6 +62,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
                 args.property === 'startColumn' ||
                 args.property === 'startRow' ||
                 args.property === 'vbarposition' ||
+                args.property === 'hbarposition' ||
                 args.path === 'rows') {
 
                 if (args.property === 'vbarposition') {
@@ -63,6 +72,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
                 if (args.property === 'hbarposition') {
                     me.setStartColumn(me.hbarposition);
                 }
+
 
                 if (!me.columnOffsets && rowheaders && cols) {
                     me.columnOffsets = [].interpolate(0, cols, function (x) {
@@ -81,8 +91,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
                         return me.defaultRowHeight;
                     })
                 }
-                me.render();
 
+                me.update();
             }
         });
     },
@@ -100,9 +110,88 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.canvas.addEventListener('mousemove', function (evt) {
             me.handleSingleCellCalculations(evt, 'mousemovecell');
         });
+
+        me.canvas.addEventListener('mousemove', function (evt) {
+            if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
+                var cells = me.getCanvasCells(evt);
+                var cell = cells.first()
+                me.selecting.end = cell;
+                me.canvas.dispatchEvent(MEPH.createEvent('mousemoveselect', {
+                    selecting: me.selecting
+                }));
+            }
+        });
+
         me.canvas.addEventListener('mousemovecell', function (evt) {
             me.handleMouseMoveCell(evt);
-        })
+        });
+
+        me.canvas.addEventListener('mousemoveselect', function (evt) {
+            var selecting = evt.selecting;
+            if (!selecting || !selecting.end || !selecting.start) {
+                return null;
+            }
+            me.handleMouseMoveCellSelect(evt);
+        });
+
+        me.canvas.addEventListener('mousedown', function (evt) {
+            var cells = me.getCanvasCells(evt);
+            var cell = cells.first()
+            me.selecting = {
+                start: cell
+            };
+            document.body.classList.add('noselect');
+            me.state = MEPH.table.SpreadSheet.states.Selecting;
+            me.canvas.dispatchEvent(MEPH.createEvent('selectstart', {
+                cell: cell
+            }));
+        });
+
+        me.canvas.addEventListener('mouseout', me.onMouseupSelecting.bind(me));
+        me.canvas.addEventListener('mouseup', me.onMouseupSelecting.bind(me));
+        var removenoselect= function () {
+            document.body.classList.remove('noselect');
+        }
+        document.body.addEventListener('mouseup', removenoselect);
+        document.body.addEventListener('mouseout', removenoselect);
+    },
+    getSelectedStartRow: function (selecting) {
+        if (!selecting || !selecting.end || !selecting.start) {
+            return null;
+        }
+        var startrow = Math.min(selecting.end.row, selecting.start.row);
+        var endrow = Math.max(selecting.end.row, selecting.start.row);
+        var startcolumn = Math.min(selecting.end.column, selecting.start.column);
+        var endcolumn = Math.max(selecting.end.column, selecting.start.column);
+
+        return {
+            startrow: startrow,
+            endrow: endrow,
+            startcolumn: startcolumn,
+            endcolumn: endcolumn
+        }
+    },
+    onMouseupSelecting: function () {
+        var me = this;
+        if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
+            var selectedstartrow = me.getSelectedStartRow(me.selecting);
+            me.selectedrange = me.selecting;
+            if (me.selected) {
+                me.selected.clear();
+                if (selectedstartrow) {
+                    [].interpolate(selectedstartrow.startrow, selectedstartrow.endrow + 1, function (x) {
+                        [].interpolate(selectedstartrow.startcolumn, selectedstartrow.endcolumn + 1, function (y) {
+                            me.selected.push({
+                                row: x,
+                                column: y
+                            });
+                        })
+                    });
+                }
+            }
+            me.selecting = null;
+            me.state = null;
+        }
     },
     handleMouseMoveCell: function (evt) {
         var me = this;
@@ -120,34 +209,98 @@ MEPH.define('MEPH.table.SpreadSheet', {
 
         me.setActiveCell(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y)
     },
-    setActiveCell: function (x1, x2, y1, y2) {
+    updateSelectedMouse: function () {
         var me = this;
-        if (arguments.length === 4) {
-            me.activeArea = {
+        if (me.selectedrange) {
+            me.handleMouseMoveCellSelect({ selecting: me.selectedrange });
+        }
+    },
+    handleMouseMoveCellSelect: function (evt) {
+        var me = this;
+        if (evt.selecting) {
+            var info = me.getSelectedStartRow(evt.selecting);
+            if (info) {
+                var minCellLeftPosition = me.getCellPosition({ row: info.startrow, column: info.startcolumn });
+                var maxCellLeftPosition = me.getCellPosition({ row: info.startrow, column: info.endcolumn + 1 });
+
+                var minCellTopPosition = me.getCellPosition({ row: info.startrow, column: info.endcolumn });
+                var maxCellTopPosition = me.getCellPosition({ row: info.endrow + 1, column: info.endcolumn });
+
+                me.setActiveSelect(minCellLeftPosition.x, maxCellLeftPosition.x, minCellTopPosition.y, maxCellTopPosition.y)
+            }
+        }
+    },
+    setActiveSelect: function (x1, x2, y1, y2) {
+        var me = this,
+            area = {
                 x1: x1,
                 x2: x2,
                 y1: y1,
                 y2: y2
             };
+        if (me.requestActiveSelect != null) {
+            cancelAnimationFrame(me.requestActiveSelect);
+        }
+        me.requestActiveSelect = requestAnimationFrame(function () {
+            if (me.selectArea && MEPH.equals(me.selectArea, area)) {
+            }
+            else if (arguments.length === 4) {
+                me.selectArea = area;
 
-            Style.top(me.activearea, y1 + me.getColumnHeaderHeight());
-            Style.left(me.activearea, x1 + me.getRowsHeaderWidth());
-            Style.width(me.activearea, x2 - x1);
-            Style.height(me.activearea, y2 - y1);
-            me.activearea.classList.add('active')
+                Style.top(me.selectarea, y1 + me.getColumnHeaderHeight());
+                Style.left(me.selectarea, x1 + me.getRowsHeaderWidth());
+                Style.width(me.selectarea, x2 - x1);
+                Style.height(me.selectarea, y2 - y1);
+                me.selectarea.classList.add('active')
+            }
+            else {
+                me.selectarea.classList.remove('active')
+            }
+            me.requestActiveSelect = null;
+        }.bind(x1, x2, y1, y2))
+    },
+    setActiveCell: function (x1, x2, y1, y2) {
+        var me = this, area = {
+            x1: x1,
+            x2: x2,
+            y1: y1,
+            y2: y2
+        };
+
+        if (me.requestActiveCell) {
+            cancelAnimationFrame(me.requestActiveCell);
         }
-        else {
-            me.activearea.classList.remove('active')
-        }
+
+        me.requestActiveCell = requestAnimationFrame(function () {
+            if (me.activeArea && MEPH.equals(me.activeArea, area)) {
+            } else if (arguments.length === 4) {
+                me.activeArea = area;
+
+                Style.top(me.activearea, y1 + me.getColumnHeaderHeight());
+                Style.left(me.activearea, x1 + me.getRowsHeaderWidth());
+                Style.width(me.activearea, x2 - x1);
+                Style.height(me.activearea, y2 - y1);
+                me.activearea.classList.add('active')
+            }
+            else {
+                me.activearea.classList.remove('active')
+            }
+            me.requestActiveCell = null;
+        }.bind(x1, x2, y1, y2))
     },
     handleSingleCellCalculations: function (evt, outevnt) {
         var me = this;
-        var canvasPos = MEPH.util.Dom.getPosition(me.canvas);   
-        var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
-        var cells = me.calculateCells(pos, { x: me.getRowsHeaderWidth(), y: me.getColumnHeaderHeight() });
+        var cells = me.getCanvasCells(evt);
         me.canvas.dispatchEvent(MEPH.createEvent(outevnt, {
             cells: cells
         }));
+    },
+    getCanvasCells: function (evt) {
+        var me = this;
+        var canvasPos = MEPH.util.Dom.getPosition(me.canvas);
+        var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
+        var cells = me.calculateCells(pos, { x: me.getRowsHeaderWidth(), y: me.getColumnHeaderHeight() });
+        return cells;
     },
     getCellPosition: function (cell) {
         var me = this;
@@ -175,7 +328,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
     getRowsHeaderWidth: function () {
         var me = this;
         me.cache.rowHeaderWidth = me.cache.rowHeaderWidth || me.columnHeaderOffsets.summation(function (x, t) {
-            return t += x; 
+            return t += x;
         });
         return me.cache.rowHeaderWidth;
     },
@@ -237,6 +390,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.horizontalSize = me.horizontalSize || me.columnOffsets.summation(function (x, t) { return t += x; });
         return me.horizontalSize;
     },
+    update: function(){
+        var me = this;
+        me.render();
+        me.updateSelectedMouse();
+    },
     render: function () {
         var me = this;
         if (!me.rowOffsets || !me.columnOffsets)
@@ -247,6 +405,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.animFrame = requestAnimationFrame(function () {
             var rows, columns, headers;
             me.animFrame = null;
+
             if (!me.rendered) {
                 me.renderer.setCanvas(me.canvas);
                 me.leftRenderer.setCanvas(me.leftheader);
@@ -359,14 +518,18 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var drawInstructions = rowOffsets.subset(startRow, startRow + visRows + 1).select(rowDrawFunc);
 
         if (rowOffsets.length < startRow + visRows) {
-            drawInstructions = drawInstructions.concat([].interpolate(0, startRow + visRows - rowOffsets.length, rowDrawFunc));
+            drawInstructions = drawInstructions.concat([].interpolate(0, startRow + visRows - rowOffsets.length, function (x) {
+                return me.defaultRowHeight;
+            }).select(rowDrawFunc));
         }
 
         var visCols = me.visibleColumns(width, startColumn)
         drawInstructions = drawInstructions.concat(columnOffsets.subset(startColumn, startColumn + visCols + 1).select(colDrawFunc));
 
         if (columnOffsets.length < startColumn + visCols) {
-            drawInstructions = drawInstructions.concat([].interpolate(0, startColumn + visCols - columnOffsets.length, colDrawFunc));
+            drawInstructions = drawInstructions.concat([].interpolate(0, startColumn + visCols - columnOffsets.length, function (x) {
+                return me.defaultColumnWidth;
+            }).select(colDrawFunc));
         }
 
         Style.height(canvas, height)
