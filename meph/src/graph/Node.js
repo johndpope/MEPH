@@ -267,7 +267,9 @@ MEPH.define('MEPH.graph.Node', {
             return;
         }
         me.movingToTarget = true;
-
+        if (me.requestedAnimationFrame !== undefined) {
+            cancelAnimationFrame(me.requestedAnimationFrame)
+        }
         var anim = function () {
             var pos = pgx.Vector.Create(me.$position);
             var nextpos = me.$targetPosition.subtract(pos).unit().multiply(me.$speed).add(pos);
@@ -278,12 +280,13 @@ MEPH.define('MEPH.graph.Node', {
                 if (callback) {
                     callback();
                 }
+                me.requestedAnimationFrame = undefined;
             }
             else {
-                requestAnimationFrame(anim);
+                me.requestedAnimationFrame = requestAnimationFrame(anim);
             }
         }
-        requestAnimationFrame(anim)
+        me.requestedAnimationFrame = requestAnimationFrame(anim)
     },
     isMoving: function (x, y, z) {
         var me = this, position = me.getPosition();

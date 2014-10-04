@@ -62,21 +62,17 @@ MEPH.define('MEPH.graph.GraphRenderer', {
         me.requestAnimationFrame();
     },
     requestAnimationFrame: function () {
-        var toresolve,
-            me = this;
-        if (!me.animationComplete)
-            return Promise.resolve();
+        var me = this;
 
-        var promise = new Promise(function (resolve) {
-            toresolve = resolve;
-        });
-        me.animationComplete = false;
-        requestAnimationFrame(function () {
+        if (me.requestedAnimation !== undefined) {
+            cancelAnimationFrame(me.requestedAnimation);
+        }
+
+        me.requestedAnimation = requestAnimationFrame(function () {
             me.render();
-            toresolve()
-            me.animationComplete = true;
+            me.requestedAnimation = undefined;
         });
-        return promise;
+        return Promise.resolve();
     },
     setNodeRenderer: function (renderer) {
         var me = this;

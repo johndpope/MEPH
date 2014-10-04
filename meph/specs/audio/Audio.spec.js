@@ -159,7 +159,7 @@
             audio.buffer(resource.buffer).complete();
 
             // start the source playing
-            resource.buffer.start();
+            //resource.buffer.start();
             setTimeout(function () {
                 audio.disconnect();
                 done();
@@ -178,7 +178,7 @@
             audio.buffer(result.buffer).complete();
 
             // start the source playing
-            result.buffer.start();
+            // result.buffer.start();
             setTimeout(function () {
                 audio.disconnect();
                 done();
@@ -206,7 +206,7 @@
 
         audio.load(audiofile, audiofiletyp, {}).then(function (resource) {
 
-            var result = audio.copyToBuffer(resource, 50, 52, {});
+            var result = audio.copyToBuffer(resource, 50, 50.1, {});
 
             audio.buffer(result.buffer).complete({
                 length: 2,
@@ -296,7 +296,7 @@
 
         audio.load(audiofile, audiofiletyp).then(function (resource) {
             
-            var result = audio.copyToBuffer(resource, 40, 42);
+            var result = audio.copyToBuffer(resource, 40, 40.2);
 
             var res = Audio.quickAnalysis(result);
             expect(res).toBeTruthy();

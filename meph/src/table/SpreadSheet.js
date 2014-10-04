@@ -562,10 +562,6 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.rowHeaderOffsets.subset(me.startRow, cell.row).first(function (x) {
                 t += x;
             });
-            //if (cell.row >= me.rowHeaderOffsets.length) {
-            //    var header = me.rowHeaderOffsets.length - cell.row;
-            //    t += Math.ceil(header / me.defaultRowHeight);
-            //}
         }
         else {
             me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
@@ -577,10 +573,6 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.columnHeaderOffsets.subset(me.startColumn, cell.column).first(function (x) {
                 u += x;
             });
-            //if (cell.column >= me.columnHeaderOffsets.length) {
-            //    var header = me.columnHeaderOffsets.length - cell.column;
-            //    u += Math.ceil(header / me.defaultColumnHeight);
-            //}
         }
         else {
             me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
@@ -591,6 +583,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
             x: u,
             y: t
         }
+    },
+    getColumnWidth: function (col) {
+        var me = this;
+        return me.columnOffsets[col];
+    },
+    getRowHeight: function (row) {
+        var me = this;
+        return me.rowOffsets[row];
     },
     getColumnHeaderHeight: function () {
         var me = this;

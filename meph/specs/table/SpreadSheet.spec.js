@@ -396,7 +396,7 @@
             scrollingtable.leftheader.addEventListener('leftselectstart', function () {
                 selectingstarted = true;
             });
-            debugger
+            
             scrollingtable.leftheader.dispatchEvent(MEPH.createEvent('mousedown', { pageX: 10, pageY: 10 }));
 
             ///Assert
