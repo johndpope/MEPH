@@ -24,6 +24,11 @@
             'path': '/scrollbar'
         },
         {
+            'viewId': 'MEPSequencer02',
+            'view': 'MEPHControls.table.view.Sequencer',
+            'path': '/sequencer'
+        },
+        {
             'viewId': 'MEPH0302',
             'view': 'MEPHControls.table.view.SpreadSheet',
             'path': '/spreadsheet'

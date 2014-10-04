@@ -32,6 +32,12 @@
 					'itemType': 'launch',
 					'path': '/spreadsheet'
 				},{
+					'viewId': 'MEPSequencer02',
+					'description': 'Sequencer',
+					'iconType': 'launch',
+					'itemType': 'launch',
+					'path': '/sequencer/Sequencer'
+				},{
 					'viewId': 'MEPH108',
 					'description': 'Dropbox',
 					'iconType': 'launch',

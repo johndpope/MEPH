@@ -72,7 +72,6 @@
     it('the sequencer must have a time, length and lane function to get enough information for sequencing', function () {
         var sequence = new Sequencer();
         var result = sequence.getMainContentInstructions({});
-        expect(result).toBeFalsy();
         sequence.time = function () { }
         sequence.length = function () { }
         sequence.lane = function () { }
@@ -121,9 +120,10 @@
         var sequence = new Sequencer(),
             called;
         sequence.source = MEPH.Observable.observable([]);
-        sequence.getMainContentInstructions = function () {
+        sequence.updateCells = function () {
             called = true;
         }
+
 
         sequence.source.push({});
         setTimeout(function (x) {
@@ -137,7 +137,7 @@
         var sequence = new Sequencer(),
             called;
         sequence.source = MEPH.Observable.observable([{}]);
-        sequence.getMainContentInstructions = function () {
+        sequence.updateCells = function () {
             called = true;
         }
 
@@ -157,7 +157,7 @@
 
         sequence.source = source1;
         sequence.source = null;
-        sequence.getMainContentInstructions = function () {
+        sequence.updateCells = function () {
             called = true;
         }
 
@@ -173,6 +173,7 @@
         sequence.updateCells = function () {
             called++;
         }
+        sequence.setActiveCell = function () { };;
         sequence.time = function (x) { return 0; }
         sequence.length = function (x) { return 1; };
         sequence.lane = function (x) { return 0; };
@@ -194,5 +195,247 @@
             done();
         }, 130)
 
+    });
+
+    it('when the source changes the listeners will be removed from the items.', function (done) {
+        var sequence = new Sequencer(),
+
+            called = 0;
+
+        sequence.updateCells = function () {
+            called++;
+        }
+        sequence.setActiveCell = function () { };;
+
+        var item = { prop: 'p' };
+        MEPH.Observable.observable(item);
+        var source1 = MEPH.Observable.observable([item]);
+        sequence.source = source1;
+
+        item.prop = '2';
+
+        sequence.source = null;
+        item.prop = '3';
+        setTimeout(function (x) {
+            expect(called).toBe(3);
+            done();
+        }, 1);
+    });
+
+    it('can get the item which the mouse is over', function () {
+        var sequence = new Sequencer();
+        sequence.time = function (x) { return 0; }
+        sequence.length = function (x) { return 1; };
+        sequence.lane = function (x) { return 0; };
+        sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
+        sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
+        sequence.getCellPosition = function () {
+            return { x: 0, y: 0 };
+        }
+        sequence.setActiveCell = function () { };;
+        sequence.updateCells = function () { };
+        var item = { prop: 'p' };
+        MEPH.Observable.observable(item);
+        var source1 = MEPH.Observable.observable([item]);
+        sequence.source = source1;
+        var type;
+        var args;
+        sequence.dispatchEvent = function (t, a) {
+            type = t;
+            args = a;
+        }
+        sequence.onMouseOverCell({}, {
+            cells: [{ row: 0, column: 0 }],
+            position: { x: 1, y: 1 }
+        });
+
+        expect(type).toBe('mouseoveritem');
+        expect(args.items.contains(item)).toBeTruthy();
+    });
+
+
+
+    it('listens for a mouseovercell call.', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                sequencer = results.first().classInstance;
+            sequencer.updateCells = function () {
+            };
+            sequencer.setActiveCell = function () { };;
+            sequencer.onMouseOverCell = function () {
+                called = true
+            }
+            ///Assert
+            sequencer.canvas.dispatchEvent(MEPH.createEvent('mouseovercell', {}))
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+    it('listens for a mouseovercell header call.', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                sequencer = results.first().classInstance;
+            sequencer.updateCells = function () {
+            };
+            sequencer.setActiveCell = function () { };;
+            sequencer.onMouseOverCell = function () {
+                called = true
+            }
+            ///Assert
+            sequencer.topheader.dispatchEvent(MEPH.createEvent('mouseovercelltop', {}))
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('listens for a mouseovercell header call.', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                sequencer = results.first().classInstance;
+            sequencer.updateCells = function () {
+            };
+            sequencer.setActiveCell = function () { };;
+            sequencer.onMouseOverCell = function () {
+                called = true
+            }
+            ///Assert
+            sequencer.leftheader.dispatchEvent(MEPH.createEvent('mouseovercellleft', {}))
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+    it('to grab an item in the sequence, it must have a settime function', function () {
+        var sequence = new Sequencer();
+
+        sequence.updateCells = function () { }
+        sequence.setActiveCell = function () { };;
+        var item = { prop: 'p' };
+        MEPH.Observable.observable(item);
+        var source1 = MEPH.Observable.observable([item]);
+        sequence.source = source1;
+
+        var result = sequence.grab(item);
+
+        expect(sequence.state).toBeFalsy();
+        expect(result).toBeFalsy();
+    });
+
+    it('when grabbing an item the state is set to grabbing, and the grabbed item is set on the me.grabbeditem property', function () {
+        var sequence = new Sequencer();
+        sequence.setActiveCell = function () { };;
+        sequence.settime = function () { }
+        sequence.updateCells = function () { }
+        var item = { prop: 'p' };
+        MEPH.Observable.observable(item);
+        var source1 = MEPH.Observable.observable([item]);
+        sequence.source = source1;
+
+        var result = sequence.grab(item);
+
+        expect(sequence.grabbeditem === item).toBeTruthy();
+        expect(sequence.state).toBeTruthy();
+        expect(result).toBeTruthy();
+
+    });
+
+    it('when the state is grabbing, the grabrep will be moved, and follow the mouse but only in its lane on mousemovecell', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                called,
+                sequencer = results.first().classInstance;
+            sequencer.updateCells = function () { };
+            sequencer.time = function (x) { return 0; };
+            sequencer.setttime = function () {
+            };
+            sequencer.setActiveCell = function () { };;
+            sequencer.length = function (x) { return 1; };
+            sequencer.lane = function (x) { return 0; };
+            sequencer.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequencer.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequencer.getCellPosition = function () {
+                return { x: 0, y: 0 };
+            }
+            sequencer.onMouseOverCell = function () { }
+            ///Assert
+            sequencer.state = MEPH.table.Sequencer.grabbing;
+            sequencer.positionGrabRep = function () {
+                called = true;
+            }
+            sequencer.canvas.dispatchEvent(MEPH.createEvent('mousemovecell', {
+                cells: [{
+                    row: 1,
+                    column: 1
+                }],
+                position: {
+                    x: 10,
+                    y: 10
+                }
+            }));
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('can set the grabreps position and size. ', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                called,
+                sequencer = results.first().classInstance;
+
+            sequencer.positionGrabRep({ x: 1, y: 2, width: 10, height: 10 });
+
+            expect(sequencer.grabrep.clientWidth == 10).toBeTruthy();
+            expect(sequencer.grabrep.clientHeight == 10).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
     });
 });

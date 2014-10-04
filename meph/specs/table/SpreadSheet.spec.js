@@ -140,7 +140,7 @@
         });
     });
 
-    it('can detect a mouse over on a specific cell', function (done) {
+    it('can detect a mouse move on a specific cell', function (done) {
 
         MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
             var results = r.res;
@@ -174,7 +174,44 @@
             done();
         });
     });
-    it('can detect a mouse over on a specific top header cell', function (done) {
+
+
+    it('can detect a mouse over on a specific cell', function (done) {
+
+        MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom,
+                scrollingtable = results.first().classInstance;
+            scrollingtable.rowheaders = "1";
+            scrollingtable.columnheaders = "1";
+            scrollingtable.columns = "26";
+            scrollingtable.rows = "1000";
+            var cells;
+            scrollingtable.body.addEventListener('mouseovercell', function (e) {
+                cells = e.cells;
+            })
+            scrollingtable.canvas.dispatchEvent(MEPH.createEvent('mouseover', { pageX: 10, pageY: 10 }));
+
+            ///Assert
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(cells).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 150);
+            })
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can detect a mouse move on a specific top header cell', function (done) {
 
         MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
             var results = r.res;
@@ -209,8 +246,78 @@
             done();
         });
     });
+    it('can detect a mouse over on a specific top header cell', function (done) {
 
+        MEPH.render('MEPH.table.SpreadSheet', 'spreadsheet').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom,
+                scrollingtable = results.first().classInstance;
+            scrollingtable.rowheaders = "3";
+            scrollingtable.columnheaders = "3";
+            scrollingtable.columns = "3";
+            scrollingtable.rows = "3";
+            var cells;
+
+            scrollingtable.body.addEventListener('mouseoverheadertop', function (e) {
+                cells = e.cells;
+            })
+            scrollingtable.topheader.dispatchEvent(MEPH.createEvent('mouseover', { pageX: 10, pageY: 10 }));
+
+            ///Assert
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(cells).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 150);
+            })
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
     it('can detect a mouse over on a specific left header cell', function (done) {
+
+        MEPH.render('MEPH.table.SpreadSheet', 'spreadsheet').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom,
+                scrollingtable = results.first().classInstance;
+            scrollingtable.rowheaders = "3";
+            scrollingtable.columnheaders = "3";
+            scrollingtable.columns = "3";
+            scrollingtable.rows = "3";
+            var cells;
+
+            scrollingtable.body.addEventListener('mouseoverheaderleft', function (e) {
+                cells = e.cells;
+            })
+            scrollingtable.leftheader.dispatchEvent(MEPH.createEvent('mouseover', { pageX: 10, pageY: 10 }));
+
+            ///Assert
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(cells).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 150);
+            })
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can detect a mouse move on a specific left header cell', function (done) {
 
         MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
             var results = r.res;
@@ -245,7 +352,7 @@
             done();
         });
     });
-    it('can detect a mouse over on a specific top header cell', function (done) {
+    it('can detect a mouse move on a specific top header cell', function (done) {
 
         MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
             var results = r.res;
