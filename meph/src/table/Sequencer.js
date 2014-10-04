@@ -126,7 +126,7 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     getItemInSpace: function (cellData, source) {
         var result = [],
-            time, lane,
+            time, lane, endtime,
             length,
             calctime,
             me = this;
@@ -141,8 +141,11 @@ MEPH.define('MEPH.table.Sequencer', {
                         length = me.length.function(x);
                         lane = me.lane.function(x);
                         calctime = me.getScaled(time);
-                        if (cellData.column <= calctime && calctime < cellData.visibleColumns + cellData.column
-                            && cellData.row <= lane && lane < cellData.visibleRows + cellData.row) {
+                        endtime = calctime + me.getScaled(length);
+                        if ((cellData.column <= calctime && calctime < cellData.visibleColumns + cellData.column
+                            && cellData.row <= lane && lane < cellData.visibleRows + cellData.row)||
+                            (cellData.column <= endtime && endtime < cellData.visibleColumns + cellData.column
+                            && cellData.row <= lane && lane < cellData.visibleRows + cellData.row)) {
                             return true;
                         }
                         return false;
