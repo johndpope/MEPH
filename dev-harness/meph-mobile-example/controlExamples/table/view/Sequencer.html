@@ -1,8 +1,13 @@
 ﻿<div class="meph-view meph-view-remove">
     <activityview data-bind='"activityName": "c$.name"'>
         <sequencer meph-data-rowheaders="1"
-                    meph-data-columnheaders="1"
-                    meph-data-columns="26"
-                    meph-data-rows="30"></sequencer>
+                   meph-data-columnheaders="1"
+                   meph-data-time="v$.timeFunc"
+                   meph-data-lane="v$.laneFunc"
+                   meph-data-settime="v$.settimeFunc"
+                   meph-data-length="v$.lengthFunc"
+                   meph-data-source="v$.source"
+                   meph-data-columns="26"
+                   meph-data-rows="30"></sequencer>
     </activityview>
 </div>

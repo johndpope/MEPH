@@ -37,11 +37,15 @@
 
     it('a sequencer requires data, that have certain properties, e.g. length, time, accessing them will be in the inheriting class', function () {
         var sequencer = new Sequencer();
-        sequencer.time = function (x) {
-            return x.time;
+        sequencer.time = {
+            'function': function (x) {
+                return x.time;
+            }
         }
-        sequencer.length = function (x) {
-            return x.length;
+        sequencer.length = {
+            'function': function (x) {
+                return x.length;
+            }
         }
         var called;
         sequencer.on('altered', function (type, args) {
@@ -55,11 +59,15 @@
 
     it('when the source is altered the sequencer will update the screen', function () {
         var sequencer = new Sequencer();
-        sequencer.time = function (x) {
-            return x.time;
+        sequencer.time = {
+            'function': function (x) {
+                return x.time;
+            }
         }
-        sequencer.length = function (x) {
-            return x.length;
+        sequencer.length = {
+            'function': function (x) {
+                return x.length;
+            }
         }
         var called;
         sequencer.updateCells = function () {
@@ -72,9 +80,9 @@
     it('the sequencer must have a time, length and lane function to get enough information for sequencing', function () {
         var sequence = new Sequencer();
         var result = sequence.getMainContentInstructions({});
-        sequence.time = function () { }
-        sequence.length = function () { }
-        sequence.lane = function () { }
+        sequence.time = { 'function': function () { } }
+        sequence.length = { 'function': function () { } }
+        sequence.lane = { 'function': function () { } }
         result = sequence.getMainContentInstructions({});
         expect(result).toBeTruthy();
     });
@@ -83,9 +91,9 @@
     it('when an update occurs, visilble cells and rows are passed as arguments, so the sequencer must return a list o instructions' +
         'to render the source based on the visiblle cells', function () {
             var sequence = new Sequencer();
-            sequence.time = function (x) { return 1; }
-            sequence.length = function (x) { return 1; }
-            sequence.lane = function (x) { return 0; }
+            sequence.time = { 'function': function (x) { return 1; } }
+            sequence.length = { 'function': function (x) { return 1; } }
+            sequence.lane = { 'function': function (x) { return 0; } }
             result = sequence.getMainContentInstructions({});
             expect(result).toBeTruthy();
 
@@ -96,9 +104,9 @@
     it('when an update occurs, visilble cells and rows are passed as arguments, so the sequencer must return a list o instructions' +
         'to render the source based on the visiblle cells, returns 1 instruction', function () {
             var sequence = new Sequencer();
-            sequence.time = function (x) { return 0; }
-            sequence.length = function (x) { return 1; };
-            sequence.lane = function (x) { return 0; };
+            sequence.time = { 'function': function (x) { return 0; } }
+            sequence.length = { 'function': function (x) { return 1; } };
+            sequence.lane = { 'function': function (x) { return 0; } };
             sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
             sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
             sequence.getCellPosition = function () {
@@ -174,9 +182,9 @@
             called++;
         }
         sequence.setActiveCell = function () { };;
-        sequence.time = function (x) { return 0; }
-        sequence.length = function (x) { return 1; };
-        sequence.lane = function (x) { return 0; };
+        sequence.time = { 'function': function (x) { return 0; } }
+        sequence.length = { 'function': function (x) { return 1; } };
+        sequence.lane = { 'function': function (x) { return 0; } };
         sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
         sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
         sequence.getCellPosition = function () {
@@ -224,9 +232,9 @@
 
     it('can get the item which the mouse is over', function () {
         var sequence = new Sequencer();
-        sequence.time = function (x) { return 0; }
-        sequence.length = function (x) { return 1; };
-        sequence.lane = function (x) { return 0; };
+        sequence.time = { 'function': function (x) { return 0; } }
+        sequence.length = { 'function': function (x) { return 1; } };
+        sequence.lane = { 'function': function (x) { return 0; } };
         sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
         sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
         sequence.getCellPosition = function () {
@@ -353,7 +361,7 @@
     it('when grabbing an item the state is set to grabbing, and the grabbed item is set on the me.grabbeditem property', function () {
         var sequence = new Sequencer();
         sequence.setActiveCell = function () { };;
-        sequence.settime = function () { }
+        sequence.settime = { 'function': function () { } }
         sequence.updateCells = function () { }
         var item = { prop: 'p' };
         MEPH.Observable.observable(item);
@@ -377,12 +385,16 @@
                 called,
                 sequencer = results.first().classInstance;
             sequencer.updateCells = function () { };
-            sequencer.time = function (x) { return 0; };
-            sequencer.setttime = function () {
+            sequencer.time = {
+                'function': function (x) { return 0; }
+            };
+            sequencer.setttime = {
+                'function': function () {
+                }
             };
             sequencer.setActiveCell = function () { };;
-            sequencer.length = function (x) { return 1; };
-            sequencer.lane = function (x) { return 0; };
+            sequencer.length = { 'function': function (x) { return 1; } };
+            sequencer.lane = { 'function': function (x) { return 0; } };
             sequencer.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
             sequencer.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
             sequencer.getCellPosition = function () {
@@ -394,7 +406,7 @@
             sequencer.positionGrabRep = function () {
                 called = true;
             }
-            sequencer.canvas.dispatchEvent(MEPH.createEvent('mousemovecell', {
+            var evt = MEPH.createEvent('mousemovecell', {
                 cells: [{
                     row: 1,
                     column: 1
@@ -403,7 +415,10 @@
                     x: 10,
                     y: 10
                 }
-            }));
+            });
+            
+            sequencer.canvas.dispatchEvent(evt);
+            expect(sequencer.lastgrabposition).toBeTruthy();
             expect(called).toBeTruthy();
             if (app) {
                 app.removeSpace();
@@ -438,4 +453,110 @@
             done();
         });
     });
+
+    it('can ungrab an item', function () {
+        var sequence = new Sequencer(), called;
+        sequence.setActiveCell = function () { };;
+        sequence.settime = { 'function': function () { called = true; } }
+        sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
+        sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
+        sequence.getCellPosition = function () {
+            return { x: 0, y: 0 };
+        }
+        sequence.updateCells = function () { }
+        var item = { prop: 'p' };
+        MEPH.Observable.observable(item);
+        var source1 = MEPH.Observable.observable([item]);
+        sequence.source = source1;
+
+        var result = sequence.grab(item);
+        sequence.lastgrabposition = { x: 1, y: 1 };
+        expect(sequence.grabbeditem === item).toBeTruthy();
+        expect(sequence.state).toBeTruthy();
+        expect(result).toBeTruthy();
+
+
+        sequence.ungrab(item);
+        expect(called).toBeTruthy();
+        expect(sequence.grabbeditem).toBe(null);
+        expect(sequence.state).toBe(null);
+
+    });
+
+    it('on mouse over item, an item is cached as the last hovered item', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                called,
+                sequence = results.first().classInstance;
+
+            sequence.setActiveCell = function () { };;
+            sequence.settime = { 'function': function () { called = true; } }
+            sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequence.getCellPosition = function () {
+                return { x: 0, y: 0 };
+            }
+            sequence.updateCells = function () { }
+            var item = { prop: 'p' };
+            MEPH.Observable.observable(item);
+            var source1 = MEPH.Observable.observable([item]);
+            sequence.source = source1;
+
+
+            sequence.dispatchEvent('mouseoveritem', {
+                items: [item], header: null
+            }, sequence.canvas);
+
+            expect(sequence.lastitem).toBe(item);
+
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can set a key to use for grabbing an item.', function (done) {
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                called,
+                sequence = results.first().classInstance;
+
+            sequence.setActiveCell = function () { };;
+            sequence.settime = { 'function': function () { called = true; } }
+            sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequence.getCellPosition = function () {
+                return { x: 0, y: 0 };
+            }
+            sequence.updateCells = function () { }
+            var item = { prop: 'p' };
+            MEPH.Observable.observable(item);
+            var source1 = MEPH.Observable.observable([item]);
+            sequence.source = source1;
+
+
+            sequence.dispatchEvent('mouseoveritem', {
+                items: [item], header: null
+            }, sequence.canvas);
+
+            expect(sequence.lastitem).toBe(item);
+
+            sequence.canvas.dispatchEvent(MEPH.createEvent('keypress', { which: 71 }));
+
+            expect(sequence.grabbeditem).toBeTruthy();
+
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
 });

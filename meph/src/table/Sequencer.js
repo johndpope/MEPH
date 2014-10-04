@@ -12,7 +12,9 @@ MEPH.define('MEPH.table.Sequencer', {
         grabbing: 'grabbing'
     },
     properties: {
+        grabkeycode: 'G',
         source: null,
+        radius: 2,
         topheadersource: null,
         leftheadersource: null,
         /**
@@ -66,11 +68,18 @@ MEPH.define('MEPH.table.Sequencer', {
     onLoaded: function () {
         var me = this;
         me.super();
+        window.addEventListener('keypress', function (evt) {
+            me.onKeyPress(evt);
+        });
         me.canvas.addEventListener('mouseovercell', function (evt) {
             me.onMouseOverCell(me.canvas, evt);
         });
         me.canvas.addEventListener('mousemovecell', function (evt) {
             me.onMouseMoveCell(me.canvas, evt);
+        });
+
+        me.canvas.addEventListener('mouseoveritem', function (evt) {
+            me.onMouseOverItem(evt);
         });
 
         me.topheader.addEventListener('mouseovercelltop', function (evt) {
@@ -82,7 +91,7 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     onSourceUpdated: function () {
         var me = this;
-        me.updateCells();
+        me.update();
         if (me.source && MEPH.util.Observable.isObservable(me.source)) {
             me.source.on('changed', me.sourceItemChanged.bind(me), me);
             me.source.foreach(function (item) {
@@ -94,7 +103,7 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     sourceItemChanged: function (type, args) {
         var me = this;
-        me.updateCells();
+        me.update();
     },
     getMainContentInstructions: function (visibleCellData) {
         var me = this;
@@ -117,22 +126,23 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     getItemInSpace: function (cellData, source) {
         var result = [],
-            time,
+            time, lane,
             length,
             calctime,
             me = this;
 
         if (cellData) {
-            if (typeof (me.time) === 'function' &&
-                   typeof (me.length) === 'function' &&
-                   typeof (me.lane) === 'function') {
+            if (me.time && me.length && me.lane && typeof (me.time.function) === 'function' &&
+                   typeof (me.length.function) === 'function' &&
+                   typeof (me.lane.function) === 'function') {
                 if (source) {
                     source.where(function (x) {
-                        time = me.time(x);
-                        length = me.length(x);
+                        time = me.time.function(x);
+                        length = me.length.function(x);
+                        lane = me.lane.function(x);
                         calctime = me.getScaled(time);
                         if (cellData.column <= calctime && calctime < cellData.visibleColumns + cellData.column
-                            && cellData.row <= calctime && calctime < cellData.visibleRows + cellData.row) {
+                            && cellData.row <= lane && lane < cellData.visibleRows + cellData.row) {
                             return true;
                         }
                         return false;
@@ -152,7 +162,16 @@ MEPH.define('MEPH.table.Sequencer', {
     getScaled: function (value) {
         var me = this;
         return value / me.timescale;
+    }, /**
+     * Gets the unscaled value.
+     * @param {Number} value
+     * @return {Number}
+     **/
+    unscaleValue: function (value) {
+        var me = this;
+        return value * me.timescale;
     },
+
     /**
      * Gets instructions for a sequence item.
      * @param {Object} sequenceItem
@@ -163,14 +182,14 @@ MEPH.define('MEPH.table.Sequencer', {
             metrics;
         metrics = me.getItemMetrics(sequenceItem);
         metrics.shape = MEPH.util.Renderer.shapes.rectangle;
-
+        metrics.radius = me.radius;
         return [metrics];
     },
     getItemMetrics: function (sequenceItem) {
         var me = this;
-        var lane = me.lane(sequenceItem);
-        var time = me.time(sequenceItem);
-        var length = me.length(sequenceItem);
+        var lane = me.lane.function(sequenceItem);
+        var time = me.time.function(sequenceItem);
+        var length = me.length.function(sequenceItem);
         var calctime = me.getScaled(time);
         var column = Math.floor(calctime);
         var pos = me.getCellPosition({ row: lane, column: column });
@@ -221,10 +240,11 @@ MEPH.define('MEPH.table.Sequencer', {
 
         var me = this;
         if (me.state === MEPH.table.Sequencer.grabbing) {
-            var lane = me.lane(me.grabbeditem);
-            var y = Math.min(parseFloat(canvas.clientHeight), Math.max(0, me.getCellRowPosition(lane)));
+            var lane = me.lane.function(me.grabbeditem);
+            var y = Math.min(parseFloat(canvas.clientHeight), Math.max(0, me.getCellRowPx({ row: lane })));
             var x = evt.position.x;
             var metrics = me.getItemMetrics(me.grabbeditem);
+            me.lastgrabposition = { x: x, y: y };
             me.positionGrabRep({ x: x, y: y, width: metrics.width, height: metrics.height });
         }
     },
@@ -232,24 +252,65 @@ MEPH.define('MEPH.table.Sequencer', {
         var me = this;
         canvas.dispatchEvent(MEPH.createEvent(evnt, args));
     },
+    onMouseOverItem: function (evnt) {
+        var me = this;
+        switch (evnt.header) {
+            case 'left':
+            case 'top':
+                break;
+            default:
+                me.lastitem = evnt.items.first() || me.lastitem;
+                break;
+        }
+    },
     /**
      *Grabs an item from a sequence, and sets the state to grabbing.
      * @param {Object} item
      */
     grab: function (item) {
         var me = this;
-        if (me.settime && typeof (me.settime) === 'function' && !me.state) {
+        if (me.settime && typeof (me.settime.function) === 'function' && !me.state) {
             me.state = MEPH.table.Sequencer.grabbing;
             me.grabbeditem = item;
             return true;
         }
         else return false;
     },
+    ungrab: function (item) {
+        var me = this;
+        if (me.grabbeditem === item && me.state === MEPH.table.Sequencer.grabbing) {
+            me.grabbeditem = null;
+            var position = MEPH.util.Dom.getRelativePosition(me.grabrep, me.canvas);
+            var col = me.getRelativeColum(position.x);
+            var colpos = me.getCellColumnPosition({ column: col });
+            var extrac = (me.lastgrabposition.x - colpos) / me.getColumnWidth(col);
+            var time = col + extrac - 1;
+            time = Math.max(0, time);
+            var unscaledtime = me.unscaleValue(time);
+            me.settime.function(unscaledtime, item);
+            me.state = null;
+        }
+    },
+    onKeyPress: function (evt) {
+        var me = this,
+            key = MEPH.util.Dom.getCharCode(evt);
+
+        if (String.fromCharCode(key).toLowerCase() === me.grabkeycode.toLowerCase()) {
+            if (me.lastitem) {
+                if (me.state === null) {
+                    me.grab(me.lastitem);
+                }
+                else if (me.state === MEPH.table.Sequencer.grabbing) {
+                    me.ungrab(me.grabbeditem);
+                }
+            }
+        }
+    },
     positionGrabRep: function (options) {
         var me = this;
         Style.height(me.grabrep, options.height);
         Style.width(me.grabrep, options.width);
-        Style.left(me.grabrep, options.left);;
-        Style.top(me.grabrep, options.top);
+        Style.left(me.grabrep, options.x);;
+        Style.top(me.grabrep, options.y);
     }
 });

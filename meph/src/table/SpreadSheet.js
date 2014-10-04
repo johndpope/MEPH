@@ -25,6 +25,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         columnheaders: 0,
         endselectonmouseout: false,
         rowheaders: 0,
+        state: null,
         columns: null,
         rows: null,
         defaultRowHeight: 25,
@@ -268,7 +269,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.handleSingleCellCalculations(evt, 'mousemovecell');
         });
 
-        me.canvas.addEventListener('mouseover', function (evt) {
+        me.canvas.addEventListener('mousemove', function (evt) {
             me.handleSingleCellCalculations(evt, 'mouseovercell');
         });
 
@@ -554,7 +555,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
         me.canvas.dispatchEvent(MEPH.createEvent(outevnt, {
             cells: cells,
-            position: pos
+            position: pos.first()
         }));
     },
     getHeaderCells: function (evt, offsets) {
@@ -593,6 +594,25 @@ MEPH.define('MEPH.table.SpreadSheet', {
         //}
         t = me.getCellRowPosition(cell, offset);
 
+        u = me.getCellColumnPosition(cell, offset);
+        //if (offset == 'left') {
+        //    me.columnHeaderOffsets.subset(me.startColumn, cell.column).first(function (x) {
+        //        u += x;
+        //    });
+        //}
+        //else {
+        //    me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
+        //        u += x;
+        //    });
+        //}
+        return {
+            x: u,
+            y: t
+        }
+    },
+    getCellColumnPosition: function (cell, offset) {
+        var me = this,
+            u = 0;
         if (offset == 'left') {
             me.columnHeaderOffsets.subset(me.startColumn, cell.column).first(function (x) {
                 u += x;
@@ -603,10 +623,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
                 u += x;
             });
         }
-        return {
-            x: u,
-            y: t
-        }
+        return u;
+    },
+    getCellRowPx: function (cell, offset) {
+        var me = this;
+        return me.getCellRowPosition({ row: cell.row + 1 }, offset);
     },
     getCellRowPosition: function (cell, offset) {
         var me = this;

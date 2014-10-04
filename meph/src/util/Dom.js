@@ -239,6 +239,10 @@ Promise.resolve().then(function () {
                 }
                 return false;
             },
+            getCharCode: function (e) {
+                var charCode = (typeof e.which == "number") ? e.which : e.keyCode;
+                return charCode;
+            },
             /**
              * @method getEventSource
              * Gets the event source from an event.
@@ -253,6 +257,17 @@ Promise.resolve().then(function () {
                 var yPosition = 0;
 
                 while (element) {
+                    xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+                    yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+                    element = element.offsetParent;
+                }
+                return { x: xPosition, y: yPosition };
+            },
+            getRelativePosition: function (element, parent) {
+                var xPosition = 0;
+                var yPosition = 0;
+
+                while (element && element !== parent) {
                     xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
                     yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
                     element = element.offsetParent;

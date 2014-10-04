@@ -192,7 +192,7 @@
             scrollingtable.body.addEventListener('mouseovercell', function (e) {
                 cells = e.cells;
             })
-            scrollingtable.canvas.dispatchEvent(MEPH.createEvent('mouseover', { pageX: 10, pageY: 10 }));
+            scrollingtable.canvas.dispatchEvent(MEPH.createEvent('mousemove', { pageX: 10, pageY: 10 }));
 
             ///Assert
             return new Promise(function (r) {
