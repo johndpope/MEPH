@@ -1,5 +1,5 @@
 ﻿MEPH.define('MEPHControls.table.view.Sequencer', {
-    alias: 'mephcontrols_spreadsheet',
+    alias: 'mephcontrols_sequencer',
     templates: true,
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
