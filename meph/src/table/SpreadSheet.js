@@ -38,6 +38,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
         vbarposition: null,
         hbarposition: null,
         startRow: 0,
+        startTopRow: 0,
+        startLeftColumn: 0,
         verticalSize: 0,
         horizontalSize: 0,
         selectedleftheader: null,
@@ -151,15 +153,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.handleMouseMoveHeaderCell(evt, 'left');
         });
 
-        me.leftheader.addEventListener('mousedown', me.headerMouseDownHandler.bind(me, 'left', me.leftheader));
 
 
         me.leftheader.addEventListener('mouseover', me.headerMouseEventHandler.bind(me, 'left', me.leftheader, 'mouseoverheader'));
-
         me.leftheader.addEventListener('mousemove', me.headerMouseMoveHandler.bind(me, 'left', me.leftheader));
 
         me.leftheader.addEventListener('mousemoveselectleft', me.headerMouseMoveSelectHandler.bind(me, 'left', me.leftheader));
 
+        me.leftheader.addEventListener('mousedown', me.headerMouseDownHandler.bind(me, 'left', me.leftheader));
         me.leftheader.addEventListener('mouseup', me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
         if (me.endselectonmouseout)
             me.leftheader.addEventListener('mouseout', me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
@@ -272,11 +273,12 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.canvas.addEventListener('mousemove', function (evt) {
             me.handleSingleCellCalculations(evt, 'mouseovercell');
         });
-
+        me.canvas.addEventListener('keypress', function (evt) {
+            me.onKeyPress(evt);
+        });
         me.canvas.addEventListener('mousemove', function (evt) {
             if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
-                var cells = me.getCanvasCells(evt);
-                var cell = cells.first()
+                var cell = me.hovercells ? me.hovercells.first() : me.getCanvasCells(evt).first()
                 me.selecting.end = cell;
                 me.canvas.dispatchEvent(MEPH.createEvent('mousemoveselect', {
                     selecting: me.selecting
@@ -297,18 +299,9 @@ MEPH.define('MEPH.table.SpreadSheet', {
         });
 
         me.canvas.addEventListener('mousedown', function (evt) {
-            var cells = me.getCanvasCells(evt);
-            if (!me.state) {
-                var cell = cells.first()
-                me.selecting = {
-                    start: cell
-                };
-                document.body.classList.add('noselect');
-                me.state = MEPH.table.SpreadSheet.states.Selecting;
-                me.canvas.dispatchEvent(MEPH.createEvent('selectstart', {
-                    cell: cell
-                }));
-            }
+            if (me.commands && me.commands.first(function (x) { return x.command === 'select' }))
+                return;
+            me.select(evt);
         });
 
         me.canvas.addEventListener('mouseout', me.onMouseupSelecting.bind(me));
@@ -337,25 +330,9 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     onMouseupSelecting: function () {
         var me = this;
-        if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
-            var selectedstartrow = me.getSelectedStartRow(me.selecting);
-            me.selectedrange = me.selecting;
-            if (me.selected) {
-                me.selected.clear();
-                if (selectedstartrow) {
-                    [].interpolate(selectedstartrow.startrow, selectedstartrow.endrow + 1, function (x) {
-                        [].interpolate(selectedstartrow.startcolumn, selectedstartrow.endcolumn + 1, function (y) {
-                            me.selected.push({
-                                row: x,
-                                column: y
-                            });
-                        })
-                    });
-                }
-            }
-            me.selecting = null;
-            me.state = null;
-        }
+        if (me.commands && me.commands.first(function (x) { return x.command === 'select' }))
+            return;
+        me.endselect();
     },
     handleMouseMoveCell: function (evt) {
         var me = this;
@@ -553,6 +530,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this;
         var cells = me.getCanvasCells(evt);
         var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
+        me.hovercells = cells || me.hovercells;
         me.canvas.dispatchEvent(MEPH.createEvent(outevnt, {
             cells: cells,
             position: pos.first()
@@ -582,39 +560,24 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this;
         var t = 0;
         var u = 0;
-        //if (offset == 'top') {
-        //    me.rowHeaderOffsets.subset(me.startRow, cell.row).first(function (x) {
-        //        t += x;
-        //    });
-        //}
-        //else {
-        //    me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
-        //        t += x;
-        //    });
-        //}
         t = me.getCellRowPosition(cell, offset);
 
         u = me.getCellColumnPosition(cell, offset);
-        //if (offset == 'left') {
-        //    me.columnHeaderOffsets.subset(me.startColumn, cell.column).first(function (x) {
-        //        u += x;
-        //    });
-        //}
-        //else {
-        //    me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
-        //        u += x;
-        //    });
-        //}
+
         return {
             x: u,
             y: t
         }
     },
+    getCellColumnPx: function (cell, offset) {
+        var me = this;
+        return me.getCellColumnPosition({ column: cell.column + 1 }, offset);
+    },
     getCellColumnPosition: function (cell, offset) {
         var me = this,
             u = 0;
         if (offset == 'left') {
-            me.columnHeaderOffsets.subset(me.startColumn, cell.column).first(function (x) {
+            me.columnHeaderOffsets.subset(me.startLeftColumn, cell.column).first(function (x) {
                 u += x;
             });
         }
@@ -633,7 +596,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this;
         var t = 0;
         if (offset == 'top') {
-            me.rowHeaderOffsets.subset(me.startRow, cell.row).first(function (x) {
+            me.rowHeaderOffsets.subset(me.startTopRow, cell.row).first(function (x) {
                 t += x;
             });
         }
@@ -853,11 +816,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     drawTopGrid: function (height, width) {
         var me = this;
-        me.visibletopheader = me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, 0, 0);
+        me.visibletopheader = me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, me.startTopRow, me.startColumn);
     },
     drawLeftGrid: function (height, width) {
         var me = this;
-        me.visibleleftheader = me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, 0, 0);
+        me.visibleleftheader = me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, me.startRow, me.startLeftColumn);
     },
     drawGrid: function (height, width) {
         var me = this;
@@ -970,5 +933,61 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
 
         return columns;
+    },
+    /**
+     * Handles key presses.
+     * @param {Object} evt
+     **/
+    onKeyPress: function (evt) {
+        var me = this,
+          key = MEPH.util.Dom.getCharCode(evt);
+        if (me.commands) {
+            var command = me.commands.first(function (x) {
+                return x.key.toLowerCase() === String.fromCharCode(key).toLowerCase();
+            });
+            if (command) {
+                switch (command.command) {
+                    case 'select':
+                        me.state === MEPH.table.SpreadSheet.states.Selecting ? me.endselect() : me.select();
+                        break;
+                }
+            }
+        }
+    },
+    select: function (evt) {
+        var me = this;
+        if (!me.state) {
+            var cell = me.hovercells ? me.hovercells.first() || me.getCanvasCells(evt).first() : me.getCanvasCells(evt).first();
+            me.selecting = {
+                start: cell
+            };
+            document.body.classList.add('noselect');
+            me.state = MEPH.table.SpreadSheet.states.Selecting;
+            me.canvas.dispatchEvent(MEPH.createEvent('selectstart', {
+                cell: cell
+            }));
+        }
+    },
+    endselect: function () {
+        var me = this;
+        if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
+            var selectedstartrow = me.getSelectedStartRow(me.selecting);
+            me.selectedrange = me.selecting;
+            if (me.selected) {
+                me.selected.clear();
+                if (selectedstartrow) {
+                    [].interpolate(selectedstartrow.startrow, selectedstartrow.endrow + 1, function (x) {
+                        [].interpolate(selectedstartrow.startcolumn, selectedstartrow.endcolumn + 1, function (y) {
+                            me.selected.push({
+                                row: x,
+                                column: y
+                            });
+                        })
+                    });
+                }
+            }
+            me.selecting = null;
+            me.state = null;
+        }
     }
 });

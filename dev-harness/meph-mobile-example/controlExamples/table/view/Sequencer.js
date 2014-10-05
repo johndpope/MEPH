@@ -9,7 +9,10 @@
         laneFunc: null,
         settimeFunc: null,
         lengthFunc: null,
-        source: null
+        source: null,
+        rowheaderFunc: null,
+        leftheadersource: null,
+        columnheader: null
     },
     onLoaded: function () {
         var me = this;
@@ -43,7 +46,23 @@
                 }
             }
         }
+        me.rowheaderFunc = function () {
+            return {
+                'function': function (item) {
+                    return 'Row ' + item.lane;
+                }
+            }
+        }
+        me.columnheaderFunc = function () {
+            return {
+                'function': function (item) {
+                    return 'Column ' + item.time;
+                }
+            }
+        }
         me.source = MEPH.Observable.observable([]);
+        me.leftheadersource = MEPH.Observable.observable([]);
+        me.columnheader = MEPH.Observable.observable([]);
         var res = [].interpolate(0, 10, function (x) {
             return MEPH.Observable.observable({
                 lane: x,
@@ -51,6 +70,22 @@
                 length: (Math.random() * 3) + 1
             });
         });
+        var res2 = [].interpolate(0, 10, function (x) {
+            return MEPH.Observable.observable({
+                lane: x,
+                time: 0,
+                length: 1
+            });
+        });
+        var res3 = [].interpolate(0, 10, function (x) {
+            return MEPH.Observable.observable({
+                lane: 0,
+                time: x,
+                length: 1
+            });
+        });
+        me.leftheadersource.push.apply(me.leftheadersource, res2);
+        me.columnheader.push.apply(me.columnheader, res3);
         me.source.push.apply(me.source, res);
     },
     initialize: function () {

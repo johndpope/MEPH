@@ -15,8 +15,10 @@ MEPH.define('MEPH.table.Sequencer', {
         grabkeycode: 'G',
         source: null,
         radius: 2,
+        leftHeaderLeftPadding: 3,
         topheadersource: null,
         leftheadersource: null,
+
         /**
          * @property {Object} grabbeditem
          * The item grabbed.
@@ -24,24 +26,36 @@ MEPH.define('MEPH.table.Sequencer', {
         grabbeditem: null,
         timescale: 1,
         /**
-         * @property {Function} time
-         * This function will take a item from the source, and return the time.
+         * @property {Object} time
+         * This function will take an item from the source, and return the time.
          **/
         time: null,
         /**
-         * @property {Function} time
+         * @property {Object} time
          * This function will take a number and item as an input, and set the time on the item.
          **/
         settime: null,
 
         /**
-         * @property {Function} lane
-         * This function will take a item from the source, and return the lane.
+         * @property{Object} rowheader
+         * This function will take an item, and return the text/or instructions to render.
+         */
+        rowheader: null,
+
+        /**
+         * @property{Object} columnheader
+         * This function will take an item, and return the text/or instructions to render.
+         */
+        columnheader: null,
+
+        /**
+         * @property {Object} lane
+         * This function will take an item from the source, and return the lane.
          **/
         lane: null,
         /**
-         * @property {Function} length
-         * This function will take a item from the source, and return the length.
+         * @property {Object} length
+         * This function will take an item from the source, and return the length.
          **/
         length: null
     },
@@ -68,9 +82,7 @@ MEPH.define('MEPH.table.Sequencer', {
     onLoaded: function () {
         var me = this;
         me.super();
-        window.addEventListener('keypress', function (evt) {
-            me.onKeyPress(evt);
-        });
+
         me.canvas.addEventListener('mouseovercell', function (evt) {
             me.onMouseOverCell(me.canvas, evt);
         });
@@ -112,19 +124,33 @@ MEPH.define('MEPH.table.Sequencer', {
         });
         return result;
     },
+    getLeftHeaderInstructions: function (visibleCellData) {
+        var me = this;
+        var result = me.getItemsInLeftSpace(visibleCellData).concatFluent(function (x) {
+            return me.getInstructionsForLeft(x);
+        });
+        return result;
+    },
+    getTopHeaderInstructions: function (visibleCellData) {
+        var me = this;
+        var result = me.getItemsInTopSpace(visibleCellData).concatFluent(function (x) {
+            return me.getInstructionsForTop(x);
+        });
+        return result;
+    },
     getItemsInCellSpace: function (cellData) {
         var me = this;
         return me.getItemInSpace(cellData, me.source);
     },
     getItemsInTopSpace: function (cellData) {
         var me = this;
-        return me.getItemInSpace(cellData, me.topheadersource);
+        return me.getItemInSpace(cellData, me.topheadersource, 'top');
     },
     getItemsInLeftSpace: function (cellData) {
         var me = this;
-        return me.getItemInSpace(cellData, me.leftheadersource);
+        return me.getItemInSpace(cellData, me.leftheadersource, 'left');
     },
-    getItemInSpace: function (cellData, source) {
+    getItemInSpace: function (cellData, source, header) {
         var result = [],
             time, lane, endtime,
             length,
@@ -142,11 +168,21 @@ MEPH.define('MEPH.table.Sequencer', {
                         lane = me.lane.function(x);
                         calctime = me.getScaled(time);
                         endtime = calctime + me.getScaled(length);
-                        if ((cellData.column <= calctime && calctime < cellData.visibleColumns + cellData.column
-                            && cellData.row <= lane && lane < cellData.visibleRows + cellData.row)||
-                            (cellData.column <= endtime && endtime < cellData.visibleColumns + cellData.column
-                            && cellData.row <= lane && lane < cellData.visibleRows + cellData.row)) {
+
+                        var rowfits = cellData.row <= lane && lane <= cellData.visibleRows + cellData.row;
+                        var startofcolumns = cellData.column <= calctime && calctime <= cellData.visibleColumns + cellData.column;
+                        var endofcolumns = cellData.column <= endtime && endtime <= cellData.visibleColumns + cellData.column;
+                        var beginning = (startofcolumns && rowfits);
+                        var end = (endofcolumns && rowfits);
+
+                        if ((beginning || end) && !header) {
                             return true;
+                        }
+                        else if (header === 'left') {
+                            return rowfits;
+                        }
+                        else if (header === 'top') {
+                            return startofcolumns;
                         }
                         return false;
                     }).foreach(function (x) {
@@ -188,14 +224,60 @@ MEPH.define('MEPH.table.Sequencer', {
         metrics.radius = me.radius;
         return [metrics];
     },
-    getItemMetrics: function (sequenceItem) {
+    getInstructionsForLeft: function (sequenceItem) {
+        var me = this,
+            metrics;
+
+        metrics = me.getItemMetrics(sequenceItem, 'left');
+        var res = me.rowheader && me.rowheader.function ? me.rowheader.function(sequenceItem) : null;
+        if (res === null) {
+        }
+        else if (typeof res === 'string') {
+            metrics.font = "12px Arial";
+            metrics.textAlign = 'left';
+            // metrics.x = me.getCellColumnPx(metrics, 'left')
+            metrics.x += me.leftHeaderLeftPadding;
+            metrics.y = me.getCellRowPx(metrics, 'left') - 12;
+            metrics.shape = MEPH.util.Renderer.shapes.text;
+            metrics.text = res;
+            return [metrics];
+        }
+        else {
+            console.log('Unhandled: ')
+        }
+        return [];
+    },
+    getInstructionsForTop: function (sequenceItem) {
+        var me = this,
+          metrics;
+
+        metrics = me.getItemMetrics(sequenceItem, 'top');
+        var res = me.columnheader && me.columnheader.function ? me.columnheader.function(sequenceItem) : null;
+        if (res === null) {
+        }
+        else if (typeof res === 'string') {
+            metrics.font = "12px Arial";
+            metrics.textAlign = 'left';
+            // metrics.x = me.getCellColumnPx(metrics, 'left')
+            metrics.x += me.leftHeaderLeftPadding;
+            metrics.y = me.getCellRowPx(metrics, 'top') - 12;
+            metrics.shape = MEPH.util.Renderer.shapes.text;
+            metrics.text = res;
+            return [metrics];
+        }
+        else {
+            console.log('Unhandled: ')
+        }
+        return [];
+    },
+    getItemMetrics: function (sequenceItem, offset) {
         var me = this;
         var lane = me.lane.function(sequenceItem);
         var time = me.time.function(sequenceItem);
         var length = me.length.function(sequenceItem);
         var calctime = me.getScaled(time);
         var column = Math.floor(calctime);
-        var pos = me.getCellPosition({ row: lane, column: column });
+        var pos = me.getCellPosition({ row: lane, column: column }, offset);
         var columnWidth = me.getColumnWidth(column);
         var xoffset = (calctime - column) * columnWidth;
         var width = me.getScaled(length) * columnWidth;
@@ -204,7 +286,9 @@ MEPH.define('MEPH.table.Sequencer', {
             x: pos.x + xoffset,
             y: pos.y,
             width: width,
-            height: height
+            height: height,
+            column: column,
+            row: lane
         };
     },
     onMouseOverCell: function (canvas, evt, header) {
@@ -307,6 +391,9 @@ MEPH.define('MEPH.table.Sequencer', {
                     me.ungrab(me.grabbeditem);
                 }
             }
+        }
+        else {
+            me.super();
         }
     },
     positionGrabRep: function (options) {

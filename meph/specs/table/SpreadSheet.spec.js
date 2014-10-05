@@ -161,6 +161,7 @@
             ///Assert
             return new Promise(function (r) {
                 setTimeout(function () {
+                    expect(scrollingtable.hovercells).toBeTruthy();
                     expect(cells).toBeTruthy();
                     if (app) {
                         app.removeSpace();
@@ -451,6 +452,43 @@
             done();
         });
     });
+    it('can set up a keypress to a command, for executing a command', function (done) {
+        MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom,
+                scrollingtable = results.first().classInstance;
+            scrollingtable.rowheaders = "1";
+            scrollingtable.columnheaders = "1";
+            scrollingtable.columns = "26";
+            scrollingtable.rows = "1000";
+            scrollingtable.commands = [{ key: 'S', command: 'select' }]
+            var selectingstarted;
+            scrollingtable.canvas.addEventListener('selectstart', function () {
+                selectingstarted = true;
+            });
+            scrollingtable.canvas.dispatchEvent(MEPH.createEvent('mousemove', { pageX: 10, pageY: 10 }));
+            scrollingtable.canvas.dispatchEvent(MEPH.createEvent('keypress', { which: 'S'.charCodeAt(0) }));
+
+            ///Assert
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(scrollingtable.selecting).toBeTruthy();
+                    expect(scrollingtable.state === MEPH.table.SpreadSheet.states.Selecting).toBeTruthy();
+                    expect(selectingstarted).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 150);
+            })
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
 
     it('when the mouse is pressed down will start to select, by setting the select state to selecting', function (done) {
         MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
@@ -488,6 +526,42 @@
         });
     });
 
+    it('if the select command is defined by keypress, the mousedown and mouseup will not do anything select related.', function (done) {
+        MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom,
+                scrollingtable = results.first().classInstance;
+            scrollingtable.rowheaders = "1";
+            scrollingtable.columnheaders = "1";
+            scrollingtable.columns = "26";
+            scrollingtable.rows = "1000";
+            scrollingtable.commands = [{ key: 'S', command: 'select' }];
+            var selectingstarted;
+            scrollingtable.canvas.addEventListener('selectstart', function () {
+                selectingstarted = true;
+            });
+            scrollingtable.canvas.dispatchEvent(MEPH.createEvent('mousedown', { pageX: 10, pageY: 10 }));
+
+            ///Assert
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(scrollingtable.selecting).toBeFalsy();
+                    expect(scrollingtable.state === null).toBeTruthy();
+                    expect(!selectingstarted).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 150);
+            })
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
     it('when the mouse is pressed down will start to select, by setting the select state to selecting, headers', function (done) {
         MEPH.render('MEPH.table.SpreadSheet', 'scrollingtable').then(function (r) {
             var results = r.res;
@@ -503,7 +577,7 @@
             scrollingtable.leftheader.addEventListener('leftselectstart', function () {
                 selectingstarted = true;
             });
-            
+
             scrollingtable.leftheader.dispatchEvent(MEPH.createEvent('mousedown', { pageX: 10, pageY: 10 }));
 
             ///Assert
