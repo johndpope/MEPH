@@ -140,72 +140,76 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         var me = this;
         if (me.markerFrame)
             cancelAnimationFrame(me.markerFrame)
-        return new Promise(function (r) {
-            me.markerFrame = requestAnimationFrame(function () {
-                var HEIGHT = me.height;
-                var WIDTH = me.width;
-                var dataArray = me.source;
-                me.markerFrame = null;
+        me.markerFrame = requestAnimationFrame(function () {
+            var HEIGHT = me.height;
+            var WIDTH = me.width;
+            var dataArray = me.source;
+            me.markerFrame = null;
 
-                if (!me.markerrenderer) {
-                    me.markerrenderer = new MEPH.util.Renderer();
-                    me.markerrenderer.setCanvas(me.markerCanvas);
-                }
-                me.markerrenderer.clear();
-                var xpos = me.getMarkerPosition();
-                me.markerrenderer.draw({
-                    shape: MEPH.util.Renderer.shapes.line,
-                    end: {
-                        x: xpos,
-                        y: HEIGHT
-                    },
-                    start: {
-                        x: xpos,
-                        y: 0
-                    },
-                    strokeStyle: me.markercolor
-                });
-                r();
+            if (!me.markerrenderer) {
+                me.markerrenderer = new MEPH.util.Renderer();
+                me.markerrenderer.setCanvas(me.markerCanvas);
+            }
+            me.markerrenderer.clear();
+            var xpos = me.getMarkerPosition();
+            me.markerrenderer.draw({
+                shape: MEPH.util.Renderer.shapes.line,
+                end: {
+                    x: xpos,
+                    y: HEIGHT
+                },
+                start: {
+                    x: xpos,
+                    y: 0
+                },
+                strokeStyle: me.markercolor
             });
+            rsolve();
+        });
+        var rsolve;
+        return new Promise(function (r) {
+            rsolve = r;
         });
     },
     render: function () {
         var me = this;
         if (me.markframe)
             cancelAnimationFrame(me.markframe)
+        me.markframe = requestAnimationFrame(function () {
+            var HEIGHT = me.height;
+            var WIDTH = me.width;
+            var dataArray = me.source;
+            me.markframe = null;
+
+            if (!me.renderer) {
+                me.renderer = new MEPH.util.Renderer();
+                me.renderer.setCanvas(me.markCanvas);
+            }
+
+
+            me.renderer.clear();
+            if (me.marks) {
+                var lines = me.marks.select(function (x) {
+                    return {
+                        shape: MEPH.util.Renderer.shapes.line,
+                        end: {
+                            x: x.position * WIDTH,
+                            y: HEIGHT
+                        },
+                        start: {
+                            x: x.position * WIDTH,
+                            y: 0
+                        },
+                        strokeStyle: me.markscolor
+                    }
+                });
+                me.renderer.draw(lines);
+            }
+            rsolve();
+        });
+        var rsolve;
         return new Promise(function (r) {
-            me.markframe = requestAnimationFrame(function () {
-                var HEIGHT = me.height;
-                var WIDTH = me.width;
-                var dataArray = me.source;
-                me.markframe = null;
-
-                if (!me.renderer) {
-                    me.renderer = new MEPH.util.Renderer();
-                    me.renderer.setCanvas(me.markCanvas);
-                }
-
-
-                me.renderer.clear();
-                if (me.marks) {
-                    var lines = me.marks.select(function (x) {
-                        return {
-                            shape: MEPH.util.Renderer.shapes.line,
-                            end: {
-                                x: x.position * WIDTH,
-                                y: HEIGHT
-                            },
-                            start: {
-                                x: x.position * WIDTH,
-                                y: 0
-                            },
-                            strokeStyle: me.markscolor
-                        }
-                    });
-                    me.renderer.draw(lines);
-                }
-                r();
-            });
+            rsolve = r;
         });
     }
 });

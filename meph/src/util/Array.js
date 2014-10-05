@@ -25,6 +25,9 @@ MEPH.define('MEPH.util.Array', {
                     value: function (func) {
                         var result = MEPH.util.Array.create();
                         var collection = this;
+                        if (func === undefined) {
+                            func = function (x) { return x }
+                        }
                         for (var i = 0 ; i < collection.length ; i++) {
                             if (func(collection[i], i)) {
                                 result.push(collection[i]);

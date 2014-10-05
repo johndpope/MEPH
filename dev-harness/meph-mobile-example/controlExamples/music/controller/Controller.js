@@ -114,6 +114,39 @@
             time: time
         });
     },
+    sliceClipToBank: function () {
+        var me = this;
+        var filemarks = me.soundFileMarks;
+        
+
+        var audio = new MEPH.audio.Audio();
+        var magnification = parseFloat(me.magnification || 100);
+        var timeScroll = parseFloat(me.timeScroll || 0) / 100;
+        var start = timeScroll * me.result.buffer.buffer.duration;
+        var _time = me.result.buffer.buffer.duration / magnification;
+        var resources = filemarks.orderBy(function (x, y) {
+            return x.position - y.position;
+        }).select(function (mark, i) {
+            if (i ) {
+                var pos2 = filemarks[i].position;
+                var pos1 = filemarks[i - 1].position;
+                var substart = start + (_time * pos1);
+                var subend = (_time * pos2) + start;
+                var res = MEPH.audio.Audio.clip(me.result, substart,
+                    Math.min(me.result.buffer.buffer.duration, subend));
+                return { time: subend - substart, res: res };
+            }
+            return null
+        }).where().foreach(function (r) {
+            me.banks.push({
+                id: MEPH.GUID(),
+                clip: r.res,
+                name: me.visualizedFile + ' ' + MEPH.GUID().split('').subset(0, 3).join(''),
+                time: r.time
+            });
+        });
+
+    },
     captureSnippet: function () {
         var me = this;
         return me.getSnippet();

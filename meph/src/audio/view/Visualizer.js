@@ -68,46 +68,48 @@ MEPH.define('MEPH.audio.view.Visualizer', {
         var me = this;
         if (me.frame)
             cancelAnimationFrame(me.frame)
-        return new Promise(function (r) {
-            me.frame = requestAnimationFrame(function () {
-                if (!me.canvas) return;
-                var HEIGHT = me.height;
-                var WIDTH = me.width;
-                var dataArray = me.source;
-                me.frame = null;
-                var canvasCtx = me.canvas.getContext('2d');
+        me.frame = requestAnimationFrame(function () {
+            if (!me.canvas) return;
+            var HEIGHT = me.height;
+            var WIDTH = me.width;
+            var dataArray = me.source;
+            var canvasCtx = me.canvas.getContext('2d');
 
-                canvasCtx.fillStyle = 'rgb(200, 200, 200)';
-                canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+            canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+            canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-                canvasCtx.lineWidth = 1;
-                canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+            canvasCtx.lineWidth = 1;
+            canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
 
-                canvasCtx.beginPath();
-                if (me.source && me.source.max) {
-                    var max = me.source.max(function (x) { return Math.abs(x); });
-                    var bufferLength = me.source.length;
-                    var sliceWidth = WIDTH * 1.0 / bufferLength;
-                    var x = 0;
+            canvasCtx.beginPath();
+            if (me.source && me.source.max) {
+                var max = me.source.max(function (x) { return Math.abs(x); });
+                var bufferLength = me.source.length;
+                var sliceWidth = WIDTH * 1.0 / bufferLength;
+                var x = 0;
 
-                    for (var i = 0; i < bufferLength; i++) {
+                for (var i = 0; i < bufferLength; i++) {
 
-                        var v = dataArray[i] / (max || 128.0);
-                        var y = (v * HEIGHT / 2) + (HEIGHT / 2) + parseFloat(me.vertical || 0) / (max || 128.0);
+                    var v = dataArray[i] / (max || 128.0);
+                    var y = (v * HEIGHT / 2) + (HEIGHT / 2) + parseFloat(me.vertical || 0) / (max || 128.0);
 
-                        if (i === 0) {
-                            canvasCtx.moveTo(x, y);
-                        } else {
-                            canvasCtx.lineTo(x, y);
-                        }
-
-                        x += sliceWidth;
+                    if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
                     }
+
+                    x += sliceWidth;
                 }
-                canvasCtx.lineTo(WIDTH, HEIGHT / 2);
-                canvasCtx.stroke();
-                r();
-            });
+            }
+            canvasCtx.lineTo(WIDTH, HEIGHT / 2);
+            canvasCtx.stroke();
+            me.frame = null;
+            rsolve();
+        });
+        var rsolve;
+        return new Promise(function (r) {
+            rsolve = r;
         });
     },
     changeWidth: function () {
