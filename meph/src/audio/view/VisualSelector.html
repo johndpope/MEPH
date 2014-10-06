@@ -1,15 +1,22 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "precanvas", "before" : true -->
 <range descriptiontext="start" meph-data-value="c$.position" meph-event-change="c$.updateMarker" meph-data-step="0.000001" meph-data-min="0" meph-data-max="1"></range>
 <div style="display:none">
-    <div mephid="markerBtnTemplate" class="btn btn-danger btn-xs" style="position:absolute; z-index:100">
-        <div style="position:relative;">
-            <span class="glyphicon glyphicon-remove"></span>
+    <div mephid="markerBtnTemplate" class="btn-group" style="position:absolute; z-index:100">
+        <div class="btn btn-danger btn-xs" removebtn>
+            <div style="position:relative;">
+                <span class="glyphicon glyphicon-remove"></span>
+            </div>
+        </div>
+        <div class="btn btn-danger btn-xs" playbtn>
+            <div style="position:relative;">
+                <span class="glyphicon glyphicon-play"></span>
+            </div>
         </div>
     </div>
 </div>
 <!-- "instruction": true, "name" : "injectop", "close": true -->
 <!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "canvas", "before" : true -->
-<div>
+<div class="btn-group">
     <button type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addMark | c$.cancelEvent">
         <span class="glyphicon glyphicon-plus"></span>
     </button> <!-- "name": "buttonpanel" -->

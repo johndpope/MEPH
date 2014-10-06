@@ -101,6 +101,25 @@
         return res;
 
     },
+    playSnippet: function () {
+        
+        var me = this;
+        var arg = MEPH.Array(arguments).last();
+        var _start = arg.domEvent.start;
+        var _end = arg.domEvent.end;
+
+        var audio = new MEPH.audio.Audio();
+        var magnification = parseFloat(me.magnification || 100);
+        var timeScroll = parseFloat(me.timeScroll || 0) / 100;
+        var start = timeScroll * me.result.buffer.buffer.duration;
+        var time = me.result.buffer.buffer.duration / magnification;
+
+
+
+        var res = MEPH.audio.Audio.clip(me.result, start + (time * _start),
+            Math.min(me.result.buffer.buffer.duration, (time * _end) + start));
+        return res;
+    },
     saveClipToBank: function () {
         var me = this;
         var magnification = parseFloat(me.magnification || 100);
@@ -117,7 +136,7 @@
     sliceClipToBank: function () {
         var me = this;
         var filemarks = me.soundFileMarks;
-        
+
 
         var audio = new MEPH.audio.Audio();
         var magnification = parseFloat(me.magnification || 100);
@@ -127,7 +146,7 @@
         var resources = filemarks.orderBy(function (x, y) {
             return x.position - y.position;
         }).select(function (mark, i) {
-            if (i ) {
+            if (i) {
                 var pos2 = filemarks[i].position;
                 var pos1 = filemarks[i - 1].position;
                 var substart = start + (_time * pos1);

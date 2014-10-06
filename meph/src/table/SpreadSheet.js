@@ -128,56 +128,57 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     appendEvents: function () {
         var me = this;
-        window.addEventListener("resize", me.update.bind(me));
+
+        me.don('resize', window, me.update.bind(me));
         me.appendCanvasEvents();
         me.appendHeaderEvents();
     },
     appendHeaderEvents: function () {
         var me = this;
-        me.topheader.addEventListener('click', function (evt) {
+        me.don('click', me.topheader, function (evt) {
             me.handleSingleHeaderCellCalculations(me.topheader, evt, 'topheadercellclicked', 'top');
         });
-        me.leftheader.addEventListener('click', function (evt) {
+        me.don('click', me.leftheader, function (evt) {
             me.handleSingleHeaderCellCalculations(me.leftheader, evt, 'leftheadercellclicked', 'left');
         });
-        me.topheader.addEventListener('mousemove', function (evt) {
+        me.don('mousemove', me.topheader, function (evt) {
             me.handleSingleHeaderCellCalculations(me.topheader, evt, 'mousemovetopheader', 'top');
         });
-        me.leftheader.addEventListener('mousemove', function (evt) {
+        me.don('mousemove', me.leftheader, function (evt) {
             me.handleSingleHeaderCellCalculations(me.leftheader, evt, 'mousemoveleftheader', 'left');
         });
-        me.topheader.addEventListener('mousemovetopheader', function (evt) {
+        me.don('mousemovetopheader', me.topheader, function (evt) {
             me.handleMouseMoveHeaderCell(evt, 'top');
         });
-        me.leftheader.addEventListener('mousemoveleftheader', function (evt) {
+        me.don('mousemoveleftheader', me.leftheader, function (evt) {
             me.handleMouseMoveHeaderCell(evt, 'left');
         });
 
 
 
-        me.leftheader.addEventListener('mouseover', me.headerMouseEventHandler.bind(me, 'left', me.leftheader, 'mouseoverheader'));
-        me.leftheader.addEventListener('mousemove', me.headerMouseMoveHandler.bind(me, 'left', me.leftheader));
+        me.don('mouseover', me.leftheader, me.headerMouseEventHandler.bind(me, 'left', me.leftheader, 'mouseoverheader'));
+        me.don('mousemove', me.leftheader, me.headerMouseMoveHandler.bind(me, 'left', me.leftheader));
 
-        me.leftheader.addEventListener('mousemoveselectleft', me.headerMouseMoveSelectHandler.bind(me, 'left', me.leftheader));
+        me.don('mousemoveselectleft', me.leftheader, me.headerMouseMoveSelectHandler.bind(me, 'left', me.leftheader));
 
-        me.leftheader.addEventListener('mousedown', me.headerMouseDownHandler.bind(me, 'left', me.leftheader));
-        me.leftheader.addEventListener('mouseup', me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
+        me.don('mousedown', me.leftheader, me.headerMouseDownHandler.bind(me, 'left', me.leftheader));
+        me.don('mouseup', me.leftheader, me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
         if (me.endselectonmouseout)
-            me.leftheader.addEventListener('mouseout', me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
+            me.don('mouseout', me.leftheader, me.onHeaderMouseupSelecting.bind(me, 'left', me.leftheader));
 
 
 
-        me.topheader.addEventListener('mousedown', me.headerMouseDownHandler.bind(me, 'top', me.topheader));
+        me.don('mousedown', me.topheader, me.headerMouseDownHandler.bind(me, 'top', me.topheader));
 
-        me.topheader.addEventListener('mousemove', me.headerMouseMoveHandler.bind(me, 'top', me.topheader));
+        me.don('mousemove', me.topheader, me.headerMouseMoveHandler.bind(me, 'top', me.topheader));
 
-        me.topheader.addEventListener('mouseover', me.headerMouseEventHandler.bind(me, 'top', me.topheader, 'mouseoverheader'));
+        me.don('mouseover', me.topheader, me.headerMouseEventHandler.bind(me, 'top', me.topheader, 'mouseoverheader'));
 
-        me.topheader.addEventListener('mousemoveselecttop', me.headerMouseMoveSelectHandler.bind(me, 'top', me.topheader));
+        me.don('mousemoveselecttop', me.topheader, me.headerMouseMoveSelectHandler.bind(me, 'top', me.topheader));
 
-        me.topheader.addEventListener('mouseup', me.onHeaderMouseupSelecting.bind(me, 'top', me.topheader));
+        me.don('mouseup', me.topheader, me.onHeaderMouseupSelecting.bind(me, 'top', me.topheader));
         if (me.endselectonmouseout)
-            me.topheader.addEventListener('mouseout', me.onHeaderMouseupSelecting.bind(me, 'top', me.topheader));
+            me.don('mouseout', me.topheader, me.onHeaderMouseupSelecting.bind(me, 'top', me.topheader));
     },
     onHeaderMouseupSelecting: function (offset, header, evt) {
         var me = this;
@@ -263,20 +264,20 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     appendCanvasEvents: function () {
         var me = this;
-        me.canvas.addEventListener('click', function (evt) {
+        me.don('click', me.canvas, function (evt) {
             me.handleSingleCellCalculations(evt, 'cellclicked');
         });
-        me.canvas.addEventListener('mousemove', function (evt) {
+        me.don('mousemove', me.canvas, function (evt) {
             me.handleSingleCellCalculations(evt, 'mousemovecell');
         });
 
-        me.canvas.addEventListener('mousemove', function (evt) {
+        me.don('mousemove', me.canvas, function (evt) {
             me.handleSingleCellCalculations(evt, 'mouseovercell');
         });
-        me.canvas.addEventListener('keypress', function (evt) {
+        me.don('keypress', me.canvas, function (evt) {
             me.onKeyPress(evt);
         });
-        me.canvas.addEventListener('mousemove', function (evt) {
+        me.don('mousemove', me.canvas, function (evt) {
             if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
                 var cell = me.hovercells ? me.hovercells.first() : me.getCanvasCells(evt).first()
                 me.selecting.end = cell;
@@ -286,11 +287,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
             }
         });
 
-        me.canvas.addEventListener('mousemovecell', function (evt) {
+        me.don('mousemovecell', me.canvas, function (evt) {
             me.handleMouseMoveCell(evt);
         });
 
-        me.canvas.addEventListener('mousemoveselect', function (evt) {
+        me.don('mousemoveselect', me.canvas, function (evt) {
             var selecting = evt.selecting;
             if (!selecting || !selecting.end || !selecting.start) {
                 return null;
@@ -298,19 +299,19 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.handleMouseMoveCellSelect(evt);
         });
 
-        me.canvas.addEventListener('mousedown', function (evt) {
+        me.don('mousedown', me.canvas, function (evt) {
             if (me.commands && me.commands.first(function (x) { return x.command === 'select' }))
                 return;
             me.select(evt);
         });
 
-        me.canvas.addEventListener('mouseout', me.onMouseupSelecting.bind(me));
-        me.canvas.addEventListener('mouseup', me.onMouseupSelecting.bind(me));
+        me.don('mouseout', me.canvas, me.onMouseupSelecting.bind(me));
+        me.don('mouseup', me.canvas, me.onMouseupSelecting.bind(me));
         var removenoselect = function () {
             document.body.classList.remove('noselect');
         }
-        document.body.addEventListener('mouseup', removenoselect);
-        document.body.addEventListener('mouseout', removenoselect);
+        me.don('mouseup', document.body, removenoselect);
+        me.don('mouseout', document.body, removenoselect);
     },
     getSelectedStartRow: function (selecting) {
         if (!selecting || !selecting.end || !selecting.start) {

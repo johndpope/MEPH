@@ -82,6 +82,7 @@
                                 meph-data-vertical="v$.verticalScroll"
                                 meph-data-marks="ct$.soundFileMarks"
                                 meph-data-height="300"
+                                meph-event-playsnippet="ct$.playSnippet | v$.playSnippet | c$.cancelEvent"
                                 scrollmutiplier="0">
                     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.createSnippets, ct$.soundFileMarks | c$.cancelEvent">
                         <span class="glyphicon glyphicon-ok"></span>

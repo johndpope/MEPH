@@ -83,21 +83,21 @@ MEPH.define('MEPH.table.Sequencer', {
         var me = this;
         me.super();
 
-        me.canvas.addEventListener('mouseovercell', function (evt) {
+        me.don('mouseovercell', me.canvas, function (evt) {
             me.onMouseOverCell(me.canvas, evt);
         });
-        me.canvas.addEventListener('mousemovecell', function (evt) {
+        me.don('mousemovecell', me.canvas, function (evt) {
             me.onMouseMoveCell(me.canvas, evt);
         });
 
-        me.canvas.addEventListener('mouseoveritem', function (evt) {
+        me.don('mouseoveritem', me.canvas, function (evt) {
             me.onMouseOverItem(evt);
         });
 
-        me.topheader.addEventListener('mouseovercelltop', function (evt) {
+        me.don('mouseovercelltop', me.topheader, function (evt) {
             me.onMouseOverCell(me.topheader, evt, 'top')
         });
-        me.leftheader.addEventListener('mouseovercellleft', function (evt) {
+        me.don('mouseovercellleft', me.leftheader, function (evt) {
             me.onMouseOverCell(me.topheader, evt, 'left')
         });
     },

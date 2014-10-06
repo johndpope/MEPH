@@ -103,16 +103,42 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     },
     createNewMarkerBtns: function (newmarks) {
         var me = this;
-        return newmarks.select(function (x) {
-            var btn = me.createMarkerBtn();
-            btn.addEventListener('click', function (x) {
+        return newmarks.select(function (x, index) {
+            var btntemplate = me.createMarkerBtn();
+            var btn = btntemplate.querySelector('[removebtn]');
+            me.don('click', btn, function (x) {
                 me.marks.removeWhere(function (y) { return y === x; });
+            }.bind(me, x));
+
+            me.don('click', btntemplate.querySelector('[playbtn]'), function (x) {
+                console.log('play snippet')
+                me.playSnippet(x);
             }.bind(me, x))
+
             return {
                 marker: x,
-                dom: btn
+                dom: btntemplate
             }
         })
+    },
+    /**
+     * Plays the snippet.
+     * @param {Object} percentage
+     ***/
+    playSnippet: function (mark) {
+        var me = this;
+        
+        var index = me.marks.orderBy(function (x, y) {
+            return x.position - y.position;
+        }).indexWhere(function (x) {
+            return x.position === mark.position;
+        }).first();
+        if (index !== null) {
+            me.markCanvas.dispatchEvent(MEPH.createEvent('playsnippet', {
+                start: mark.position,
+                end: me.marks[index + 1] ? me.marks[index + 1].position : 1
+            }))
+        }
     },
     createMarkerBtn: function () {
         var me = this;
