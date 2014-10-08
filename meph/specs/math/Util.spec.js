@@ -1,4 +1,4 @@
-﻿describe("MEPH/math/Util.spec.js", function () {
+﻿describe("MEPH/math/Util.spec.js", 'MEPH.math.Util', function () {
     beforeEach(function () {
         jasmine.addMatchers(MEPH.customMatchers);
     });
@@ -71,5 +71,16 @@
         }).then(function (x) {
             done();
         });
+    });
+
+    it('can apply a window function to an array of numbers ', function () {
+        var res = [].interpolate(0, 100, function (x) {
+            return 10;
+        }).window(0, 10, MEPH.math.Util.window.Triangle.bind(null, -1));
+        var h1 = res.subset(0, 5);
+        var h2 = res.subset(5).reverse();
+        expect(h1.all(function (x, y) {
+            return x === h2[y]; 
+        })).toBeTruthy();
     });
 });

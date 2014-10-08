@@ -21,7 +21,7 @@ MEPH.define('MEPH.math.Util', {
         cosh: function (num) {
             return (Math.exp(num) + Math.exp(-num)) / 2;
         },
-        tanh: function(x){
+        tanh: function (x) {
             return (Math.exp(2 * x) - 1) / (Math.exp(2 * x) + 1);
         },
         sech: function (num) {
@@ -80,6 +80,19 @@ MEPH.define('MEPH.math.Util', {
             }
             result.push(v);
             return result;
+        },
+        window: {
+            /**
+             * http://en.wikipedia.org/wiki/Window_function#Spectral_analysis
+             * Triangular windows are given by: w(n)=1 - \left|\frac{n-\frac{N-1}{2}}{\frac{L}{2}}\right|,
+             * where L can be N,[8][16] N+1,[17] or N-1.[18] The last one is also known as Bartlett window. All three definitions converge at large N.
+             * The triangular window is the 2nd order B-spline window and can be seen as the convolution of two half-sized rectangular windows, giving it twice the width of the regular windows.
+             ****/
+            Triangle: function (plus, y, index, end) {
+                var L = end + plus;
+                var v = 1 - Math.abs(((index - ((end - 1) / 2)) / (L / 2)));
+                return y * v;
+            }
         }
     }
 }).then(function (x) {
