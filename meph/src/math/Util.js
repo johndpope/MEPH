@@ -92,6 +92,9 @@ MEPH.define('MEPH.math.Util', {
                 var L = end + plus;
                 var v = 1 - Math.abs(((index - ((end - 1) / 2)) / (L / 2)));
                 return y * v;
+            },
+            Rectangle: function (y, index, end) {
+                return y;
             }
         }
     }

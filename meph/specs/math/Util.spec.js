@@ -83,4 +83,14 @@
             return x === h2[y]; 
         })).toBeTruthy();
     });
+
+    it('can apply a square window function', function () {
+        var res = [].interpolate(0, 100, function (x) {
+            return 10;
+        }).window(0, 10, MEPH.math.Util.window.Rectangle);
+        var h1 = res;
+        expect(h1.all(function (x, y) {
+            return x === 10;
+        })).toBeTruthy();
+    });
 });
