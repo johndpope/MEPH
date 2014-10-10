@@ -93,4 +93,13 @@
             return x === 10;
         })).toBeTruthy();
     });
+
+    it('can convert x,y to polar coordinates', function () {
+        var x = 1;
+        var y = 0;
+        var polar = MEPH.math.Util.polar(x, y);
+
+        expect(polar.radius).toBe(1);
+        expect(polar.theta).toBe(0);
+    });
 });

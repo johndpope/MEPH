@@ -153,6 +153,7 @@
                         'service/ServiceCaller.spec.js',
                         'service/SignalRService.spec.js',
                         'session/SessionManager.spec.js',
+                        'signalprocessing/SignalProcessor.spec.js',
                         'synchronization/SyncArray.spec.js',
                         'synchronization/SyncConflictNegotiator.spec.js',
                         'synchronization/SyncMembrane.spec.js',

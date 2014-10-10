@@ -6,6 +6,12 @@
 MEPH.define('MEPH.math.Util', {
     statics: {
         cachedPrimes: null,
+        polar: function (x, y) {
+            return {
+                radius: Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)),
+                theta: Math.atan2(y, x)
+            }
+        },
         sec: function (num) {
             return 1 / Math.cos(num);
         },
