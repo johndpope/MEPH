@@ -166,7 +166,7 @@ MEPH.define('MEPH.util.Array', {
                         var result = [];
                         var collection = this;
                         for (var i = 0 ; i < collection.length ; i++) {
-                            if (func(collection[i])) {
+                            if (func(collection[i], i)) {
                                 result.push(i);
                             }
                         }
@@ -452,6 +452,22 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.step) {
+                Object.defineProperty(array, 'step', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (skip, func) {
+                        var collection = this;
+                        skip = Math.abs(skip);
+                        func = func || function (x) { return x; };
+                        for (var i = 0; i < collection.length; i = i + skip) {
+                            func(collection[i], i);
+                        }
+                        return this;
+                    }
+                });
+            }
             if (!array.skipEveryFromTo) {
                 Object.defineProperty(array, 'skipEveryFromTo', {
                     enumerable: false,
@@ -612,6 +628,21 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.addition) {
+                Object.defineProperty(array, 'addition', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = 0;
+                        var collection = this;
+                        for (var i = 0; i < collection.length ; i++) {
+                            result += func(collection[i], i);
+                        }
+                        return result;
+                    }
+                });
+            }
             var pushArray = function (array, value, i) {
                 if (array instanceof Float32Array || array instanceof Float64Array) {
                     array[i] = value;
@@ -765,13 +796,13 @@ MEPH.define('MEPH.util.Array', {
                         stop = Math.min(collection.length, stop === undefined || stop === null ? collection.length : stop);
                         var result = this instanceof Float32Array ? new Float32Array(stop - start) : [];
                         for (var i = start ; i < stop ; i++) {
-                            if (this instanceof Float32Array) {
-                                result[i] = windowFunc(collection[i]);
-                            }
-                            else {
-                                result.push(windowFunc(collection[i], i - start, stop));
-                            }
-
+                            //if (this instanceof Float32Array) {
+                            //    result[i] = windowFunc(collection[i]);
+                            //}
+                            //else {
+                            //    result.push(windowFunc(collection[i], i - start, stop));
+                            //}
+                            pushArray(result, windowFunc(collection[i], i - start, stop), i - start)
                         }
                         return MEPH.util.Array.create(result);
                     }

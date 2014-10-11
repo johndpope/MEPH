@@ -29,7 +29,7 @@
 
         var res = sp.fft(input);
 
-        expect(res.length).toBe(32);
+        expect(res.length).toBe(64);
     });
 
     it('can calculate the amplitude and phase from a FFT result.', function () {
@@ -42,8 +42,8 @@
         var phases = sp.phase(res);
 
         expect(amplitudes).toBeTruthy();
-        expect(amplitudes.length).toBe(16);
-        expect(phases.length).toBe(16);
+        expect(amplitudes.length).toBe(32);
+        expect(phases.length).toBe(32);
         expect(phases).toBeTruthy();
     });
 
@@ -117,5 +117,111 @@
         expect(res[0]).toBe(1);
         expect(res[1]).toBe(2);
         expect(res[2]).toBe(3);
+    });
+
+    it('can stretch a signal of x(n) to a signal of xs(n)', function () {
+        var sp = new SignalProcessor(), len = Math.pow(2, 8);
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i / len * 3 * Math.PI);
+        });
+
+        sp.windowing(MEPH.math.Util.window.Triangle.bind(null, -1));
+        sp.joining(MEPH.math.Util.windowjoin.Triangle.bind(null, -1));
+
+        var result = sp.stretch(input, 2).skipEvery(2);
+
+        expect(result.length).toBe(len * 2);
+    });
+
+    it('can reconstruct a signal of x(n) to a signal of xs(n)', function () {
+        var sp = new SignalProcessor(), len = Math.pow(2, 8);
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i * 8 * Math.PI);
+        });
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+
+        var result = sp.stretch(input, 1, 0).skipEvery(2);
+        debugger
+        expect(result.length).toBe(len);
+    });
+
+    it('can slice a signal into windowed chunks and return an array of ffts.', function () {
+        var sp = new SignalProcessor(),
+            len = 1024;
+
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i / len * 3 * Math.PI);
+        });
+
+        sp.windowing(MEPH.math.Util.window.Triangle.bind(null, -1));
+
+        var result = sp.fftwindows(input, 32);
+
+        expect(result.length).toBe(len / 32);
+
+    });
+
+    it('can join window chunks back together, and return a signal', function () {
+        var sp = new SignalProcessor(),
+            len = 64;
+        var input = [].interpolate(0, 4, function (x) {
+            return (new Float32Array(len)).select(function (x, i) {
+                return Math.cos(i / len * 3 * Math.PI);
+            })
+        });
+
+        var result = sp.joinWindows(input, MEPH.math.Util.windowjoin.Triangle.bind(null, -1), .5);
+
+        expect(result.length).toBe(64 * 2.5);
+    });
+
+    it('can generate a seriers of Xs[K] windows ', function () {
+        var sp = new SignalProcessor();
+        var windows = sp.generateWindows(32, 64);
+        expect(windows.length).toBe(64);
+    });
+
+    it('throws an error if the windowing isnt set.', function () {
+        var sp = new SignalProcessor(),
+            len = 1024;
+
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i / len * 3 * Math.PI);
+        });
+        var caught;
+
+        try {
+            var result = sp.fftwindows(input, 32);
+        }
+        catch (e) {
+            caught = true;
+        }
+        expect(caught).toBeTruthy();
+    });
+
+    it('can select the window width based on the signal length ', function () {
+        var sp = new SignalProcessor();
+
+        var width = sp.windowWidth(1024);
+
+        expect(width).toBe(32)
+    });
+
+    it('can set the windowing function for a signal processor', function () {
+        var sp = new SignalProcessor();
+
+        sp.windowing(MEPH.math.Util.window.Triangle);
+
+        expect(sp.windowing()).toBe(MEPH.math.Util.window.Triangle)
+    });
+
+    it('can set the window joining function for a signal processor', function () {
+        var sp = new SignalProcessor();
+
+        sp.joining(MEPH.math.Util.windowjoin.Triangle);
+
+        expect(sp.joining()).toBe(MEPH.math.Util.windowjoin.Triangle);
     })
 });

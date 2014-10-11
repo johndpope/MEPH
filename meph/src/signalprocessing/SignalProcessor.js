@@ -4,10 +4,13 @@
  * Signal processing library.
  **/
 MEPH.define('MEPH.signalprocessing.SignalProcessor', {
-    requires: ['MEPH.math.FFT', 'MEPH.math.Util'],
+    requires: ['MEPH.math.FFT', 'MEPH.math.Util', 'MEPH.util.Vector'],
     statics: {
+        maximumWindow: 1024
     },
     properties: {
+        windowingFunc: null,
+        joiningFunc: null
     },
     /**
      * Performs a fast fourier transform(FFT).
@@ -19,17 +22,44 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * @param {Array} output
      ***/
     fft: function (array, outputOffset, outputStride, inputOffset, inputStride, type) {
-        var output = new Float32Array(array.length);
+        var size = array.length * 2;
+        var output = new Float32Array(size);
         outputOffset = outputOffset !== undefined ? outputOffset : 0;
         outputStride = outputStride !== undefined ? outputStride : 1;
 
         inputOffset = inputOffset !== undefined ? inputOffset : 0;
         inputStride = inputStride !== undefined ? inputStride : 1;
-        type = type !== undefined ? type : false;
+        type = type !== undefined ? type : 'real';
+        var fft = new FFT();
+
+        fft.complex(array.length, false);
+        fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, type)
+        return output;
+    },/**
+     * Performs an inverse fast fourier transform(FFT).
+     * @param {Array} array
+     * @param {Number} outputOffset
+     * @param {Number} outputStride
+     * @param {Number} inputOffset
+     * @param {Number} inputStide
+     * @param {Array} output
+     ***/
+    ifft: function (array, outputOffset, outputStride, inputOffset, inputStride, type) {
+        var size = array.length;
+        var output = new Float32Array(size);
+        outputOffset = outputOffset !== undefined ? outputOffset : 0;
+        outputStride = outputStride !== undefined ? outputStride : 1;
+
+        inputOffset = inputOffset !== undefined ? inputOffset : 0;
+        inputStride = inputStride !== undefined ? inputStride : 1;
+        type = type !== undefined ? type : 'complex';
         var fft = new FFT();
 
         fft.complex(array.length / 2, true);
-        fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, type)
+        fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, false);
+        output.foreach(function (t, i) {
+            output[i] = output[i] / size;
+        })
         return output;
     },
     /**
@@ -42,7 +72,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         var res = new Float32Array(fftarray.length / 2);
         [].interpolate(0, fftarray.length / 2, function (x) {
             var index = x * 2;
-            res[x] = MEPH.math.Util.polar(fftarray[index], fftarray[index + 1]).theta;
+            res[x] = MEPH.math.Util.polar(fftarray[index], fftarray[index + 1]).radius;
         });
         return res;
     },
@@ -243,5 +273,172 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             return me.diff(res, n);
         }
         return res;
+    },
+    /**
+     *
+     * Stretches a signal by the stretch factor, resulting in a signal * stretch long.
+     * @param {Array} signal
+     * @param {Number} stretch
+     **/
+    stretch: function (signal, stretch, overlap, width) {
+        var len = signal.length, me = this;
+        overlap = overlap === null ? .5 : overlap;
+        var windowWidth = width || me.windowWidth(signal.length);
+        var windows = me.fftwindows(signal, windowWidth );
+        var frames = windows.select(function (x, index) {
+            return {
+                a: x,
+                b: windows[index + 1] || null
+            }
+        });
+
+        var interpolatedWindows = me.interpolateFrames(windowWidth, windows, stretch, frames, overlap);
+        var ifftwindows = me.ifftwindows(interpolatedWindows);
+        var res = me.joinWindows(ifftwindows, me.joining(), overlap);
+
+        return res.subset(0, Math.ceil(stretch * signal.length * (1 / (overlap || 1))));
+    },
+    /**
+     * @private
+     **/
+    interpolateFrames: function (windowWidth, windows, stretch, frames, overlap) {
+        var me = this, unwrappedPhase, phase, amplitude, rectangular,
+            a, b, halfIndex,
+            unwrappedA, unwrappedB,
+            lerp, frame,
+            fth, interpolateVal, inverseoverlap = (1 / (overlap || 1)),
+        generatedWindowFrames;
+        generatedWindowFrames = me.generateWindows(windowWidth, Math.ceil(windows.length * stretch * inverseoverlap));
+        lerp = MEPH.util.Vector.Lerp;
+
+        generatedWindowFrames.foreach(function (Xsk, i) {
+            fth = Math.floor(i / (stretch * inverseoverlap));
+            interpolateVal = (i / (stretch * inverseoverlap)) - fth;
+            frame = frames[fth];
+            a = frame.a;
+            b = frame.b;
+            unwrappedA = me.unwrap(a.phase);
+            if (b) {
+                unwrappedB = me.unwrap(b.phase);
+            }
+            else {
+                unwrappedB = null;
+            }
+            Xsk.step(2, function (xsk, index) {
+                halfIndex = index / 2;
+                unwrappedPhase = unwrappedB ? lerp(unwrappedA[halfIndex], unwrappedB[halfIndex], interpolateVal) : unwrappedA[halfIndex];
+                phase = unwrappedPhase % Math.PI;
+                amplitude = unwrappedB ? lerp(a.amplitude[halfIndex], b.amplitude[halfIndex], interpolateVal) : a.amplitude[halfIndex];
+                rectangular = MEPH.math.Util.rectangular(phase, amplitude);
+                Xsk[index] = rectangular.x;
+                Xsk[index + 1] = rectangular.y;
+            })
+        });
+
+        return generatedWindowFrames;
+    },
+    joinWindows: function (windows, joinfunc, stepratio) {
+        var windowWidth = windows.first().length;
+        stepratio = stepratio || 1;
+        var resultSignalLength = windows.first().length * (windows.length + 1) * stepratio;
+        var res = new Float32Array(resultSignalLength);
+        //windows.foreach(function (w) {
+        //    joinfunc()
+        //    w.foreach(function (t, index) {
+        //        joinfunc(t, w.length);
+        //    })
+        //});
+
+        res.step(2, function (x, rindex) {
+            //var percentage = index / res;
+            var indexesOfContributingWindows = windows.indexWhere(function (w, index) {
+                var start = index * stepratio * windowWidth;
+                var end = start + windowWidth;
+                return start <= rindex && rindex < end;
+            });
+            var r = indexesOfContributingWindows.addition(function (w, index) {
+                var t = windows[w];
+                var start = w * stepratio * windowWidth;
+                var contribution = joinfunc(rindex - start, windowWidth);
+                return contribution < 0 ? 0 : contribution * t[rindex - start];
+            });
+            res[rindex] = r;
+
+            r = indexesOfContributingWindows.addition(function (w, index) {
+                var t = windows[w];
+                var start = w * stepratio * windowWidth;
+                var contribution = joinfunc((rindex) - (start), windowWidth);
+                return contribution < 0 ? 0 : contribution * t[(rindex + 1) - (start)];
+            });
+            res[rindex + 1] = r;
+        });
+        return res;
+    },
+    /**
+     * Splits real signal arrays into fft chunks.
+     * @param {Array} signal
+     * @param {Number} step
+     **/
+    fftwindows: function (signal, step) {
+        var me = this;
+        var windowing = me.windowing();
+        if (!windowing) {
+            throw new Error('Set a windowing function.');
+        }
+        var steps = Math.ceil(signal.length / step);
+        var result = [].interpolate(0, steps, function (t) {
+            var windowStartIndex = t * step;
+            var windowEndIndex = (t + 1) * step;
+            var windowSlice = signal.window(windowStartIndex, windowEndIndex, windowing, t === 0, t === (steps - 1));
+            var windowFFT = me.fft(windowSlice);
+            return {
+                raw: windowFFT,
+                phase: me.phase(windowFFT),
+                amplitude: me.amplitude(windowFFT)
+            };
+        });
+
+        return result;
+    },
+    ifftwindows: function (windows) {
+        var me = this;
+        var res = windows.select(function (w) {
+            return me.ifft(w);
+        });
+        return res;
+    },
+    /**
+     * Generates a count of series of arrays of size long
+     **/
+    generateWindows: function (size, count) {
+        return [].interpolate(0, count, function (x) {
+            return new Float32Array(size);
+        })
+    },
+    /**
+     * Selects a windows width based on the signal length.
+     * @param {Number} len
+     **/
+    windowWidth: function (len) {
+        var length = Math.log(len) / Math.log(2);
+
+        return Math.pow(2, Math.min(MEPH.signalprocessing.SignalProcessor.maximumWindow, Math.max(2, (length / 2))));
+    },
+    /**
+     * Gets/Sets the function to use for windowing.
+     */
+    windowing: function (w) {
+        var me = this;
+        if (w !== undefined) {
+            me.windowingFunc = w;
+        }
+        return me.windowingFunc;
+    },
+    joining: function (w) {
+        var me = this;
+        if (w !== undefined) {
+            me.joiningFunc = w;
+        }
+        return me.joiningFunc;
     }
 })

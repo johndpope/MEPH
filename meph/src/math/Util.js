@@ -12,6 +12,12 @@ MEPH.define('MEPH.math.Util', {
                 theta: Math.atan2(y, x)
             }
         },
+        rectangular: function (theta, radius) {
+            return {
+                x: radius * Math.cos(theta),
+                y: radius * Math.sin(theta)
+            }
+        },
         sec: function (num) {
             return 1 / Math.cos(num);
         },
@@ -101,6 +107,16 @@ MEPH.define('MEPH.math.Util', {
             },
             Rectangle: function (y, index, end) {
                 return y;
+            }
+        },
+        windowjoin: {
+            Triangle: function (plus, index, end) {
+                var L = end + plus;
+                var v = 1 - Math.abs(((index - ((end - 1) / 2)) / (L / 2)));
+                return v;
+            },
+            Rectangle: function (y, index, end) {
+                return 1;
             }
         }
     }
