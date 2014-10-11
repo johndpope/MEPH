@@ -16,31 +16,34 @@
         var output = new Float32Array(32);
         var outputOffset = 0;
         var outputStride = 1;;
-        var input = new Float32Array(32);
+        var fftsize = 16;
+        var input = new Float32Array(fftsize);
         input.foreach(function (x, index) {
             input[index] = Math.cos(Math.PI * index / 16);
         })
         var inputOffset = 0;
         var inputStride = 1;
-        var type = false;
-        
-        fft.complex(16, true);
+        var type = 'real';
+
+        fft.complex(fftsize, false);
         fft.process(output, outputOffset, outputStride, input, inputOffset, inputStride, type)
 
         var ifft = new FFT();
-        ifft.complex(16, false);
+        ifft.complex(fftsize, true);
         var output2 = new Float32Array(32);
-        ifft.process(output2, inputOffset, inputStride, output, outputOffset, outputStride, type);
+        ifft.process(output2, inputOffset, inputStride, output, outputOffset, outputStride, false);
 
-        var res = [].interpolate(0, 32, function (x) {
-            return (output2[x] / 16);
+        var res = []
+        output2.foreach(function (x, index) {
+            if (index % 2 === 0)
+                res.push((output2[index] / 16));
         })
 
         expect(res.all(function (x, i) {
-            
+
             return Math.abs(Math.abs(res[i]) - Math.abs(input[i])) < .001;
         })).toBeTruthy();
-        
+
 
     });
 });
