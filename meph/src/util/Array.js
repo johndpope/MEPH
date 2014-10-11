@@ -9,6 +9,15 @@ MEPH.define('MEPH.util.Array', {
         isArray: function () {
             $array.isArray.apply(null, arguments);
         },
+        $create: function (array, length) {
+            if (array instanceof Float32Array) {
+                return new Float32Array(length);
+            }
+            if (array instanceof Float64Array) {
+                return new Float64Array(length);
+            }
+            return [];
+        },
         /**
          * Adds extension function to an array.
          **/
@@ -317,11 +326,16 @@ MEPH.define('MEPH.util.Array', {
                     writable: true,
                     configurable: true,
                     value: function (func) {
-                        var result = MEPH.util.Array.create();
+                        var result = MEPH.util.Array.$create(this, this.length);
                         func = func || function (x) { return x; };
                         var collection = this;
                         for (var i = 0 ; i < collection.length ; i++) {
-                            result.push(func(collection[i], i));
+                            if (this instanceof Float32Array) {
+                                result[i] = func(collection[i], i);
+                            }
+                            else {
+                                result.push(func(collection[i], i));
+                            }
                         }
                         return result;
                     }
@@ -593,6 +607,32 @@ MEPH.define('MEPH.util.Array', {
                         var collection = this;
                         for (var i = 0; i < collection.length ; i++) {
                             result = func(collection[i], result, i);
+                        }
+                        return result;
+                    }
+                });
+            }
+            var pushArray = function (array, value, i) {
+                if (array instanceof Float32Array || array instanceof Float64Array) {
+                    array[i] = value;
+                }
+                else {
+                    array.push(value);
+                }
+            }
+            if (!array.cumsum) {
+                Object.defineProperty(array, 'cumsum', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = MEPHArray.$create(this, this.length);
+                        var total = 0;
+                        func = func || function (x) { return x; };
+                        var collection = this;
+                        for (var i = 0; i < collection.length ; i++) {
+                            total += func(collection[i]);
+                            pushArray(result, total, i);
                         }
                         return result;
                     }

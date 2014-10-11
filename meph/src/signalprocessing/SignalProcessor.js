@@ -134,5 +134,114 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             }
         }
         return res;
+    },
+    /**
+     * https://github.com/numpy/numpy/blob/v1.8.1/numpy/lib/function_base.py#L1122
+     * Unwrap by changing deltas between values to 2*pi complement.
+     * Unwrap radian phase `p` by changing absolute jumps greater than 
+     * `discont` to their 2*pi complement along the given axis.
+    *
+    *    Parameters
+    *    ----------
+    *    p : array_like
+    *        Input array.
+    *    discont : float, optional
+    *        Maximum discontinuity between values, default is ``pi``.
+    *    axis : int, optional
+    *        Axis along which unwrap will operate, default is the last axis.
+    *
+    *    Returns
+    *    -------
+    *    out : ndarray
+    *        Output array.
+    *
+    *    See Also
+    *    --------
+    *    rad2deg, deg2rad
+    *
+    *    Notes
+    *    -----
+    *    If the discontinuity in `p` is smaller than ``pi``, but larger than
+    *    `discont`, no unwrapping is done because taking the 2*pi complement
+    *    would only make the discontinuity larger.
+
+    *    Examples
+    *    --------
+    *    >>> phase = np.linspace(0, np.pi, num=5)
+    *    >>> phase[3:] += np.pi
+    *    >>> phase
+    *    array([ 0.        ,  0.78539816,  1.57079633,  5.49778714,  6.28318531])
+    *    >>> np.unwrap(phase)
+    *    array([ 0.        ,  0.78539816,  1.57079633, -0.78539816,  0.        ])
+    *
+    */
+    unwrap: function (p, discont, axis) {
+        discont = discont || Math.PI;
+        axis = axis || -1;
+        var me = this;
+        var nd = p.length;
+        var dd = me.diff(p);
+        //slice1 = [slice(None, None)] * nd
+        // slice1[axis] = slice(1, None)
+        // ddmod = mod(dd + pi, 2 * pi) - pi
+        var ddmod = dd.select(function (x) {
+            return (x + Math.PI) % (2 * Math.PI) - Math.PI;
+        })
+        // _nx.copyto(ddmod, pi, where = (ddmod == -pi) & (dd > 0))
+        ddmod = ddmod.select(function (x, index) {
+            return x === -Math.PI && dd[index] > 0 ? Math.PI : x;
+        });
+        // ph_correct = ddmod - dd;
+        var ph_correct = ddmod.select(function (x, index) {
+            return x - dd[index];
+        });
+
+        // _nx.copyto(ph_correct, 0, where = abs(dd) < discont)
+        ph_correct = ph_correct.select(function (x, index) {
+            return Math.abs(dd[index]) < discont ? 0 : x;
+        })
+        // up = array(p, copy = True, dtype = 'd')
+        // up[slice1] = p[slice1] + ph_correct.cumsum(axis)
+        var correct = ph_correct.cumsum();
+        return p.select(function (x, index) {
+            return x + (correct[index - 1] || 0);
+        });
+
+    },
+    /**
+    *
+    *  Calculate the n-th order discrete difference along given axis.
+    *  The first order difference is given by ``out[n] = a[n+1] - a[n]`` along
+    *  the given axis, higher order differences are calculated by using `diff`
+    *  recursively.
+
+    *  Parameters
+    *  ----------
+    *  a : array_like
+    *      Input array
+    *  n : int, optional
+    *      The number of times values are differenced.
+    *  axis : int, optional
+    *      The axis along which the difference is taken, default is the last axis.
+    *
+    *  Returns
+    *  -------
+    *  diff : ndarray
+    *      The `n` order differences. The shape of the output is the same as `a`
+    *      except along `axis` where the dimension is smaller by `n`.
+    *
+    *
+    */
+    diff: function (array, n) {
+        n = n || 1;
+
+        var res = array.subset(1).select(function (x, index) {
+            return x - array[index];
+        });
+        if (n > 1) {
+            n--;
+            return me.diff(res, n);
+        }
+        return res;
     }
 })

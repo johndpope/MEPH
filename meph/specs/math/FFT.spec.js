@@ -13,10 +13,11 @@
 
     it('can execute a fft on an array', function () {
         var fft = new FFT();
-        var output = new Float32Array(32);
+        var fftsize = 16;
+        var output = new Float32Array(fftsize * 2);
         var outputOffset = 0;
         var outputStride = 1;;
-        var fftsize = 16;
+        
         var input = new Float32Array(fftsize);
         input.foreach(function (x, index) {
             input[index] = Math.cos(Math.PI * index / 16);
@@ -30,13 +31,13 @@
 
         var ifft = new FFT();
         ifft.complex(fftsize, true);
-        var output2 = new Float32Array(32);
+        var output2 = new Float32Array(fftsize * 2);
         ifft.process(output2, inputOffset, inputStride, output, outputOffset, outputStride, false);
 
         var res = []
         output2.foreach(function (x, index) {
             if (index % 2 === 0)
-                res.push((output2[index] / 16));
+                res.push((output2[index] / fftsize));
         })
 
         expect(res.all(function (x, i) {

@@ -91,4 +91,31 @@
         expect(valleys.length).toBe(2);
         expect(valleys.first()).toBe(16);
     });
+
+    it('can unwrap a series of phase theta values to limit the discontinuity', function () {
+        var sp = new SignalProcessor();
+        var input = [0.0, 0.78539816, 1.57079633, 5.49778714, 6.28318531];
+
+        var result = sp.unwrap(input);
+        var answ = [0.0, 0.78539816, 1.57079633, -0.78539816, 0.0];
+        expect(result.all(function (x, i) { return Math.abs(answ[i]) - Math.abs(x) < .0001; })).toBeTruthy();
+    });
+
+    it('can unwrap a series of phase theta values to limit the discontinuity(FloatArray32)', function () {
+        var sp = new SignalProcessor();
+        var input = new Float32Array([0.0, 0.78539816, 1.57079633, 5.49778714, 6.28318531]);
+
+        var result = sp.unwrap(input);
+        var answ = new Float32Array([0.0, 0.78539816, 1.57079633, -0.78539816, 0.0]);
+        expect(result.all(function (x, i) { return Math.abs(answ[i]) - Math.abs(x) < .0001; })).toBeTruthy();
+    });
+
+    it('can calculate the diff', function () {
+        var sp = new SignalProcessor();
+        var res = sp.diff([1, 2, 4, 7, 0]);
+
+        expect(res[0]).toBe(1);
+        expect(res[1]).toBe(2);
+        expect(res[2]).toBe(3);
+    })
 });
