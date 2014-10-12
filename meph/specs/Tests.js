@@ -7,6 +7,8 @@
          * Custom Matchers
          */
         var jasmineDescribe = describe;
+        jasmine.getEnv().defaultTimeoutInterval = 15000;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
         window.describe = function () {
             var args = MEPH.util.Array.convert(arguments);
             var name = args.first();

@@ -119,21 +119,140 @@
         expect(res[2]).toBe(3);
     });
 
-    it('can stretch a signal of x(n) to a signal of xs(n)', function () {
+    it('can stretch a constant signal of x(n) to a signal of xs(n)', function () {
         var sp = new SignalProcessor(), len = Math.pow(2, 8);
+
         var input = (new Float32Array(len)).select(function (x, i) {
-            return Math.cos(i / len * 3 * Math.PI);
+            return Math.cos(i * 8 * Math.PI);
         });
 
-        sp.windowing(MEPH.math.Util.window.Triangle.bind(null, -1));
-        sp.joining(MEPH.math.Util.windowjoin.Triangle.bind(null, -1));
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
 
-        var result = sp.stretch(input, 2).skipEvery(2);
+        var result = sp.stretch(input, 2, 0).skipEvery(2);
 
         expect(result.length).toBe(len * 2);
+        expect(input.all(function (x, i) { return x === result[i]; })).toBeTruthy();
     });
 
-    it('can reconstruct a signal of x(n) to a signal of xs(n)', function () {
+    it('can stretch a signal of x(n) to a signal of xs(n)', function () {
+        var sp = new SignalProcessor(), len = Math.pow(2, 8);
+
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i * Math.PI / 8 + i * Math.PI / 3);
+        });
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+
+        var result = sp.stretch(input, 2, 0).skipEvery(2);
+
+        expect(result.length).toBe(len * 2);
+
+    });
+
+    it('can stretch a signal  by a float of x(n) to a signal of xs(n)', function () {
+        var sp = new SignalProcessor(), len = Math.pow(2, 8);
+        var stretch = 2.5;
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i * Math.PI / 8 + i * Math.PI / 3);
+        });
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+
+        var result = sp.stretch(input, stretch, 0).skipEvery(2);
+
+        expect(result.length).toBe(len * stretch);
+
+    });
+    var createBuffer = function (t, sampleRate) {
+        var resource = {
+            buffer: {
+                buffer: {
+                    getChannelData: function () {
+                        return t;
+                    },
+                    sampleRate: sampleRate
+                },
+                channelCount: 1
+            }
+        }
+        return resource;
+    }
+    it('test: the creek .mp3 stretch', function (done) {
+
+        var audio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 16) / 48000);
+
+
+            var input = result.buffer.buffer.getChannelData(0);
+            var samplerate = result.buffer.buffer.sampleRate;
+            var sp = new SignalProcessor(),
+                stretch = 1.12;
+
+            sp.windowing(MEPH.math.Util.window.Rectangle);
+            sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+
+
+            var result = sp.stretch(input, stretch, 0).skipEvery(2);
+            var stretchedBuffer = createBuffer(result, samplerate);
+            var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            // audioresult.buffer.start();
+            setTimeout(function () {
+                audio.disconnect();
+                done();
+
+            }, 200)
+        });
+    })
+
+    it('test: play , normally silent', function (done) {
+        var sp = new SignalProcessor(),
+            len = Math.pow(2, 15),
+            stretch = 2.5,
+            input = (new Float32Array(len)).select(function (x, i) {
+                return Math.sin(i * Math.PI / 8);
+            });
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+
+
+        var result = sp.stretch(input, stretch, 0).skipEvery(2);
+        var resource = {
+            buffer: {
+                buffer: {
+                    getChannelData: function () {
+                        return result;
+                    },
+                    sampleRate: len
+                },
+                channelCount: 1
+            }
+        };
+
+        var audio = new MEPH.audio.Audio();
+
+        var audioresult = audio.copyToBuffer(resource, 0, stretch);
+
+        audio.buffer(audioresult.buffer).complete();
+
+        // start the source playing
+        //audioresult.buffer.start();
+        setTimeout(function () {
+            audio.disconnect();
+            done();
+        }, 1000)
+    })
+    it('can reconstruct a constant signal of x(n) to a signal of xs(n)', function () {
         var sp = new SignalProcessor(), len = Math.pow(2, 8);
         var input = (new Float32Array(len)).select(function (x, i) {
             return Math.cos(i * 8 * Math.PI);
@@ -143,8 +262,24 @@
         sp.joining(MEPH.math.Util.windowjoin.Rectangle);
 
         var result = sp.stretch(input, 1, 0).skipEvery(2);
-        debugger
+
         expect(result.length).toBe(len);
+        expect(input.all(function (x, i) { return x === result[i]; })).toBeTruthy();
+    });
+
+    it('can reconstruct a signal of x(n) to a signal of xs(n)', function () {
+        var sp = new SignalProcessor(), len = Math.pow(2, 8);
+        var input = (new Float32Array(len)).select(function (x, i) {
+            return Math.cos(i * Math.PI / 13);
+        });
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+
+        var result = sp.stretch(input, 1, 0).skipEvery(2);
+
+        expect(result.length).toBe(len);
+        expect(input.all(function (x, i) { return Math.abs(Math.abs(x) - Math.abs(result[i])) < .000001; })).toBeTruthy();
     });
 
     it('can slice a signal into windowed chunks and return an array of ffts.', function () {
@@ -172,7 +307,7 @@
             })
         });
 
-        var result = sp.joinWindows(input, MEPH.math.Util.windowjoin.Triangle.bind(null, -1), .5);
+        var result = sp.joinWindows(input, MEPH.math.Util.windowjoin.Triangle.bind(null, -1), .5, 64 * 2.5);
 
         expect(result.length).toBe(64 * 2.5);
     });

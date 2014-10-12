@@ -22,14 +22,14 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * @param {Array} output
      ***/
     fft: function (array, outputOffset, outputStride, inputOffset, inputStride, type) {
-        var size = array.length * 2;
+        type = type !== undefined ? type : 'real';
+        var size = type === 'real' ? array.length * 2 : array.length;
         var output = new Float32Array(size);
         outputOffset = outputOffset !== undefined ? outputOffset : 0;
         outputStride = outputStride !== undefined ? outputStride : 1;
 
         inputOffset = inputOffset !== undefined ? inputOffset : 0;
         inputStride = inputStride !== undefined ? inputStride : 1;
-        type = type !== undefined ? type : 'real';
         var fft = new FFT();
 
         fft.complex(array.length, false);
@@ -58,7 +58,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         fft.complex(array.length / 2, true);
         fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, false);
         output.foreach(function (t, i) {
-            output[i] = output[i] / size;
+            output[i] = output[i] / (size / 2);
         })
         return output;
     },
@@ -278,13 +278,17 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      *
      * Stretches a signal by the stretch factor, resulting in a signal * stretch long.
      * @param {Array} signal
-     * @param {Number} stretch
+     * @param {Number} stretch how much to stretch the windows.
+     * @param {Number} overlap the overlap factor of the windowing function.
+     * @param {Number} width overrides the calculated width.
+     * @param {String} type , complex or real
      **/
-    stretch: function (signal, stretch, overlap, width) {
+    stretch: function (signal, stretch, overlap, width, type) {
         var len = signal.length, me = this;
         overlap = overlap === null ? .5 : overlap;
         var windowWidth = width || me.windowWidth(signal.length);
-        var windows = me.fftwindows(signal, windowWidth );
+        stretch = type === 'complex' ? stretch : stretch * 2;
+        var windows = me.fftwindows(signal, windowWidth);
         var frames = windows.select(function (x, index) {
             return {
                 a: x,
@@ -292,20 +296,20 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             }
         });
 
-        var interpolatedWindows = me.interpolateFrames(windowWidth, windows, stretch, frames, overlap);
+        var interpolatedWindows = me.interpolateFrames(windowWidth * 2, windows, type === 'complex' ? stretch : stretch / 2, overlap);
         var ifftwindows = me.ifftwindows(interpolatedWindows);
-        var res = me.joinWindows(ifftwindows, me.joining(), overlap);
+        var res = me.joinWindows(ifftwindows, me.joining(), overlap, stretch * len);
 
-        return res.subset(0, Math.ceil(stretch * signal.length * (1 / (overlap || 1))));
+        return res//.subset(0, Math.ceil(stretch * signal.length * (1 / (overlap || 1))));
     },
     /**
      * @private
      **/
-    interpolateFrames: function (windowWidth, windows, stretch, frames, overlap) {
+    interpolateFrames: function (windowWidth, windows, stretch, overlap) {
         var me = this, unwrappedPhase, phase, amplitude, rectangular,
             a, b, halfIndex,
             unwrappedA, unwrappedB,
-            lerp, frame,
+            lerp, frame, gth,
             fth, interpolateVal, inverseoverlap = (1 / (overlap || 1)),
         generatedWindowFrames;
         generatedWindowFrames = me.generateWindows(windowWidth, Math.ceil(windows.length * stretch * inverseoverlap));
@@ -313,34 +317,29 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
 
         generatedWindowFrames.foreach(function (Xsk, i) {
             fth = Math.floor(i / (stretch * inverseoverlap));
+            gth = Math.ceil(i / (stretch * inverseoverlap));
             interpolateVal = (i / (stretch * inverseoverlap)) - fth;
-            frame = frames[fth];
-            a = frame.a;
-            b = frame.b;
-            unwrappedA = me.unwrap(a.phase);
-            if (b) {
-                unwrappedB = me.unwrap(b.phase);
-            }
-            else {
-                unwrappedB = null;
-            }
+            a = windows[fth];
+            b = windows[gth];
             Xsk.step(2, function (xsk, index) {
                 halfIndex = index / 2;
-                unwrappedPhase = unwrappedB ? lerp(unwrappedA[halfIndex], unwrappedB[halfIndex], interpolateVal) : unwrappedA[halfIndex];
-                phase = unwrappedPhase % Math.PI;
-                amplitude = unwrappedB ? lerp(a.amplitude[halfIndex], b.amplitude[halfIndex], interpolateVal) : a.amplitude[halfIndex];
-                rectangular = MEPH.math.Util.rectangular(phase, amplitude);
-                Xsk[index] = rectangular.x;
-                Xsk[index + 1] = rectangular.y;
+                //unwrappedPhase = unwrappedB ? lerp(unwrappedA[halfIndex], unwrappedB[halfIndex], interpolateVal) : unwrappedA[halfIndex];
+                //phase = unwrappedPhase //% Math.PI;
+                //amplitude = unwrappedB ? lerp(a.amplitude[halfIndex], b.amplitude[halfIndex], interpolateVal) : a.amplitude[halfIndex];
+                //rectangular = MEPH.math.Util.rectangular(phase, amplitude);
+                var x = b && b.raw ? lerp(a.raw[index], b.raw[index], interpolateVal) : a.raw[index];
+                var y = b && b.raw ? lerp(a.raw[index + 1], b.raw[index + 1], interpolateVal) : a.raw[index + 1];
+                Xsk[index] = x;
+                Xsk[index + 1] = y;
             })
         });
 
         return generatedWindowFrames;
     },
-    joinWindows: function (windows, joinfunc, stepratio) {
+    joinWindows: function (windows, joinfunc, stepratio, length) {
         var windowWidth = windows.first().length;
         stepratio = stepratio || 1;
-        var resultSignalLength = windows.first().length * (windows.length + 1) * stepratio;
+        var resultSignalLength = length;
         var res = new Float32Array(resultSignalLength);
         //windows.foreach(function (w) {
         //    joinfunc()
