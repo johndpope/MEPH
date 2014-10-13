@@ -126,7 +126,7 @@
             return Math.cos(i * 8 * Math.PI);
         });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle); 
+        sp.windowing(MEPH.math.Util.window.Rectangle);
 
         var result = sp.stretch(input, 2, 0).skipEvery(2);
 
@@ -214,20 +214,20 @@
         var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
 
         audio.load(audiofile, audiofiletyp).then(function (resource) {
-            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 16) / 48000);
+            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
 
 
             var input = result.buffer.buffer.getChannelData(0);
             var samplerate = result.buffer.buffer.sampleRate;
             var sp = new SignalProcessor(),
-                stretch = 1;
+                stretch = 1.5;
 
             // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
             // sp.windowing(MEPH.math.Util.window.Welch);
-            // sp.windowing(MEPH.math.Util.window.Rectangle);
-            sp.windowing(MEPH.math.Util.window.Hamming);
-            
-            var result = sp.stretch(input, stretch, 0.3, 512).skipEvery(2);
+            sp.windowing(MEPH.math.Util.window.Rectangle);
+            //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
+
+            var result = sp.stretch(input, stretch, 0.2, 1024).skipEvery(2);
             var stretchedBuffer = createBuffer(result, samplerate);
             var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
 
@@ -243,6 +243,65 @@
         });
     })
 
+    it('test: can execute a fft on a piece of music', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
+
+            debugger
+            var input = result.buffer.buffer.getChannelData(0);
+            var samplerate = result.buffer.buffer.sampleRate;
+            var sp = new SignalProcessor(),
+                stretch = 1.5;
+
+            // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
+            // sp.windowing(MEPH.math.Util.window.Welch);
+            //sp.windowing(MEPH.math.Util.window.Rectangle);
+            //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
+
+            var fft = new FFT();
+            var fftsize = input.length;
+            var output = new Float32Array(fftsize * 2);
+            var outputOffset = 0;
+            var outputStride = 1;;
+             
+            var inputOffset = 0;
+            var inputStride = 1;
+            var type = 'real';
+
+            fft.complex(fftsize, false);
+            fft.process(output, outputOffset, outputStride, input, inputOffset, inputStride, type)
+
+            var ifft = new FFT();
+            ifft.complex(fftsize, true);
+            var output2 = new Float32Array(fftsize * 2);
+            ifft.process(output2, inputOffset, inputStride, output, outputOffset, outputStride, false);
+
+            var res = []
+            output2.foreach(function (x, index) {
+                if (index % 2 === 0)
+                    res.push((output2[index] / fftsize));
+            })
+             
+            var stretchedBuffer = createBuffer(res, samplerate);
+            var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            audioresult.buffer.start();
+
+            setTimeout(function () {
+                audio.disconnect();
+                done();
+
+            }, 3000)
+        });
+
+    });
+
     it('test: play , normally silent', function (done) {
         var sp = new SignalProcessor(),
             len = Math.pow(2, 15),
@@ -251,7 +310,7 @@
                 return Math.sin(i * Math.PI / 8);
             });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle); 
+        sp.windowing(MEPH.math.Util.window.Rectangle);
 
 
         var result = sp.stretch(input, stretch, 0).skipEvery(2);
@@ -286,7 +345,7 @@
             return Math.cos(i * 8 * Math.PI);
         });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle); 
+        sp.windowing(MEPH.math.Util.window.Rectangle);
 
         var result = sp.stretch(input, 1, 0).skipEvery(2);
 
@@ -301,7 +360,7 @@
         });
 
         sp.windowing(MEPH.math.Util.window.Rectangle);
-       
+
         var result = sp.stretch(input, 1, 0).skipEvery(2);
 
         expect(result.length).toBe(len);

@@ -116,6 +116,12 @@ MEPH.define('MEPH.math.Util', {
             },
             Hamming: function (n, N) {
                 return MEPH.math.Util.window.Hann(.54, .46, n, N);
+            },
+            Blackman: function (a, n, N) {
+                var a0 = (1 - a) / 2;
+                var a1 = .5;
+                var a2 = a / 2;
+                return a0 - (a1 * Math.cos((2 * Math.PI * n) / (N - 1))) + (a2 * Math.cos((4 * Math.PI * n) / (N - 1)));
             }
         }
     }
