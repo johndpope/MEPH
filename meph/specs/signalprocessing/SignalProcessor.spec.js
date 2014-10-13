@@ -126,8 +126,7 @@
             return Math.cos(i * 8 * Math.PI);
         });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+        sp.windowing(MEPH.math.Util.window.Rectangle); 
 
         var result = sp.stretch(input, 2, 0).skipEvery(2);
 
@@ -143,7 +142,6 @@
         });
 
         sp.windowing(MEPH.math.Util.window.Rectangle);
-        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
 
         var result = sp.stretch(input, 2, 0).skipEvery(2);
 
@@ -159,7 +157,6 @@
         });
 
         sp.windowing(MEPH.math.Util.window.Rectangle);
-        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
 
         var result = sp.stretch(input, stretch, 0).skipEvery(2);
 
@@ -195,8 +192,6 @@
                 stretch = 1.12;
 
             sp.windowing(MEPH.math.Util.window.Rectangle);
-            sp.joining(MEPH.math.Util.windowjoin.Rectangle);
-
 
             var result = sp.stretch(input, stretch, 0).skipEvery(2);
             var stretchedBuffer = createBuffer(result, samplerate);
@@ -213,6 +208,40 @@
             }, 200)
         });
     })
+    it('test: the creek .mp3 stretch. triangle windowing', function (done) {
+
+        var audio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 16) / 48000);
+
+
+            var input = result.buffer.buffer.getChannelData(0);
+            var samplerate = result.buffer.buffer.sampleRate;
+            var sp = new SignalProcessor(),
+                stretch = 1;
+
+            // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
+            // sp.windowing(MEPH.math.Util.window.Welch);
+            // sp.windowing(MEPH.math.Util.window.Rectangle);
+            sp.windowing(MEPH.math.Util.window.Hamming);
+            
+            var result = sp.stretch(input, stretch, 0.3, 512).skipEvery(2);
+            var stretchedBuffer = createBuffer(result, samplerate);
+            var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            audioresult.buffer.start();
+            setTimeout(function () {
+                audio.disconnect();
+                done();
+
+            }, 3000)
+        });
+    })
 
     it('test: play , normally silent', function (done) {
         var sp = new SignalProcessor(),
@@ -222,8 +251,7 @@
                 return Math.sin(i * Math.PI / 8);
             });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+        sp.windowing(MEPH.math.Util.window.Rectangle); 
 
 
         var result = sp.stretch(input, stretch, 0).skipEvery(2);
@@ -258,8 +286,7 @@
             return Math.cos(i * 8 * Math.PI);
         });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
+        sp.windowing(MEPH.math.Util.window.Rectangle); 
 
         var result = sp.stretch(input, 1, 0).skipEvery(2);
 
@@ -274,8 +301,7 @@
         });
 
         sp.windowing(MEPH.math.Util.window.Rectangle);
-        sp.joining(MEPH.math.Util.windowjoin.Rectangle);
-
+       
         var result = sp.stretch(input, 1, 0).skipEvery(2);
 
         expect(result.length).toBe(len);
@@ -355,8 +381,8 @@
     it('can set the window joining function for a signal processor', function () {
         var sp = new SignalProcessor();
 
-        sp.joining(MEPH.math.Util.windowjoin.Triangle);
+        sp.joining(MEPH.math.Util.window.Triangle);
 
-        expect(sp.joining()).toBe(MEPH.math.Util.windowjoin.Triangle);
+        expect(sp.joining()).toBe(MEPH.math.Util.window.Triangle);
     })
 });

@@ -100,23 +100,22 @@ MEPH.define('MEPH.math.Util', {
              * where L can be N,[8][16] N+1,[17] or N-1.[18] The last one is also known as Bartlett window. All three definitions converge at large N.
              * The triangular window is the 2nd order B-spline window and can be seen as the convolution of two half-sized rectangular windows, giving it twice the width of the regular windows.
              ****/
-            Triangle: function (plus, y, index, end) {
-                var L = end + plus;
-                var v = 1 - Math.abs(((index - ((end - 1) / 2)) / (L / 2)));
-                return y * v;
-            },
-            Rectangle: function (y, index, end) {
-                return y;
-            }
-        },
-        windowjoin: {
             Triangle: function (plus, index, end) {
                 var L = end + plus;
                 var v = 1 - Math.abs(((index - ((end - 1) / 2)) / (L / 2)));
                 return v;
             },
-            Rectangle: function (y, index, end) {
+            Rectangle: function (index, end) {
                 return 1;
+            },
+            Welch: function (n, N) {
+                return 1 - Math.pow(((n - ((N - 1) / 2)) / ((N + 1) / 2)), 2);
+            },
+            Hann: function (a, b, n, N) {
+                return a - (b * Math.cos((2 * Math.PI * n) / (N - 1)));
+            },
+            Hamming: function (n, N) {
+                return MEPH.math.Util.window.Hann(.54, .46, n, N);
             }
         }
     }

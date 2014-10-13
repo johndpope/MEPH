@@ -287,6 +287,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         var len = signal.length, me = this;
         overlap = overlap === null ? .5 : overlap;
         var windowWidth = width || me.windowWidth(signal.length);
+
         stretch = type === 'complex' ? stretch : stretch * 2;
         var windows = me.fftwindows(signal, windowWidth);
         var frames = windows.select(function (x, index) {
@@ -314,7 +315,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         generatedWindowFrames;
         generatedWindowFrames = me.generateWindows(windowWidth, Math.ceil(windows.length * stretch * inverseoverlap));
         lerp = MEPH.util.Vector.Lerp;
-
+        
         generatedWindowFrames.foreach(function (Xsk, i) {
             fth = Math.floor(i / (stretch * inverseoverlap));
             gth = Math.ceil(i / (stretch * inverseoverlap));
@@ -355,21 +356,49 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
                 var end = start + windowWidth;
                 return start <= rindex && rindex < end;
             });
-            var r = indexesOfContributingWindows.addition(function (w, index) {
+
+            var contributionsWindow = indexesOfContributingWindows.select(function (w, index) {
                 var t = windows[w];
-                var start = w * stepratio * windowWidth;
+                var start = Math.floor(w * stepratio * windowWidth);
                 var contribution = joinfunc(rindex - start, windowWidth);
-                return contribution < 0 ? 0 : contribution * t[rindex - start];
+                return {
+                    window: windows[w],
+                    start: start,
+                    contribution: contribution < 0 ? 0 : contribution
+                }
+            });
+
+            var total = contributionsWindow.addition(function (t) {
+                return t.contribution;
+            });
+
+            var r = contributionsWindow.addition(function (t, index) {
+                var w = t.window;
+                return (t.contribution / total) * w[rindex - t.start];
             });
             res[rindex] = r;
 
-            r = indexesOfContributingWindows.addition(function (w, index) {
-                var t = windows[w];
-                var start = w * stepratio * windowWidth;
-                var contribution = joinfunc((rindex) - (start), windowWidth);
-                return contribution < 0 ? 0 : contribution * t[(rindex + 1) - (start)];
+            r = contributionsWindow.addition(function (t, index) {
+                var w = t.window;
+                return (t.contribution / total) * w[(rindex + 1) - t.start];
             });
             res[rindex + 1] = r;
+
+            //var r = indexesOfContributingWindows.addition(function (w, index) {
+            //    var t = windows[w];
+            //    var start = w * stepratio * windowWidth;
+            //    var contribution = joinfunc(rindex - start, windowWidth);
+            //    return contribution < 0 ? 0 : contribution * t[rindex - start];
+            //});
+            //res[rindex] = r;
+
+            //r = indexesOfContributingWindows.addition(function (w, index) {
+            //    var t = windows[w];
+            //    var start = w * stepratio * windowWidth;
+            //    var contribution = joinfunc((rindex) - (start), windowWidth);
+            //    return contribution < 0 ? 0 : contribution * t[(rindex + 1) - (start)];
+            //});
+            //res[rindex + 1] = r;
         });
         return res;
     },
@@ -436,8 +465,8 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
     joining: function (w) {
         var me = this;
         if (w !== undefined) {
-            me.joiningFunc = w;
+            me.windowingFunc = w;
         }
-        return me.joiningFunc;
+        return me.windowingFunc;
     }
 })

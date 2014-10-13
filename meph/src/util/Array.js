@@ -796,13 +796,7 @@ MEPH.define('MEPH.util.Array', {
                         stop = Math.min(collection.length, stop === undefined || stop === null ? collection.length : stop);
                         var result = this instanceof Float32Array ? new Float32Array(stop - start) : [];
                         for (var i = start ; i < stop ; i++) {
-                            //if (this instanceof Float32Array) {
-                            //    result[i] = windowFunc(collection[i]);
-                            //}
-                            //else {
-                            //    result.push(windowFunc(collection[i], i - start, stop));
-                            //}
-                            pushArray(result, windowFunc(collection[i], i - start, stop), i - start)
+                            pushArray(result, collection[i] * windowFunc(i - start, stop), i - start)
                         }
                         return MEPH.util.Array.create(result);
                     }
