@@ -10,6 +10,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
     },
     properties: {
         windowingFunc: null,
+        sampleRate: 44100,
         joiningFunc: null
     },
     /**
@@ -298,6 +299,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         });
 
         var interpolatedWindows = me.interpolateFrames(windowWidth * 2, windows, type === 'complex' ? stretch : stretch / 2, overlap);
+
         var ifftwindows = me.ifftwindows(interpolatedWindows);
         var res = me.joinWindows(ifftwindows, me.joining(), overlap, stretch * len);
 
@@ -315,24 +317,69 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         generatedWindowFrames;
         generatedWindowFrames = me.generateWindows(windowWidth, Math.ceil(windows.length * stretch * inverseoverlap));
         lerp = MEPH.util.Vector.Lerp;
-        
+
+        var unwrappedPhase = windows.first().phase.select();
+        var wwindow = windowWidth / 2;
+
+        var unwrappedPhase = [].interpolate(0, windows.first().phase.length, function (x) {
+            return windows.select(function (t) {
+                return t.phase[x];
+            })
+        }).select(function (x) {
+            return me.unwrap(x);
+        });
+
+        var lastXsk = null, hop = windowWidth * overlap;
         generatedWindowFrames.foreach(function (Xsk, i) {
             fth = Math.floor(i / (stretch * inverseoverlap));
             gth = Math.ceil(i / (stretch * inverseoverlap));
-            interpolateVal = (i / (stretch * inverseoverlap)) - fth;
+            interpolateVal = (i / (stretch)) - fth;
             a = windows[fth];
             b = windows[gth];
+            b = b || a;
+            if (fth > gth) {
+                throw new Error('Frames are out of sequence.')
+            }
             Xsk.step(2, function (xsk, index) {
                 halfIndex = index / 2;
                 //unwrappedPhase = unwrappedB ? lerp(unwrappedA[halfIndex], unwrappedB[halfIndex], interpolateVal) : unwrappedA[halfIndex];
                 //phase = unwrappedPhase //% Math.PI;
                 //amplitude = unwrappedB ? lerp(a.amplitude[halfIndex], b.amplitude[halfIndex], interpolateVal) : a.amplitude[halfIndex];
                 //rectangular = MEPH.math.Util.rectangular(phase, amplitude);
-                var x = b && b.raw ? lerp(a.raw[index], b.raw[index], interpolateVal) : a.raw[index];
-                var y = b && b.raw ? lerp(a.raw[index + 1], b.raw[index + 1], interpolateVal) : a.raw[index + 1];
-                Xsk[index] = x;
-                Xsk[index + 1] = y;
-            })
+                var phasea = unwrappedPhase[halfIndex][fth];
+                var phaseb = unwrappedPhase[halfIndex][gth];
+                if (lastXsk) {
+                    var dpkm = (phaseb - phasea) / (hop);
+                    //var dpckm = (hop * (Math.PI * 2)) / (wwindow / (wwindow / 2));
+                    var polar = MEPH.math.Util.polar(lastXsk[index], lastXsk[index + 1]);
+                    var pa = polar.theta + dpkm * stretch * overlap;
+                    //var pa = dpckm + (halfIndex / hop) * (1 / wwindow);
+                    phasea = pa;/// me.unwrap([phasea, pa]).last();
+                }
+                // var phasea = unwrappedPhase[halfIndex];
+                //var phasea = a.phase[halfIndex]
+                //var phaseb;
+                //phaseb = b.phase[halfIndex];
+
+                //var dp = phaseb - phasea - (2 * Math.PI * (wwindow / 2)) / (wwindow / index);
+                //dp = dp - 2 * Math.PI * Math.round(dp / (2 * Math.PI));
+                //phaseb = dp;
+
+                // b.phase[halfIndex] = phaseb;
+                //var x = b && b.raw ? lerp(a.raw[index], b.raw[index], interpolateVal) : a.raw[index];
+                //var y = b && b.raw ? lerp(a.raw[index + 1], b.raw[index + 1], interpolateVal) : a.raw[index + 1];
+                var x = phasea;
+                // var x = lerp(phasea, phaseb, interpolateVal);
+                var y = lerp(a.amplitude[halfIndex], b.amplitude[halfIndex], interpolateVal);
+                var rect = MEPH.math.Util.rectangular(x, y)
+                //var x = a.raw[index];
+                //var y = a.raw[index + 1];
+                //Xsk[index] = x;
+                //Xsk[index + 1] = y;
+                Xsk[index] = rect.x;
+                Xsk[index + 1] = rect.y;
+            });
+            lastXsk = Xsk;
         });
 
         return generatedWindowFrames;
@@ -342,18 +389,13 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         stepratio = stepratio || 1;
         var resultSignalLength = length;
         var res = new Float32Array(resultSignalLength);
-        //windows.foreach(function (w) {
-        //    joinfunc()
-        //    w.foreach(function (t, index) {
-        //        joinfunc(t, w.length);
-        //    })
-        //});
+
 
         res.step(2, function (x, rindex) {
             //var percentage = index / res;
             var indexesOfContributingWindows = windows.indexWhere(function (w, index) {
                 var start = index * stepratio * windowWidth;
-                var end = start + windowWidth;
+                var end = start + windowWidth - 1;
                 return start <= rindex && rindex < end;
             });
 
@@ -371,10 +413,9 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             var total = contributionsWindow.addition(function (t) {
                 return t.contribution;
             });
-
             var r = contributionsWindow.addition(function (t, index) {
                 var w = t.window;
-                return (t.contribution / total) * w[rindex - t.start];
+                return total === 0 ? w[rindex - t.start] : (t.contribution / total) * w[rindex - t.start];
             });
             res[rindex] = r;
 
@@ -417,7 +458,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         var result = [].interpolate(0, steps, function (t) {
             var windowStartIndex = t * step;
             var windowEndIndex = (t + 1) * step;
-            var windowSlice = signal.window(windowStartIndex, windowEndIndex, windowing, t === 0, t === (steps - 1));
+            var windowSlice = signal.subset(windowStartIndex, windowEndIndex);//, windowing, t === 0, t === (steps - 1)
             var windowFFT = me.fft(windowSlice);
             return {
                 raw: windowFFT,

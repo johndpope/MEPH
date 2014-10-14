@@ -189,11 +189,11 @@
             var input = result.buffer.buffer.getChannelData(0);
             var samplerate = result.buffer.buffer.sampleRate;
             var sp = new SignalProcessor(),
-                stretch = 1.12;
+                stretch = 1;
 
             sp.windowing(MEPH.math.Util.window.Rectangle);
 
-            var result = sp.stretch(input, stretch, 0).skipEvery(2);
+            var result = sp.stretch(input, stretch, 0, 1024).skipEvery(2);
             var stretchedBuffer = createBuffer(result, samplerate);
             var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
 
@@ -208,6 +208,91 @@
             }, 200)
         });
     })
+    it('test: 11111111111111111111', function (done) {
+
+        var input = [].interpolate(0, Math.pow(2, 3), function (x) {
+            return x % 2 ? Math.cos(x) : 1;
+        });
+        var sp = new SignalProcessor(),
+            stretch = 1;
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+
+        var result = sp.stretch(input, stretch, 0, 8).skipEvery(2);
+        expect(result.skipEvery(2, function (x) { return x; }).all(function (x) { return x === 1; })).toBeTruthy();
+
+        done();
+    });
+
+    it('test: 11111111111111111111 window overlap', function (done) {
+
+        var input = [].interpolate(0, Math.pow(2, 10), function (x) {
+            return x % 2 ? Math.cos(x) : 1;
+        });
+        var sp = new SignalProcessor(),
+            stretch = 2;
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+
+        //sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
+        // sp.windowing(MEPH.math.Util.window.Welch);
+        //sp.windowing(MEPH.math.Util.window.Rectangle);
+        //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
+
+        var result = sp.stretch(input, stretch, .8, 512).skipEvery(2);
+        expect(result.skipEvery(2, function (x) {
+            return x;
+        }).all(function (x) {
+            return Math.abs(Math.abs(x) - 1) < .1;
+        })).toBeTruthy();
+
+        done();
+    });
+    it('test: 11111111111111111111 stretch', function (done) {
+
+        var input = [].interpolate(0, Math.pow(2, 3), function (x) {
+            return x % 2 ? Math.cos(x) : 1;
+        });
+        var sp = new SignalProcessor(),
+            stretch = 2;
+
+        sp.windowing(MEPH.math.Util.window.Rectangle);
+
+        var result = sp.stretch(input, stretch, 0, 8).skipEvery(2);
+        expect(result.skipEvery(2, function (x) { return x; }).all(function (x) { return x === 1; })).toBeTruthy();
+
+        done();
+    });
+    it('test: the creek .mp3 stretch. matches input.', function (done) {
+
+        var audio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
+
+
+            var input = result.buffer.buffer.getChannelData(0);
+            var samplerate = result.buffer.buffer.sampleRate;
+            var sp = new SignalProcessor(),
+                stretch = 1;
+
+            // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
+            // sp.windowing(MEPH.math.Util.window.Welch);
+            sp.windowing(MEPH.math.Util.window.Rectangle);
+            //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
+
+            var result = sp.stretch(input, stretch, 0, 1024).skipEvery(2);
+
+            expect(result.all(function (x, index) {
+                return x === input[index];
+            })).toBeTruthy();
+
+            done();
+        });
+    })
+
+
     it('test: the creek .mp3 stretch. triangle windowing', function (done) {
 
         var audio = new MEPH.audio.Audio();
@@ -250,7 +335,7 @@
         audio.load(audiofile, audiofiletyp).then(function (resource) {
             var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
 
-            debugger
+
             var input = result.buffer.buffer.getChannelData(0);
             var samplerate = result.buffer.buffer.sampleRate;
             var sp = new SignalProcessor(),
@@ -266,7 +351,7 @@
             var output = new Float32Array(fftsize * 2);
             var outputOffset = 0;
             var outputStride = 1;;
-             
+
             var inputOffset = 0;
             var inputStride = 1;
             var type = 'real';
@@ -284,7 +369,7 @@
                 if (index % 2 === 0)
                     res.push((output2[index] / fftsize));
             })
-             
+
             var stretchedBuffer = createBuffer(res, samplerate);
             var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
 
