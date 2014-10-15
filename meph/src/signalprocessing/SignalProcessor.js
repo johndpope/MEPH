@@ -11,7 +11,9 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
     properties: {
         windowingFunc: null,
         sampleRate: 44100,
-        joiningFunc: null
+        joiningFunc: null,
+        framesize: 2048,
+        lastphase: null
     },
     /**
      * Performs a fast fourier transform(FFT).
@@ -22,7 +24,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * @param {Number} inputStide
      * @param {Array} output
      ***/
-    fft: function (array, outputOffset, outputStride, inputOffset, inputStride, type) {
+    fft: function (array, type, outputOffset, outputStride, inputOffset, inputStride) {
         type = type !== undefined ? type : 'real';
         var size = type === 'real' ? array.length * 2 : array.length;
         var output = new Float32Array(size);
@@ -33,7 +35,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         inputStride = inputStride !== undefined ? inputStride : 1;
         var fft = new FFT();
 
-        fft.complex(array.length, false);
+        fft.complex(type === 'complex' ? array.length / 2 : array.length, false);
         fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, type)
         return output;
     },/**
@@ -46,18 +48,19 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * @param {Array} output
      ***/
     ifft: function (array, outputOffset, outputStride, inputOffset, inputStride, type) {
+        type = type !== undefined ? type : 'complex';
         var size = array.length;
-        var output = new Float32Array(size);
+        var output = new Float32Array(type === 'complex' ? size : size * 2);
         outputOffset = outputOffset !== undefined ? outputOffset : 0;
         outputStride = outputStride !== undefined ? outputStride : 1;
 
         inputOffset = inputOffset !== undefined ? inputOffset : 0;
         inputStride = inputStride !== undefined ? inputStride : 1;
-        type = type !== undefined ? type : 'complex';
         var fft = new FFT();
 
-        fft.complex(array.length / 2, true);
+        fft.complex(output.length / 2, true);
         fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, false);
+
         output.foreach(function (t, i) {
             output[i] = output[i] / (size / 2);
         })
@@ -165,6 +168,174 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             }
         }
         return res;
+    },
+    /**
+     * Gets/Sets the frame size.
+     **/
+    frameSize: function (size) {
+        var me = this;
+        if (size) {
+            me.framesize = size;
+            me.framesize2 = size / 2;
+        }
+        return me.framesize;
+    },
+    oversampling: function (os) {
+        var me = this;
+        if (os) {
+            me.oversample = os;
+        }
+        return me.oversample;
+    },
+    samplingRate: function (sr) {
+        var me = this;
+        if (sr) {
+            me.samplingrate = sr;
+        }
+        return me.samplingrate;
+    },
+    /**
+     *
+     * Analysis of the input.
+     **/
+    analysis: function (input) {
+        var me = this,
+            magn, phase,
+            real, expct,
+            stepSize, tmp, freqPerBin,
+            sampleRate = me.samplingRate(),
+            qpd, osamp = me.oversampling(),
+            imag;
+        me.lastphase = me.lastphase || new Float32Array(me.framesize2);
+        if (me.lastphase.length !== me.framesize2) {
+            me.lastphase = new Float32Array(me.framesize2)
+        }
+        stepSize = me.frameSize() / osamp;
+        expct = 2 * Math.PI * stepSize / me.frameSize();
+        freqPerBin = sampleRate / me.frameSize();
+        var res = {
+            mag: new Float32Array(me.framesize2),
+            freq: new Float32Array(me.framesize2)
+        }
+        for (var k = 0 ; k < me.framesize2; k++) {
+            /* de-interlace FFT buffer */
+            real = input[2 * k];
+            imag = input[2 * k + 1];
+
+            /* compute magnitude and phase */
+            magn = 2. * Math.sqrt(real * real + imag * imag);
+            phase = Math.atan2(imag, real);
+
+            /* compute phase difference */
+            tmp = phase - me.lastphase[k];
+            me.lastphase[k] = phase;
+
+            /* subtract expected phase difference */
+            tmp -= k * expct;
+
+            /* map delta phase into +/- Pi interval */
+            qpd = tmp / Math.PI;
+            if (qpd >= 0) {
+                qpd += (qpd & 1);
+            }
+            else {
+                qpd -= (qpd & 1);
+            }
+            tmp -= Math.PI * qpd;
+
+            /* get deviation from bin frequency from the +/- Pi interval */
+            tmp = osamp * tmp / (2.0 * Math.PI);
+
+            /* compute the k-th partials' true frequency */
+            tmp = k * freqPerBin + tmp * freqPerBin;
+
+            res.mag[k] = magn;
+            res.freq[k] = tmp;
+        }
+        return res;
+    },
+    /**
+     * Pitch shifts input.
+     ***/
+    pitch: function (analysisframe, pitchShift) {
+        var me = this, k,
+            synthesisMag = new Float32Array(me.frameSize()),
+            synthesisFreq = new Float32Array(me.frameSize()),
+            index;
+        for (k = 0; k < me.framesize2; k++) {
+            index = Math.floor(k * pitchShift);
+            if (index < me.framesize2) {
+                synthesisMag[index] += analysisframe.mag[k];
+                synthesisFreq[index] = analysisframe.freq[k] * pitchShift;
+            }
+        }
+        return {
+            mag: synthesisMag,
+            freq: synthesisFreq
+        }
+    },
+    synthesis: function (frame) {
+        var me = this,
+            k, osamp, stepSize,
+            expct,
+            sampleRate = me.samplingRate(),
+            freqPerBin;
+
+        osamp = me.oversampling();
+        stepSize = me.frameSize() / osamp;
+        expct = 2 * Math.PI * stepSize / me.frameSize();
+        freqPerBin = sampleRate / me.frameSize();
+        me.sumPhase = me.sumPhase || new Float32Array(me.framesize2);
+        if (me.sumPhase.length !== me.framesize2) {
+            me.sumPhase = new Float32Array(me.framesize2);
+        }
+        var result = new Float32Array(me.frameSize());
+        for (k = 0; k < me.framesize2; k++) {
+
+            /* get magnitude and true frequency from synthesis arrays */
+            magn = frame.mag[k];
+            tmp = frame.freq[k];
+
+            /* subtract bin mid frequency */
+            tmp -= k * freqPerBin;
+
+            /* get bin deviation from freq deviation */
+            tmp /= freqPerBin;
+
+            /* take osamp into account */
+            tmp = 2.0 * Math.PI * tmp / osamp;
+
+            /* add the overlap phase advance back in */
+            tmp += k * expct;
+
+            /* accumulate delta phase to get bin phase */
+            me.sumPhase[k] += tmp;
+            phase = me.sumPhase[k];
+
+            /* get real and imag part and re-interleave */
+            result[2 * k] = magn * Math.cos(phase);
+            result[2 * k + 1] = magn * Math.sin(phase);
+        }
+        return result;
+    },
+    /*
+     *
+     * do windowing and add to output accumulator 
+     * @param {Array} frame
+     * @param {Array} output
+     */
+    unwindow: function (frame, output) {
+        var me = this,
+            window,
+            osamp,
+            k;
+        osamp = me.oversampling();
+
+        for (k = 0; k < me.frameSize() ; k++) {
+            window = -.5 * Math.cos(2.0 * Math.PI * k / me.frameSize()) + .5;
+            output[k] += 2. * window * (frame[2 * k] || 0) / (me.framesize2 * osamp);
+        };
+        return output;
     },
     /**
      * https://github.com/numpy/numpy/blob/v1.8.1/numpy/lib/function_base.py#L1122
@@ -509,5 +680,27 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             me.windowingFunc = w;
         }
         return me.windowingFunc;
+    },
+    /**
+     *  Do windowing and re,im interleave
+     ***/
+    interleaveInput: function (input) {
+        var me = this, window, framesize = me.frameSize(),
+            gFFTworksp = me.getArray(input, framesize * 2);
+        for (k = 0; k < me.frameSize() ; k++) {
+            window = -.5 * Math.cos(2. * Math.PI * k / framesize) + .5;
+            gFFTworksp[2 * k] = input[k] * window;
+            gFFTworksp[2 * k + 1] = 0.;
+        }
+        return gFFTworksp;
+    },
+    getArray: function (array, length) {
+        if (array instanceof Float32Array) {
+            return new Float32Array(length);
+        }
+        else if (array instanceof Float64Array) {
+            return new Float64Array(length);
+        }
+        return [].interpolate(0, length, function () { return 0; });
     }
 })

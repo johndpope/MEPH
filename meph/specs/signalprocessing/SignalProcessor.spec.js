@@ -119,7 +119,7 @@
         expect(res[2]).toBe(3);
     });
 
-    it('can stretch a constant signal of x(n) to a signal of xs(n)', function () {
+    xit('can stretch a constant signal of x(n) to a signal of xs(n)', function () {
         var sp = new SignalProcessor(), len = Math.pow(2, 8);
 
         var input = (new Float32Array(len)).select(function (x, i) {
@@ -177,7 +177,7 @@
         }
         return resource;
     }
-    it('test: the creek .mp3 stretch', function (done) {
+    xit('test: the creek .mp3 stretch', function (done) {
 
         var audio = new MEPH.audio.Audio();
         var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
@@ -208,7 +208,7 @@
             }, 200)
         });
     })
-    it('test: 11111111111111111111', function (done) {
+    xit('test: 11111111111111111111', function (done) {
 
         var input = [].interpolate(0, Math.pow(2, 3), function (x) {
             return x % 2 ? Math.cos(x) : 1;
@@ -224,7 +224,7 @@
         done();
     });
 
-    it('test: 11111111111111111111 window overlap', function (done) {
+    xit('test: 11111111111111111111 window overlap', function (done) {
 
         var input = [].interpolate(0, Math.pow(2, 10), function (x) {
             return x % 2 ? Math.cos(x) : 1;
@@ -248,7 +248,7 @@
 
         done();
     });
-    it('test: 11111111111111111111 stretch', function (done) {
+    xit('test: 11111111111111111111 stretch', function (done) {
 
         var input = [].interpolate(0, Math.pow(2, 3), function (x) {
             return x % 2 ? Math.cos(x) : 1;
@@ -263,7 +263,7 @@
 
         done();
     });
-    it('test: the creek .mp3 stretch. matches input.', function (done) {
+    xit('test: the creek .mp3 stretch. matches input.', function (done) {
 
         var audio = new MEPH.audio.Audio();
         var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
@@ -293,7 +293,7 @@
     })
 
 
-    it('test: the creek .mp3 stretch. triangle windowing', function (done) {
+    xit('test: the creek .mp3 stretch. triangle windowing', function (done) {
 
         var audio = new MEPH.audio.Audio();
         var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
@@ -328,7 +328,7 @@
         });
     })
 
-    it('test: can execute a fft on a piece of music', function (done) {
+    xit('test: can execute a fft on a piece of music', function (done) {
         var audio = new MEPH.audio.Audio();
         var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
 
@@ -424,7 +424,7 @@
             done();
         }, 1000)
     })
-    it('can reconstruct a constant signal of x(n) to a signal of xs(n)', function () {
+    xit('can reconstruct a constant signal of x(n) to a signal of xs(n)', function () {
         var sp = new SignalProcessor(), len = Math.pow(2, 8);
         var input = (new Float32Array(len)).select(function (x, i) {
             return Math.cos(i * 8 * Math.PI);
@@ -438,7 +438,7 @@
         expect(input.all(function (x, i) { return x === result[i]; })).toBeTruthy();
     });
 
-    it('can reconstruct a signal of x(n) to a signal of xs(n)', function () {
+    xit('can reconstruct a signal of x(n) to a signal of xs(n)', function () {
         var sp = new SignalProcessor(), len = Math.pow(2, 8);
         var input = (new Float32Array(len)).select(function (x, i) {
             return Math.cos(i * Math.PI / 13);
@@ -468,7 +468,7 @@
 
     });
 
-    it('can join window chunks back together, and return a signal', function () {
+    xit('can join window chunks back together, and return a signal', function () {
         var sp = new SignalProcessor(),
             len = 64;
         var input = [].interpolate(0, 4, function (x) {
@@ -528,5 +528,110 @@
         sp.joining(MEPH.math.Util.window.Triangle);
 
         expect(sp.joining()).toBe(MEPH.math.Util.window.Triangle);
+    });
+
+    it('can set frame size of a signal processor', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+
+        expect(sp.frameSize()).toBe(1024);
     })
+
+    it('can window and interleave a signal', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+
+        var res = sp.interleaveInput(input);
+        expect(res.length).toBe(1024 * 2)
+    });
+
+    it('can do a fft on  the output of the interleave function', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+
+        var res = sp.interleaveInput(input);
+
+
+        var output = sp.fft(res, 'complex');
+        expect(output.all(function (t) { return !isNaN(t); })).toBeTruthy();
+    });
+    it('keeps the fftFrameSize/2 stored away', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+
+        expect(sp.framesize2).toBe(512)
+    });
+    it('can set the over sampling rate.', function () {
+        var sp = new SignalProcessor();
+        sp.oversampling(4);
+
+        expect(sp.oversampling()).toBe(4)
+    });
+
+    it('can do an analysis of the frame', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        sp.samplingRate(44100);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+        var res = sp.interleaveInput(input);
+        var analysisRes = sp.analysis(res);
+        expect(analysisRes.mag.length).toBe(sp.framesize2);
+        expect(analysisRes.freq.length).toBe(sp.framesize2);
+    });
+
+    it('can pitch shift the analysis result', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        sp.samplingRate(44100);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+        var res = sp.interleaveInput(input);
+        var analysisRes = sp.analysis(res);
+        var p = sp.pitch(analysisRes, .5);
+        expect(p).toBeTruthy();
+    });
+
+    it('can synthesize the new synth frame', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        sp.samplingRate(44100);
+        sp.oversampling(4);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+        var res = sp.interleaveInput(input);
+        var analysisRes = sp.analysis(res);
+        var p = sp.pitch(analysisRes, .5);
+        var s = sp.synthesis(p);
+        expect(s).toBeTruthy();
+    });
+
+    it('can do the inverse fft on the synthesized frame', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        sp.samplingRate(44100);
+        sp.oversampling(4);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+        var res = sp.interleaveInput(input);
+        var analysisRes = sp.analysis(res);
+        var p = sp.pitch(analysisRes, .5);
+        var s = sp.synthesis(p);
+
+        var ifft = sp.ifft(s);
+        expect(ifft.all(function (x) { return !isNaN(x); })).toBeTruthy();
+    });
+    it('can join the output of the ifft to the previously processed part', function () {
+        var sp = new SignalProcessor();
+        sp.frameSize(1024);
+        sp.oversampling(1);
+        sp.samplingRate(44100);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(Math.PI * x / 3); });
+        var res = sp.interleaveInput(input);
+        var analysisRes = sp.analysis(res);
+        var p = sp.pitch(analysisRes, 1);
+        var s = sp.synthesis(p);
+        var ifft = sp.ifft(s);
+        var newsignal = sp.unwindow(ifft, new Float32Array(ifft.length));
+        expect(newsignal.length).toBe(ifft.length);
+        expect(newsignal.all(function (x) { return !isNaN(x); })).toBeTruthy();
+    });
 });
