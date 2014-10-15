@@ -607,16 +607,18 @@
 
     it('can do the inverse fft on the synthesized frame', function () {
         var sp = new SignalProcessor();
-        sp.frameSize(1024);
+        sp.frameSize(32);
         sp.samplingRate(44100);
-        sp.oversampling(4);
-        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 100); });
+        sp.oversampling(1);
+        var input = [].interpolate(0, 4000, function (x) { return Math.cos(x / 2) });// ;
         var res = sp.interleaveInput(input);
-        var analysisRes = sp.analysis(res);
-        var p = sp.pitch(analysisRes, .5);
+        var output = sp.fft(res, 'complex');
+        var analysisRes = sp.analysis(output);
+        var p = sp.pitch(analysisRes, 1);
         var s = sp.synthesis(p);
 
         var ifft = sp.ifft(s);
+
         expect(ifft.all(function (x) { return !isNaN(x); })).toBeTruthy();
     });
     it('can join the output of the ifft to the previously processed part', function () {
@@ -626,12 +628,75 @@
         sp.samplingRate(44100);
         var input = [].interpolate(0, 4000, function (x) { return Math.cos(Math.PI * x / 3); });
         var res = sp.interleaveInput(input);
-        var analysisRes = sp.analysis(res);
+        var output = sp.fft(res, 'complex');
+        var analysisRes = sp.analysis(output);
         var p = sp.pitch(analysisRes, 1);
         var s = sp.synthesis(p);
         var ifft = sp.ifft(s);
         var newsignal = sp.unwindow(ifft, new Float32Array(ifft.length));
+
         expect(newsignal.length).toBe(ifft.length);
         expect(newsignal.all(function (x) { return !isNaN(x); })).toBeTruthy();
+    });
+
+    it('straight up pitch shift', function () {
+        var input = [].interpolate(0, 8000, function (x) { return Math.cos(Math.PI * x / 3); });
+        var sp = new SignalProcessor();
+        sp.pitchShift(1, 1024, 1024, 4, 44100, input);
+
+    });
+    it('audio file pitch shifting', function (done) {
+
+
+        var audio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+
+            var audioresult = audio.copyToBuffer(resource, 1, 5);
+            var inbucket;
+            var outbucket;
+            audio.buffer(audioresult.buffer)
+                .processor({
+                    name: 'proce',
+                    process: function (audioProcessingEvent) {
+                        var inputBuffer = audioProcessingEvent.inputBuffer;
+
+                        var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+                        var outputData = new Float32Array(inputData.length);
+                        inbucket = inputData.select();
+                        var d = audioProcessingEvent.outputBuffer.getChannelData(0);
+                        var hasoutput = sp.pitchShift(2, inputData.length, 1024 * 4, 4, 48000, inbucket, d);
+
+                        if (hasoutput) {
+                            //outputData.foreach(function (x, i) {
+                            //    d[i] = x;
+                            //})
+                            // sp.clear();
+                        }
+                        //[].interpolate(0, inputData.length, function (x) {
+                        //    outputData[x] = Math.cos(x * Math.PI / 10) * inputData[x];
+                        //})
+                        //sp.gOutFIFO.subset(0, 1024 / 4).foreach(function (x, i) {
+                        //    outputData[i] = x;
+                        //});
+                    }
+                })
+                .complete();
+
+            // start the source playing
+            audioresult.buffer.start();
+
+            setTimeout(function () {
+                audio.disconnect();
+                done();
+
+            }, 10000)
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+
     });
 });

@@ -292,6 +292,28 @@ MEPH.define('MEPH.audio.Audio', {
         return me;
     },
     /**
+     * Processor node.
+     * @param {Object} options
+     * @param {Number} options.resolution
+     **/
+    processor: function (options) {
+        var me = this;
+        var context = me.createContext();
+        if (!options || !options.process) {
+            throw new Error('Processor requires a process function.')
+        }
+        // Create a ScriptProcessorNode with a bufferSize of 4096 and a single input and output channel
+        var scriptNode = context.createScriptProcessor(1024, 1, 1);
+
+        var nodecontext = { options: options || null, node: scriptNode };
+        me.nodes.push(nodecontext);
+        nodecontext.data = [];
+        // Give the node a function to process audio events
+        scriptNode.onaudioprocess = options.process;
+
+        return me;
+    },
+    /**
      * Creates an oscillator node
      **/
     oscillator: function (options) {
