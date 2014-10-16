@@ -11,7 +11,7 @@ MEPH.define('MEPH.query.QueryableWorker', {
         me.$worker = new Worker(MEPH.frameWorkPathSource);
         var src = '' +
             'var t=  mephFrameWork(\'MEPH\', "' + MEPH.frameWorkPath + '",null, self);' +
-            'debugger;      t.framework.ready().then(function(){ ' +
+            ' t.framework.ready().then(function(){ ' +
             'MEPH.setPath("' + MEPH.frameWorkPath + '","MEPH");' +
             'postMessage({ "success": true });});'
         //me.$worker.postMessage('');

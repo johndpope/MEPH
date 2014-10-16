@@ -18,6 +18,11 @@
             'controller': 'MEPHControls.music.controller.Controller',
             'path': '/music/Visualizer'
         },
+          {
+            'viewId': 'tweeneditor',
+            'view': 'MEPHControls.tween.view.TweenEditor',
+            'path': '/tween/editor'
+        },
         {
             'viewId': 'scrollbar',
             'view': 'MEPHControls.scrollbar.view.Scrollbar',

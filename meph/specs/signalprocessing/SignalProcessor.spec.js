@@ -119,21 +119,6 @@
         expect(res[2]).toBe(3);
     });
 
-    xit('can stretch a constant signal of x(n) to a signal of xs(n)', function () {
-        var sp = new SignalProcessor(), len = Math.pow(2, 8);
-
-        var input = (new Float32Array(len)).select(function (x, i) {
-            return Math.cos(i * 8 * Math.PI);
-        });
-
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-
-        var result = sp.stretch(input, 2, 0).skipEvery(2);
-
-        expect(result.length).toBe(len * 2);
-        expect(input.all(function (x, i) { return x === result[i]; })).toBeTruthy();
-    });
-
     it('can stretch a signal of x(n) to a signal of xs(n)', function () {
         var sp = new SignalProcessor(), len = Math.pow(2, 8);
 
@@ -177,216 +162,7 @@
         }
         return resource;
     }
-    xit('test: the creek .mp3 stretch', function (done) {
-
-        var audio = new MEPH.audio.Audio();
-        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
-
-        audio.load(audiofile, audiofiletyp).then(function (resource) {
-            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 16) / 48000);
-
-
-            var input = result.buffer.buffer.getChannelData(0);
-            var samplerate = result.buffer.buffer.sampleRate;
-            var sp = new SignalProcessor(),
-                stretch = 1;
-
-            sp.windowing(MEPH.math.Util.window.Rectangle);
-
-            var result = sp.stretch(input, stretch, 0, 1024).skipEvery(2);
-            var stretchedBuffer = createBuffer(result, samplerate);
-            var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
-
-            audio.buffer(audioresult.buffer).complete();
-
-            // start the source playing
-            // audioresult.buffer.start();
-            setTimeout(function () {
-                audio.disconnect();
-                done();
-
-            }, 200)
-        });
-    })
-    xit('test: 11111111111111111111', function (done) {
-
-        var input = [].interpolate(0, Math.pow(2, 3), function (x) {
-            return x % 2 ? Math.cos(x) : 1;
-        });
-        var sp = new SignalProcessor(),
-            stretch = 1;
-
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-
-        var result = sp.stretch(input, stretch, 0, 8).skipEvery(2);
-        expect(result.skipEvery(2, function (x) { return x; }).all(function (x) { return x === 1; })).toBeTruthy();
-
-        done();
-    });
-
-    xit('test: 11111111111111111111 window overlap', function (done) {
-
-        var input = [].interpolate(0, Math.pow(2, 10), function (x) {
-            return x % 2 ? Math.cos(x) : 1;
-        });
-        var sp = new SignalProcessor(),
-            stretch = 2;
-
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-
-        //sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
-        // sp.windowing(MEPH.math.Util.window.Welch);
-        //sp.windowing(MEPH.math.Util.window.Rectangle);
-        //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
-
-        var result = sp.stretch(input, stretch, .8, 512).skipEvery(2);
-        expect(result.skipEvery(2, function (x) {
-            return x;
-        }).all(function (x) {
-            return Math.abs(Math.abs(x) - 1) < .1;
-        })).toBeTruthy();
-
-        done();
-    });
-    xit('test: 11111111111111111111 stretch', function (done) {
-
-        var input = [].interpolate(0, Math.pow(2, 3), function (x) {
-            return x % 2 ? Math.cos(x) : 1;
-        });
-        var sp = new SignalProcessor(),
-            stretch = 2;
-
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-
-        var result = sp.stretch(input, stretch, 0, 8).skipEvery(2);
-        expect(result.skipEvery(2, function (x) { return x; }).all(function (x) { return x === 1; })).toBeTruthy();
-
-        done();
-    });
-    xit('test: the creek .mp3 stretch. matches input.', function (done) {
-
-        var audio = new MEPH.audio.Audio();
-        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
-
-        audio.load(audiofile, audiofiletyp).then(function (resource) {
-            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
-
-
-            var input = result.buffer.buffer.getChannelData(0);
-            var samplerate = result.buffer.buffer.sampleRate;
-            var sp = new SignalProcessor(),
-                stretch = 1;
-
-            // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
-            // sp.windowing(MEPH.math.Util.window.Welch);
-            sp.windowing(MEPH.math.Util.window.Rectangle);
-            //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
-
-            var result = sp.stretch(input, stretch, 0, 1024).skipEvery(2);
-
-            expect(result.all(function (x, index) {
-                return x === input[index];
-            })).toBeTruthy();
-
-            done();
-        });
-    })
-
-
-    xit('test: the creek .mp3 stretch. triangle windowing', function (done) {
-
-        var audio = new MEPH.audio.Audio();
-        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
-
-        audio.load(audiofile, audiofiletyp).then(function (resource) {
-            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
-
-
-            var input = result.buffer.buffer.getChannelData(0);
-            var samplerate = result.buffer.buffer.sampleRate;
-            var sp = new SignalProcessor(),
-                stretch = 1.5;
-
-            // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
-            // sp.windowing(MEPH.math.Util.window.Welch);
-            sp.windowing(MEPH.math.Util.window.Rectangle);
-            //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
-
-            var result = sp.stretch(input, stretch, 0.2, 1024).skipEvery(2);
-            var stretchedBuffer = createBuffer(result, samplerate);
-            var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
-
-            audio.buffer(audioresult.buffer).complete();
-
-            // start the source playing
-            audioresult.buffer.start();
-            setTimeout(function () {
-                audio.disconnect();
-                done();
-
-            }, 3000)
-        });
-    })
-
-    xit('test: can execute a fft on a piece of music', function (done) {
-        var audio = new MEPH.audio.Audio();
-        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
-
-        audio.load(audiofile, audiofiletyp).then(function (resource) {
-            var result = audio.copyToBuffer(resource, 0, Math.pow(2, 17) / 48000);
-
-
-            var input = result.buffer.buffer.getChannelData(0);
-            var samplerate = result.buffer.buffer.sampleRate;
-            var sp = new SignalProcessor(),
-                stretch = 1.5;
-
-            // sp.windowing(MEPH.math.Util.window.Triangle.bind(0, -1));
-            // sp.windowing(MEPH.math.Util.window.Welch);
-            //sp.windowing(MEPH.math.Util.window.Rectangle);
-            //sp.windowing(MEPH.math.Util.window.Blackman.bind(null, 0.16));
-
-            var fft = new FFT();
-            var fftsize = input.length;
-            var output = new Float32Array(fftsize * 2);
-            var outputOffset = 0;
-            var outputStride = 1;;
-
-            var inputOffset = 0;
-            var inputStride = 1;
-            var type = 'real';
-
-            fft.complex(fftsize, false);
-            fft.process(output, outputOffset, outputStride, input, inputOffset, inputStride, type)
-
-            var ifft = new FFT();
-            ifft.complex(fftsize, true);
-            var output2 = new Float32Array(fftsize * 2);
-            ifft.process(output2, inputOffset, inputStride, output, outputOffset, outputStride, false);
-
-            var res = []
-            output2.foreach(function (x, index) {
-                if (index % 2 === 0)
-                    res.push((output2[index] / fftsize));
-            })
-
-            var stretchedBuffer = createBuffer(res, samplerate);
-            var audioresult = audio.copyToBuffer(stretchedBuffer, 0, stretch);
-
-            audio.buffer(audioresult.buffer).complete();
-
-            // start the source playing
-            audioresult.buffer.start();
-
-            setTimeout(function () {
-                audio.disconnect();
-                done();
-
-            }, 3000)
-        });
-
-    });
-
+    
     it('test: play , normally silent', function (done) {
         var sp = new SignalProcessor(),
             len = Math.pow(2, 15),
@@ -424,34 +200,7 @@
             done();
         }, 1000)
     })
-    xit('can reconstruct a constant signal of x(n) to a signal of xs(n)', function () {
-        var sp = new SignalProcessor(), len = Math.pow(2, 8);
-        var input = (new Float32Array(len)).select(function (x, i) {
-            return Math.cos(i * 8 * Math.PI);
-        });
-
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-
-        var result = sp.stretch(input, 1, 0).skipEvery(2);
-
-        expect(result.length).toBe(len);
-        expect(input.all(function (x, i) { return x === result[i]; })).toBeTruthy();
-    });
-
-    xit('can reconstruct a signal of x(n) to a signal of xs(n)', function () {
-        var sp = new SignalProcessor(), len = Math.pow(2, 8);
-        var input = (new Float32Array(len)).select(function (x, i) {
-            return Math.cos(i * Math.PI / 13);
-        });
-
-        sp.windowing(MEPH.math.Util.window.Rectangle);
-
-        var result = sp.stretch(input, 1, 0).skipEvery(2);
-
-        expect(result.length).toBe(len);
-        expect(input.all(function (x, i) { return Math.abs(Math.abs(x) - Math.abs(result[i])) < .000001; })).toBeTruthy();
-    });
-
+    
     it('can slice a signal into windowed chunks and return an array of ffts.', function () {
         var sp = new SignalProcessor(),
             len = 1024;
@@ -468,20 +217,7 @@
 
     });
 
-    xit('can join window chunks back together, and return a signal', function () {
-        var sp = new SignalProcessor(),
-            len = 64;
-        var input = [].interpolate(0, 4, function (x) {
-            return (new Float32Array(len)).select(function (x, i) {
-                return Math.cos(i / len * 3 * Math.PI);
-            })
-        });
-
-        var result = sp.joinWindows(input, MEPH.math.Util.windowjoin.Triangle.bind(null, -1), .5, 64 * 2.5);
-
-        expect(result.length).toBe(64 * 2.5);
-    });
-
+    
     it('can generate a seriers of Xs[K] windows ', function () {
         var sp = new SignalProcessor();
         var windows = sp.generateWindows(32, 64);
@@ -649,12 +385,12 @@
 
 
         var audio = new MEPH.audio.Audio();
-        var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
 
         audio.load(audiofile, audiofiletyp).then(function (resource) {
             var sp = new SignalProcessor();
 
-            var audioresult = audio.copyToBuffer(resource, 1, 5);
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
             var inbucket;
             var outbucket;
             audio.buffer(audioresult.buffer)
@@ -662,37 +398,21 @@
                     name: 'proce',
                     process: function (audioProcessingEvent) {
                         var inputBuffer = audioProcessingEvent.inputBuffer;
-
                         var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
-                        var outputData = new Float32Array(inputData.length);
-                        inbucket = inputData.select();
                         var d = audioProcessingEvent.outputBuffer.getChannelData(0);
-                        var hasoutput = sp.pitchShift(2, inputData.length, 1024 * 4, 4, 48000, inbucket, d);
-
-                        if (hasoutput) {
-                            //outputData.foreach(function (x, i) {
-                            //    d[i] = x;
-                            //})
-                            // sp.clear();
-                        }
-                        //[].interpolate(0, inputData.length, function (x) {
-                        //    outputData[x] = Math.cos(x * Math.PI / 10) * inputData[x];
-                        //})
-                        //sp.gOutFIFO.subset(0, 1024 / 4).foreach(function (x, i) {
-                        //    outputData[i] = x;
-                        //});
+                        var hasoutput = sp.pitchShift(.95, inputData.length, inputData.length, 4, 44100, inputData, d);
                     }
                 })
                 .complete();
 
             // start the source playing
-            audioresult.buffer.start();
+            //audioresult.buffer.start();
 
             setTimeout(function () {
                 audio.disconnect();
                 done();
 
-            }, 10000)
+            }, 1000)
         }).catch(function (e) {
             expect(e).caught();
             done();

@@ -20,6 +20,12 @@
 					'itemType': 'launch',
 					'path': '/music/Visualizer'
 				},{
+					'viewId': 'tweeneditor',
+					'description': 'Tween Editor',
+					'iconType': 'launch',
+					'itemType': 'launch',
+					'path': '/tween/editor'
+				},{
 					'viewId': 'scrollbar',
 					'description': 'Scrollbar',
 					'iconType': 'launch',

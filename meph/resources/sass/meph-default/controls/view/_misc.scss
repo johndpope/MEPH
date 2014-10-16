@@ -102,3 +102,28 @@ $padding-distance: 20px;
     position: absolute;
     background-color: rgba(1, 233, 204, 0.2);
 }
+
+.tweeneditor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.tweeneditor svg {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+$buttonspace : 50px;
+.tweeneditorspace {
+    position: absolute;
+    top: 0px;
+    height: 100%;
+    padding-bottom: $buttonspace;
+}
+
+.button_row {
+    position: absolute;
+    height: $buttonspace;
+    bottom: 0px;
+}
