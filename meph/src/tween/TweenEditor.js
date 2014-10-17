@@ -11,6 +11,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
     statics: {
         states: {
             dragging: 'dragging'
+        },
+        tweenTypes: {
+            bezier: 'bezier'
         }
     },
     properties: {
@@ -25,7 +28,10 @@ MEPH.define('MEPH.tween.TweenEditor', {
         pointradius: 4,
         tweenoverradius: 10,
         linestroke: '#000000',
-        linestrokeover: '#12351a',
+        linestrokeselected: '#f2f51a',
+        linestrokewidth: '4px',
+        linestrokeoverwidth: '7px',
+        $selectedLine: null,
         tweenrad: 4,
         $tweenpoints: null,
         margin: 2,
@@ -162,8 +168,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
     render: function () {
         var me = this;
         me.renderPaths();
-        me.renderStructureElements();
+
         me.renderTweenPoints();
+        me.renderStructureElements();
     },
     renderPaths: function () {
         var me = this,
@@ -184,8 +191,13 @@ MEPH.define('MEPH.tween.TweenEditor', {
         unrenderedPaths.foreach(function (x) {
             lines = me.getLineInstructions(x);
             me.renderedPaths[x] = {
-                lines: me.renderer.draw(lines)
+                lines: me.renderer.draw(lines),
+                linetypes: []
             };
+            me.renderedPaths[x].lines.foreach(function (t, index) {
+                me.addEventsToLine(t, index);
+                t.path = x;
+            });
         });
 
         renderedPaths.foreach(function (x) {
@@ -201,38 +213,123 @@ MEPH.define('MEPH.tween.TweenEditor', {
                     return i < toremove;
                 });
 
-                lineshapes.foreach(function (x, index) {
+                lineshapes.foreach(function (t, index) {
                     me.renderer.drawLine(lines[index], lineshapes[index]);
+                    lineshapes[index].path = x;
+                    me.addEventsToLine(lineshapes[index], index)
                 });
             }
             else if (lineshapes.length < lines.length) {
                 //add
                 var toadd = lines.length - lineshapes.length;
-                lineshapes.push.apply(lineshapes, me.renderer.draw(lines.subset(0, toadd)));
+                var newlines = me.renderer.draw(lines.subset(0, toadd));
+                newlines.foreach(function (tg, index) {
+                    me.addEventsToLine(tg, index + lineshapes.length);
+                    tg.path = x;
+                })
+
+                lineshapes.push.apply(lineshapes, newlines);
+
                 lines.subset(toadd).foreach(function (x, index) {
                     me.renderer.drawLine(x, lineshapes[index]);
+                    me.addEventsToLine(lineshapes[index], index)
                 });
             }
             else {
                 lineshapes.foreach(function (x, index) {
-                    me.dun(lineshapes[index]);
                     me.renderer.drawLine(lines[index], lineshapes[index]);
                     me.addEventsToLine(lineshapes[index], index)
                 });
             }
         });
     },
+    setSelectedLineToBezier: function () {
+        var me = this;
+        if (me.$selectedLine) {
+            var path = me.getPath(me.$selectedLine.path);
+
+            var lineInfo = path.linetypes.first(function (x) { return x.lineIndex === me.$selectedLine.lineIndex; });
+            if (lineInfo) {
+                lineInfo.type = MEPH.tween.TweenEditor.tweenTypes.bezier;
+            }
+            else {
+                path.linetypes.push({ type: MEPH.tween.TweenEditor.tweenTypes.bezier, lineIndex: me.$selectedLine.lineIndex });
+            }
+        }
+    },
+    /**
+     * Sets the lines type to type.
+     * @param {Object} line
+     * @param {String} type
+     * @return {Object}
+     **/
+    setLineType: function (line, type) {
+        line.options.type = type;
+        return line;
+    },
+    /**
+     * Gets the lines for a path.
+     * @param {String} guid
+     * @return {Array}
+     **/
+    getPathLines: function (guid) {
+        var me = this, path = me.getPath(guid);
+        if (path) {
+            return path.lines || [];
+        }
+        return [];
+    },
+    getPath: function (guid) {
+        var me = this;
+        if (me.renderedPaths && me.renderedPaths[guid]) {
+            return me.renderedPaths[guid];
+        }
+        return null;
+    },
     /**
      * Adds events to lines.
      **/
     addEventsToLine: function (line, index) {
         var me = this;
+        me.dun(line);
+        line.lineIndex = index;
         me.don('mouseout', line.shape, function (shape, evt) {
-            shape.shape.style.stroke = me.linestroke;
+            me.handleLineState(shape, 'mouseout');
         }.bind(me, line), line);
         me.don('mouseover', line.shape, function (shape, evt) {
-            shape.shape.style.stroke = me.linestrokeover;
+            me.handleLineState(shape, 'mouseover');
         }.bind(me, line), line);
+        me.don('click', line.shape, function (shape, evt) {
+            me.handleLineState(shape, 'click');
+        }.bind(me, line), line);
+        me.handleLineState(line);
+    },
+    handleLineState: function (shape, evt) {
+        var me = this;
+        switch (evt) {
+            case 'click':
+                if (me.$selectedLine) {
+                    me.$selectedLine.shape.style.stroke = me.linestroke;
+                }
+                shape.shape.style.stroke = me.linestrokeselected;
+                me.$selectedLine = shape;
+                break;
+            case 'mouseover':
+                //shape.shape.style.stroke = me.linestrokeover;
+                shape.shape.style.strokeWidth = me.linestrokeoverwidth;
+                break;
+            case 'mouseout':
+                //shape.shape.style.stroke = me.linestroke;
+                shape.shape.style.strokeWidth = me.linestrokewidth;
+                break;
+            default:
+                if (shape && shape.shape) {
+                    shape.shape.style.stroke = me.linestroke;
+                    shape.shape.style.strokeWidth = me.linestrokewidth;
+                }
+                me.$selectedLine = null;
+                break;
+        }
     },
     /**
      * @private
@@ -245,7 +342,7 @@ MEPH.define('MEPH.tween.TweenEditor', {
             points,
             p1, lines,
             p2;
-        points = me.getPathPoints(x).orderBy(function (x, y) { return x.x - y.x; });
+        points = me.getPathPoints(x).orderBy(function (x, y) { return y.x - x.x; });
 
         lines = points.select(function (p, index) {
             if (index) {
@@ -254,6 +351,7 @@ MEPH.define('MEPH.tween.TweenEditor', {
                 var line = {
                     shape: MEPH.util.SVG.shapes.line,
                     start: p1,
+                    strokeWidth: me.linestrokewidth,
                     end: p2
                 };
                 return line;

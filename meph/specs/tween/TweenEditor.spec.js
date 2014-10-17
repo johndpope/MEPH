@@ -231,7 +231,7 @@
 
             tweeneditor.onAddPoint();
             var circle = tweeneditor.$tweenpoints.first().shape;
-            
+
             circle.dispatchEvent(MEPH.createEvent('mouseover', {
                 tweenpoint: tweeneditor.$tweenpoints.first(),
                 position: {
@@ -560,7 +560,7 @@
                 expect(editor.renderedPaths[i]).toBeTruthy();
                 expect(editor.renderedPaths[i].lines.length).toBeTruthy();
             }
-            
+
             if (app) {
                 app.removeSpace();
             }
@@ -570,4 +570,39 @@
             done();
         });
     });
+
+    it('line state: clicking on a line will select it.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+
+            expect(editor.renderedPaths).toBeTruthy()
+
+            var lines = editor.getPathLines(editor.paths.first());
+
+
+            editor.handleLineState(lines.first(), 'click');
+
+            expect(editor.$selectedLine).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can set a lines type to bezier', function () {
+        var editor = new TweenEditor();
+        editor.source = [];
+        var res = editor.setLineType({ shape: {}, options: {} }, 'bezier');
+        expect(res.options.type).toBe('bezier')
+    });
+
 });
