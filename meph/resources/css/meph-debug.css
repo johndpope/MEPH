@@ -9732,7 +9732,7 @@ input[type="range"]::-webkit-slider-thumb {
   position: relative;
 }
 
-/* line 118, ../sass/meph-default/controls/view/_misc.scss */
+/* line 120, ../sass/meph-default/controls/view/_misc.scss */
 .tweeneditorspace {
   position: absolute;
   top: 0px;
@@ -9740,7 +9740,13 @@ input[type="range"]::-webkit-slider-thumb {
   padding-bottom: 50px;
 }
 
-/* line 125, ../sass/meph-default/controls/view/_misc.scss */
+/* line 127, ../sass/meph-default/controls/view/_misc.scss */
+.tweeneditorspace circle {
+  cursor: pointer;
+  r: 6px;
+}
+
+/* line 132, ../sass/meph-default/controls/view/_misc.scss */
 .button_row {
   position: absolute;
   height: 50px;

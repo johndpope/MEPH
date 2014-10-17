@@ -19,7 +19,14 @@ MEPH.define('MEPH.tween.TweenEditor', {
          * @property {String} mark Marks the tween point with a group id.
          **/
         mark: null,
+        target: null,
+        paths: null,
+        state: null,
         pointradius: 4,
+        tweenoverradius: 10,
+        linestroke: '#000000',
+        linestrokeover: '#12351a',
+        tweenrad: 4,
         $tweenpoints: null,
         margin: 2,
         $structureElements: null
@@ -28,6 +35,7 @@ MEPH.define('MEPH.tween.TweenEditor', {
         var me = this;
         me.callParent.apply(me, arguments);
         me.source = MEPH.util.Observable.observable([]);
+        me.paths = MEPH.util.Observable.observable([]);
         me.source.on('changed', me.update.bind(me));
 
     },
@@ -43,12 +51,108 @@ MEPH.define('MEPH.tween.TweenEditor', {
         var me = this;
         me.don('tweendown', me.svg, me.onTweenDown.bind(me));
         me.don('resize', window, me.update.bind(me));
+        me.don('mousemove', me.svg, me.onMouseMove.bind(me));
+        me.don('mouseup', me.svg, me.onMouseUp.bind(me));
+        me.don('tweenup', me.svg, me.onTweenUp.bind(me));
+        me.don('tweenmove', me.svg, me.onTweenMove.bind(me));
+    },
+    onMouseUp: function (evt) {
+        var me = this;
+        if (me.state === MEPH.tween.TweenEditor.states.dragging) {
+            var pos = MEPH.util.Dom.getEventPositions(evt, me.svg);
+            me.svg.dispatchEvent(MEPH.createEvent('tweenup', {
+                tweentarget: me.target,
+                position: pos
+            }));
+        }
+    },
+    onMouseMove: function (evt) {
+        var me = this;
+        if (me.state === MEPH.tween.TweenEditor.states.dragging) {
+            var pos = MEPH.util.Dom.getEventPositions(evt, me.svg);
+            me.svg.dispatchEvent(MEPH.createEvent('tweenmove', {
+                tweentarget: me.target,
+                position: pos
+            }));
+        }
+    },
+    onTweenUp: function () {
+        var me = this;
+        if (me.state === MEPH.tween.TweenEditor.states.dragging) {
+            me.state = null;
+            me.target = null;
+        }
+    },
+    onTweenMove: function (evt) {
+        var me = this,
+            point,
+            pos;
+
+        if (me.state === MEPH.tween.TweenEditor.states.dragging) {
+            pos = me.convertToTweenSpace(evt.position.first());
+            point = me.getPoint(evt.tweentarget);
+            me.source.removeWhere(function (t) {
+                return t === point;
+            });
+            point.x = pos.x;
+            point.y = pos.y;
+            me.source.push(point);
+        }
+    },
+    /**
+     * Get points position.
+     * @param {Object} point
+     * @return {Object}
+     **/
+    getPosition: function (point) {
+        var me = this;
+        return {
+            x: me.getX(point.x),
+            y: me.getY(point.y)
+        }
+    },
+    getX: function (t) {
+        var me = this, size = Style.size(me.svg);
+        return (t * (size.width - me.margin)) + me.margin;
+    },
+    getY: function (t) {
+        var me = this, size = Style.size(me.svg),
+            theight = size.height - me.margin;
+        return (t * (theight / 2)) + (theight / 2) + me.margin;
+    },
+    convertToTweenSpace: function (pos) {
+        var me = this,
+            size = Style.size(me.svg),
+            width = size.width - me.margin,
+            height = size.height - me.margin;
+
+        return {
+            x: (pos.x / width),
+            y: ((pos.y / height) * 2) - 1
+        }
+    },
+    getPathPoints: function (mark) {
+        var me = this;
+        return me.source.where(function (t) { return t.mark === mark; });
+    },
+    getPoint: function (guid) {
+        var me = this,
+            point = me.source.first(function (x) {
+                return x.guid === guid;
+            });
+        return point;
     },
     onTweenDown: function (evt) {
         var me = this;
         if (!me.state && evt.tweenpoint) {
+            var point = me.getPoint(evt.tweenpoint.options.guid);
+
+            if (!point || point.anchor) {
+                return;
+            }
             me.target = evt.tweenpoint.options.guid;
             me.state = MEPH.tween.TweenEditor.states.dragging;
+            me.startposition = me.getPoint(me.target);
         }
     },
     update: function () {
@@ -57,8 +161,108 @@ MEPH.define('MEPH.tween.TweenEditor', {
     },
     render: function () {
         var me = this;
+        me.renderPaths();
         me.renderStructureElements();
         me.renderTweenPoints();
+    },
+    renderPaths: function () {
+        var me = this,
+            points,
+            unrenderedPaths,
+            renderedPaths,
+            lines, lineshapes,
+            p1,
+            p2;
+
+        if (!me.renderedPaths) {
+            me.renderedPaths = {};
+        }
+
+        unrenderedPaths = me.paths.where(function (x) { return !me.renderedPaths[x]; });
+        renderedPaths = me.paths.where(function (x) { return me.renderedPaths[x]; });
+
+        unrenderedPaths.foreach(function (x) {
+            lines = me.getLineInstructions(x);
+            me.renderedPaths[x] = {
+                lines: me.renderer.draw(lines)
+            };
+        });
+
+        renderedPaths.foreach(function (x) {
+            lines = me.getLineInstructions(x);
+            lineshapes = me.renderedPaths[x].lines;
+            if (lineshapes.length > lines.length) {
+                //remove
+                var toremove = lineshapes.length - lines.length;
+                lineshapes.subset(0, toremove).where(function (x) {
+                    me.renderer.remove(x);
+                });
+                lineshapes.removeWhere(function (x, i) {
+                    return i < toremove;
+                });
+
+                lineshapes.foreach(function (x, index) {
+                    me.renderer.drawLine(lines[index], lineshapes[index]);
+                });
+            }
+            else if (lineshapes.length < lines.length) {
+                //add
+                var toadd = lines.length - lineshapes.length;
+                lineshapes.push.apply(lineshapes, me.renderer.draw(lines.subset(0, toadd)));
+                lines.subset(toadd).foreach(function (x, index) {
+                    me.renderer.drawLine(x, lineshapes[index]);
+                });
+            }
+            else {
+                lineshapes.foreach(function (x, index) {
+                    me.dun(lineshapes[index]);
+                    me.renderer.drawLine(lines[index], lineshapes[index]);
+                    me.addEventsToLine(lineshapes[index], index)
+                });
+            }
+        });
+    },
+    /**
+     * Adds events to lines.
+     **/
+    addEventsToLine: function (line, index) {
+        var me = this;
+        me.don('mouseout', line.shape, function (shape, evt) {
+            shape.shape.style.stroke = me.linestroke;
+        }.bind(me, line), line);
+        me.don('mouseover', line.shape, function (shape, evt) {
+            shape.shape.style.stroke = me.linestrokeover;
+        }.bind(me, line), line);
+    },
+    /**
+     * @private
+     * Gets instructions for line.
+     * @param {String} x
+     * @return {Array}
+     **/
+    getLineInstructions: function (x) {
+        var me = this,
+            points,
+            p1, lines,
+            p2;
+        points = me.getPathPoints(x).orderBy(function (x, y) { return x.x - y.x; });
+
+        lines = points.select(function (p, index) {
+            if (index) {
+                p2 = me.getPosition(points[index]);
+                p1 = me.getPosition(points[index - 1]);
+                var line = {
+                    shape: MEPH.util.SVG.shapes.line,
+                    start: p1,
+                    end: p2
+                };
+                return line;
+            }
+        }).where(function (t) {
+            return t;
+        });
+
+        return lines;
     },
     renderTweenPoints: function () {
         var me = this, toshape = function (x) {
@@ -84,7 +288,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
                 var r = me.$tweenpoints[index];
                 if (r) {
                     var t = me.renderer.drawCircle(x, r);
-                    r.guid = t.guid;
+                    me.dun(r);
+                    r.options.guid = t.options.guid;
+                    me.addEventsToTweenPoints([r]);
                     return false;
                 }
                 else {
@@ -112,19 +318,23 @@ MEPH.define('MEPH.tween.TweenEditor', {
     addEventsToTweenPoints: function (array) {
         var me = this;
         array.foreach(function (x) {
-            me.don('mousedown', x.shape, function (shape) {
-                me.svg.dispatchEvent(MEPH.createEvent('tweendown', { tweenpoint: shape }))
-            }.bind(me, x), x)
-        });
-    },
-    getX: function (t) {
+            me.don('mousedown', x.shape, function (shape, evt) {
+                var pos = MEPH.util.Dom.getEventPositions(evt, me.svg);
+                me.svg.dispatchEvent(MEPH.createEvent('tweendown', { tweenpoint: shape, position: pos }));
+            }.bind(me, x), x);
+            me.don('mouseout', x.shape, function (shape) {
+                shape.shape.setAttribute('r', me.tweenrad);
+            }.bind(me, x), x);
+            me.don('mouseover', x.shape, function (shape, evt) {
+                var pos = MEPH.util.Dom.getEventPositions(evt, me.svg);
+                if (!me.state) {
+                    me.target = shape.options.guid;
+                }
+                shape.shape.setAttribute('r', me.tweenoverradius)
+                me.svg.dispatchEvent(MEPH.createEvent('tweenover', { tweenpoint: shape, position: pos }));
+            }.bind(me, x), x);
 
-        var me = this, size = Style.size(me.svg);
-        return (t * (size.width - me.margin)) + me.margin;
-    },
-    getY: function (t) {
-        var me = this, size = Style.size(me.svg), theight = size.height - me.margin;
-        return (t * (theight)) + (theight / 2) + me.margin;
+        });
     },
     renderStructureElements: function () {
         var me = this, size = Style.size(me.svg);
@@ -183,10 +393,18 @@ MEPH.define('MEPH.tween.TweenEditor', {
             })
         }
     },
+    onAddPointAndPath: function () {
+        var me = this;
+        me.onAddPath();
+        me.onAddPoint();
+    },
     onAddPoint: function () {
         var me = this;
         me.addPoint({ x: .5, y: 0 });
     },
+    /**
+     * Adds a point the the tween editor.
+     ***/
     addPoint: function (point) {
         var me = this;
 
@@ -195,5 +413,23 @@ MEPH.define('MEPH.tween.TweenEditor', {
         point.y = Math.max(-1, Math.min(point.y, 1));
         point.mark = me.mark;
         me.source.push(point);
+    },
+    onAddPath: function () {
+        var me = this;
+        me.addPath({ x: 0, y: 0 }, { x: 1, y: 0 })
+    },
+    /**
+     * Adds a path 
+     * @param {Object} p1
+     * @param {Object} p2
+     ***/
+    addPath: function (p1, p2) {
+        var me = this, guid = MEPH.GUID();
+        me.paths.push(guid);
+        me.mark = guid;
+        p1.anchor = true;
+        p2.anchor = true;
+        me.addPoint(p1);
+        me.addPoint(p2);
     }
 });

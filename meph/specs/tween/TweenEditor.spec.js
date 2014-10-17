@@ -221,6 +221,37 @@
         });
     });
 
+    it('on mouse over the target is set if the state is not dragging', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.onAddPoint();
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            
+            circle.dispatchEvent(MEPH.createEvent('mouseover', {
+                tweenpoint: tweeneditor.$tweenpoints.first(),
+                position: {
+                    x: 10,
+                    y: 20
+                }
+            }));
+
+            expect(tweeneditor.target).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
     it('on tweendown the state goes to dragging', function (done) {
         MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
             var results = r.res;
@@ -233,9 +264,16 @@
             var circle = tweeneditor.$tweenpoints.first().shape;
             tweeneditor.getDomTemplate().first().addEventListener('tweendown', function () {
                 called = true;
-            })
-            circle.dispatchEvent(MEPH.createEvent('tweendown', { tweenpoint: tweeneditor.$tweenpoints.first() }));
+            });
+            circle.dispatchEvent(MEPH.createEvent('tweendown', {
+                tweenpoint: tweeneditor.$tweenpoints.first(),
+                position: {
+                    x: 10,
+                    y: 20
+                }
+            }));
 
+            expect(tweeneditor.startposition).toBeTruthy();
             expect(tweeneditor.state).toBe(MEPH.tween.TweenEditor.states.dragging);
             expect(tweeneditor.target).toBeTruthy();
 
@@ -249,4 +287,287 @@
         });
     });
 
+    it('on mousemove tween move is fired.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.onAddPoint();
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            tweeneditor.getDomTemplate().first().addEventListener('tweenmove', function () {
+                called = true;
+            });
+
+            circle.dispatchEvent(MEPH.createEvent('tweendown', { tweenpoint: tweeneditor.$tweenpoints.first() }));
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mousemove', { pageX: 10, pageY: 10 }));
+
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('on mousemove tween move is not fired, when not dragging.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.onAddPoint();
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            tweeneditor.getDomTemplate().first().addEventListener('tweenmove', function () {
+                called = true;
+            })
+
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mousemove', { pageX: 10, pageY: 10 }));
+
+            expect(!called).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('on tweenmove tween move is not fired, when not dragging.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.onAddPoint();
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            var point = tweeneditor.$tweenpoints.first();
+            point = tweeneditor.source.first(function (x) { return x.guid === point.options.guid; });
+            tweeneditor.getDomTemplate().first().addEventListener('tweenmove', function () {
+                called = true;
+            });
+
+            circle.dispatchEvent(MEPH.createEvent('tweendown', { tweenpoint: tweeneditor.$tweenpoints.first() }));
+
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mousemove', {
+                pageX: 10, pageY: 10
+            }));
+
+
+            expect(called).toBeTruthy();
+            expect(point.x !== .5).toBeTruthy();
+            expect(point.y !== 0).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('on mouseup tweenup is fired ', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.onAddPoint();
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            var point = tweeneditor.$tweenpoints.first();
+            point = tweeneditor.source.first(function (x) { return x.guid === point.options.guid; });
+
+            circle.dispatchEvent(MEPH.createEvent('tweendown', {
+                tweenpoint: tweeneditor.$tweenpoints.first(),
+                position: {
+                    x: 10,
+                    y: 20
+                }
+            }));
+
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mousemove', {
+                pageX: 10, pageY: 10
+            }));
+
+            tweeneditor.svg.addEventListener('tweenup', function () {
+                called = true;
+            })
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mouseup', {
+            }));
+
+            expect(called).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('on mouseup tweenup is fired ', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.onAddPoint();
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            var point = tweeneditor.$tweenpoints.first();
+            point = tweeneditor.source.first(function (x) { return x.guid === point.options.guid; });
+
+            circle.dispatchEvent(MEPH.createEvent('tweendown', {
+                tweenpoint: tweeneditor.$tweenpoints.first(),
+                position: {
+                    x: 10,
+                    y: 20
+                }
+            }));
+
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mousemove', {
+                pageX: 10, pageY: 10
+            }));
+
+            expect(tweeneditor.state).toBe(MEPH.tween.TweenEditor.states.dragging);
+
+            tweeneditor.svg.addEventListener('tweenup', function () {
+                called = true;
+            })
+            tweeneditor.svg.dispatchEvent(MEPH.createEvent('mouseup', {
+            }));
+
+            expect(called).toBeTruthy();
+            expect(tweeneditor.state).toBe(null);
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('tween editor can add a mark with anchors', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.addPath({ x: 0, y: 0 }, { x: 1, y: 0 });
+            expect(editor.source.length).toBe(2);
+
+            expect(editor.source.all(function (x) {
+                return x.anchor;
+            })).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('tween point cant move if its an anchor ', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var dom,
+                tweeneditor = results.first().classInstance;
+
+            tweeneditor.addPath({ x: 0, y: 0 }, { x: 1, y: 0 });
+            var circle = tweeneditor.$tweenpoints.first().shape;
+            tweeneditor.getDomTemplate().first().addEventListener('tweendown', function () {
+                called = true;
+            });
+            circle.dispatchEvent(MEPH.createEvent('tweendown', {
+                tweenpoint: tweeneditor.$tweenpoints.first(),
+                position: {
+                    x: 10,
+                    y: 20
+                }
+            }));
+
+            expect(tweeneditor.state).toBe(null);
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('when there is a path, a line is draw between all points', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+            editor.renderPaths = function () { called = true; };
+            editor.onAddPath();
+            expect(called).toBeTruthy()
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('when there is a path, a line is draw between all points', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPath();
+            expect(editor.renderedPaths).toBeTruthy()
+            for (var i in editor.renderedPaths) {
+                expect(editor.renderedPaths[i]).toBeTruthy();
+                expect(editor.renderedPaths[i].lines.length).toBeTruthy();
+            }
+            
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
 });

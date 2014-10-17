@@ -114,12 +114,19 @@ $padding-distance: 20px;
     height: 100%;
     position: relative;
 }
-$buttonspace : 50px;
+
+$buttonspace: 50px;
+
 .tweeneditorspace {
     position: absolute;
     top: 0px;
     height: 100%;
     padding-bottom: $buttonspace;
+}
+
+.tweeneditorspace circle {
+    cursor: pointer;
+    r: 6px;
 }
 
 .button_row {

@@ -3,9 +3,16 @@
         <svg mephid="svg"></svg>
     </div>
     <div class="col-md-12 button_row">
+        <mephbutton type="button"
+                    class="btn btn-xs"
+                    meph-event-click="c$.onAddPointAndPath">
+            Path
+            <span class="glyphicon glyphicon-plus"></span>
+        </mephbutton>
         <mephbutton type="button" 
                     class="btn btn-xs" 
                     meph-event-click="c$.onAddPoint">
+            Point
             <span class="glyphicon glyphicon-plus"></span>
         </mephbutton>
     </div>
