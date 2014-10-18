@@ -598,11 +598,497 @@
         });
     });
 
-    it('can set a lines type to bezier', function () {
+    it('can add a control point ', function () {
         var editor = new TweenEditor();
+        editor.controlpoints = [];
         editor.source = [];
-        var res = editor.setLineType({ shape: {}, options: {} }, 'bezier');
-        expect(res.options.type).toBe('bezier')
+        editor.onAddPoint();
+        var p = editor.source.first()
+
+        editor.addControlPoint(p.guid);
+        expect(editor.controlpoints.length).toBeTruthy()
     });
 
+
+    it('can render control points.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+            editor.renderControlPoints = function () {
+                called = true;
+            };
+
+            editor.addControlPoint(p.guid);
+
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('can add controls to selected lines.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can not add more than a single control point per tweenpoint.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+            expect(editor.renderedControlPoints.length).toBe(2);
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('can render a previously rendered control point .', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            expect(editor.renderedControlPoints.length).toBe(2);
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can remove a control point ', function () {
+        var editor = new TweenEditor();
+        editor.controlpoints = [];
+        editor.source = [];
+        editor.onAddPoint();
+        var p = editor.source.first()
+
+        editor.addControlPoint(p.guid, 0, MEPH.tween.TweenEditor.StartControlPoint);
+        editor.removeControlPoint(editor.controlpoints.first());
+        expect(editor.controlpoints.length).toBe(0)
+    });
+
+    it('a previously removed control point will no longer be rendered .', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.removeControlPoint(editor.controlpoints.first());
+            editor.update();
+
+            expect(editor.renderedControlPoints.length).toBe(1);
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('when a control point has mousedown , controldown is fired.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            var controlpoint = editor.renderedControlPoints.first();
+
+            var circle = controlpoint.point.parts.first(function (x) {
+                return x.options.name === 'circle';
+            });
+
+            editor.svg.addEventListener('controldown', function () {
+                called = true;
+            })
+            circle.shape.dispatchEvent(MEPH.createEvent('mousedown', {}));
+
+            expect(called).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('when a control point has mouseup , controlup is fired.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            var controlpoint = editor.renderedControlPoints.first();
+
+            var circle = controlpoint.point.parts.first(function (x) {
+                return x.options.name === 'circle';
+            });
+            circle.shape.dispatchEvent(MEPH.createEvent('mousedown', {}));
+
+            editor.svg.addEventListener('controlup', function () {
+                called = true;
+            });
+            editor.svg.dispatchEvent(MEPH.createEvent('mouseup', {}));
+
+            expect(called).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('on control down,  state is set to controldragging.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            var controlpoint = editor.renderedControlPoints.first();
+
+            var circle = controlpoint.point.parts.first(function (x) {
+                return x.options.name === 'circle';
+            });
+
+            circle.shape.dispatchEvent(MEPH.createEvent('mousedown', {}));
+
+            expect(editor.state).toBe(MEPH.tween.TweenEditor.states.controldragging);
+            expect(editor.target).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('on control up,  state is set to null if controldragging.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            var controlpoint = editor.renderedControlPoints.first();
+
+            var circle = controlpoint.point.parts.first(function (x) {
+                return x.options.name === 'circle';
+            });
+            circle.shape.dispatchEvent(MEPH.createEvent('mousedown', {}));
+
+            circle.shape.dispatchEvent(MEPH.createEvent('mouseup', {}));
+
+            expect(editor.state).toBe(null);
+            expect(editor.target).toBe(null);
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('on mousemove with control dragging ,  controlmove is fired.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            var controlpoint = editor.renderedControlPoints.first();
+
+            var circle = controlpoint.point.parts.first(function (x) {
+                return x.options.name === 'circle';
+            });
+            circle.shape.dispatchEvent(MEPH.createEvent('mousedown', {}));
+
+            editor.svg.addEventListener('controlmove', function () {
+                called = true;
+            });
+
+            circle.shape.dispatchEvent(MEPH.createEvent('mousemove', { pageX: 10, pageY: 10 }));
+
+            expect(called).toBeTruthy(called)
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('on controlmove the control point is moved to a new location.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            var controlpoint = editor.renderedControlPoints.first();
+            var lastposition = MEPH.clone(editor.getControlPointPosition(controlpoint));
+            var circle = controlpoint.point.parts.first(function (x) {
+                return x.options.name === 'circle';
+            });
+            circle.shape.dispatchEvent(MEPH.createEvent('mousedown', {}));
+
+            editor.svg.addEventListener('controlmove', function () {
+                called = true;
+            });
+
+            circle.shape.dispatchEvent(MEPH.createEvent('mousemove', { pageX: 10, pageY: 10 }));
+            var currentposition = (editor.getControlPointPosition(controlpoint));
+
+            expect(currentposition.x !== lastposition.x).toBeTruthy()
+            expect(currentposition.y !== lastposition.y).toBeTruthy()
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+
+    it('can get control points for a segment.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+
+            editor.update();
+            editor.$selectedLine = lines.first();
+
+            var cps = editor.getControlPoints(editor.$selectedLine.path, 0);
+
+            expect(cps.point.start).toBeTruthy();
+            expect(cps.point.end).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can output values in some kind of format', function () {
+        var editor = new TweenEditor();
+        editor.source = [];
+        editor.paths = [];
+        editor.controlpoints = [];
+        
+        editor.onAddPointAndPath();
+        editor.updateData();
+        
+        expect(editor.tween).toBeTruthy();
+    });
+
+    it('can get control points for a segment.', function (done) {
+        MEPH.render('MEPH.tween.TweenEditor', 'tweeneditor').then(function (r) {
+            var results = r.res;
+            var app = r.app, called,
+                dom,
+                editor = results.first().classInstance;
+
+            editor.onAddPointAndPath();
+            var p = editor.source.first();
+
+            var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
+
+            editor.$selectedLine = lines.first();
+
+            editor.addControlsToSelectedLine();
+            editor.svg.addEventListener('dataupdated', function () {
+                called = true;
+            });
+            editor.updateData(); 
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
 });

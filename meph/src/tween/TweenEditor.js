@@ -10,11 +10,14 @@ MEPH.define('MEPH.tween.TweenEditor', {
     extend: 'MEPH.control.Control',
     statics: {
         states: {
+            controldragging: 'controldragging',
             dragging: 'dragging'
         },
         tweenTypes: {
             bezier: 'bezier'
-        }
+        },
+        StartControlPoint: 'StartControlPoint',
+        EndControlPoint: 'EndControlPoint'
     },
     properties: {
         source: null,
@@ -23,27 +26,43 @@ MEPH.define('MEPH.tween.TweenEditor', {
          **/
         mark: null,
         target: null,
+        /**
+         * @property {Number} controlpointoffset 
+         * Intial control point offset
+         **/
+        controlpointoffset: .1,
+
+        /**
+         * @property {Number} controlpointstrokewidth
+         * Control point stroke width
+         **/
+        controlpointstrokewidth: 3,
         paths: null,
         state: null,
-        pointradius: 4,
+        controlpoints: null,
+        pointradius: 8,
         tweenoverradius: 10,
         linestroke: '#000000',
         linestrokeselected: '#f2f51a',
+        controlpointfill: 'transparent',
+        controlpointstroke: '#ff0021',
         linestrokewidth: '4px',
         linestrokeoverwidth: '7px',
         $selectedLine: null,
-        tweenrad: 4,
+        tweenrad: 8,
         $tweenpoints: null,
         margin: 2,
-        $structureElements: null
+        $structureElements: null,
+        animate: false
     },
     initialize: function () {
         var me = this;
         me.callParent.apply(me, arguments);
         me.source = MEPH.util.Observable.observable([]);
         me.paths = MEPH.util.Observable.observable([]);
+        me.controlpoints = MEPH.util.Observable.observable([]);
         me.source.on('changed', me.update.bind(me));
-
+        me.controlpoints.on('changed', me.update.bind(me));
     },
     onLoaded: function () {
         var me = this;
@@ -61,6 +80,32 @@ MEPH.define('MEPH.tween.TweenEditor', {
         me.don('mouseup', me.svg, me.onMouseUp.bind(me));
         me.don('tweenup', me.svg, me.onTweenUp.bind(me));
         me.don('tweenmove', me.svg, me.onTweenMove.bind(me));
+        me.don('controldown', me.svg, me.onControlDown.bind(me));
+        me.don('controlup', me.svg, me.onControlUp.bind(me));
+        me.don('controlmove', me.svg, me.onControlMove.bind(me));
+    },
+    onControlMove: function (evt) {
+        var me = this;
+        if (me.state === MEPH.tween.TweenEditor.states.controldragging) {
+            var tweenspaceposition = me.convertToTweenSpace(evt.position);
+            me.setControlPointPosition(me.target, tweenspaceposition);
+            me.update();
+        }
+    },
+    onControlUp: function (evt) {
+        var me = this;
+        if (me.state === MEPH.tween.TweenEditor.states.controldragging) {
+            me.state = null;
+            me.target = null;
+        }
+    },
+    onControlDown: function (evt) {
+        var me = this;
+        if (me.state === null) {
+            me.state = MEPH.tween.TweenEditor.states.controldragging;
+            me.target = evt.controlpoint;
+            me.startPosition = me.getControlPointPosition(evt.controlpoint);
+        }
     },
     onMouseUp: function (evt) {
         var me = this;
@@ -71,14 +116,26 @@ MEPH.define('MEPH.tween.TweenEditor', {
                 position: pos
             }));
         }
+        else if (me.state === MEPH.tween.TweenEditor.states.controldragging) {
+            me.svg.dispatchEvent(MEPH.createEvent('controlup', {
+            }));
+        }
     },
     onMouseMove: function (evt) {
         var me = this;
+
         if (me.state === MEPH.tween.TweenEditor.states.dragging) {
             var pos = MEPH.util.Dom.getEventPositions(evt, me.svg);
             me.svg.dispatchEvent(MEPH.createEvent('tweenmove', {
                 tweentarget: me.target,
                 position: pos
+            }));
+        }
+        else if (me.state === MEPH.tween.TweenEditor.states.controldragging) {
+            var pos = MEPH.util.Dom.getEventPositions(evt, me.svg);
+            me.svg.dispatchEvent(MEPH.createEvent('controlmove', {
+                target: me.target,
+                position: pos.first()
             }));
         }
     },
@@ -97,12 +154,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
         if (me.state === MEPH.tween.TweenEditor.states.dragging) {
             pos = me.convertToTweenSpace(evt.position.first());
             point = me.getPoint(evt.tweentarget);
-            me.source.removeWhere(function (t) {
-                return t === point;
-            });
             point.x = pos.x;
             point.y = pos.y;
-            me.source.push(point);
+            me.source.fire('changed', { removed: [], added: [] });
         }
     },
     /**
@@ -163,15 +217,237 @@ MEPH.define('MEPH.tween.TweenEditor', {
     },
     update: function () {
         var me = this;
-        me.render();
+        if (me.animate) {
+            if (me.animateRequest) {
+                cancelAnimationFrame(me.animateRequest);
+            }
+            me.animateRequest = requestAnimationFrame(function () {
+                me.render();
+                me.animateRequest = null;
+            });
+        }
+        else {
+            me.render();
+        }
+    },
+    updateData: function () {
+        var me = this;
+        var data = me.paths.select(function (path) {
+            var points = me.getOrderedPathPoints(path);
+            var xs = points.select(function (x, index) {
+                return x.x;
+            });
+            var ys = points.select(function (x, index) {
+                return x.y;
+            });
+            var segments = points.select(function (p, t) {
+                var cpoints = me.getControlPoints(path, t);
+                if (cpoints) {
+                    var startpos = me.getControlPointPosition(cpoints.point.start);
+                    var endpos = me.getControlPointPosition(cpoints.point.end);
+                    return {
+                        segment: t,
+                        startpos: MEPH.clone(startpos),
+                        endpos: MEPH.clone(endpos)
+                    }
+                }
+            }).where();
+            return {
+                path: path,
+                xs: xs,
+                ys: ys,
+                segments: segments
+            }
+        });
+        me.tween = data;
+        if (me.svg) {
+            me.svg.dispatchEvent(MEPH.createEvent('dataupdated', { data: data }))
+        }
     },
     render: function () {
         var me = this;
         me.renderPaths();
-
+        me.renderControlPoints();
         me.renderTweenPoints();
         me.renderStructureElements();
     },
+    selectPoint: function (x, t) {
+        return t.point.path === x.path &&
+                t.point.segment === x.segment &&
+                t.point.type === x.type;
+
+    },
+    renderControlPoints: function () {
+        var me = this,
+            cpoint, unrenderedPoints;
+        if (!me.renderedControlPoints) {
+            me.renderedControlPoints = [];
+        }
+
+
+        unrenderedPoints = me.controlpoints.where(function (x) {
+            return !me.renderedControlPoints.some(me.selectPoint.bind(me, x));
+        });
+
+        renderedPoints = me.controlpoints.where(function (x) {
+            return me.renderedControlPoints.some(me.selectPoint.bind(me, x));
+        });
+
+        renderedPoints.foreach(function (x) {
+            var t = me.convertToControlPoint(false, x);
+            x.parts.foreach(function (y) {
+                var tpart = t.parts.first(function (w) { return w.name === y.options.name; });
+                y.options = tpart;
+            }).foreach(function (g) {
+                if (g.options.shape === MEPH.util.SVG.shapes.line) {
+                    me.renderer.drawLine(g.options, g);
+                }
+                else if (g.options.shape === MEPH.util.SVG.shapes.circle) {
+                    me.renderer.drawCircle(g.options, g);
+                }
+            });
+        });
+
+        newpoints = unrenderedPoints.select();
+
+        newpoints.select(me.convertToControlPoint.bind(me, true)).foreach(function (t) {
+            var result = me.renderer.draw(t.parts);
+            t.point.parts = result;
+            return t.point;
+        }).foreach(function (x) {
+            me.addControlPointEvents(x);
+            me.renderedControlPoints.push(x);
+        });
+
+        me.renderedControlPoints.removeWhere(function (x) {
+            return !me.controlpoints.some(function (t) {
+                return me.selectPoint(t, x);
+            });
+        }).foreach(function (x) {
+            x.parts.foreach(function (t) {
+                me.renderer.remove(t.shape);
+            });
+            me.dun(x);
+        });
+
+    },
+    /**
+     * Converts a point in to a point and line representing a control arm.
+     * @param {Object} point
+     * @param {Boolean} initial
+     **/
+    convertToControlPoint: function (initial, controlpoint) {
+        var me = this,
+            target,
+            cpoint;
+
+        points = me.getLineSegment(controlpoint.path, controlpoint.segment);
+        cpoint = MEPH.tween.TweenEditor.EndControlPoint === controlpoint.type ? points.second() : points.first();
+        if (initial) {
+            target = me.getInitialControlPointPosition(cpoint);
+            controlpoint.position = target;
+        }
+        else {
+            target = controlpoint.position;
+        }
+        return {
+            parts: me.createControlPointInstructions(cpoint, target),
+            point: controlpoint
+        };
+    },
+    /**
+     * Gets the control points position.
+     * @param {Object} controlpoint
+     * @return {Object}
+     ***/
+    getControlPointPosition: function (controlpoint) {
+        var me = this;
+        if (controlpoint.point)
+            return controlpoint.point.position;
+        return controlpoint.position;
+    },
+    /**
+     * Sets the control points position.
+     * @param {Object} controlpoint
+     * @param {Object} position
+     ****/
+    setControlPointPosition: function (controlpoint, position) {
+        controlpoint.point.position = position;
+    },
+    /**
+     * Add control points events.
+     **/
+    addControlPointEvents: function (cp) {
+        var me = this;
+        var circle = cp.point.parts.first(function (x) {
+            return x.options.shape === 'circle';
+        });
+
+        me.don('mousedown', circle.shape, function (shape, circle, evt) {
+            me.handleControlPointEvents(shape, circle, 'mousedown');
+        }.bind(me, cp, circle.shape), cp);
+
+        //me.don('mouseup', circle.shape, function (shape, circle, evt) {
+        //    me.handleControlPointEvents(shape, circle, 'mouseup');
+        //}.bind(me, cp, circle.shape), cp);
+    },
+    handleControlPointEvents: function (cp, shape, evt) {
+        var me = this;
+        switch (evt) {
+            case 'mousedown':
+                shape.dispatchEvent(MEPH.createEvent('controldown', {
+                    controlpoint: cp,
+                    shape: shape
+                }));
+                break;
+        }
+    },
+    /**
+     * Creates control point instructions
+     * @param {Object} point  control point
+     * @param {Object} target target point
+     * @returns {Array}
+     **/
+    createControlPointInstructions: function (point, target) {
+        var me = this;
+        var $point = {
+            name: 'circle',
+            shape: MEPH.util.SVG.shapes.circle,
+            x: me.getX(target.x),
+            y: me.getY(target.y),
+            stroke: me.controlpointstroke,
+            fill: me.controlpointfill,
+            radius: me.pointradius
+        };
+
+        var line = {
+            name: 'line',
+            shape: MEPH.util.SVG.shapes.line,
+            end: me.getPosition(point),
+            start: me.getPosition(target),
+            stroke: me.controlpointstroke,
+            fill: me.controlpointfill,
+            strokeWidth: me.controlpointstrokewidth
+        };
+        return [$point, line];
+    },
+    /**
+     * @private
+     * Gets the intial control point position.
+     * @param {Object} cpoint
+     * @return {Object}
+     **/
+    getInitialControlPointPosition: function (cpoint) {
+        var me = this;
+        return {
+            x: cpoint.x,
+            y: cpoint.y + me.controlpointoffset > 1 ? Math.max(0, cpoint.y - me.controlpointoffset) : cpoint.y + me.controlpointoffset
+        }
+    },
+    /**
+     * @private 
+     * Renders path to the svg.
+     ***/
     renderPaths: function () {
         var me = this,
             points,
@@ -243,6 +519,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
             }
         });
     },
+    /**
+     * Sets the selected lines type to bezier
+     **/
     setSelectedLineToBezier: function () {
         var me = this;
         if (me.$selectedLine) {
@@ -258,16 +537,6 @@ MEPH.define('MEPH.tween.TweenEditor', {
         }
     },
     /**
-     * Sets the lines type to type.
-     * @param {Object} line
-     * @param {String} type
-     * @return {Object}
-     **/
-    setLineType: function (line, type) {
-        line.options.type = type;
-        return line;
-    },
-    /**
      * Gets the lines for a path.
      * @param {String} guid
      * @return {Array}
@@ -279,6 +548,11 @@ MEPH.define('MEPH.tween.TweenEditor', {
         }
         return [];
     },
+    /**
+     * Gets the paths by id.
+     * @param {String} guid
+     * @returns {Object}
+     ***/
     getPath: function (guid) {
         var me = this;
         if (me.renderedPaths && me.renderedPaths[guid]) {
@@ -304,6 +578,11 @@ MEPH.define('MEPH.tween.TweenEditor', {
         }.bind(me, line), line);
         me.handleLineState(line);
     },
+    /**
+     * Handles lines state
+     * @param {Object} shape
+     * @param {String} evt
+     **/
     handleLineState: function (shape, evt) {
         var me = this;
         switch (evt) {
@@ -341,20 +620,40 @@ MEPH.define('MEPH.tween.TweenEditor', {
         var me = this,
             points,
             p1, lines,
-            p2;
-        points = me.getPathPoints(x).orderBy(function (x, y) { return y.x - x.x; });
+            controlpoints, p2;
+
+        points = me.getOrderedPathPoints(x);
 
         lines = points.select(function (p, index) {
             if (index) {
+                controlpoints = me.getControlPoints(x, index - 1);
                 p2 = me.getPosition(points[index]);
                 p1 = me.getPosition(points[index - 1]);
-                var line = {
-                    shape: MEPH.util.SVG.shapes.line,
-                    start: p1,
-                    strokeWidth: me.linestrokewidth,
-                    end: p2
-                };
-                return line;
+                if (!controlpoints ||
+                    !controlpoints.point ||
+                    !controlpoints.point.start ||
+                    !controlpoints.point.end) {
+                    var line = {
+                        shape: MEPH.util.SVG.shapes.line,
+                        start: p1,
+                        strokeWidth: me.linestrokewidth,
+                        end: p2
+                    };
+                    return line;
+                }
+                else {
+
+                    var bezier = {
+                        shape: MEPH.util.SVG.shapes.bezier,
+                        start: p1,
+                        fill: 'transparent',
+                        bezier1: me.getPosition(me.getControlPointPosition(controlpoints.point.start)),
+                        bezier2: me.getPosition(me.getControlPointPosition(controlpoints.point.end)),
+                        strokeWidth: me.linestrokewidth,
+                        end: p2
+                    };
+                    return bezier;
+                }
             }
         }).where(function (t) {
             return t;
@@ -362,6 +661,15 @@ MEPH.define('MEPH.tween.TweenEditor', {
 
         return lines;
     },
+    getOrderedPathPoints: function (x) {
+        var me = this;
+        return me.getPathPoints(x).orderBy(function (y, x) {
+            return y.x - x.x;
+        });
+    },
+    /**
+     * Renders tween points.
+     ***/
     renderTweenPoints: function () {
         var me = this, toshape = function (x) {
             return {
@@ -378,10 +686,6 @@ MEPH.define('MEPH.tween.TweenEditor', {
             me.$tweenpoints = me.renderer.draw(select);
         }
         else {
-            //me.$tweenpoints.foreach(function (t) {
-            //    var shapeObj = structure.first(function (m) { return m.name === t.options.name; });
-            //    me.renderer.drawCircle(shapeObj, t);
-            //});
             var newshapes = me.source.select(toshape).where(function (x, index) {
                 var r = me.$tweenpoints[index];
                 if (r) {
@@ -413,6 +717,10 @@ MEPH.define('MEPH.tween.TweenEditor', {
             }
         }
     },
+    /**
+     * Adds events to tween points
+     * @param {Array} array an array of tween points.
+     **/
     addEventsToTweenPoints: function (array) {
         var me = this;
         array.foreach(function (x) {
@@ -434,6 +742,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
 
         });
     },
+    /**
+     * Renders the structure of the tween editor.
+     ***/
     renderStructureElements: function () {
         var me = this, size = Style.size(me.svg);
         var structure = [{
@@ -491,17 +802,24 @@ MEPH.define('MEPH.tween.TweenEditor', {
             })
         }
     },
+    /**
+     * Adds a point an a path.
+     ***/
     onAddPointAndPath: function () {
         var me = this;
         me.onAddPath();
         me.onAddPoint();
     },
+    /**
+     * Adds a point to the center of the tween editor.
+     **/
     onAddPoint: function () {
         var me = this;
         me.addPoint({ x: .5, y: 0 });
     },
     /**
      * Adds a point the the tween editor.
+     * @param {Object} point
      ***/
     addPoint: function (point) {
         var me = this;
@@ -512,6 +830,9 @@ MEPH.define('MEPH.tween.TweenEditor', {
         point.mark = me.mark;
         me.source.push(point);
     },
+    /**
+     * Add a path from (0,0) to (1,0)
+     **/
     onAddPath: function () {
         var me = this;
         me.addPath({ x: 0, y: 0 }, { x: 1, y: 0 })
@@ -529,5 +850,72 @@ MEPH.define('MEPH.tween.TweenEditor', {
         p2.anchor = true;
         me.addPoint(p1);
         me.addPoint(p2);
+    },
+    /**
+     * Adds a control point to a specific point
+     **/
+    addControlPoint: function (path, lineSegment, type) {
+        var me = this;
+
+        if (!me.controlpoints.some(function (t) { return t.path === path && t.segment === lineSegment && t.type === type; })) {
+            me.controlpoints.push({
+                path: path,
+                segment: lineSegment,
+                type: type
+            });
+        }
+    },
+    /**
+     * Removes a control point.
+     * @param {Object} point
+     ***/
+    removeControlPoint: function (point) {
+        var me = this;
+
+        return me.controlpoints.removeWhere(function (t) { return t === point; }).first();
+    },
+    /**
+     * Gets the control points for a path and segment.
+     * @param {String} path
+     * @param {Number} lineSegment
+     * @return {Object}
+     **/
+    getControlPoints: function (path, lineSegment) {
+        var me = this, start, end;
+        start = me.controlpoints.first(function (t) {
+            return t.path === path && t.segment === lineSegment && t.type === MEPH.tween.TweenEditor.StartControlPoint;
+        });
+        end = me.controlpoints.first(function (t) {
+            return t.path === path && t.segment === lineSegment && t.type === MEPH.tween.TweenEditor.EndControlPoint;
+        });
+        if (start && start.position && end && end.position) {
+            return {
+                point: {
+                    start: start,
+                    end: end
+                }
+            }
+        }
+        return null;
+    },
+
+    getLineSegment: function (pathguid, segment) {
+        var me = this,
+            points = me.getOrderedPathPoints(pathguid);
+
+        return points = points.subset(segment, segment + 2);
+    },
+    /**
+     * Add controlls to selected line.
+     **/
+    addControlsToSelectedLine: function () {
+        var me = this,
+            selectedline = me.$selectedLine,
+            points;
+
+        if (selectedline) {
+            me.addControlPoint(selectedline.path, selectedline.lineIndex, MEPH.tween.TweenEditor.StartControlPoint);
+            me.addControlPoint(selectedline.path, selectedline.lineIndex, MEPH.tween.TweenEditor.EndControlPoint);
+        }
     }
 });

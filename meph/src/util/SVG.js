@@ -1,4 +1,4 @@
-﻿/**
+﻿/**k
  * @class MEPH.util.SVG
  * String
  */
@@ -10,7 +10,8 @@ MEPH.define('MEPH.util.SVG', {
             circle: 'circle',
             text: 'text',
             line: 'line',
-            canvas: 'canvas'
+            canvas: 'canvas',
+            bezier: 'bezier'
         },
         defaultShapeOptions: {
             x: 50,
@@ -59,6 +60,7 @@ MEPH.define('MEPH.util.SVG', {
         args.foreach(function (options, index) {
             options = me.applyDefaults(options);
             switch (options.shape) {
+                case MEPH.util.SVG.shapes.bezier:
                 case MEPH.util.SVG.shapes.line:
                     result = result.concat(me.drawLine(options));
                     break;
@@ -83,7 +85,7 @@ MEPH.define('MEPH.util.SVG', {
     },
     drawLine: function (options, el) {
         var me = this,
-            canvas, shape,
+            d, canvas, shape,
             add, line;
 
         canvas = me.getCanvas();
@@ -95,11 +97,15 @@ MEPH.define('MEPH.util.SVG', {
             shape = el.shape;
             options = me.applyDefaults(options);
         }
-        shape = shape || document.createElementNS(svgns, "line");
-        shape.setAttributeNS(null, "x1", options.start.x);
-        shape.setAttributeNS(null, "y1", options.start.y);
-        shape.setAttributeNS(null, "x2", options.end.x);
-        shape.setAttributeNS(null, "y2", options.end.y);
+        shape = shape || document.createElementNS(svgns, "path");
+        if (options.shape === MEPH.util.SVG.shapes.line) {
+            d = 'M' + options.start.x + ' ' + options.start.y + ' L' + options.end.x + ' ' + options.end.y;
+        }
+        else if (options.shape === MEPH.util.SVG.shapes.bezier) {
+            d = 'M' + options.start.x + ', ' + options.start.y + ' C ' + options.bezier1.x + ' ' + options.bezier1.y +
+            ', ' + options.bezier2.x + ' ' + options.bezier2.y + ', ' + options.end.x + ' ' + options.end.y;
+        }
+        shape.setAttributeNS(null, "d", d);
         shape.setAttributeNS(null, "fill", options.fill);
         shape.setAttributeNS(null, "style", "stroke:" + options.strokeStyle + "; stroke-width:" + options.strokeWidth + ";");
         if (add) {
@@ -123,6 +129,7 @@ MEPH.define('MEPH.util.SVG', {
         }
         shape = shape || document.createElementNS(svgns, "circle");
         // cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"
+
         shape.setAttributeNS(null, "cx", options.x);
         shape.setAttributeNS(null, "cy", options.y);
         shape.setAttributeNS(null, "r", options.radius);

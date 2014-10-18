@@ -27,6 +27,26 @@
         svg.parentElement.removeChild(svg);
     })
 
+
+    it('can draw a bezier', function () {
+        var renderer = new MEPH.util.SVG();
+        var svgns = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(svgns, "svg");
+        svg.setAttributeNS(null, "height", 300);
+        svg.setAttributeNS(null, "width", 300);
+        document.body.appendChild(svg);
+        renderer.setCanvas(svg);
+        var res = renderer.draw([{
+            shape: 'bezier',
+            end: { x: 100, y: 100 },
+            bezier1: { x: 150, y: 130 },
+            bezier2: { x: 170, y: 170 },
+            start: { x: 100, y: 200 }
+        }]);
+        expect(res.length).toBe(1);
+        svg.parentElement.removeChild(svg);
+    })
+
     it('can draw a circle', function () {
         var renderer = new MEPH.util.SVG();
         var svgns = "http://www.w3.org/2000/svg";
