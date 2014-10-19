@@ -18,10 +18,15 @@
             'controller': 'MEPHControls.music.controller.Controller',
             'path': '/music/Visualizer'
         },
-          {
+        {
             'viewId': 'tweeneditor',
             'view': 'MEPHControls.tween.view.TweenEditor',
             'path': '/tween/editor'
+        },
+        {
+            'viewId': 'spectrogram',
+            'view': 'MEPHControls.signalprocessing.view.Spectrogram',
+            'path': '/spectrogram'
         },
         {
             'viewId': 'scrollbar',

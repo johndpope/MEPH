@@ -148,6 +148,9 @@ MEPH.define('MEPH.util.Renderer', {
                                    options.x,
                                    options.y);
         }
+        else if (options.simple) {
+            context.putImageData(options.canvas, 0, 0);
+        }
         else {
             context.drawImage(options.canvas,
                                      0,

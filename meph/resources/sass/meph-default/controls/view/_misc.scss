@@ -134,3 +134,9 @@ $buttonspace: 50px;
     height: $buttonspace;
     bottom: 0px;
 }
+
+.spectrogram canvas,    
+.spectrogram {
+    height: 100%;
+    width: 100%;
+}

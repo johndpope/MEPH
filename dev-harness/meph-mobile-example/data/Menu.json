@@ -26,6 +26,12 @@
 					'itemType': 'launch',
 					'path': '/tween/editor'
 				},{
+					'viewId': 'spectrogram',
+					'description': 'Spectrogram',
+					'iconType': 'launch',
+					'itemType': 'launch',
+					'path': '/spectrogram'
+				},{
 					'viewId': 'scrollbar',
 					'description': 'Scrollbar',
 					'iconType': 'launch',

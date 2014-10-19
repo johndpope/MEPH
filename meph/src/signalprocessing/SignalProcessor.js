@@ -30,9 +30,11 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         gInit: null
 
     },
-    initialize: function () {
+    initialize: function (skip) {
         var me = this;
-        me.clear();
+        if (!skip) {
+            me.clear();
+        }
     },
     clear: function () {
         var me = this;

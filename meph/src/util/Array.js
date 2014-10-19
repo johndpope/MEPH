@@ -527,7 +527,11 @@ MEPH.define('MEPH.util.Array', {
                     value: function (start, stop, func) {
                         var collection = this;
                         for (var i = start; i < stop ; i++) {
-                            collection.push(func(i));
+                            if (collection instanceof Float32Array) {
+                                collection[i - start] = (func(i));
+                            }
+                            else
+                                collection.push(func(i));
                         }
                         return collection;
                     }
@@ -774,10 +778,27 @@ MEPH.define('MEPH.util.Array', {
                     writable: true,
                     configurable: true,
                     value: function (func) {
-                        var collection = this;
-                        var result = MEPH.util.Array.create();
-                        for (var i = 0; i < collection.length ; i++) {
-                            result = MEPH.util.Array.create(result.concat(func(collection[i], i)));
+                        var collection = this, count = 0;
+
+                        collection.foreach(function (t) {
+                            count += t.length;
+                        });
+
+                        var result = this instanceof Float32Array ? new Float32Array(count) : [];
+
+                        if (this instanceof Float32Array) {
+                            var len = collection.length;
+                            for (var i = 0; i < collection.length ; i++) {
+                                var res = func(collection[i], i);
+                                for (var j = 0 ; j < collection[i].length; i++) {
+                                    result[i * len + j] = collection[i][j];
+                                }
+                            }
+                        }
+                        else {
+                            for (var i = 0; i < collection.length ; i++) {
+                                result = MEPH.util.Array.create(result.concat(func(collection[i], i)));
+                            }
                         }
                         return result;
                     }
