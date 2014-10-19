@@ -254,8 +254,8 @@ MEPH.define('MEPH.tween.TweenEditor', {
             }).where();
             return {
                 path: path,
-                xs: xs,
-                ys: ys,
+                x: xs,
+                y: ys,
                 segments: segments
             }
         });
@@ -427,7 +427,8 @@ MEPH.define('MEPH.tween.TweenEditor', {
             start: me.getPosition(target),
             stroke: me.controlpointstroke,
             fill: me.controlpointfill,
-            strokeWidth: me.controlpointstrokewidth
+            strokeWidth: me.controlpointstrokewidth,
+            'stroke-dasharray': '5,5'
         };
         return [$point, line];
     },

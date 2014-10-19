@@ -163,6 +163,7 @@
                         'table/Sequencer.spec.js',
                         'table/SpreadSheet.spec.js',
                         'tree/Tree.spec.js',
+                        'tween/Calculator.spec.js',
                         'tween/TweenEditor.spec.js',
                         'util/DataModel.spec.js',
                         'util/Dom.spec.js',

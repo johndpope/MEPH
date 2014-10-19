@@ -1055,10 +1055,10 @@
         editor.source = [];
         editor.paths = [];
         editor.controlpoints = [];
-        
+
         editor.onAddPointAndPath();
         editor.updateData();
-        
+
         expect(editor.tween).toBeTruthy();
     });
 
@@ -1070,18 +1070,30 @@
                 editor = results.first().classInstance;
 
             editor.onAddPointAndPath();
-            var p = editor.source.first();
 
             var lines = editor.renderedPaths[Object.keys(editor.renderedPaths)[0]].lines;
 
             editor.$selectedLine = lines.first();
 
             editor.addControlsToSelectedLine();
+
+            editor.update();
+
+            editor.$selectedLine = lines.first();
+
+            var points = editor.getControlPoints(editor.$selectedLine.path, 0);
+
+            points.point.start.position.x = .1;
+            points.point.end.position.x = .45;
+            
             editor.svg.addEventListener('dataupdated', function () {
                 called = true;
             });
-            editor.updateData(); 
+
+            editor.updateData();
+
             expect(called).toBeTruthy();
+
             if (app) {
                 app.removeSpace();
             }

@@ -16,6 +16,7 @@ MEPH.define('MEPH.util.SVG', {
         defaultShapeOptions: {
             x: 50,
             y: 50,
+            'stroke-dasharray': '',
             width: 100,
             height: 100,
             radius: 100,
@@ -106,6 +107,9 @@ MEPH.define('MEPH.util.SVG', {
             ', ' + options.bezier2.x + ' ' + options.bezier2.y + ', ' + options.end.x + ' ' + options.end.y;
         }
         shape.setAttributeNS(null, "d", d);
+        if (options['stroke-dasharray']) {
+            shape.setAttributeNS(null, 'stroke-dasharray', options['stroke-dasharray']);
+        }
         shape.setAttributeNS(null, "fill", options.fill);
         shape.setAttributeNS(null, "style", "stroke:" + options.strokeStyle + "; stroke-width:" + options.strokeWidth + ";");
         if (add) {

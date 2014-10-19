@@ -378,6 +378,30 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
+            if (!array.firstIndex) {
+                Object.defineProperty(array, 'firstIndex', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this.select(function (x) { return x });
+                        func = func || function () { return true; };
+                        if (typeof (func) !== 'function') {
+                            var temp = func;
+                            func = function (x) {
+                                return temp === x;
+                            }
+                        }
+                        for (var i = 0 ; i < collection.length ; i++) {
+                            if (func(collection[i], i)) {
+                                return i;
+                            }
+                        }
+                        return -1;
+                    }
+                });
+            }
+
             if (!array.selectFirst) {
                 Object.defineProperty(array, 'selectFirst', {
                     enumerable: false,

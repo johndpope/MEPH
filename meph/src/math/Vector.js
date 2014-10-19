@@ -9,13 +9,17 @@
  */
 MEPH.define('MEPH.math.Vector', {
     alternateNames: 'Vector',
+    requires: ['MEPH.math.J3DIVector3'],
     statics: {
         Id: 0,
         ZeroLength: Math.pow(1, -15),
-        
+
         Create: function (obj) {
-            if (Array.isArray(obj) || obj instanceof J3DIVector3) {
+            if (obj instanceof J3DIVector3) {
                 return new Vector(obj[0], obj[1], obj[2]);
+            }
+            else if (Array.isArray(obj)) {
+                return new Vector(obj);
             }
             return new Vector(obj.x, obj.y, obj.z);
         },
@@ -42,9 +46,10 @@ MEPH.define('MEPH.math.Vector', {
         },
         Lerp2D: function (vect1, vect2, percentage) {
             if (vect1.dimensions() === vect2.dimensions()) {
-                return new Vector(vect1.vector.select(function (x, index) {
+                var res = new Vector(vect1.vector.select(function (x, index) {
                     return Vector.lerp(vect1.getIndex(index), vect2.getIndex(index), percentage)
                 }));
+                return res;
             }
             throw new Error('Vectors must have the same dimensions');
             //return new Vector(Vector.Lerp(vect1._x, vect2._x, percentage), Vector.Lerp(vect1._y, vect2._y, percentage))
