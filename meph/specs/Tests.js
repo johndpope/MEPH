@@ -88,6 +88,8 @@
                     tests = [
                         'MEPH.spec.js',
                         'audio/Audio.spec.js',
+                        'audio/graph/node/Convolver.spec.js',
+                        'audio/graph/node/Node.spec.js',
                         'audio/view/Visualizer.spec.js',
                         'audio/view/VisualSelector.spec.js',
                         'application/Application.spec.js',

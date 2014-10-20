@@ -1,5 +1,5 @@
 ﻿/**
- * @class
+ * @class MEPH.util.Queryable
  * Defines a base class for all controls and views.
  **/
 MEPH.define('MEPH.util.Queryable', {
