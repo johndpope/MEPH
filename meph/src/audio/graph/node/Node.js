@@ -7,7 +7,10 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     statics: {
         types: {
             AudioBuffer: 'AudioBuffer',
-            Boolean: 'boolean'
+            Boolean: 'boolean',
+            Number: 'Number',
+            String: 'String',
+            Float32Array: 'Float32Array'
         }
     },
     properties: {
@@ -23,10 +26,11 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.nodeOutputs = MEPH.util.Observable.observable([]);
         me.id = MEPH.GUID();
     },
-    createInput: function (name, type) {
+    createInput: function (name, type, options) {
         return {
             name: name,
             type: type,
+            options: options || null,
             output: false
         }
     },

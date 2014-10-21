@@ -1,14 +1,15 @@
 ﻿/**
- * @class MEPH.control.Control
- * Defines a base class for all controls and views.
+ * @class MEPH.audio.graph.node.OscillatorNode
+ * @extend MEPH.audio.graph.node.Node
  **/
-MEPH.define('MEPH.audio.graph.node.Convolver', {
+MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
     extend: 'MEPH.audio.graph.node.Node',
     initialize: function () {
         var me = this;
         me.super();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
-        me.nodeInputs.push(me.createInput('normalize', MEPH.audio.graph.node.Node.Boolean));
+        me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.AudioBuffer, { path: 'gain.value' }));
+
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
     }
-}); 
+});
