@@ -7,6 +7,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
     initialize: function () {
         var me = this;
         me.super();
+        me.title = 'Biquad Filter';
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('Q', MEPH.audio.graph.node.Node.Number, { path: 'Q.value' }));
         me.nodeInputs.push(me.createInput('frequency', MEPH.audio.graph.node.Node.Number, { path: 'frequency.value' }));

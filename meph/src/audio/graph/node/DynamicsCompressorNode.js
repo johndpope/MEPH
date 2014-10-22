@@ -7,6 +7,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
     initialize: function () {
         var me = this;
         me.super();
+        me.title = 'Dynamic Compressor';
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('attack', MEPH.audio.graph.node.Node.AudioBuffer, { path: 'attack.value' }));
         me.nodeInputs.push(me.createInput('knee', MEPH.audio.graph.node.Node.AudioBuffer, { path: 'knee.value' }));

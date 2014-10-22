@@ -7,12 +7,9 @@ MEPH.define('MEPH.audio.graph.node.ChannelMergerNode', {
     initialize: function () {
         var me = this;
         me.super();
-        me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
-        me.nodeInputs.push(me.createInput('detune', MEPH.audio.graph.node.Node.Number, { path: 'detune.value' }));
-        me.nodeInputs.push(me.createInput('frequency', MEPH.audio.graph.node.Node.Number, { path: 'frequency.value' }));
-        me.nodeInputs.push(me.createInput('type', MEPH.audio.graph.node.Node.Number, {
-            values: ['sine', 'square', 'sawtooth', 'triangle', 'custom']
-        }));
+
+        me.title = 'Channel Merger';
+        me.nodeInputs.push(me.createInput('buffers', MEPH.audio.graph.node.Node.AudioBuffer, { count: 100 }));
 
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
     }

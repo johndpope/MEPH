@@ -7,6 +7,7 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
     initialize: function () {
         var me = this;
         me.super();
+        me.title = 'Wave Shaper';
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('curve', MEPH.audio.graph.node.Node.Number));
 

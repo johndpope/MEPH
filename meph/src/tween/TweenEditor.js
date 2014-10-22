@@ -6,7 +6,7 @@
 MEPH.define('MEPH.tween.TweenEditor', {
     alias: 'tweeneditor',
     templates: true,
-    requires: ['MEPH.util.Observable', 'MEPH.util.Style', 'MEPH.util.SVG', 'MEPH.util.Dom'],
+    requires: ['MEPH.util.Observable', 'MEPH.button.Button', 'MEPH.util.Style', 'MEPH.util.SVG', 'MEPH.util.Dom'],
     extend: 'MEPH.control.Control',
     statics: {
         states: {

@@ -88,6 +88,7 @@
                     tests = [
                         'MEPH.spec.js',
                         'audio/Audio.spec.js',
+                        'audio/graph/AudioGraph.spec.js',
                         'audio/graph/node/AudioBufferSourceNode.spec.js',
                         'audio/graph/node/BiquadFilter.spec.js',
                         'audio/graph/node/ChannelMergerNode.spec.js',

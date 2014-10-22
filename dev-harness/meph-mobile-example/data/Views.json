@@ -1,120 +1,125 @@
 ﻿{
-    'views': [
+    "views": [
         {
-            'viewId': '4UHP001',
-            'view': 'MEPH.mobile.view.HomePageView',
-            'singleton': true,
-            'namespace': 'U4homePage'
+            "viewId": "4UHP001",
+            "view": "MEPH.mobile.view.HomePageView",
+            "singleton": true,
+            "namespace": "U4homePage"
         },
         {
-            'viewId': 'MEPH002',
-            'view': 'MEPHControls.list.view.List',
-            'controller': 'MEPHControls.list.controller.ListController',
-            'path': '/list/List'
+            "viewId": "MEPH002",
+            "view": "MEPHControls.list.view.List",
+            "controller": "MEPHControls.list.controller.ListController",
+            "path": "/list/List"
         },
         {
-            'viewId': 'MEPH0102',
-            'view': 'MEPHControls.music.view.MusicVisualizer',
-            'controller': 'MEPHControls.music.controller.Controller',
-            'path': '/music/Visualizer'
+            "viewId": "MEPH0102",
+            "view": "MEPHControls.music.view.MusicVisualizer",
+            "controller": "MEPHControls.music.controller.Controller",
+            "path": "/music/Visualizer"
         },
         {
-            'viewId': 'tweeneditor',
-            'view': 'MEPHControls.tween.view.TweenEditor',
-            'path': '/tween/editor'
+            "viewId": "audiograph",
+            "view": "MEPHControls.music.view.AudioGraph",
+            "path": "/audio/graph"
         },
         {
-            'viewId': 'spectrogram',
-            'view': 'MEPHControls.signalprocessing.view.Spectrogram',
-            'path': '/spectrogram'
+            "viewId": "tweeneditor",
+            "view": "MEPHControls.tween.view.TweenEditor",
+            "path": "/tween/editor"
         },
         {
-            'viewId': 'scrollbar',
-            'view': 'MEPHControls.scrollbar.view.Scrollbar',
-            'path': '/scrollbar'
+            "viewId": "spectrogram",
+            "view": "MEPHControls.signalprocessing.view.Spectrogram",
+            "path": "/spectrogram"
         },
         {
-            'viewId': 'MEPSequencer02',
-            'view': 'MEPHControls.table.view.Sequencer',
-            'path': '/sequencer'
+            "viewId": "scrollbar",
+            "view": "MEPHControls.scrollbar.view.Scrollbar",
+            "path": "/scrollbar"
         },
         {
-            'viewId': 'MEPH0302',
-            'view': 'MEPHControls.table.view.SpreadSheet',
-            'path': '/spreadsheet'
+            "viewId": "MEPSequencer02",
+            "view": "MEPHControls.table.view.Sequencer",
+            "path": "/sequencer"
         },
         {
-            'viewId': 'MEPH003',
-            'view': 'MEPHControls.button.view.Button',
-            'path': '/button/Button'
+            "viewId": "MEPH0302",
+            "view": "MEPHControls.table.view.SpreadSheet",
+            "path": "/spreadsheet"
         },
         {
-            'viewId': 'MEPH004',
-            'view': 'MEPHControls.iconbutton.view.IconButton',
-            'controller': 'MEPHControls.iconbutton.controller.IconButtonController',
-            'path': '/button/IconButton'
+            "viewId": "MEPH003",
+            "view": "MEPHControls.button.view.Button",
+            "path": "/button/Button"
         },
         {
-            'viewId': 'MEPH010',
-            'view': 'MEPHControls.remoting.view.Remoting',
-            'controller': 'MEPHControls.remoting.controller.RemotingController',
-            'path': '/remoting/Remoting'
+            "viewId": "MEPH004",
+            "view": "MEPHControls.iconbutton.view.IconButton",
+            "controller": "MEPHControls.iconbutton.controller.IconButtonController",
+            "path": "/button/IconButton"
         },
         {
-            'viewId': 'MEPH011',
-            'view': 'MEPHControls.remoteview.view.RemoteView',
-            'controller': 'MEPHControls.remoteview.controller.RemoteViewController',
-            'model': 'MEPHControls.remoteview.model.RemoteViewModel',
-            'path': '/remoteview/RemoteView'
+            "viewId": "MEPH010",
+            "view": "MEPHControls.remoting.view.Remoting",
+            "controller": "MEPHControls.remoting.controller.RemotingController",
+            "path": "/remoting/Remoting"
         },
         {
-            'viewId': 'MEPH013',
-            'view': 'MEPHControls.graph.view.Graph',
-            'path': '/graph/Graph'
+            "viewId": "MEPH011",
+            "view": "MEPHControls.remoteview.view.RemoteView",
+            "controller": "MEPHControls.remoteview.controller.RemoteViewController",
+            "model": "MEPHControls.remoteview.model.RemoteViewModel",
+            "path": "/remoteview/RemoteView"
         },
         {
-            'viewId': 'MEPH012',
-            'view': 'MEPHControls.qrcode.view.Qrcode',
-            'path': '/qrcode/Qrcode'
+            "viewId": "MEPH013",
+            "view": "MEPHControls.graph.view.Graph",
+            "path": "/graph/Graph"
         },
         {
-            'viewId': 'MEPH005',
-            'view': 'MEPHControls.tree.view.Tree',
-            'controller': 'MEPHControls.tree.controller.TreeController',
-            'path': '/tree/Tree'
+            "viewId": "MEPH012",
+            "view": "MEPHControls.qrcode.view.Qrcode",
+            "path": "/qrcode/Qrcode"
         },
         {
-            'viewId': 'MEPH006',
-            'view': 'MEPHControls.fields.view.Text',
-            'controller': 'MEPHControls.fields.controller.TextController',
-            'path': '/text/Text'
+            "viewId": "MEPH005",
+            "view": "MEPHControls.tree.view.Tree",
+            "controller": "MEPHControls.tree.controller.TreeController",
+            "path": "/tree/Tree"
         },
         {
-            'viewId': 'MEPH007',
-            'view': 'MEPHControls.panel.view.Panel',
-            'path': '/panel/Panel'
+            "viewId": "MEPH006",
+            "view": "MEPHControls.fields.view.Text",
+            "controller": "MEPHControls.fields.controller.TextController",
+            "path": "/text/Text"
         },
         {
-            'viewId': 'MEPH001',
-            'view': 'MEPH.mobile.view.HomePageView',
-            'path': '/mobile/home'
+            "viewId": "MEPH007",
+            "view": "MEPHControls.panel.view.Panel",
+            "path": "/panel/Panel"
         },
         {
-            'viewId': 'MEPH009',
-            'view': 'MEPHControls.communication.view.Communication',
-            'controller': 'MEPHControls.communication.controller.CommunicationController',
-            'path': '/communication/Communication'
+            "viewId": "MEPH001",
+            "view": "MEPH.mobile.view.HomePageView",
+            "path": "/mobile/home"
         },
         {
-            'viewId': 'MEPH008',
-            'view': 'MEPHControls.drawing.view.DrawingSurface',
-            'path': '/mobile/drawingsurface'
+            "viewId": "MEPH009",
+            "view": "MEPHControls.communication.view.Communication",
+            "controller": "MEPHControls.communication.controller.CommunicationController",
+            "path": "/communication/Communication"
         },
         {
-            'viewId': 'MEPH108',
-            'controller': 'MEPHControls.file.controller.DropboxController',
-            'view': 'MEPHControls.file.view.Dropbox',
-            'path': '/mobile/dropbox'
+            "viewId": "MEPH008",
+            "view": "MEPHControls.drawing.view.DrawingSurface",
+            "path": "/mobile/drawingsurface"
+        },
+        {
+            "viewId": "MEPH108",
+            "controller": "MEPHControls.file.controller.DropboxController",
+            "view": "MEPHControls.file.view.Dropbox",
+            "path": "/mobile/dropbox"
         }
     ]
 }

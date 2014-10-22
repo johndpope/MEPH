@@ -29,7 +29,9 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     createInput: function (name, type, options) {
         return {
             name: name,
+            title: name,
             type: type,
+            id: MEPH.GUID(),
             options: options || null,
             output: false
         }
@@ -37,7 +39,9 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     createOutput: function (name, type) {
         return {
             name: name,
+            title: name,
             type: type,
+            id: MEPH.GUID(),
             output: true
         }
     }

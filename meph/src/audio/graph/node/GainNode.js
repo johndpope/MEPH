@@ -7,6 +7,7 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
     initialize: function () {
         var me = this;
         me.super();
+        me.title = 'Gain';
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.AudioBuffer, { path: 'gain.value' }));
 

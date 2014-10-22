@@ -7,6 +7,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
     initialize: function () {
         var me = this;
         me.super();
+        me.title = 'Panner';
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('coneInnerAngle', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('coneOuterAngle', MEPH.audio.graph.node.Node.Number));
