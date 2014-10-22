@@ -32,6 +32,13 @@
                     "path": "/music/Visualizer"
                 },
                 {
+                    "viewId": "svgaudiograph",
+                    "description": "SVG Audio graph",
+                    "iconType": "launch",
+                    "itemType": "launch",
+                    "path": "/music/svgaudiograph"
+                },
+                {
                     "viewId": "tweeneditor",
                     "description": "Tween Editor",
                     "iconType": "launch",

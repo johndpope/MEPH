@@ -100,7 +100,7 @@ MEPH.define('MEPH.graph.GraphRenderer', {
     },
     generateCanvas: function (bucket, isconnectioncanvas) {
         var me = this,
-            canvas = document.createElement('canvas');
+        canvas = document.createElement('canvas');
         var viewportsize = me.getViewPort().getCanvasSize();
         bucket = bucket || me.getCanvasBag();
         bucket.appendChild(canvas);

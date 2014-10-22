@@ -116,7 +116,7 @@ MEPH.define('MEPH.graph.GraphViewPort', {
         var me = this;
         var target = document.querySelector(selector);
         var dock = document.createElement('div');
-        var canvas = document.createElement('canvas');
+        var canvas = document.createElement(options && options.element ? options.element : 'canvas');
         canvas.style.position = 'absolute';
         canvas.style.zIndex = 3;
         options = options || { height: 400, width: 450 };
@@ -660,7 +660,7 @@ MEPH.define('MEPH.graph.GraphViewPort', {
     setCanvasSize: function (args) {
         var me = this,
             canvas = me.getCanvas();
-        canvas.height = parseFloat(args.height);
-        canvas.width = parseFloat(args.width);
+        Style.height(canvas, args.height);
+        Style.width(canvas, args.width);
     }
 });
