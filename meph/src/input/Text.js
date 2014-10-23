@@ -1,5 +1,5 @@
 ﻿MEPH.define('MEPH.input.Text', {
-    alias: 'text',
+    alias: 'textfield',
     extend: 'MEPH.input.Input',
     properties: {
         type: 'text'

@@ -135,8 +135,12 @@ $buttonspace: 50px;
     bottom: 0px;
 }
 
-.spectrogram canvas,    
+.spectrogram canvas,
 .spectrogram {
     height: 100%;
     width: 100%;
+}
+
+svg[control] {
+    overflow: visible;
 }

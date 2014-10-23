@@ -9760,6 +9760,11 @@ input[type="range"]::-webkit-slider-thumb {
   width: 100%;
 }
 
+/* line 144, ../sass/meph-default/controls/view/_misc.scss */
+svg[control] {
+  overflow: visible;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

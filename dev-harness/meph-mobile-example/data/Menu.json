@@ -29,7 +29,14 @@
                     "description": "Audio graph",
                     "iconType": "launch",
                     "itemType": "launch",
-                    "path": "/music/Visualizer"
+                    "path": "/audio/graph"
+                },
+                {
+                    "viewId": "audionodes",
+                    "description": "Audio Nodes",
+                    "iconType": "launch",
+                    "itemType": "launch",
+                    "path": "/audio/nodes"
                 },
                 {
                     "viewId": "svgaudiograph",

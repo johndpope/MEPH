@@ -481,6 +481,7 @@ MEPH.define('MEPH.bind.Binder', {
                     case 'min':
                         dom.setAttribute(prop, value);
                         break;
+
                     case 'class':
                         MEPH.util.Array.convert(dom.classList).foreach(function (x) {
                             dom.classList.remove(x);
@@ -495,8 +496,11 @@ MEPH.define('MEPH.bind.Binder', {
                             });
                         }
                         break;
-                    default:
+                    case 'innerHTML':
                         MEPH.setPathValue(dom, prop, value);
+                        break;
+                    default:
+                        dom.setAttribute(prop, value);
                         break;
                 }
             }

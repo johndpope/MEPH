@@ -29,6 +29,11 @@
             "path": "/audio/svggraph"
         },
         {
+            "viewId": "audionodes",
+            "view": "MEPHControls.music.view.AudioNodes",
+            "path": "/audio/nodes"
+        },
+        {
             "viewId": "tweeneditor",
             "view": "MEPHControls.tween.view.TweenEditor",
             "path": "/tween/editor"
