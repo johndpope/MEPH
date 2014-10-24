@@ -1517,14 +1517,23 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             configurable: true,
             writeable: true,
             value: function (type, dom, func, reference, capture) {
-                dom.addEventListener(type, func);
-                meph.Array(this[domListenersPropertyKey]).push({
-                    type: type,
-                    dom: dom,
-                    func: func,
-                    reference: reference || this,
-                    capture: capture || false
-                });
+                var $dom;
+                if (!Array.isArray(dom)) {
+                    $dom = [dom];
+                }
+                else {
+                    $dom = dom;
+                }
+                $dom.foreach(function (dom) {
+                    dom.addEventListener(type, func);
+                    meph.Array(this[domListenersPropertyKey]).push({
+                        type: type,
+                        dom: dom,
+                        func: func,
+                        reference: reference || this,
+                        capture: capture || false
+                    });
+                })
             }.bind(object)
         });
 

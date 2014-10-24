@@ -89,6 +89,10 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             type: MEPH.graph.ActiveZone.type.header,
             dom: me.body
         });
+
+        me.don('mousedown', [me.body, me.container, me.inputs], function () {
+            me.svg.parentNode.appendChild(me.svg);
+        }, me);
     },
     defineNodeDependentProperties: function () {
         var me = this;
@@ -101,7 +105,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.defineTitleProperties();
     },
     definePositionProperty: function () {
-      
+
     },
     defineNodeHeightProperty: function () {
         var me = this;
