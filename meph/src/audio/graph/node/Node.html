@@ -1,9 +1,11 @@
 ﻿<svg mephid="svg"
      meph-data-x="c$.sx"
+     meph-data-y="c$.sy"
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <g mephid="nodeg">
         <rect data-bind='"x" : "c$.nodex", "y" : "c$.bodyy"'
+              mephid="body"
               meph-data-rx="c$.bodyrx"
               meph-data-ry="c$.bodyry"
               meph-data-width="c$.nodewidth"
@@ -11,8 +13,7 @@
               meph-data-stroke="c$.bodystroke"
               meph-data-stroke-width="c$.bodystrokewidth"
               meph-data-height="c$.nodeheight" />
-        <rect 
-              data-bind='"x" : "c$.bodyx", "y" : "c$.headerbuffer"'
+        <rect data-bind='"x" : "c$.bodyx", "y" : "c$.headerbuffer"'
               meph-data-fill="c$.bodyfill"
               meph-data-height="c$.bodyheight"
               meph-data-width="c$.bodywidth" />

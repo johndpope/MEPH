@@ -171,15 +171,20 @@ MEPH.define('MEPH.graph.ActiveZone', {
         var me = this;
         me.$dom = dom;
         var graphviewport = me.getGraphViewPort();
-        if (graphviewport) {
+        if (graphviewport && !me.getOptions().managed) {
             graphviewport.getDock().appendChild(dom);
         }
         if (me.$clickable) {
             Style.cursor(dom, 'pointer');
         }
+        
         me.interactivity();
-        Style.position(dom, 'absolute');
-        Style.zIndex(dom, me.raiseZIndex);
+
+        if (!me.getOptions().managed) {
+            Style.position(dom, 'absolute');
+            Style.zIndex(dom, me.raiseZIndex);
+        }
+
         me.$dom.addEventListener('mousedown', me.onMouseDown.bind(me));
         me.$dom.addEventListener('click', me.onClick.bind(me));
         me.setDomTitle();
@@ -230,7 +235,7 @@ MEPH.define('MEPH.graph.ActiveZone', {
     },
     destroy: function () {
         var me = this;
-        if (me.getDom() && me.getDom().parentNode) {
+        if (me.getDom() && me.getDom().parentNode && !me.getOptions().managed) {
             me.getDom().parentNode.removeChild(me.getDom());
         }
         me.fire('destroy', me);
@@ -278,7 +283,7 @@ MEPH.define('MEPH.graph.ActiveZone', {
         if (me.$$$timeout) {
             clearTimeout(me.$$$timeout);
         }
-        if (dom && (!me.stoppedMoveAbility || override)) {
+        if (dom && (!me.stoppedMoveAbility || override) && !me.getOptions().managed) {
             // me.$$$timeout = setTimeout(function () {
             Style.translate(dom, (x + _x), (y + _y));
             //}, 100);

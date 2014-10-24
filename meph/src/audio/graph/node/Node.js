@@ -3,7 +3,7 @@
  * Defines a base class for all controls and views.
  **/
 MEPH.define('MEPH.audio.graph.node.Node', {
-    requires: ['MEPH.util.Observable'],
+    requires: ['MEPH.util.Observable', 'MEPH.graph.ActiveZone'],
     alias: 'audionode',
     templates: true,
     extend: 'MEPH.control.Control',
@@ -23,6 +23,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         //x: null,
         y: null,
         sx: null,
+        sy: null,
         controlverticalpadding: 4,
         inputoutputverticalpadding: 10,
         nodeInputs: null,
@@ -75,14 +76,32 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         //    me.nodeg.setAttributeNS(null, "id", "node" + (me.id || MEPH.GUID()));
         //}, 1000)
     },
+    setupActiveZones: function (viewport, node) {
+        var me = this;
+
+        me.setupActiveHeaderZone(viewport, node);
+    },
+    setupActiveHeaderZone: function (viewport, node) {
+        var me = this;
+        viewport.requestZone(node, {
+            managed: true,
+            id: node.getId() + '-header',
+            type: MEPH.graph.ActiveZone.type.header,
+            dom: me.body
+        });
+    },
     defineNodeDependentProperties: function () {
         var me = this;
+        me.definePositionProperty();
         me.defineNodeHeightProperty();
         me.definerHeaderBufferProperties();
         me.defineBodyHeightProperty();
         me.defineBodyWidthProperty();
         me.defineBodyXProperty();
         me.defineTitleProperties();
+    },
+    definePositionProperty: function () {
+      
     },
     defineNodeHeightProperty: function () {
         var me = this;

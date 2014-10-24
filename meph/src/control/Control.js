@@ -445,6 +445,7 @@ MEPH.define('MEPH.control.Control', {
 
             return application.loadViewObject([template], dom, parent);
         }
+
         return Promise.resolve().then(function () {
             throw new Error('application is not present');
         });

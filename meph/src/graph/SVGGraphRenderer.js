@@ -12,18 +12,29 @@ MEPH.define('MEPH.graph.SVGGraphRenderer', {
         me.super();
         MEPH.graph.SVGGraphRenderer.graphtemplates = [];
     },
-
+    clearCanvas: function (canvas) {
+        var context;
+        if (canvas && canvas.getContext) {
+            context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    },
     generateCanvas: function (bucket, isconnectioncanvas) {
-        debugger
         var me = this,
             canvas = document.createElement('svg');
+        
         var viewportsize = me.getViewPort().getCanvasSize();
         bucket = bucket || me.getCanvasBag();
         bucket.appendChild(canvas);
         canvas.height = viewportsize.height;
         canvas.width = viewportsize.width;
         canvas.style.position = 'absolute';
-        canvas.style.zIndex = isconnectioncanvas ? me.connectionCanvasZIndex : me.nodeCanvasZIndex;
+        if (me.createdCanvas) {
+            canvas.style.zIndex = isconnectioncanvas ? me.connectionCanvasZIndex : 1;
+        }
+        else
+            canvas.style.zIndex = isconnectioncanvas ? me.connectionCanvasZIndex : 1;
+        me.createdCanvas = true;
         me.$canvases.push(canvas);
         return canvas;
     },

@@ -8,10 +8,14 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     extend: 'MEPH.graph.GraphControl',
     requires: ['MEPH.button.Button',
         'MEPH.audio.graph.node.DelayNode',
+        'MEPH.graph.SVGGraphViewPort',
         'MEPH.audio.graph.node.Convolver',
+        'MEPH.graph.renderer.svg.BlenderNodeRenderer',
+    'MEPH.graph.renderer.svg.ConnectionRenderer',
     'MEPH.audio.graph.node.BiquadFilter',
     'MEPH.audio.graph.node.ChannelMergerNode',
     'MEPH.audio.graph.node.ChannelSplitterNode',
+    'MEPH.graph.SVGGraphRenderer',
     'MEPH.audio.graph.node.DynamicsCompressorNode',
     'MEPH.audio.graph.node.GainNode',
     'MEPH.audio.graph.node.OscillatorNode',
@@ -22,12 +26,54 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         var me = this;
         me.super();
     },
+    statics: {
+        create: function (graph, size, selector, holder) {;
+            selector = selector || 'body';
+            var graphviewport = new MEPH.graph.SVGGraphViewPort();
+            var graphrenderer = new MEPH.graph.SVGGraphRenderer();
+            var connectionrenderer = new MEPH.graph.renderer.svg.ConnectionRenderer();
+            var blenderNode = new MEPH.graph.renderer.svg.BlenderNodeRenderer(graphviewport);
+
+            var connectionHandler = new MEPH.graph.ConnectionHandler();
+            connectionHandler.setGraph(graph);
+            graphviewport.setConnectionHandler(connectionHandler);
+
+            graphviewport.setup(selector, size);
+            graphrenderer.setNodeRenderer(blenderNode);
+            graphrenderer.setConnectionRenderer(connectionrenderer);
+            graphrenderer.setGraph(graph);
+            graphrenderer.setViewPort(graphviewport);
+            graphrenderer.use('viewport');
+            graphviewport.setGraph(graph);
+            graphrenderer.render();
+            if (holder && document.querySelector(holder)) {
+                graphviewport.setHolder(holder);
+                graphviewport.resize();
+                window.addEventListener('resize', function () {
+                    graphviewport.resize();
+                });
+            }
+            graphviewport.selectConnectionOnClick = true;
+            return graphviewport;
+        }
+    },
+    onLoaded: function () {
+        var me = this;
+        me.id = 'graph' + MEPH.GUID();
+        me.querySelectorAll('div.graphBody').first().parentNode.setAttribute('id', me.id);
+        //setTimeout(function () {
+        me.graphviewport = MEPH.audio.graph.AudioGraph.create(me.graph || new MEPH.graph.Graph(), { element: 'svg' }, '#' + me.id + ' div.graphBody', '#' + me.id);
+        //}, 10);
+    },
+
+    /**
+     * Add convolver audio node.
+     * @return {Promise}
+     **/
     addConvolver: function () {
         var me = this,
-            node,
-            convolver = new Convolver();
-
-        me.addAudioNode(convolver);
+            node;
+        return me.addAudioNode('MEPH.audio.graph.node.Convolver');
     },
     addDelay: function () {
         var me = this,
@@ -41,7 +87,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
             node,
             nodedata = new BiquadFilter();
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.BiquadFilter');
     },
     addChannelMerger: function () {
         var me = this,
@@ -93,13 +139,22 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
 
         me.addAudioNode(nodedata);
     },
+    /**
+     * Add audio node.
+     * @param {String} nodedata
+     * @return {Promise}
+     **/
     addAudioNode: function (nodedata) {
         var me = this,
+            svg = me.graphviewport.getGCanvas(),
             node;
 
-        node = new MEPH.graph.Node();
-        node.setId(MEPH.GUID());
-        node.appendData(nodedata);
-        me.addNode(node);
+        return me.renderControl(nodedata, svg, me).then(function (t) {
+            var res = t.first();
+            node = new MEPH.graph.Node();
+            node.setId(MEPH.GUID());
+            node.appendData(res.classInstance);
+            me.addNode(node);
+        })
     }
 });

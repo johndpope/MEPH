@@ -75,7 +75,6 @@ MEPH.define('MEPH.graph.renderer.svg.BlenderNodeRenderer', {
     },
     requestZone: function (node, options) {
         var me = this;
-        debugger
         if (!options.customonly) {
             me.$graphviewport.requestZone(node, options);
         }
@@ -199,8 +198,15 @@ MEPH.define('MEPH.graph.renderer.svg.BlenderNodeRenderer', {
             var unrendered = nodes.where(function (x) { return !x[' blendersvgid']; });
             unrendered.foreach(function (x) {
                 me.setBlenderSVGID(x);
+                x.$data.setupActiveZones(me.$graphviewport, x)
             });
-            debugger
+            
+            nodes.foreach(function (node) {
+                var position = node.getPosition();
+                var offset = me.$graphviewport.getPosition();
+                node.$data.sx = position.x + offset.x;
+                node.$data.sy = position.y + offset.y;
+            });
         }
     },
     setBlenderSVGID: function (node) {
