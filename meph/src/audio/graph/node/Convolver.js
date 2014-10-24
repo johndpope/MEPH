@@ -8,11 +8,19 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
     requires: ['MEPH.audio.graph.node.controls.Control'],
     templates: true,
     properties: {
-        bufferfill: '',
-        bufferTitle: ''
+        booleanFill: '',
+        bufferTitle: '',
+        audioBufferFill:'',
+        normalizefill: '',
+        normalizeTitle: ''
     },
     initialize: function () {
         var me = this;
+
+        me.nodecontrols = me.nodecontrols || [];
+        me.nodecontrols.push('bufferoutput');
+        me.nodecontrols.push('bufferinput');
+        me.nodecontrols.push('normalizeinput');
         me.super();
         me.title = 'Convolver';
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -21,9 +29,13 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
     },
     onLoaded: function () {
         var me = this;
-        me.bufferfill = me.bufferfill || '#FAF332';
+        me.bufferoutput.left = false;
+        me.booleanFill = me.booleanFill || '#FAF332';
+        me.audioBufferFill = me.audioBufferFill || '#3AF3F2'
+        me.normalizefill
         me.bufferTitle = 'buffer';
-        me.inputsy = 120;
+        me.normalizeTitle = 'normalize';
+        me.inputsy = 0;
         me.super();
     }
 });

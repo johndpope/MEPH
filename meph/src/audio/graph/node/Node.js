@@ -23,6 +23,8 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         //x: null,
         y: null,
         sx: null,
+        controlverticalpadding: 4,
+        inputoutputverticalpadding: 10,
         nodeInputs: null,
         nodeOutputs: null,
         bodyy: null,
@@ -32,7 +34,6 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         bodystrokewidth: null,
         bodyfill: null,
         footerheight: null,
-        nodeheight: null,
         headerfill: null,
         nodewidth: null,
         titlepadding: null,
@@ -44,6 +45,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     initialize: function () {
         var me = this;
+        me.nodecontrols = me.nodecontrols || [];
         me.nodeInputs = MEPH.util.Observable.observable([]);
         me.nodeOutputs = MEPH.util.Observable.observable([]);
         me.id = MEPH.GUID();
@@ -58,7 +60,6 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.bodyry = 10;
         me.bodystrokewidth = 2;
         me.bodyy = 0;
-        me.nodeheight = 300;
         me.title = me.title || 'Node';
         me.nodewidth = 400;
         me.titlepadding = 10;
@@ -76,18 +77,45 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     defineNodeDependentProperties: function () {
         var me = this;
+        me.defineNodeHeightProperty();
         me.definerHeaderBufferProperties();
         me.defineBodyHeightProperty();
         me.defineBodyWidthProperty();
         me.defineBodyXProperty();
         me.defineTitleProperties();
     },
+    defineNodeHeightProperty: function () {
+        var me = this;
+        me.nodecontrols = me.nodecontrols || [];
+        var noncontrols = ['headerheight', 'footerheight'];
+        var nodeheightdp = me.nodecontrols.concat(noncontrols);
+        MEPH.util.Observable.defineDependentProperty('nodeheight', me, nodeheightdp, function () {
+            var result = (me.titlepaddingtop || 0);
+            nodeheightdp.foreach(function (t, i) {
+                var temp = t;
+                if (!noncontrols.some(function (z) { return z === t; })) {
+                    temp += '.height';
+                }
+                result += parseFloat(MEPH.getPathValue(temp, me) || 0);
+            })
+            result += (me.controlverticalpadding || 0) * me.nodecontrols.length;
+            result += (me.inputoutputverticalpadding || 0);
+            return result;
+        });
+        MEPH.util.Observable.defineDependentProperty('inputoutputposition', me, ['headerbuffer'], function () {
+            var result = parseFloat(me.headerbuffer || 0);
+            result += (me.inputoutputverticalpadding || 0);
+            return result;
+        });
+        me.controlsOffsets(me.nodecontrols);
+
+    },
     defineTitleProperties: function () {
         var me = this;
 
 
-        MEPH.util.Observable.defineDependentProperty('inputtransform', me, ['inputsx', 'inputsy'], function () {
-            var result = 'translate(' + (me.inputsx || 0) + ',' + (me.inputsy || 0) + ')';
+        MEPH.util.Observable.defineDependentProperty('inputtransform', me, ['inputoutputposition', 'inputsx', 'inputsy'], function () {
+            var result = 'translate(' + (me.inputsx || 0) + ',' + ((me.inputoutputposition || 0) + (me.inputsy || 0)) + ')';
 
             return result;
         });
@@ -129,6 +157,23 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             var result = me.nodeheight - (me.headerheight || 0) - (me.footerheight || 0);
             return result;
         });
+    },
+    controlsOffsets: function (offsets) {
+        //var offsets = ['buffery'];
+        var me = this;
+        [].interpolate(0, offsets.length + 1, function (x) {
+            if (x) {
+                MEPH.util.Observable.defineDependentProperty(offsets[x - 1] + 'y', me, offsets.subset(0, x - 1).concat(['headerbuffer']), function (osets) {
+                    var result = 0;
+                    osets.foreach(function (t) {
+                        var temp = t + '.height';
+                        var vv = MEPH.getPathValue(temp, me);
+                        result += parseFloat(vv || 0) + (me.controlverticalpadding || 0);
+                    });
+                    return result;
+                }.bind(me, offsets.subset(0, x - 1)));
+            }
+        })
     },
     defineBodyWidthProperty: function () {
         var me = this;

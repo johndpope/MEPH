@@ -1,15 +1,17 @@
 ﻿<svg mephid="svg" control
+     meph-data-x="c$.x"
+     meph-data-y="c$.y"
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <g>
         <!-- "name": "beforecircle" -->
-        <circle meph-data-x="c$.connectorx"
-                meph-data-y="c$.connectory"
+        <circle     
+                meph-data-transform="c$.connectortransform"
                 meph-data-fill="c$.fill"
                 meph-data-r="c$.radius"
                 meph-data-stroke="c$.stroke"></circle>
         <!-- "name": "aftercircle" -->
-        <text meph-data-x="c$.textx" meph-data-y="c$.texty"
+        <text meph-data-transform="c$.texttransform"
               meph-data-text-anchor="c$.anchor"
               meph-data-font-size="c$.fontsize"
               dominant-baseline="central"
