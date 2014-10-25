@@ -52,6 +52,7 @@ MEPH.define('MEPH.graph.ActiveZone', {
             template.az.addEventListener('activezoneblur', function () {
                 template.az.parentNode.removeChild(template.az);
                 me.getNode().fire('move', {});
+               // MEPH.cancelBubble(e);
             });
         }
     },
@@ -160,12 +161,14 @@ MEPH.define('MEPH.graph.ActiveZone', {
         if (me.$clickable) {
             me.fire('click', { dom: me.getDom(), evt: e });
         }
+        //MEPH.cancelBubble(e);
     },
     onMouseDown: function (e) {
         var me = this;
         if (me.$draggable) {
             me.fire('activezone_dragstart', { dom: me.getDom(), evt: e });
         }
+        //MEPH.cancelBubble(e);
     },
     setDom: function (dom) {
         var me = this;

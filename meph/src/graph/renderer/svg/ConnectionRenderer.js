@@ -3,18 +3,24 @@
 * Creates a graph.
 */
 MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
-    requires: ['MEPH.util.Renderer'],
+    requires: ['MEPH.util.Renderer', 'MEPH.util.SVG', 'MEPH.util.Dom'],
     extend: "MEPH.graph.renderer.ConnectionRenderer",
     properties: {
-        singleNodePosition: null
+        singleNodePosition: null,
+        controlpointstroke: '#ff0021',
+        controlpointstrokewidth: 1,
+        controlpointfill: 'blue',
+        $connectioncache: null
     },
     initialize: function () {
         var me = this;
         MEPH.Events(me);
+        me.$connectioncache = [];
         me.singleNodePosition = { x: 100, y: 100 };
         me.callParent.apply(me, arguments);
+        me.svgrenderer = new MEPH.util.SVG();
     },
-    
+
     draw: function (options, endpoints, overridingoptions) {
         var me = this,
             temp;
@@ -65,12 +71,89 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
     },
     /**
      * Renders connections
+     * @param {Object} canvas
+     * @param {Object} ee
      * @param {Array} connections
      **/
-    render: function (canvas, endpoints, overridingoptions) {
+    render: function (canvas, ee, connections, viewport) {
         var me = this;
-        //me.renderer.setCanvas(canvas);
-        //me.draw({}, endpoints, overridingoptions);
+        if (connections && connections.length && canvas && viewport) {
+            var unrenderedconnections = connections.where(function (x) {
+                return !me.$connectioncache.some(function (t) { return t.connection === x; })
+            });
+            var vp = viewport.getPosition();
+
+            unrenderedconnections.foreach(function (connection) {
+                var obj = {
+                    connection: connection,
+                    path: me.createPath(canvas).first()
+                };
+                connection.on('destroy', function (obj) {
+                    me.svgrenderer.remove(obj.path);
+                    me.$connectioncache.removeWhere(function (x) { return x === obj; });
+                }.bind(me, obj));
+
+                me.$connectioncache.push(obj);
+            });
+            if (me.$connectioncache.length > 0) {
+                me.$connectioncache.foreach(function (connectionObj) {
+                    var connection = connectionObj.connection;
+                    var path = connectionObj.path;
+                    if (connection.$zones.length > 1) {
+                        var dom = connection.$zones.first().$dom;
+                        var dom2 = connection.$zones.second().$dom;
+                        var pos = Dom.getRelativeSvgPosition(dom, canvas.parentElement, 'center');
+                        var pos2 = Dom.getRelativeSvgPosition(dom2, canvas.parentElement, 'center');
+                        path.options.start = pos;
+                        path.options.end = pos2;
+
+                        me.svgrenderer.drawLine(path.options, path);
+                        path.shape.parentNode.insertBefore(path.shape, path.shape.parentNode.firstChild);
+                    }
+                });
+            }
+        }
+        else if (canvas && ee && !connections) {
+            //render connection flow
+            if (!me.connectionflowpath) {
+                me.connectionflowpath = me.createPath(canvas).first();
+            }
+
+            var t = ee.first();
+            var pos = Dom.getRelativeSvgPosition(t.zone.$dom, canvas.parentElement, 'center');
+           
+            me.connectionflowpath.options.start = t.start;
+            me.connectionflowpath.options.end = pos;
+
+            me.svgrenderer.drawLine(me.connectionflowpath.options, me.connectionflowpath);
+            if (me.connectionflowpath.shape.parentNode) {
+                me.connectionflowpath.shape.parentNode.insertBefore(me.connectionflowpath.shape, me.connectionflowpath.shape.parentNode.firstChild);
+            }
+        }
+    },
+    clearFlow: function () {
+        var me = this;
+        if (me.connectionflowpath) {
+            me.svgrenderer.remove(me.connectionflowpath);
+            me.connectionflowpath = null;
+        }
+    },
+    /**
+     * Creates an svg path and adds it to the canvas.
+     * @param {Object} canvas
+     **/
+    createPath: function (canvas, start, end) {
+        var me = this;
+        me.svgrenderer.setCanvas(canvas);
+        return me.svgrenderer.draw({
+            name: 'line',
+            shape: MEPH.util.SVG.shapes.line,
+            end: { x: 0, y: 0 },
+            start: { x: 0, y: 0 },
+            stroke: me.controlpointstroke,
+            fill: me.controlpointfill,
+            strokeWidth: me.controlpointstrokewidth
+        })
     },
     renderConnection: function (connection, canvas, offset, overridingoptions) {
         var me = this;

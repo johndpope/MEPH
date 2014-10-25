@@ -300,13 +300,15 @@ MEPH.define('MEPH.list.List', {
 
             info = me.getBoundSourceInfo(addedDataItem);
             previousSource = me.getPreviousBoundSource(info);
-            lastelement = me.getLastDomElement(previousSource);
-            me.getDomElements(info).foreach(function (el) {
-                Dom.insertAfter(lastelement, el);
-                lastelement = el;
-            });
-            me.boundSource.removeWhere(function (x) { return x === info; });
-            me.boundSource.splice(sourceIndex, 0, info);
+            if (previousSource) {
+                lastelement = me.getLastDomElement(previousSource);
+                me.getDomElements(info).foreach(function (el) {
+                    Dom.insertAfter(lastelement, el);
+                    lastelement = el;
+                });
+                me.boundSource.removeWhere(function (x) { return x === info; });
+                me.boundSource.splice(sourceIndex, 0, info);
+            }
         }
 
         return Promise.resolve().then(function () { return addedDataItem; });

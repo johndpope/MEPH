@@ -31,10 +31,44 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
         me.setDock(dock);
         me.applyMask(dock);
     },
+    applyMask: function (target) {
+        var me = this,
+            svg = me.getCanvas();
+
+        svg.addEventListener('mousedown', me.onMaskMouseDown.bind(me));
+        svg.addEventListener('mousemove', me.onSVGMaskMouseMove.bind(me));
+        me.super();
+        //me.$mask.addEventListener('mouseup', me.onMaskMouseUp.bind(me));
+        //me.$mask.addEventListener('mouseout', me.onMaskMouseOut.bind(me));
+        //me.$mask.addEventListener('dblclick', me.onDblClick.bind(me));
+        //me.$mask.addEventListener('click', me.onClick.bind(me));
+
+    },
+    onSVGMaskMouseMove: function (ee) {
+        var me = this;
+        
+        me.calculateMousePosition(ee);
+        if (me.getCanvas() === ee.srcElement) {
+            if (!(me.isDragging || me.isDraggingNode || me.connectionFlow)) {
+
+                me.fire('mousemove', ee);
+            }
+            else if (me.connectionFlow) {
+                me.fire('viewportconnectionflow', ee);
+            }
+        }
+    },
+    onMaskMouseDown: function (ee) {
+        if (this.getCanvas() === ee.srcElement) {
+            var me = this;
+            me.super();
+        }
+    },
     getGCanvas: function () {
         var me = this;
         return me.gcanvas;
     },
+
     setGCanvas: function (g) {
         var me = this;
         me.gcanvas = g;

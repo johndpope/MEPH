@@ -3,7 +3,7 @@
  * Defines a base class for all controls and views.
  **/
 MEPH.define('MEPH.audio.graph.node.Node', {
-    requires: ['MEPH.util.Observable', 'MEPH.graph.ActiveZone'],
+    requires: ['MEPH.util.Observable', 'MEPH.graph.ActiveZone', 'MEPH.util.Dom'],
     alias: 'audionode',
     templates: true,
     extend: 'MEPH.control.Control',
@@ -54,6 +54,58 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
         me.defineNodeDependentProperties();
     },
+    /**
+     * Gets the relative position of an element to the node.
+     * @param {Object} el
+     * @return {Object}
+     **/
+    getRelPosition: function (el) {
+        var me = this;
+        // viewport.connectionFlow.zone
+        var top = me.svg;
+        var transform = me.svg.getTransformToElement(el)
+        var result = {
+            x: transform.e,
+            y: transform.f
+        }
+        return result;
+    },
+    /**
+     * Gets the node position relative to the outer svg.
+     * @param {Object} el
+     * @return {Object}
+     ***/
+    getNodePosition: function () {
+        var me = this;
+        return {
+            x: parseFloat(me.sx) || 0,
+            y: parseFloat(me.sy) || 0
+        }
+    },
+    /**
+     * Get element position relative to the outer svg.
+     * @param {Object} el
+     * @return {Object}
+     ***/
+    getElPosition: function (el) {
+        var me = this;
+        var pos = me.getRelPosition(el);
+        var nodepos = me.getNodePosition();
+        return {
+            x: pos.x + nodepos.x,
+            y: pos.y + nodepos.y
+        }
+    },
+    getAbsElPosition: function (el) {
+        var me = this;
+        var pos = me.getRelPosition(el);
+
+        var abspos = el.getBoundingClientRect();
+        return {
+            x: abspos.left,
+            y: abspos.top
+        }
+    },
     onLoaded: function () {
         var me = this;
         me.nodex = 0;
@@ -80,7 +132,21 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         var me = this;
 
         me.setupActiveHeaderZone(viewport, node);
+        me.setupActiveControlZones(viewport, node);
     },
+    /**
+     * Setup the active control zones.
+     * @param {Object} viewport
+     * @param {Object} node
+     ***/
+    setupActiveControlZones: function (viewport, node) {
+
+    },
+    /**
+     * Setup the active header zone.
+     * @param {Object} viewport
+     * @param {Object} node
+     ***/
     setupActiveHeaderZone: function (viewport, node) {
         var me = this;
         viewport.requestZone(node, {

@@ -205,6 +205,7 @@ MEPH.define('MEPH.graph.GraphViewPort', {
                     var result = connectionHandler.createConnection([me.connectionFlow.zone, activezone]);
                     if (result) {
                         me.connectionFlow = null;
+                        me.fire('viewportconnectionflowcomplete', {});
                     }
                 }
             }
@@ -560,14 +561,7 @@ MEPH.define('MEPH.graph.GraphViewPort', {
     },
     onMaskMouseMove: function (ee) {
         var me = this;
-        var xy = me.getXY(ee);
-        var dompos = me.maskDomPosition();
-        var pos = me.getPosition();
-        me.mousePosition = {
-            x: xy.x - dompos.x,
-            y: xy.y - dompos.y
-        };
-
+        me.calculateMousePosition(ee);
         if (me.isDragging) {
             me.fire('viewportmove', ee);
         }
@@ -580,6 +574,17 @@ MEPH.define('MEPH.graph.GraphViewPort', {
         else {
             me.fire('mousemove', ee);
         }
+    },
+    calculateMousePosition: function (ee) {
+        var me = this;
+        var xy = me.getXY(ee);
+        var dompos = me.maskDomPosition();
+        var pos = me.getPosition();
+        me.mousePosition = {
+            x: xy.x - dompos.x,
+            y: xy.y - dompos.y
+        };
+
     },
     onMaskMouseOut: function (ee) {
         var me = this;

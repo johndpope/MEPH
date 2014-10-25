@@ -175,7 +175,9 @@ MEPH.define('MEPH.graph.GraphRenderer', {
             if (connectioncanvas) {
                 connectionRenderer.render(connectioncanvas, [{
                     start: viewport.getMousePosition(),
-                    end: viewport.connectionFlow.zone.getPosition()
+                    end: viewport.connectionFlow.zone.getPosition(),
+                    zone: viewport.connectionFlow.zone,
+                    viewport: viewport
                 }]);
             }
         }

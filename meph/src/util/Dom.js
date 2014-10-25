@@ -263,6 +263,30 @@ Promise.resolve().then(function () {
                 }
                 return { x: xPosition, y: yPosition };
             },
+            /**
+             * Gets the relative position of a svg to another svg.
+             * @param {Object} element
+             * @param {Object} parent
+             * @param {String} position 
+             * @return {Object}
+             **/
+            getRelativeSvgPosition: function (element, parent, position) {
+                var cb = parent.getBoundingClientRect();
+                var tb = element.getBoundingClientRect();
+                //var pos = t.zone.$node.$data.getAbsElPosition(t.zone.$dom);
+                if (position === 'center') {
+                    var pos = {
+                        x: (tb.left + tb.right) / 2 - cb.left,
+                        y: (tb.bottom + tb.top) / 2 - cb.top
+                    };
+                    return pos;
+                }
+                var pos = {
+                    x: tb.left - cb.left,
+                    y: tb.top - cb.top
+                };
+                return pos;
+            },
             getRelativePosition: function (element, parent) {
                 var xPosition = 0;
                 var yPosition = 0;

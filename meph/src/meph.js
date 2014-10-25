@@ -1286,6 +1286,17 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.getDefinedClasses = function () {
         return classes.select(function (x) { return x; });
     }
+
+    /**
+     * @method cancelBubble
+     * Cancels and stops the bubbling of an event.
+     **/
+    meph.cancelBubble = function (e) {
+        var evt = e ? e : window.event;
+        if (evt.stopPropagation) evt.stopPropagation();
+        if (evt.cancelBubble != null) evt.cancelBubble = true;
+    }
+
     /**
      * @method getDefinedClassInformation
      * Get defined class information.
@@ -1770,7 +1781,11 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                                 // Add a new ._super() method that is the same method
                                 // but on the super-class
                                 this.callParent = _super[name];
-                                this.super = _super[name].bind(this, arguments);
+                                var theargs = arguments;
+                                this.super = function () {
+                                    _super[name].apply(this, theargs);
+
+                                }
                             }
                             //for (var i = 0; i < tempclassnames.length; i++) {
                             MEPH.Array(tempclassnames).foreach(function (t, i) {

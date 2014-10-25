@@ -318,7 +318,11 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             req.send();
         });
     }
-
+    meph.cancelBubble = function (e) {
+        var evt = e ? e : window.event;
+        if (evt.stopPropagation) evt.stopPropagation();
+        if (evt.cancelBubble != null) evt.cancelBubble = true;
+    }
     /**
      * @method getExtendingClass
      * Gets the extending class, based on the configuration.
