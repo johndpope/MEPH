@@ -4,14 +4,35 @@
  **/
 MEPH.define('MEPH.audio.graph.node.PannerNode', {
     extend: 'MEPH.audio.graph.node.Node',
+    alias: 'panner',
+    templates: true,
+    properties: {
+        coneInnerAngleTitle: '',
+        coneOuterAngleTitle: '',
+        coneOuterGainTitle: '',
+        refDistanceTitle: '',
+        rolloffFactorTitle: '',
+        panningModelTitle: ''
+    },
     initialize: function () {
         var me = this;
+
+        me.nodecontrols = me.nodecontrols || [];
+        me.nodecontrols.push('bufferoutput');
+        me.nodecontrols.push('bufferinput');
+        me.nodecontrols.push('coneInnerAngle');
+        me.nodecontrols.push('coneOuterAngle');
+        me.nodecontrols.push('coneOuterGain');
+        me.nodecontrols.push('refDistance');
+        me.nodecontrols.push('rolloffFactor');
+        me.nodecontrols.push('panningModel');
+
         me.super();
-        me.title = 'Panner';
+
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('coneInnerAngle', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('coneOuterAngle', MEPH.audio.graph.node.Node.Number));
-        me.nodeInputs.push(me.createInput('conOuterGain', MEPH.audio.graph.node.Node.Number));
+        me.nodeInputs.push(me.createInput('coneOuterGain', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('refDistance', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('rolloffFactor', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('panningModel', MEPH.audio.graph.node.Node.String, {
@@ -22,7 +43,19 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
             values: ['linear', 'inverse', 'exponential']
         }));
 
-        
+
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+    },
+    onLoaded: function () {
+        var me = this;
+        me.super();
+
+        me.title = 'Panner';
+        me.coneInnerAngleTitle = 'cone inner angle';
+        me.coneOuterAngleTitle = 'cone outer angle';
+        me.coneOuterGainTitle = 'cone outer gain';
+        me.refDistanceTitle = 'ref distance';
+        me.rolloffFactorTitle = 'rolloff factor';
+        me.panningModelTitle = 'panning model';
     }
 });

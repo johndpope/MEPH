@@ -3,7 +3,11 @@
  * Defines a base class for all controls and views.
  **/
 MEPH.define('MEPH.audio.graph.node.Node', {
-    requires: ['MEPH.util.Observable', 'MEPH.graph.ActiveZone', 'MEPH.util.Dom'],
+    requires: ['MEPH.util.Observable',
+        'MEPH.graph.ActiveZone',
+        'MEPH.util.Dom',
+        'MEPH.util.Style',
+        'MEPH.audio.graph.node.controls.Control'],
     alias: 'audionode',
     templates: true,
     extend: 'MEPH.control.Control',
@@ -24,10 +28,17 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         y: null,
         sx: null,
         sy: null,
+        bufferTitle: '',
+        normalizefill: '',
+        normalizeTitle: '',
+        numberFill: '',
+        stringFill: '',
         controlverticalpadding: 4,
         inputoutputverticalpadding: 10,
         nodeInputs: null,
         nodeOutputs: null,
+        booleanFill: '',
+        audioBufferFill: '',
         bodyy: null,
         inputsy: 0,
         bodyry: 1,
@@ -71,40 +82,24 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         return result;
     },
     /**
-     * Gets the node position relative to the outer svg.
-     * @param {Object} el
-     * @return {Object}
+     * Setup the active control zones.
+     * @param {Object} viewport
+     * @param {Object} node
      ***/
-    getNodePosition: function () {
-        var me = this;
-        return {
-            x: parseFloat(me.sx) || 0,
-            y: parseFloat(me.sy) || 0
-        }
-    },
-    /**
-     * Get element position relative to the outer svg.
-     * @param {Object} el
-     * @return {Object}
-     ***/
-    getElPosition: function (el) {
-        var me = this;
-        var pos = me.getRelPosition(el);
-        var nodepos = me.getNodePosition();
-        return {
-            x: pos.x + nodepos.x,
-            y: pos.y + nodepos.y
-        }
-    },
-    getAbsElPosition: function (el) {
-        var me = this;
-        var pos = me.getRelPosition(el);
 
-        var abspos = el.getBoundingClientRect();
-        return {
-            x: abspos.left,
-            y: abspos.top
-        }
+    setupActiveControlZones: function (viewport, node) {
+        var me = this;
+        debugger
+        if (me.nodecontrols)
+            me.nodecontrols.foreach(function (x) {
+                if (me[x])
+                    viewport.requestZone(node, {
+                        managed: true,
+                        id: node.getId() + '-' + x + '-connector',
+                        type: MEPH.graph.ActiveZone.type.connector,
+                        dom: me[x].connector
+                    }); 
+            });
     },
     onLoaded: function () {
         var me = this;
@@ -114,16 +109,24 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.bodystrokewidth = 2;
         me.bodyy = 0;
         me.title = me.title || 'Node';
-        me.nodewidth = 400;
-        me.titlepadding = 10;
+        me.nodewidth = me.nodewidth || 170;
+        me.titlepadding = 15;
         me.footerheight = 15;
         me.headerheight = 24;
         me.titlepaddingtop = 17;
+        me.booleanFill = me.booleanFill || '#FAF332';
+        me.audioBufferFill = me.audioBufferFill || '#3AF3F2';
+        me.numberFill = '#3e3e11';
+        me.stringFill = '#de31f1';
         me.bodyfill = "rgb(90,90,90)";
         me.headerfill = "rgb(79,79,79)";
         me.inputradius = me.inputradius || 8;
         me.inputstroke = 'black';
         me.bodystroke = "rgb(234,168,68)";
+        me.bufferoutput.left = false;
+        me.bufferTitle = 'buffer';
+        me.normalizeTitle = 'normalize';
+
         //setTimeout(function () {
         //    me.nodeg.setAttributeNS(null, "id", "node" + (me.id || MEPH.GUID()));
         //}, 1000)
@@ -133,14 +136,6 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
         me.setupActiveHeaderZone(viewport, node);
         me.setupActiveControlZones(viewport, node);
-    },
-    /**
-     * Setup the active control zones.
-     * @param {Object} viewport
-     * @param {Object} node
-     ***/
-    setupActiveControlZones: function (viewport, node) {
-
     },
     /**
      * Setup the active header zone.
@@ -189,6 +184,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             })
             result += (me.controlverticalpadding || 0) * me.nodecontrols.length;
             result += (me.inputoutputverticalpadding || 0);
+            Style.height(me.svg, result);
             return result;
         });
         MEPH.util.Observable.defineDependentProperty('inputoutputposition', me, ['headerbuffer'], function () {
@@ -269,7 +265,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
         MEPH.util.Observable.defineDependentProperty('bodywidth', me, ['inputradius', 'nodewidth', 'bodystrokewidth'], function () {
             var result = me.nodewidth - (me.bodystrokewidth * 2 || 0);
-
+            Style.width(me.svg, (parseFloat(me.nodewidth) || 0) + (parseFloat(me.inputradius) * 2 || 0));
             return result;
         });
     },

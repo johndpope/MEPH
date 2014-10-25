@@ -76,68 +76,49 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         return me.addAudioNode('MEPH.audio.graph.node.Convolver');
     },
     addDelay: function () {
-        var me = this,
-            node,
-            nodedata = new DelayNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.DelayNode');
     },
     addBiquadFilter: function () {
-        var me = this,
-            node,
-            nodedata = new BiquadFilter();
+        var me = this;
 
         me.addAudioNode('MEPH.audio.graph.node.BiquadFilter');
     },
     addChannelMerger: function () {
-        var me = this,
-            node,
-            nodedata = new ChannelMergerNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.ChannerMergerNode');
     },
     addChannelSplitter: function () {
-        var me = this,
-            node,
-            nodedata = new ChannelSplitterNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.ChannelSplitterNode');
 
     },
     addDynamicsCompressor: function () {
-        var me = this,
-            node,
-            nodedata = new DynamicsCompressorNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.DynamicsCompressorNode');
     },
     addGain: function () {
-        var me = this,
-            node,
-            nodedata = new GainNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.GainNode');
     },
     addOscillator: function () {
-        var me = this,
-            node,
-            nodedata = new OscillatorNode();
-
-        me.addAudioNode(nodedata);
+        var me = this;
+        me.addAudioNode('MEPH.audio.graph.node.OscillatorNode');
     },
     addPanner: function () {
-        var me = this,
-            node,
-            nodedata = new PannerNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.PannerNode');
     },
     addWaveShaper: function () {
-        var me = this,
-            node,
-            nodedata = new WaveShaperNode();
+        var me = this;
 
-        me.addAudioNode(nodedata);
+        me.addAudioNode('MEPH.audio.graph.node.WaveShaperNode');
     },
     /**
      * Add audio node.

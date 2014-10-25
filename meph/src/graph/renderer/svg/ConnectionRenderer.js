@@ -8,7 +8,7 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
     properties: {
         singleNodePosition: null,
         controlpointstroke: '#ff0021',
-        controlpointstrokewidth: 1,
+        controlpointstrokewidth: 3,
         controlpointfill: 'blue',
         $connectioncache: null
     },
