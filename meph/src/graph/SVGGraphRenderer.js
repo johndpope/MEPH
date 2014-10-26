@@ -106,8 +106,5 @@ MEPH.define('MEPH.graph.SVGGraphRenderer', {
         me.getNodeRenderer().render(nodes);
 
         me.getConnectionRenderer().render(me.getViewPort().getCanvas(), null, me.getConnections(), me.getViewPort());
-
-        //me.renderConnectionFlow();
-
     }
 });
