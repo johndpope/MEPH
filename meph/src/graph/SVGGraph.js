@@ -44,24 +44,7 @@ MEPH.define('MEPH.graph.SVGGraph', {
         })).then(function (nodes) {
 
             me.$loadedGraph = result;
-            //if (!me.addVewportListener && me.$viewport) {
-            //    me.$viewport.on('newactivezone', function (options) {
-            //        var id = options.id,
-            //            zone = options.zone;
-            //        me.getConnections().where(function (conn) {
-            //            return me.$loadedGraph.connections.contains(function (x) {
-            //                return x.id === conn.getId();
-            //            });
-            //        }).foreach(function (conn) {
-            //            var conninfo = me.$loadedGraph.connections.first(function (x) { return x.id === conn.getId() });
-            //            var zoneInfo = conninfo.zones.first(function (x) { return x === id });
-            //            if (zoneInfo) {
-            //                conn.addZone(zone);
-            //            }
-            //        });
-            //    });
-            //    me.addedViewportListener = true
-            //}
+
             var connections = result.connections.select(function (connection) {
                 var newconnection = new MEPH.graph.Connection();
                 newconnection.setId(connection.id);
