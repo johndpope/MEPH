@@ -4,6 +4,7 @@
  **/
 MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
     extend: 'MEPH.audio.graph.node.Node',
+    requires: ['MEPH.audio.graph.node.controls.AudioRange'],
     alias: 'biquadfilter',
     templates: true,
     properties: {
