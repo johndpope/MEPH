@@ -31,6 +31,12 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
         me.setDock(dock);
         me.applyMask(dock);
     },
+    onClick: function (ee) {
+        // handle directly with the mouse click on svg path;
+    },
+    hoverConnection: function () {
+        // handled directly with mouse over on svg path.
+    },
     applyMask: function (target) {
         var me = this,
             svg = me.getCanvas();
@@ -46,7 +52,7 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
     },
     onSVGMaskMouseMove: function (ee) {
         var me = this;
-        
+
         me.calculateMousePosition(ee);
         if (me.getCanvas() === ee.srcElement) {
             if (!(me.isDragging || me.isDraggingNode || me.connectionFlow)) {

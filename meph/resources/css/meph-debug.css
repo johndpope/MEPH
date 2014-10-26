@@ -9765,6 +9765,35 @@ svg[control] {
   overflow: visible;
 }
 
+/* line 150, ../sass/meph-default/controls/view/_misc.scss */
+svg path.preconnection {
+  stroke-dasharray: 10, 5;
+}
+
+/* line 154, ../sass/meph-default/controls/view/_misc.scss */
+svg path.connection {
+  stroke: #1fc03c;
+  stroke-width: 3px;
+}
+
+/* line 160, ../sass/meph-default/controls/view/_misc.scss */
+svg path.connection:hover {
+  stroke: yellow;
+  stroke-width: 10px;
+}
+
+/* line 165, ../sass/meph-default/controls/view/_misc.scss */
+svg path.connection.selected {
+  stroke: orange;
+  stroke-width: 4px;
+}
+
+/* line 170, ../sass/meph-default/controls/view/_misc.scss */
+svg path.connection.selected:hover {
+  stroke: red;
+  stroke-width: 10px;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

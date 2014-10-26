@@ -1,8 +1,15 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "beforegraphbody", "before" : true -->
 <div>Audio Graph</div>
-<mephbutton type="button" class="btn btn-primary btn-xs">
-    <span class="glyphicon glyphicon-play-circle"></span>
-</mephbutton>
+<div class="btn-group">
+    <mephbutton type="button" class="btn btn-primary btn-xs">
+        <span class="glyphicon glyphicon-play-circle"></span>
+    </mephbutton>
+</div>
+<div class="btn-group">
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.removeSelectedConnections">
+        <span class="glyphicon glyphicon-remove"></span>
+    </mephbutton>
+</div>
 <div class="btn-group">
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addConvolver">
         Convolver  <span class="glyphicon glyphicon-plus"></span>

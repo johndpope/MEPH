@@ -27,7 +27,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         me.super();
     },
     statics: {
-        create: function (graph, size, selector, holder) {;
+        screate: function (graph, size, selector, holder) {;
             selector = selector || 'body';
             var graphviewport = new MEPH.graph.SVGGraphViewPort();
             var graphrenderer = new MEPH.graph.SVGGraphRenderer();
@@ -62,10 +62,14 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         me.id = 'graph' + MEPH.GUID();
         me.querySelectorAll('div.graphBody').first().parentNode.setAttribute('id', me.id);
         //setTimeout(function () {
-        me.graphviewport = MEPH.audio.graph.AudioGraph.create(me.graph || new MEPH.graph.Graph(), { element: 'svg' }, '#' + me.id + ' div.graphBody', '#' + me.id);
+        me.graphviewport = MEPH.audio.graph.AudioGraph.screate(me.graph || new MEPH.graph.Graph(), { element: 'svg' }, '#' + me.id + ' div.graphBody', '#' + me.id);
         //}, 10);
     },
-
+    removeSelectedConnections: function () {
+        var me = this;
+        me.graph.removeConnections(me.graphviewport.getSelectedConnections().select());
+        me.graphviewport.removeSelectedConnections();
+    },
     /**
      * Add convolver audio node.
      * @return {Promise}
@@ -88,7 +92,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     addChannelMerger: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.ChannerMergerNode');
+        me.addAudioNode('MEPH.audio.graph.node.ChannelMergerNode');
     },
     addChannelSplitter: function () {
         var me = this;

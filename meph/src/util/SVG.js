@@ -80,8 +80,8 @@ MEPH.define('MEPH.util.SVG', {
         var p = me.parts.removeWhere(function (x) { return x === obj; });
 
         p.foreach(function (t) {
-
-            me.getCanvas().removeChild(t.shape);
+            if (t.shape.parentNode)
+                t.shape.parentNode.removeChild(t.shape);
         })
     },
     drawLine: function (options, el) {
@@ -110,12 +110,23 @@ MEPH.define('MEPH.util.SVG', {
         if (options['stroke-dasharray']) {
             shape.setAttributeNS(null, 'stroke-dasharray', options['stroke-dasharray']);
         }
-        shape.setAttributeNS(null, "fill", options.fill);
-        shape.setAttributeNS(null, "style", "stroke:" + options.strokeStyle + "; stroke-width:" + options.strokeWidth + ";");
+        if (options.fill !== 'css')
+            shape.setAttributeNS(null, "fill", options.fill);
+
+
+        if (options.strokeStyle !== 'css')
+            shape.setAttributeNS(null, "style", "stroke:" + options.strokeStyle + "; stroke-width:" + options.strokeWidth + ";");
+
+        if (options.class) {
+            shape.classList.add(options.class);
+        }
+
         if (add) {
             canvas.appendChild(shape);
         }
-        return { shape: shape, options: options };
+        return {
+            shape: shape, options: options
+        };
     },
     drawCircle: function (options, el) {
         var me = this,
@@ -144,10 +155,13 @@ MEPH.define('MEPH.util.SVG', {
         if (add) {
             canvas.appendChild(shape);
         }
-        return { shape: shape, options: options };
+        return {
+            shape: shape, options: options
+        };
     },
     applyDefaults: function (options) {
-        options = options || {};
+        options = options || {
+        };
         for (var i in MEPH.util.SVG.defaultShapeOptions) {
             if (options[i] === undefined) {
                 options[i] = MEPH.util.SVG.defaultShapeOptions[i];

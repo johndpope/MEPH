@@ -144,3 +144,30 @@ $buttonspace: 50px;
 svg[control] {
     overflow: visible;
 }
+
+$hoverwidth: 10px;
+
+svg path.preconnection {
+    stroke-dasharray: 10, 5;
+}
+
+svg path.connection {
+    stroke: #1fc03c;
+    stroke-width: 3px;
+}
+
+
+svg path.connection:hover {
+    stroke: yellow;
+    stroke-width: $hoverwidth;
+}
+
+svg path.connection.selected {
+    stroke: orange;
+    stroke-width: 4px;
+}
+
+svg path.connection.selected:hover {
+    stroke: red;
+    stroke-width: $hoverwidth;
+}

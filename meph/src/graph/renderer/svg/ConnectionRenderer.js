@@ -69,6 +69,34 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
         });
         return nodeendpoints;
     },
+    addEventsToConnection: function (viewport, obj) {
+        var me = this, connection = obj.connection;
+        me.don('mouseover', obj.path.shape, function (ee) {
+            var xy = viewport.getXY(ee);
+
+            viewport.fire('nodeoverconnection', {
+                node: viewport.isDraggingNode ? viewport.isDraggingNode.node : null,
+                connection: connection,
+                xy: xy
+            });
+        }, obj);
+        connection.on('selected', function (obj) {
+            obj.path.shape.classList.add('selected');
+        }.bind(me, obj));
+        connection.on('unselected', function (obj) {
+            obj.path.shape.classList.remove('selected');
+        }.bind(me, obj));
+        me.don('click', obj.path.shape, function (obj) {
+            viewport.selectionConnection(obj.connection)
+        }.bind(me, obj), obj);
+
+        connection.on('removed', function (obj) {
+            me.svgrenderer.remove(obj.path);
+            me.dun(obj);
+            me.$connectioncache.removeWhere(function (x) { return x === obj; });
+        }.bind(me, obj));
+
+    },
     /**
      * Renders connections
      * @param {Object} canvas
@@ -88,11 +116,7 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
                     connection: connection,
                     path: me.createPath(canvas).first()
                 };
-                connection.on('destroy', function (obj) {
-                    me.svgrenderer.remove(obj.path);
-                    me.$connectioncache.removeWhere(function (x) { return x === obj; });
-                }.bind(me, obj));
-
+                me.addEventsToConnection(viewport, obj);
                 me.$connectioncache.push(obj);
             });
             if (me.$connectioncache.length > 0) {
@@ -104,11 +128,14 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
                         var dom2 = connection.$zones.second().$dom;
                         var pos = Dom.getRelativeSvgPosition(dom, canvas.parentElement, 'center');
                         var pos2 = Dom.getRelativeSvgPosition(dom2, canvas.parentElement, 'center');
-                        path.options.start = pos;
-                        path.options.end = pos2;
 
-                        me.svgrenderer.drawLine(path.options, path);
-                        path.shape.parentNode.insertBefore(path.shape, path.shape.parentNode.firstChild);
+                        if (!(MEPH.equals(path.options.start, pos) && MEPH.equals(path.options.end, pos2))) {
+                            path.options.start = pos;
+                            path.options.end = pos2;
+
+                            me.svgrenderer.drawLine(path.options, path);
+                            path.shape.parentNode.insertBefore(path.shape, path.shape.parentNode.firstChild);
+                        }
                     }
                 });
             }
@@ -117,14 +144,18 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
             //render connection flow
             if (!me.connectionflowpath) {
                 me.connectionflowpath = me.createPath(canvas).first();
+                me.don('dblclick', me.connectionflowpath.shape, function () {
+                    me.dun(me.connectionflowpath.shape);
+                    t.viewport.onDblClick();
+                }, me.connectionflowpath.shape);
             }
 
             var t = ee.first();
             var pos = Dom.getRelativeSvgPosition(t.zone.$dom, canvas.parentElement, 'center');
-           
+
             me.connectionflowpath.options.start = t.start;
             me.connectionflowpath.options.end = pos;
-
+            me.connectionflowpath.shape.classList.add('preconnection')
             me.svgrenderer.drawLine(me.connectionflowpath.options, me.connectionflowpath);
             if (me.connectionflowpath.shape.parentNode) {
                 me.connectionflowpath.shape.parentNode.insertBefore(me.connectionflowpath.shape, me.connectionflowpath.shape.parentNode.firstChild);
@@ -150,9 +181,10 @@ MEPH.define('MEPH.graph.renderer.svg.ConnectionRenderer', {
             shape: MEPH.util.SVG.shapes.line,
             end: { x: 0, y: 0 },
             start: { x: 0, y: 0 },
-            stroke: me.controlpointstroke,
-            fill: me.controlpointfill,
-            strokeWidth: me.controlpointstrokewidth
+            strokeStyle: "css",
+            fill: "css",
+            strokeWidth: me.controlpointstrokewidth,
+            'class': 'connection'
         })
     },
     renderConnection: function (connection, canvas, offset, overridingoptions) {

@@ -499,9 +499,11 @@ MEPH.define('MEPH.graph.GraphViewPort', {
         var me = this;
         if (me.getSelectedConnections().first(connection)) {
             me.removeSelectedConnection(connection);
+            connection.fire('unselected', connection);
         }
         else {
             me.addSelectedConnection(connection);
+            connection.fire('selected', connection);
         }
     },
     addSelectedConnection: function (connection) {

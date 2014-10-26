@@ -89,7 +89,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
     setupActiveControlZones: function (viewport, node) {
         var me = this;
-        debugger
+        
         if (me.nodecontrols)
             me.nodecontrols.foreach(function (x) {
                 if (me[x])
