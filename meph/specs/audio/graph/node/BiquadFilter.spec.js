@@ -12,7 +12,7 @@
     it('has buffer and normalize inputs ', function () {
         var BiquadFilter = new MEPH.audio.graph.node.BiquadFilter();
 
-        var buffer = BiquadFilter.nodeInputs.some(function (x) { return x.name === 'Q' });
+        var buffer = BiquadFilter.nodeInputs.some(function (x) { return x.name === 'q' });
         var normalize = BiquadFilter.nodeInputs.some(function (x) { return x.name === 'frequency' });
 
         expect(BiquadFilter.nodeInputs.some(function (x) { return x.name === 'gain' })).toBeTruthy();

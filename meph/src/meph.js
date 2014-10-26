@@ -1947,6 +1947,11 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             meph.Array(meph.connectableTypes).foreach(function (x) {
                 meph.addBindPrefixShortCuts(x.shortCut, x.type);
             });
+        }).then(function () {
+            meph.mouse = meph.mouse || { position: { x: 0, y: 0 } }
+            document.body.addEventListener('mousemove', function (e) {
+                meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
+            });
         });
         return frameworkPromise;
     }

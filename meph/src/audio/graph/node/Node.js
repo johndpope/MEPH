@@ -6,7 +6,9 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     requires: ['MEPH.util.Observable',
         'MEPH.graph.ActiveZone',
         'MEPH.util.Dom',
+        'MEPH.audio.graph.node.controls.NodeContextMenu',
         'MEPH.util.Style',
+        'MEPH.context.ContextMenu',
         'MEPH.audio.graph.node.controls.Control'],
     alias: 'audionode',
     templates: true,
@@ -207,6 +209,14 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.don('mousedown', [me.body, me.container, me.inputs], function () {
             me.svg.parentNode.appendChild(me.svg);
         }, me);
+        me.don('close', [me.svg], function (e) {
+        });
+        me.graphnode = node;
+    },
+    closeNode: function () {
+        var me = this;
+        me.graph.removeNode(me.graphnode);
+        me.destroy();
     },
     defineNodeDependentProperties: function () {
         var me = this;
@@ -296,7 +306,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             return 5;
         });
 
-        
+
     },
     defineBodyHeightProperty: function () {
         var me = this;

@@ -18,7 +18,7 @@
     it('has buffer and normalize inputs ', function () {
         var ChannelSplitterNode = new MEPH.audio.graph.node.ChannelSplitterNode();
 
-        var output = ChannelSplitterNode.nodeOutputs.some(function (x) { return x.name === 'buffers' });
+        var output = ChannelSplitterNode.nodeOutputs.some(function (x) { return x.name === 'buffer' });
 
         expect(output).toBeTruthy();
     })

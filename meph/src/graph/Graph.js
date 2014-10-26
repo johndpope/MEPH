@@ -184,9 +184,9 @@ MEPH.define('MEPH.graph.Graph', {
         .on('onremove', me.fire.bind(me, 'connectionremoved'))
         .on('onpush', me.fire.bind(me, 'change'))
         .on('onremove', me.fire.bind(me, 'change'));
-        me.on('connectionadded', function (type,anothertye, args) {
+        me.on('connectionadded', function (type, anothertye, args) {
             var connection = args.added;
-            connection[0].on('emptyconnection', function (conn) {
+            connection[0].on('emptyconnection', function (type, conn) {
                 me.removeConnection(conn);
             });
         });

@@ -1,4 +1,5 @@
-﻿/**
+﻿/// <reference path="GraphViewPort.js" />
+/**
 * @class MEPH.graph.GraphViewPort
 */
 MEPH.define('MEPH.graph.GraphViewPort', {

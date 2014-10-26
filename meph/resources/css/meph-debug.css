@@ -9804,6 +9804,12 @@ svg text.ignore {
   pointer-events: none;
 }
 
+/* line 184, ../sass/meph-default/controls/view/_misc.scss */
+.contextmenu {
+  position: absolute;
+  width: 150px;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

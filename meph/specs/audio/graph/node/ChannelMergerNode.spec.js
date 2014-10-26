@@ -12,7 +12,7 @@
     it('has buffer and normalize inputs ', function () {
         var ChannelMergerNode = new MEPH.audio.graph.node.ChannelMergerNode();
 
-        expect(ChannelMergerNode.nodeInputs.some(function (x) { return x.name === 'buffers' })).toBeTruthy();
+        expect(ChannelMergerNode.nodeInputs.some(function (x) { return x.name === 'buffer' })).toBeTruthy();
     })
 
     it('has buffer and normalize inputs ', function () {

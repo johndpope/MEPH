@@ -315,7 +315,7 @@ Promise.resolve().then(function () {
             getScreenEventPositions: function (evt, element) {
                 var positions = [];
                 if (evt.changedTouches) {
-                    var pos = MEPH.util.Dom.getPosition(element);
+                    var pos = element ? MEPH.util.Dom.getPosition(element) : { x: 0, y: 0 };
                     for (i = evt.changedTouches.length; i--;) {
                         touch = evt.changedTouches[i];
                         positions.push({ x: touch.pageX - pos.x, y: touch.pageY - pos.y, identifier: touch.identifier });

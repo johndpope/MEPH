@@ -188,7 +188,7 @@ MEPH.define('MEPH.graph.Connection', {
     removeNode: function (node) {
         var me = this;
         var results = me.nodes.removeWhere(function (x) { return x === node; });
-        if (me.nodes.length === 1) {
+        if (me.nodes.length < 2) {
             me.fire('emptyconnection', me);
         }
     }
