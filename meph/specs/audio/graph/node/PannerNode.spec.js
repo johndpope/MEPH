@@ -14,7 +14,7 @@
 
         expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'coneInnerAngle' })).toBeTruthy();
         expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'coneOuterAngle' })).toBeTruthy();
-        expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'conOuterGain' })).toBeTruthy();
+        expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'coneOuterGain' })).toBeTruthy();
         expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'distanceModel' })).toBeTruthy();
         expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'panningModel' })).toBeTruthy();
         expect(PannerNode.nodeInputs.some(function (x) { return x.name === 'refDistance' })).toBeTruthy();

@@ -70,16 +70,4 @@
             graphrenderer.render();
         });
 
-        it('blender nodes are marked with a blendersvgid ', function () {
-
-            var eco = createGraphEco();
-
-            var node = new MEPH.graph.Node();
-            var c = new MEPH.audio.graph.node.Convolver();
-            node.appendData(c);
-            eco.graph.addNode(node);
-
-            eco.graphrenderer.render();
-            expect(node[' blendersvgid']).toBeTruthy();
-        });
     });

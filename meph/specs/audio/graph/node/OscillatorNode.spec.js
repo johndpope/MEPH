@@ -13,7 +13,9 @@
         var OscillatorNode = new MEPH.audio.graph.node.OscillatorNode();
 
         expect(OscillatorNode.nodeInputs.some(function (x) { return x.name === 'buffer' })).toBeTruthy();
-        expect(OscillatorNode.nodeInputs.some(function (x) { return x.name === 'gain' })).toBeTruthy();
+        expect(OscillatorNode.nodeInputs.some(function (x) { return x.name === 'detune' })).toBeTruthy();
+        expect(OscillatorNode.nodeInputs.some(function (x) { return x.name === 'type' })).toBeTruthy();
+        expect(OscillatorNode.nodeInputs.some(function (x) { return x.name === 'frequency' })).toBeTruthy();
     })
 
     it('has buffer and normalize inputs ', function () {

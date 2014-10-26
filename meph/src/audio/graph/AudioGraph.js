@@ -9,6 +9,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     requires: ['MEPH.button.Button',
         'MEPH.audio.graph.node.DelayNode',
         'MEPH.graph.SVGGraphViewPort',
+        'MEPH.graph.SVGGraph',
         'MEPH.audio.graph.node.Convolver',
         'MEPH.graph.renderer.svg.BlenderNodeRenderer',
     'MEPH.graph.renderer.svg.ConnectionRenderer',
@@ -24,6 +25,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     ],
     initialize: function () {
         var me = this;
+        me.graph = new MEPH.graph.SVGGraph();
         me.super();
     },
     statics: {
@@ -61,14 +63,45 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         var me = this;
         me.id = 'graph' + MEPH.GUID();
         me.querySelectorAll('div.graphBody').first().parentNode.setAttribute('id', me.id);
-        //setTimeout(function () {
-        me.graphviewport = MEPH.audio.graph.AudioGraph.screate(me.graph || new MEPH.graph.Graph(), { element: 'svg' }, '#' + me.id + ' div.graphBody', '#' + me.id);
-        //}, 10);
+        me.graphviewport = MEPH.audio.graph.AudioGraph.screate(me.graph || new MEPH.graph.SVGGraph(), {
+            element: 'svg'
+        }, '#' + me.id + ' div.graphBody', '#' + me.id);
     },
     removeSelectedConnections: function () {
         var me = this;
         me.graph.removeConnections(me.graphviewport.getSelectedConnections().select());
         me.graphviewport.removeSelectedConnections();
+    },
+    saveGraph: function () {
+        var me = this;
+        var savedgraph = me.graph.save();
+        var result = {
+            connections: savedgraph.connections.select(),
+            nodes: savedgraph.nodes.select(function (x) {
+                return {
+                    id: x.id,
+                    position: x.position,
+                    data: {
+                        id: x.data.id,
+                        type: x.data.____type,
+                        nodeInputs: x.data.nodeInputs.select(),
+                        nodeOutputs: x.data.nodeOutputs.select(),
+                    }
+                }
+            })
+        }
+        return result;
+    },
+    save: function () {
+        var me = this;
+        return JSON.stringify(me.saveGraph());
+    },
+    /**
+     * Loads a graph.
+     **/
+    loadGraph: function (graph) {
+        var me = this;
+        return me.graph.load(graph, me);
     },
     /**
      * Add convolver audio node.
@@ -82,47 +115,47 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     addDelay: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.DelayNode');
+        return me.addAudioNode('MEPH.audio.graph.node.DelayNode');
     },
     addBiquadFilter: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.BiquadFilter');
+        return me.addAudioNode('MEPH.audio.graph.node.BiquadFilter');
     },
     addChannelMerger: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.ChannelMergerNode');
+        return me.addAudioNode('MEPH.audio.graph.node.ChannelMergerNode');
     },
     addChannelSplitter: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.ChannelSplitterNode');
+        return me.addAudioNode('MEPH.audio.graph.node.ChannelSplitterNode');
 
     },
     addDynamicsCompressor: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.DynamicsCompressorNode');
+        return me.addAudioNode('MEPH.audio.graph.node.DynamicsCompressorNode');
     },
     addGain: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.GainNode');
+        return me.addAudioNode('MEPH.audio.graph.node.GainNode');
     },
     addOscillator: function () {
         var me = this;
-        me.addAudioNode('MEPH.audio.graph.node.OscillatorNode');
+        return me.addAudioNode('MEPH.audio.graph.node.OscillatorNode');
     },
     addPanner: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.PannerNode');
+        return me.addAudioNode('MEPH.audio.graph.node.PannerNode');
     },
     addWaveShaper: function () {
         var me = this;
 
-        me.addAudioNode('MEPH.audio.graph.node.WaveShaperNode');
+        return me.addAudioNode('MEPH.audio.graph.node.WaveShaperNode');
     },
     /**
      * Add audio node.

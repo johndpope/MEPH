@@ -18,7 +18,7 @@ MEPH.define('MEPH.graph.GraphControl', {
     },
     initialize: function () {
         var me = this;
-        me.graph = new MEPH.graph.Graph();
+        me.graph = me.graph || new MEPH.graph.Graph();
         me.callParent.apply(me, arguments);
     },
     onLoaded: function () {

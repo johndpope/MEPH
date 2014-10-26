@@ -1535,13 +1535,14 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 else {
                     $dom = dom;
                 }
+                var me = this;
                 $dom.foreach(function (dom) {
                     dom.addEventListener(type, func);
-                    meph.Array(this[domListenersPropertyKey]).push({
+                    meph.Array(me[domListenersPropertyKey]).push({
                         type: type,
                         dom: dom,
                         func: func,
-                        reference: reference || this,
+                        reference: reference || me,
                         capture: capture || false
                     });
                 })

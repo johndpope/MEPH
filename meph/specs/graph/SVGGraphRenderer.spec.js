@@ -37,6 +37,11 @@
                         }
                     }
                 }
+                renderer.getViewPort = function () {
+                    return {
+                        getCanvas: function () { }
+                    }
+                }
                 renderer.getConnectionRenderer = function () {
                     return {
                         render: function () {

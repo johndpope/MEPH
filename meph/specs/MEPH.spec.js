@@ -481,10 +481,10 @@
             called = false,
             dom = document.createElement('div');
         MEPH.Events(object);
-
+        
         //Act
         object.don('click', dom, function () { called = true; });
-
+        
         object.dun(object);
         dom.dispatchEvent(MEPH.createEvent('click', {}));
 

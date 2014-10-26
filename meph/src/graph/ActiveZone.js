@@ -52,7 +52,7 @@ MEPH.define('MEPH.graph.ActiveZone', {
             template.az.addEventListener('activezoneblur', function () {
                 template.az.parentNode.removeChild(template.az);
                 me.getNode().fire('move', {});
-               // MEPH.cancelBubble(e);
+                // MEPH.cancelBubble(e);
             });
         }
     },
@@ -174,16 +174,16 @@ MEPH.define('MEPH.graph.ActiveZone', {
         var me = this;
         me.$dom = dom;
         var graphviewport = me.getGraphViewPort();
-        if (graphviewport && !me.getOptions().managed) {
+        if (graphviewport && (!me.getOptions() || !me.getOptions().managed)) {
             graphviewport.getDock().appendChild(dom);
         }
         if (me.$clickable) {
             Style.cursor(dom, 'pointer');
         }
-        
+
         me.interactivity();
 
-        if (!me.getOptions().managed) {
+        if ((!me.getOptions() || !me.getOptions().managed)) {
             Style.position(dom, 'absolute');
             Style.zIndex(dom, me.raiseZIndex);
         }
@@ -238,7 +238,7 @@ MEPH.define('MEPH.graph.ActiveZone', {
     },
     destroy: function () {
         var me = this;
-        if (me.getDom() && me.getDom().parentNode && !me.getOptions().managed) {
+        if (me.getDom() && me.getDom().parentNode && (!me.getOptions() || !me.getOptions().managed)) {
             me.getDom().parentNode.removeChild(me.getDom());
         }
         me.fire('destroy', me);
@@ -286,7 +286,7 @@ MEPH.define('MEPH.graph.ActiveZone', {
         if (me.$$$timeout) {
             clearTimeout(me.$$$timeout);
         }
-        if (dom && (!me.stoppedMoveAbility || override) && !me.getOptions().managed) {
+        if (dom && (!me.stoppedMoveAbility || override) && (!me.getOptions() || !me.getOptions().managed)) {
             // me.$$$timeout = setTimeout(function () {
             Style.translate(dom, (x + _x), (y + _y));
             //}, 100);
