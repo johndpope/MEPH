@@ -25,7 +25,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
         me.nodecontrols.push('typeinput');
         me.super();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
-        me.nodeInputs.push(me.createInput('Q', MEPH.audio.graph.node.Node.Number, { path: 'Q.value' }));
+        me.nodeInputs.push(me.createInput('q', MEPH.audio.graph.node.Node.Number, { path: 'Q.value' }));
         me.nodeInputs.push(me.createInput('frequency', MEPH.audio.graph.node.Node.Number, { path: 'frequency.value' }));
         me.nodeInputs.push(me.createInput('detune', MEPH.audio.graph.node.Node.Number, { path: 'detune.value' }));
         me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.Number, { path: 'gain.value' }));

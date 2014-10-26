@@ -245,6 +245,9 @@ MEPH.define('MEPH.graph.ActiveZone', {
     },
     isOutput: function () {
         var me = this;
+        if ((me.getOptions() && me.getOptions().managed)) {
+            return me.getOptions().option.isOutput;
+        }
         return me.getNode().isOutput(me.getOptions().option);
     },
 

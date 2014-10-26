@@ -9771,27 +9771,37 @@ svg path.preconnection {
 }
 
 /* line 154, ../sass/meph-default/controls/view/_misc.scss */
+svg text {
+  user-select: none;
+}
+
+/* line 158, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection {
   stroke: #1fc03c;
   stroke-width: 3px;
 }
 
-/* line 160, ../sass/meph-default/controls/view/_misc.scss */
+/* line 164, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection:hover {
   stroke: yellow;
   stroke-width: 10px;
 }
 
-/* line 165, ../sass/meph-default/controls/view/_misc.scss */
+/* line 169, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection.selected {
   stroke: orange;
   stroke-width: 4px;
 }
 
-/* line 170, ../sass/meph-default/controls/view/_misc.scss */
+/* line 174, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection.selected:hover {
   stroke: red;
   stroke-width: 10px;
+}
+
+/* line 179, ../sass/meph-default/controls/view/_misc.scss */
+svg text.ignore {
+  pointer-events: none;
 }
 
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */

@@ -12,13 +12,11 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     templates: true,
     extend: 'MEPH.control.Control',
     statics: {
-        types: {
-            AudioBuffer: 'AudioBuffer',
-            Boolean: 'boolean',
-            Number: 'Number',
-            String: 'String',
-            Float32Array: 'Float32Array'
-        }
+        AudioBuffer: 'AudioBuffer',
+        Boolean: 'boolean',
+        Number: 'Number',
+        String: 'String',
+        Float32Array: 'Float32Array'
     },
     properties: {
         title: null,
@@ -89,16 +87,30 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
     setupActiveControlZones: function (viewport, node) {
         var me = this;
-        
+
         if (me.nodecontrols)
             me.nodecontrols.foreach(function (x) {
-                if (me[x])
-                    viewport.requestZone(node, {
+                if (me[x]) {
+                    var input = me.nodeInputs.first(function (t) {
+                        return t.name + 'input' === x || t.name === x;
+                    });
+
+                    input = input || me.nodeOutputs.first(function (t) {
+                        return t.name + 'output' === x || t.name === x;
+                    });
+
+                    var zone = viewport.requestZone(node, {
                         managed: true,
                         id: node.getId() + '-' + x + '-connector',
                         type: MEPH.graph.ActiveZone.type.connector,
-                        dom: me[x].connector
-                    }); 
+                        dom: me[x].connector,
+                        connectortype: input.type
+                    });
+                    zone.$options.option = {
+                        canConnect: me.canConnect.bind(me),
+                        isOutput: !me[x].left
+                    };
+                }
             });
     },
     onLoaded: function () {
@@ -126,10 +138,51 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.bufferoutput.left = false;
         me.bufferTitle = 'buffer';
         me.normalizeTitle = 'normalize';
-
+        me.nodeInputs.foreach(function (input) {
+            input.canConnect = me.canConnect.bind(me);
+            input.isOutput = false;
+        });
+        me.nodeOutputs.foreach(function (input) {
+            input.canConnect = me.canConnect.bind(me);
+            input.isOutput = false;
+        });
         //setTimeout(function () {
         //    me.nodeg.setAttributeNS(null, "id", "node" + (me.id || MEPH.GUID()));
         //}, 1000)
+    },
+    involvedInConnections: function (zone) {
+        var me = this;
+        return me.graph.getConnections().where(function (x) {
+            return x.getZones().contains(zone);
+        });
+    },
+    isOutput: function (zone) {
+        return zone.isOutput();
+    },
+    canConnect: function (zone1, zone2) {
+        var me = this;
+
+        if (zone1.getNode() === zone2.getNode()) {
+            return false;
+        }
+        if (me.isOutput(zone1) !== !me.isOutput(zone2)) {
+            return false;
+        }
+        if (me.involvedInConnections(zone1).length > 0) {//!me.isOutput(zone1) && 
+            return false;
+        }
+
+        if (me.getZoneType(zone1) != me.getZoneType(zone2)) {
+            return false;
+        }
+        return true;
+    },
+    getZoneType: function (zone) {
+        var me = this;
+        if (zone && zone.$options && zone.$options.option) {
+            return zone.$options.connectortype;
+        }
+        return null;
     },
     setupActiveZones: function (viewport, node) {
         var me = this;
@@ -234,6 +287,16 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             var result = (parseFloat(me.nodex) || 0) + (me.bodystrokewidth || 0);
             return result;
         });
+
+        MEPH.util.Observable.defineDependentProperty('iconX', me, ['nodewidth', 'bodystrokewidth'], function () {
+            var result = (parseFloat(me.nodewidth) || 0) + (me.bodystrokewidth || 0);
+            return result - 12;
+        });
+        MEPH.util.Observable.defineDependentProperty('iconY', me, ['titley'], function () {
+            return 5;
+        });
+
+        
     },
     defineBodyHeightProperty: function () {
         var me = this;

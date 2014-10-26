@@ -13,21 +13,24 @@ MEPH.define('MEPH.audio.graph.node.ChannelSplitterNode', {
 
         me.nodecontrols = me.nodecontrols || [];
         me.nodecontrols.push('bufferoutput');
-        me.nodecontrols.push('bufferoutput2');
-        me.nodecontrols.push('bufferoutput3');
-        me.nodecontrols.push('bufferoutput4');
+        me.nodecontrols.push('buffer2output');
+        me.nodecontrols.push('buffer3output');
+        me.nodecontrols.push('buffer4output');
         me.nodecontrols.push('bufferinput');
 
         me.super();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
-        me.nodeOutputs.push(me.createOutput('buffers', MEPH.audio.graph.node.Node.AudioBuffer, { count: 100 }));
+        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeOutputs.push(me.createOutput('buffer2', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeOutputs.push(me.createOutput('buffer3', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeOutputs.push(me.createOutput('buffer4', MEPH.audio.graph.node.Node.AudioBuffer));
     },
     onLoaded: function () {
         var me = this;
         me.super();
-        me.bufferoutput2.left = false;
-        me.bufferoutput3.left = false;
-        me.bufferoutput4.left = false;
+        me.buffer2output.left = false;
+        me.buffer3output.left = false;
+        me.buffer4output.left = false;
         me.title = 'Channel Splitter';
 
     }

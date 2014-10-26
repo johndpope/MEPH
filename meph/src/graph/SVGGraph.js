@@ -8,10 +8,11 @@ MEPH.define('MEPH.graph.SVGGraph', {
         var me = this;
         me.super();
         me.on('nodeadded', function (type, evtfunc, args) {
-            
+
             args.added.foreach(function (x) {
                 //                me.setBlenderSVGID(x);
-                x.$data.setupActiveZones(me.$viewport, x)
+                x.$data.setupActiveZones(me.$viewport, x);
+                x.$data.graph = x.$data.graph || me;
             });
         })
     },

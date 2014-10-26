@@ -151,6 +151,10 @@ svg path.preconnection {
     stroke-dasharray: 10, 5;
 }
 
+svg text {
+    user-select: none;
+}
+
 svg path.connection {
     stroke: #1fc03c;
     stroke-width: 3px;
@@ -170,4 +174,8 @@ svg path.connection.selected {
 svg path.connection.selected:hover {
     stroke: red;
     stroke-width: $hoverwidth;
+}
+
+svg text.ignore {
+    pointer-events: none;
 }
