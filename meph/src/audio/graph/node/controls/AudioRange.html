@@ -5,7 +5,7 @@
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <g>
         <rect meph-data-height="c$.dragareaheight"
-              fill="#dddddd"
+              fill="#efefef"
               rx="10" ry="10"
               meph-data-width="c$.dragareawidth"></rect>
     </g>
@@ -20,15 +20,9 @@
         <rect meph-data-height="c$.dragareaheight"
               meph-data-stroke="c$.fill"
               fill="transparent"
+              mephid="dragarea"
+              meph-event-click="c$.enterValue"
               meph-data-width="c$.dragareawidth"></rect>
-        <svg xmlns="http://www.w3.org/2000/svg"
-             xmlns:xlink="http://www.w3.org/1999/xlink" >
-            <polygon points="0,0 0,20 20,10" style="fill:grey;" transform="rotate(180 10 10)" />
-        </svg>
-        <svg xmlns="http://www.w3.org/2000/svg"
-             xmlns:xlink="http://www.w3.org/1999/xlink" x="120">
-            <polygon points="0,0 0,20 20,10" style="fill:grey;" />
-        </svg>
     </g>
 </svg>
 <!-- "instruction": true, "name" : "injectop", "close": true -->

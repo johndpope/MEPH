@@ -312,6 +312,75 @@ Promise.resolve().then(function () {
                 }
                 return positions;
             },
+            getScreenPosition: function (element) {
+                var rect = element.getBoundingClientRect();
+                return rect;
+            },
+            createInputElementOverSvg: function (svg) {
+
+                var sp = Dom.getScreenPosition(svg);
+                var element = document.createElement('input');
+                Style.width(element, sp.width);
+                Style.height(element, sp.height);
+                Style.position(element, 'absolute');
+                Style.zIndex(element, 100000);
+                Style.top(element, sp.top);
+                Style.left(element, sp.left);
+                document.body.appendChild(element);
+
+                return element;
+            },
+            createInputElementOverSvgWithDisplay: function (svg) {
+                var input1 = MEPH.util.Dom.createInputElementOverSvg(svg);
+                var sp = Dom.getScreenPosition(svg);
+                var input2 = MEPH.util.Dom.createInputElementOverSvg(svg);
+                Style.left(input2, sp.left + sp.width);
+                Style.width(input2, 80);
+                return {
+                    input: input1,
+                    value: input2
+                }
+            },
+            createSimpleDataEntry: function (me, el, type, setfunc, initval) {
+
+                var res = Dom.createInputElementOverSvgWithDisplay(el);
+                var element = res.input;
+                element.type = type || 'range';
+                element.max = me.maxvalue || 10;
+                element.classList.add('form-control');
+                res.value.classList.add('form-control');
+                element.min = me.minvalue || 0;
+                me.don('blur', [res.value, element], function (x) {
+                    setfunc(element.value);
+                    setTimeout(function () {
+                        if (element !== document.activeElement && res.value !== document.activeElement) {
+                            if (element.parentNode)
+                                element.parentNode.removeChild(element);
+
+                            if (res.value.parentNode)
+                                res.value.parentNode.removeChild(res.value);
+
+                            me.dun(element);
+                        }
+                    }, 400)
+                }, element);
+
+                me.don('change', element, function (x) {
+                    setfunc(element.value);
+                    res.value.value = element.value;
+                }, element);
+
+                me.don('change', res.value, function (x) {
+                    setfunc(res.value.value);
+                    element.value = res.value.value;
+                }, element);
+                if (initval !== undefined && initval !== null) {
+                    element.value = initval;
+                    res.value.value = initval;
+                }
+                return element;
+            },
+
             getScreenEventPositions: function (evt, element) {
                 var positions = [];
                 if (evt.changedTouches) {

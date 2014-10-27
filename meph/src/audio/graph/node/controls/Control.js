@@ -10,6 +10,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
         fill: null,
         radius: null,
         title: null,
+        value: null,
         x: 0,
         y: 0,
         connectorxmargin: 3,
@@ -44,7 +45,10 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
             return Math.max(radius * 2, result, (parseFloat(me.controlheight) || 0)) + me.margin + me.margin;
         });
 
-
+        MEPH.util.Observable.defineDependentProperty('titlevalue', me, ['title', 'value'], function () {
+            var result = (me.title || '') + (me.value !== undefined && me.value !== null ? " : " + me.value : '');
+            return result
+        });
         MEPH.util.Observable.defineDependentProperty('textx', me, ['left', 'width', 'connectorxmargin', 'radius', 'bufferx'], function () {
             var result;
             if (me.left) {
