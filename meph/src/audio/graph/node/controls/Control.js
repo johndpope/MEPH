@@ -18,7 +18,8 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
         bufferx: null,
         left: true,
         width: 200,
-        margin: 4
+        margin: 4,
+        controlheight: 0
     },
     initialize: function () {
         var me = this;
@@ -36,11 +37,11 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
     defineTextX: function () {
         var me = this;
 
-        MEPH.util.Observable.defineDependentProperty('height', me, ['fontsize', 'radius'], function () {
+        MEPH.util.Observable.defineDependentProperty('height', me, ['fontsize', 'radius', 'controlheight'], function () {
             var result = parseFloat(me.fontsize) || 0;
             var radius = parseFloat(me.radius) || 0
 
-            return Math.max(radius * 2, result) + me.margin + me.margin;
+            return Math.max(radius * 2, result, (parseFloat(me.controlheight) || 0)) + me.margin + me.margin;
         });
 
 
@@ -63,7 +64,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
                 result = me.width - me.connectorxmargin - me.radius - (me.bufferx || 0);
             }
             var x = result;
-            var y = parseFloat(me.radius || 0);
+            var y = parseFloat(me.height / 2) || parseFloat(me.radius || 0);
             result = 'translate(' + (x || 0) + ',' + (y || 0) + ')';
             return result;
         });
@@ -79,7 +80,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
                 result = me.width + (me.radius || 0) / 2;
             }
             var x = result;
-            var y = parseFloat(me.radius || 0);
+            var y = parseFloat(me.height / 2) || parseFloat(me.radius || 0);
             var result = 'translate(' + (x || 0) + ',' + (y || 0) + ')';
 
             return result;

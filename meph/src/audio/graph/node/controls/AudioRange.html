@@ -1,11 +1,34 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "aftercircle", "before" : true -->
-
-<rect meph-data-height="c$.dragareaheight"
-      meph-data-stroke="c$.fill"
-      meph-data-width="c$.dragareawidth"
-      meph-data-fill="c$.fill"
-      meph-data-x="c$.dragareax"
-      meph-data-y="c$.dragareay"
-      meph-data-transform="c$.dragareatransform"></rect>
-
+<svg meph-data-x="c$.dragareax"
+     meph-data-y="c$.dragareay"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g>
+        <rect meph-data-height="c$.dragareaheight"
+              fill="#dddddd"
+              rx="10" ry="10"
+              meph-data-width="c$.dragareawidth"></rect>
+    </g>
+</svg>
+<!-- "instruction": true, "name" : "injectop", "close": true -->
+<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "aftertext", "before" : true -->
+<svg meph-data-x="c$.dragareax"
+     meph-data-y="c$.dragareay"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g>
+        <rect meph-data-height="c$.dragareaheight"
+              meph-data-stroke="c$.fill"
+              fill="transparent"
+              meph-data-width="c$.dragareawidth"></rect>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             xmlns:xlink="http://www.w3.org/1999/xlink" >
+            <polygon points="0,0 0,20 20,10" style="fill:grey;" transform="rotate(180 10 10)" />
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             xmlns:xlink="http://www.w3.org/1999/xlink" x="120">
+            <polygon points="0,0 0,20 20,10" style="fill:grey;" />
+        </svg>
+    </g>
+</svg>
 <!-- "instruction": true, "name" : "injectop", "close": true -->

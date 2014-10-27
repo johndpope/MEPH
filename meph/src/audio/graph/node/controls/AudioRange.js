@@ -11,7 +11,8 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioRange', {
         dragareaheight: null,
         dragareax: null,
         dragareay: null,
-        $spaceafterconnector: 3
+        $spaceafterconnector: 0,
+        controlheight: 30
     },
     initialize: function () {
         var me = this;
@@ -34,14 +35,14 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioRange', {
             else {
                 result = me.width - me.connectorxmargin - me.radius - (me.$spaceafterconnector || 0);
             }
-            me.bufferx = me.width / 2;
+            me.bufferx = me.width / 4;
 
-            me.dragareaheight = (me.radius * 2) || 0;
-            me.dragareawidth = (me.width / 2 - me.$spaceafterconnector) || 0;
+            me.dragareaheight = me.controlheight || (me.radius * 2) || 0;
+            me.dragareawidth = (me.width - me.radius - me.$spaceafterconnector) || 0;
             var x = result;
-            var y = parseFloat(me.radius || 0);
+            var y = parseFloat(me.controlheight / 4) || parseFloat(me.radius || 0);
             me.dragareax = x;
-            me.dragareay = y;
+            me.dragareay = y || 0;
             result = 'translate(' + (x || 0) + ',' + (y || 0) + ')';
             return result;
         });
