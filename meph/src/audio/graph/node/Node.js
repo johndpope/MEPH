@@ -67,6 +67,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.id = MEPH.GUID();
         me.super();
 
+
         me.defineNodeDependentProperties();
     },
     /**
@@ -196,6 +197,24 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
         me.setupActiveHeaderZone(viewport, node);
         me.setupActiveControlZones(viewport, node);
+    },
+    setupConnectingListeners: function () {
+
+
+    },
+    updatedValue: function (prop) {
+        var me = this;
+        var value = MEPH.Array(arguments).last().domEvent.value;
+        me.setNodeInputDefaultValue(prop, value);
+    },
+    setNodeInputDefaultValue: function (prop, value) {
+        var me = this;
+        var input = me.nodeInputs.first(function (t) {
+            return t.name === prop;
+        });
+        if (input) {
+            input.defaultValue = value;
+        }
     },
     /**
      * Setup the active header zone.

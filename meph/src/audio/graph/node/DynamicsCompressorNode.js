@@ -12,7 +12,13 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         ratioTitle: '',
         reductionTitle: '',
         releaseTitle: '',
-        thresholdTitle: ''
+        thresholdTitle: '',
+        attackvalue: null,
+        kneevalue: null,
+        ratiovalue: null,
+        reductionvalue: null,
+        releasevalue: null,
+        thresholdvalue: null
     },
     initialize: function () {
         var me = this;
@@ -35,7 +41,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.nodeInputs.push(me.createInput('release', MEPH.audio.graph.node.Node.Number, { path: 'release.value' }));
         me.nodeInputs.push(me.createInput('threshold', MEPH.audio.graph.node.Node.Number, { path: 'threshold.value' }));
 
-        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer)); 
     },
     onLoaded: function () {
         var me = this;

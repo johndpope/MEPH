@@ -15,6 +15,7 @@
              meph-data-stroke="c$.inputstroke"
              meph-data-source="c$.booleanSource"
              mephid="loop"
+             meph-event-updated="c$.updatedValue,loop"
              meph-data-y="c$.loopy"
              meph-data-width="c$.bodywidth"></audioselect>
 
@@ -24,6 +25,7 @@
             meph-data-stroke="c$.inputstroke"
             mephid="loopEnd"
             meph-data-y="c$.loopEndy"
+            meph-event-updated="c$.updatedValue,loopEnd"
             meph-data-width="c$.bodywidth"></audiorange>
 
 <audiorange meph-data-fill="c$.numberFill"
@@ -31,6 +33,7 @@
             meph-data-title="c$.loopStartTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="loopStart"
+            meph-event-updated="c$.updatedValue,loopStart"
             meph-data-y="c$.loopStarty"
             meph-data-width="c$.bodywidth"></audiorange>
 
@@ -39,6 +42,7 @@
             meph-data-title="c$.playbackRateTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="playbackRate"
+            meph-event-updated="c$.updatedValue,playbackRate"
             meph-data-y="c$.playbackRatey"
             meph-data-width="c$.bodywidth"></audiorange>
 

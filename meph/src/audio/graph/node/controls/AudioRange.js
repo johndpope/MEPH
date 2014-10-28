@@ -12,6 +12,7 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioRange', {
         var me = this;
         var element = Dom.createSimpleDataEntry(me, me.dragarea, 'range', function (val) {
             me.value = val;
+            me.getFirstElement().dispatchEvent(MEPH.createEvent('updated', { value: me.value }));
         }, me.value);
 
         element.min = me.minvalue || 0;

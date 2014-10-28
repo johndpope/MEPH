@@ -12,7 +12,14 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
         coneOuterGainTitle: '',
         refDistanceTitle: '',
         rolloffFactorTitle: '',
-        panningModelTitle: ''
+        panningModelTitle: '',
+        distanceModelTypes: null,
+        panningModelvalue: null,
+        rolloffFactorvalue: null,
+        refDistancevalue: null,
+        coneOuterGainvalue: null,
+        coneOuterAnglevalue: null,
+        coneInnerAnglevalue: null
     },
     initialize: function () {
         var me = this;
@@ -39,18 +46,21 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
             values: ['equalpower', 'HRTF']
         }));
 
+        me.distanceModelTypes = ['linear', 'inverse', 'exponential'];
         me.nodeInputs.push(me.createInput('distanceModel', MEPH.audio.graph.node.Node.String, {
-            values: ['linear', 'inverse', 'exponential']
+            values: me.distanceModelTypes.select()
         }));
 
 
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+         
     },
     onLoaded: function () {
         var me = this;
         me.super();
 
         me.title = 'Panner';
+        me.distanceModelTypes = me.distanceModelTypes.select();
         me.coneInnerAngleTitle = 'cone inner angle';
         me.coneOuterAngleTitle = 'cone outer angle';
         me.coneOuterGainTitle = 'cone outer gain';

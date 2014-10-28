@@ -11,6 +11,7 @@
             meph-data-radius="c$.inputradius"
             meph-data-title="c$.attackTitle"
             meph-data-stroke="c$.inputstroke"
+            meph-data-value="c$.attackvalue"
             mephid="attack"
             meph-data-y="c$.attacky"
             meph-data-width="c$.bodywidth"></audiorange>
@@ -19,6 +20,7 @@
 <audiorange meph-data-fill="c$.numberFill"
             meph-data-radius="c$.inputradius"
             meph-data-title="c$.kneeTitle"
+            meph-data-value="c$.kneevalue"
             meph-data-stroke="c$.inputstroke"
             mephid="knee"
             meph-data-y="c$.kneey"
@@ -29,6 +31,7 @@
             meph-data-title="c$.ratioTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="ratio"
+            meph-event-updated="c$.updatedValue,ratio"
             meph-data-y="c$.ratioy"
             meph-data-width="c$.bodywidth"></audiorange>
 
@@ -37,6 +40,7 @@
             meph-data-title="c$.reductionTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="reduction"
+            meph-event-updated="c$.updatedValue,reduction"
             meph-data-y="c$.reductiony"
             meph-data-width="c$.bodywidth"></audiorange>
 
@@ -45,6 +49,7 @@
             meph-data-title="c$.thresholdTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="threshold"
+            meph-event-updated="c$.updatedValue,threshold"
             meph-data-y="c$.thresholdy"
             meph-data-width="c$.bodywidth"></audiorange>
 

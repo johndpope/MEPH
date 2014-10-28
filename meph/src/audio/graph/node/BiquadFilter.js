@@ -13,7 +13,12 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
         detuneTitle: '',
         gainTitle: '',
         typeTitle: '',
-        biquadtypes: null
+        biquadtypes: null,
+        qvalue: null,
+        frequencyvalue: null,
+        detunevalue: null,
+        gainvalue: null,
+        tyepeinputvalue: null
     },
     initialize: function () {
         var me = this;
@@ -36,7 +41,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
             values: types
         }));
         me.types = types;
-        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer)); 
     },
     onLoaded: function () {
         var me = this;

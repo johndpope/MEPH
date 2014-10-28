@@ -8,7 +8,10 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
     templates: true,
     properties: {
         curveTitle: '',
-        oversampleTitle: ''
+        oversampleTitle: '',
+        oversampletypes: null,
+        oversamplevalue: null,
+        curvevalue: null
     },
     initialize: function () {
         var me = this;
@@ -24,9 +27,9 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('curve', MEPH.audio.graph.node.Node.Number));
-
+        me.oversampletypes = ['none', '2x', '4x'];
         me.nodeInputs.push(me.createInput('oversample', MEPH.audio.graph.node.Node.String, {
-            values: ['none', '2x', '4x']
+            values: me.oversampletypes.select()
         }));
 
 
@@ -35,7 +38,7 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
     onLoaded: function () {
         var me = this;
         me.super();
-
+        me.oversampletypes = me.oversampletypes.select()
         me.title = 'Wave Shaper';
         me.curveTitle = 'curve';
         me.oversampleTitle = 'oversample';

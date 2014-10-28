@@ -8,18 +8,20 @@
              meph-data-width="c$.bodywidth"></nodecontrol>
 
 <audiorange meph-data-fill="c$.numberFill"
-             meph-data-radius="c$.inputradius"
-             meph-data-title="c$.detuneTitle"
-             meph-data-stroke="c$.inputstroke"
-             mephid="detune"
-             meph-data-y="c$.detuney"
-             meph-data-width="c$.bodywidth"></audiorange>
+            meph-data-radius="c$.inputradius"
+            meph-data-title="c$.detuneTitle"
+            meph-data-stroke="c$.inputstroke"
+            mephid="detune"
+            meph-event-updated="c$.updatedValue,detune"
+            meph-data-y="c$.detuney"
+            meph-data-width="c$.bodywidth"></audiorange>
 
 <audiorange meph-data-fill="c$.numberFill"
             meph-data-radius="c$.inputradius"
             meph-data-title="c$.frequencyTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="frequency"
+            meph-event-updated="c$.updatedValue,frequency"
             meph-data-y="c$.frequencyy"
             meph-data-width="c$.bodywidth"></audiorange>
 
@@ -28,6 +30,7 @@
              meph-data-title="c$.typefieldTitle"
              meph-data-stroke="c$.inputstroke"
              meph-data-source="c$.typesource"
+             meph-event-updated="c$.updatedValue,type"
              mephid="typeinput"
              meph-data-y="c$.typeinputy"
              meph-data-width="c$.bodywidth"></audioselect>

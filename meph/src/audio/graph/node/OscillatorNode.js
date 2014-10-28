@@ -10,7 +10,10 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
         detuneTitle: '',
         frequencyTitle: '',
         typefieldTitle: '',
-        typesource: null
+        typesource: null,
+        detunevalue: null,
+        frequencyvalue: null,
+        typeinputvalue: null
     },
     initialize: function () {
         var me = this;
@@ -32,7 +35,7 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
             values: me.typesource.select()
         }));
 
-        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer)); 
     },
     onLoaded: function () {
         var me = this;

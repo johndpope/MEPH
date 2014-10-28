@@ -34,7 +34,7 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioControl', {
             else {
                 result = me.width - me.connectorxmargin - me.radius - (me.$spaceafterconnector || 0);
             }
-            me.bufferx = me.width / 4;
+            me.bufferx = 4;
 
             me.dragareaheight = me.controlheight || (me.radius * 2) || 0;
             me.dragareawidth = (me.width - me.radius - me.$spaceafterconnector) || 0;

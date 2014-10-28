@@ -7,7 +7,8 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
     alias: 'gain',
     templates: true,
     properties: {
-        gainTitle: ''
+        gainTitle: '',
+        gainvalue: null
     },
     initialize: function () {
         var me = this;
@@ -22,6 +23,7 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
         me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.Number, { path: 'gain.value' }));
 
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+         
     },
     onLoaded: function () {
         var me = this;

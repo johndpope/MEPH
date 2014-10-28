@@ -12,6 +12,11 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         loopStartTitle: 'detune',
         playbackRateTitle: 'gain',
         sourceTitle: '',
+        sourcevalue: null,
+        loopvalue: null,
+        loopEndvalue: null,
+        loopStartvalue: null,
+        playbackRatevalue: null,
         audiobuffersources: null
     },
     initialize: function () {
