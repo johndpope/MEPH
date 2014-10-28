@@ -108,7 +108,6 @@
                         'bind/Binder.spec.js',
                         'button/Button.spec.js',
                         'button/IconButton.spec.js',
-                        'context/ContextMenu.spec.js',
                         'control/Control.spec.js',
                         'controller/Controller.spec.js',
                         'dom/ControlLoader.spec.js',

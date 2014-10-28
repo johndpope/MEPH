@@ -7,6 +7,14 @@
  * MEPH is the framework.
  */
 var window = window || self;
+// run this in global scope of window or worker. since window.self = window, we're ok
+if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+    // huzzah! a worker!
+    var workerthread = true;
+} else {
+    // I'm a window... sad trombone.
+}
+
 var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
 
     if ($promise) {
@@ -1948,10 +1956,17 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 meph.addBindPrefixShortCuts(x.shortCut, x.type);
             });
         }).then(function () {
-            meph.mouse = meph.mouse || { position: { x: 0, y: 0 } }
-            document.body.addEventListener('mousemove', function (e) {
-                meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
-            });
+            try {
+                meph.mouse = meph.mouse || { position: { x: 0, y: 0 } }
+                meph.workerthread = workerthread;
+                if (!workerthread) {
+                    
+
+                    document.body.addEventListener('mousemove', function (e) {
+                        meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
+                    });
+                }
+            } catch (e) { }
         });
         return frameworkPromise;
     }

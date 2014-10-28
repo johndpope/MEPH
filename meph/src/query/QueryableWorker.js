@@ -9,7 +9,7 @@ MEPH.define('MEPH.query.QueryableWorker', {
     initialize: function () {
         var me = this;
         me.$worker = new Worker(MEPH.frameWorkPathSource);
-        var src = '' +
+        var src = ' ' +
             'var t=  mephFrameWork(\'MEPH\', "' + MEPH.frameWorkPath + '",null, self);' +
             ' t.framework.ready().then(function(){ ' +
             'MEPH.setPath("' + MEPH.frameWorkPath + '","MEPH");' +
