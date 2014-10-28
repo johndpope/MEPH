@@ -2,20 +2,20 @@
  * @class MEPH.control.Control
  * Defines a base class for all controls and views.
  **/
-MEPH.define('MEPH.audio.graph.node.controls.AudioRange', {
-    alias: 'audiorange',
+MEPH.define('MEPH.audio.graph.node.controls.AudioSelect', {
+    alias: 'audioselect',
     templates: true,
     requires: ['MEPH.util.Dom'],
+    properties: {
+        source: null
+    },
     extend: 'MEPH.audio.graph.node.controls.AudioControl',
     enterValue: function () {
         //var me = this;
         var me = this;
-        var element = Dom.createSimpleDataEntry(me, me.dragarea, 'range', function (val) {
+        var element = Dom.createSimpleSelectData(me, me.dragarea, function (val) {
             me.value = val;
-        }, me.value);
+        }, me.value, me.source || []);
 
-        element.min = me.minvalue || 0;
-        element.max = me.maxvalue || 10;
-        element.step = me.increment || .01;
     }
 })

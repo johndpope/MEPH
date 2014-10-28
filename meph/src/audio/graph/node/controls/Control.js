@@ -13,6 +13,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
         value: null,
         x: 0,
         y: 0,
+        hideconnector: null,
         connectorxmargin: 3,
         fontsize: null,
         stroke: null,
@@ -37,6 +38,13 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
      */
     defineTextX: function () {
         var me = this;
+
+
+        MEPH.util.Observable.defineDependentProperty('controlradius', me, ['hideconnector', 'radius'], function () {
+            var result = me.hideconnector ? 0 : parseFloat(me.radius) || 0;
+
+            return result;
+        });
 
         MEPH.util.Observable.defineDependentProperty('height', me, ['fontsize', 'radius', 'controlheight'], function () {
             var result = parseFloat(me.fontsize) || 0;

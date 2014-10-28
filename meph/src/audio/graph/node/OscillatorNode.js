@@ -9,7 +9,8 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
     properties: {
         detuneTitle: '',
         frequencyTitle: '',
-        typefieldTitle: ''
+        typefieldTitle: '',
+        typesource: null
     },
     initialize: function () {
         var me = this;
@@ -19,16 +20,16 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
         me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('frequency');
         me.nodecontrols.push('detune');
-        me.nodecontrols.push('typefield');
+        me.nodecontrols.push('typeinput');
 
         me.super();
 
-
+        me.typesource = ['sine', 'square', 'sawtooth', 'triangle', 'custom'];
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('detune', MEPH.audio.graph.node.Node.Number, { path: 'detune.value' }));
         me.nodeInputs.push(me.createInput('frequency', MEPH.audio.graph.node.Node.Number, { path: 'frequency.value' }));
         me.nodeInputs.push(me.createInput('type', MEPH.audio.graph.node.Node.String, {
-            values: ['sine', 'square', 'sawtooth', 'triangle', 'custom']
+            values: me.typesource.select()
         }));
 
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -36,7 +37,7 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
     onLoaded: function () {
         var me = this;
         me.super();
-
+        me.typesource = me.typesource.select();
         me.title = 'Oscillator';
         me.typefieldTitle = 'type';
         me.detuneTitle = 'detune';;

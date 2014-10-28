@@ -316,10 +316,10 @@ Promise.resolve().then(function () {
                 var rect = element.getBoundingClientRect();
                 return rect;
             },
-            createInputElementOverSvg: function (svg) {
+            createInputElementOverSvg: function (svg, type) {
 
                 var sp = Dom.getScreenPosition(svg);
-                var element = document.createElement('input');
+                var element = document.createElement(type || 'input');
                 Style.width(element, sp.width);
                 Style.height(element, sp.height);
                 Style.position(element, 'absolute');
@@ -340,6 +340,32 @@ Promise.resolve().then(function () {
                     input: input1,
                     value: input2
                 }
+            },
+            createSimpleSelectData: function (me, el, setfunc, initval, options) {
+                var element = MEPH.util.Dom.createInputElementOverSvg(el, 'select');
+                options.unshift('');
+                (options || []).select(function (x) {
+                    return x;
+                }).foreach(function (x) {
+                    var option = document.createElement("option");
+                    option.text = x;
+                    option.value = x;
+                    element.add(option);
+                });
+
+                me.don('blur', element, function (x) {
+                    setfunc(element.value);
+                    
+                    setTimeout(function () {
+                        if (element !== document.activeElement) {
+                            if (element.parentNode)
+                                element.parentNode.removeChild(element);
+
+                            me.dun(element);
+                        }
+                    }, 400)
+                }, element);
+
             },
             createSimpleDataEntry: function (me, el, type, setfunc, initval) {
 

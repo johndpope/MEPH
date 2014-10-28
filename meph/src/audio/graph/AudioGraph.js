@@ -19,6 +19,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     'MEPH.graph.SVGGraphRenderer',
     'MEPH.audio.graph.node.DynamicsCompressorNode',
     'MEPH.audio.graph.node.GainNode',
+    'MEPH.audio.graph.node.AudioBufferSourceNode',
     'MEPH.audio.graph.node.OscillatorNode',
     'MEPH.audio.graph.node.PannerNode',
     'MEPH.audio.graph.node.WaveShaperNode'
@@ -111,6 +112,11 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         var me = this,
             node;
         return me.addAudioNode('MEPH.audio.graph.node.Convolver');
+    },
+    addAudioSource: function () {
+        var me = this,
+            node;
+        return me.addAudioNode('MEPH.audio.graph.node.AudioBufferSourceNode');
     },
     addDelay: function () {
         var me = this;

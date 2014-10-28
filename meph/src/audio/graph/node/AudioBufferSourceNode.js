@@ -11,19 +11,21 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         loopEndTitle: 'loop',
         loopStartTitle: 'detune',
         playbackRateTitle: 'gain',
+        sourceTitle: '',
+        audiobuffersources: null
     },
     initialize: function () {
         var me = this;
         me.nodecontrols = me.nodecontrols || [];
         me.nodecontrols.push('bufferoutput');
-        me.nodecontrols.push('bufferinput');
+        me.nodecontrols.push('sourceinput');
         me.nodecontrols.push('loop');
         me.nodecontrols.push('loopEnd');
         me.nodecontrols.push('loopStart');
         me.nodecontrols.push('playbackRate');
 
         me.super();
-        me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
+        me.nodeInputs.push(me.createInput('source', MEPH.audio.graph.node.Node.String));
         me.nodeInputs.push(me.createInput('loop', MEPH.audio.graph.node.Node.Boolean));
         me.nodeInputs.push(me.createInput('loopEnd', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('loopStart', MEPH.audio.graph.node.Node.Number));
@@ -34,7 +36,8 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         var me = this;
         me.super();
         me.title = 'Audio Buffer Source';
-
+        me.hideConnector = true;
+        me.sourceTitle = 'source';
         me.loopTitle = 'loop';
         me.loopEndTitle = 'loop end';
         me.loopStartTitle = 'loop start';

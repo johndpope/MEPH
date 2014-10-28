@@ -7,6 +7,8 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         'MEPH.graph.ActiveZone',
         'MEPH.util.Dom',
         'MEPH.audio.graph.node.controls.NodeContextMenu',
+        'MEPH.audio.graph.node.controls.AudioRange',
+        'MEPH.audio.graph.node.controls.AudioSelect',
         'MEPH.util.Style',
         'MEPH.context.ContextMenu',
         'MEPH.audio.graph.node.controls.Control'],
@@ -28,6 +30,8 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         y: null,
         sx: null,
         sy: null,
+        hideConnector: null,
+        booleanSource: null,
         bufferTitle: '',
         normalizefill: '',
         normalizeTitle: '',
@@ -139,6 +143,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.bodystroke = "rgb(234,168,68)";
         me.bufferoutput.left = false;
         me.bufferTitle = 'buffer';
+        me.booleanSource = ['true', 'false'];
         me.normalizeTitle = 'normalize';
         me.nodeInputs.foreach(function (input) {
             input.canConnect = me.canConnect.bind(me);

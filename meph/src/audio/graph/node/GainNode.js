@@ -19,7 +19,7 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
 
         me.super();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
-        me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.AudioBuffer, { path: 'gain.value' }));
+        me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.Number, { path: 'gain.value' }));
 
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
     },
