@@ -1960,8 +1960,6 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 meph.mouse = meph.mouse || { position: { x: 0, y: 0 } }
                 meph.workerthread = workerthread;
                 if (!workerthread) {
-                    
-
                     document.body.addEventListener('mousemove', function (e) {
                         meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
                     });
