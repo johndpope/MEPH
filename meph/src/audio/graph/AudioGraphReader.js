@@ -3,6 +3,7 @@
  * Defines a base class for Audio.
  **/
 MEPH.define('MEPH.audio.graph.AudioGraphReader', {
+    requires: ['MEPH.audio.Audio'],
     properties: {
         $graph: null
     },
@@ -25,12 +26,30 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
      * Constructs an audio object from the graph.
      * @return {MEPH.audio.Audio}
      **/
-    constructAudio: function () {
+    constructAudioNodeList: function () {
         var me = this;
         if (me.hasSingleRoot()) {
             var root = me.getRoot();
-            me.getRootInputs()
+            var res = me.fillListWithOrderedTree(root);
+            return res;
         }
+    },
+    /**
+     * Fills the list with the nodes ordered.
+     * @param {Object} root
+     * @param {Array} list
+     * @return {Array}
+     **/
+    fillListWithOrderedTree: function (root, list) {
+        var me = this;
+        var inputs = me.getInputs(root);
+        var audionode = me.constructAudioNode(root, inputs);
+        list = list || [];
+        list.unshift(audionode);
+        inputs.foreach(function (x) {
+            me.fillListWithOrderedTree(x.node, list);
+        });
+        return list;
     },
     /**
      * Can get the root.
@@ -152,6 +171,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createWaveShaperNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             curve: me.getNodeInputValue(node, inputs, 'curve'),
             oversample: me.getNodeInputValue(node, inputs, 'oversample')
@@ -160,6 +180,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createOscillatorNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             detune: me.getNodeInputValue(node, inputs, 'detune'),
             frequency: me.getNodeInputValue(node, inputs, 'frequency'),
@@ -169,6 +190,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createDynamicsCompressorNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             knee: me.getNodeInputValue(node, inputs, 'knee'),
             ratio: me.getNodeInputValue(node, inputs, 'ratio'),
@@ -181,6 +203,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createDelayNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             delayTime: me.getNodeInputValue(node, inputs, 'delayTime')
         };
@@ -188,6 +211,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createConvolverNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             normalize: me.getNodeInputValue(node, inputs, 'normalize')
         };
@@ -195,12 +219,14 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createChannelSplitterNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer')
         };
     },
     createChannelMergerNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             buffer2: me.getNodeInputValue(node, inputs, 'buffer2'),
             buffer3: me.getNodeInputValue(node, inputs, 'buffer3'),
@@ -210,6 +236,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createAudioBufferSourceNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             source: me.getNodeInputValue(node, inputs, 'source'),
             loop: me.getNodeInputValue(node, inputs, 'loop'),
             loopEnd: me.getNodeInputValue(node, inputs, 'loopEnd'),
@@ -220,6 +247,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     createPannerNode: function (node, inputs) {
         var me = this;
         return {
+            node: node,
             coneInnerAngle: me.getNodeInputValue(node, inputs, 'coneInnerAngle'),
             coneOuterAngle: me.getNodeInputValue(node, inputs, 'coneOuterAngle'),
             coneOuterGain: me.getNodeInputValue(node, inputs, 'coneOuterGain'),

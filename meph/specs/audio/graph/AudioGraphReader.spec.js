@@ -280,13 +280,6 @@
         expect(node).toBeTruthy();
     });
 
-    it('can construct an audio object for playin sounds', function () {
-        var reader = new MEPH.audio.graph.AudioGraphReader();
-        reader.setGraph(graph);
-        var audio = reader.constructAudio();
-        expect(audio).toBeTruthy();
-    });
-
     it('can get inputs for a node.', function () {
         var reader = new MEPH.audio.graph.AudioGraphReader();
         reader.setGraph(graph);
@@ -499,4 +492,13 @@
         expect(audionode.hasOwnProperty('curve')).toBeTruthy();
         expect(audionode.hasOwnProperty('oversample')).toBeTruthy();
     });
+
+
+    it('can construct an audio object for playin sounds', function () {
+        var reader = new MEPH.audio.graph.AudioGraphReader();
+        reader.setGraph(largegraph);
+        var audio = reader.constructAudioNodeList();
+        expect(audio).toBeTruthy();
+    });
+
 })
