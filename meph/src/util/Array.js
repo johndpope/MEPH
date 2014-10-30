@@ -831,6 +831,25 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
+            if (!array.subeach) {
+                Object.defineProperty(array, 'subeach', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (start, stop, func) {
+                        var collection = this;
+                        stop = Math.min(collection.length, stop === undefined || stop === null ? collection.length : stop);
+                        start = Math.min(collection.length, start === undefined || start === null ? collection.length : start);
+                        start = start < 0 ? 0 : start;
+                        stop = stop < 0 ? 0 : stop;
+                        for (var i = start ; i < stop ; i++) {
+                            func(collection[i]);
+                        }
+                        return collection;
+                    }
+                });
+            }
+
             if (!array.window) {
                 Object.defineProperty(array, 'window', {
                     enumerable: false,

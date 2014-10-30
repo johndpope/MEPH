@@ -174,7 +174,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         if (me.isOutput(zone1) !== !me.isOutput(zone2)) {
             return false;
         }
-        if (me.involvedInConnections(zone1).length > 0) {//!me.isOutput(zone1) && 
+        if (!me.isOutput(zone1) && me.involvedInConnections(zone1).length > 0) {//
             return false;
         }
 

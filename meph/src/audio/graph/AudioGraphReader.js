@@ -34,6 +34,50 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
             return res;
         }
     },
+    createAudio: function () {
+        var me = this, audio = new MEPH.audio.Audio();
+        var list = me.constructAudioNodeList();
+        list.foreach(function (t) {
+            switch (t.node.data.type) {
+                case 'MEPH.audio.graph.node.WaveShaperNode':
+                    audio.waveShaper(t);
+                    break;
+                case 'MEPH.audio.graph.node.PannerNode':
+                    audio.panner(t);
+                    break;
+                case 'MEPH.audio.graph.node.OscillatorNode':
+                    audio.oscillator(t);
+                    break;
+                case 'MEPH.audio.graph.node.GainNode':
+                    audio.gain(t);
+                    break;
+                case 'MEPH.audio.graph.node.DynamicsCompressorNode':
+                    audio.dynamicsCompressor(t);
+                    break;
+                case 'MEPH.audio.graph.node.ChannelMergerNode':
+                    audio.merger(t);
+                    break;
+                case 'MEPH.audio.graph.node.ChannelSplitterNode':
+                    audio.splitter(t);
+                    break;
+                case 'MEPH.audio.graph.node.BiquadFilter':
+                    audio.biquadFilter(t);
+                    break;
+                case 'MEPH.audio.graph.node.DelayNode':
+                    audio.delay(t);
+                    break;
+                case 'MEPH.audio.graph.node.Convolver':
+                    audio.convolver(t);
+                    break;
+                case 'MEPH.audio.graph.node.AudioBufferSourceNode':
+                    audio.buffer(null, t);
+                    break;
+                default:
+                    throw new Error('unhandled type : ' + t.data.type);
+            }
+        });
+        return audio;
+    },
     /**
      * Fills the list with the nodes ordered.
      * @param {Object} root
@@ -45,6 +89,9 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         var inputs = me.getInputs(root);
         var audionode = me.constructAudioNode(root, inputs);
         list = list || [];
+
+        list.removeWhere(function (x) { return x.node.id === audionode.node.id; });
+
         list.unshift(audionode);
         inputs.foreach(function (x) {
             me.fillListWithOrderedTree(x.node, list);
@@ -124,10 +171,15 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
                 var cz = x.zones.first(function (t) {
                     return t.indexOf(node.id) === -1;
                 });
+                var ctozone = x.zones.first(function (t) {
+                    return t.indexOf(node.id) !== -1;
+                });
+                var resto = me.getNodeConnectorById(ctozone);
                 var res = me.getNodeConnectorById(cz);
                 return {
                     node: me.getNodeById(x.nodes.first(function (t) { return t !== node.id; })),
-                    connection: res
+                    connection: res,
+                    to: resto
                 }
             }
         });
@@ -313,7 +365,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
                 value = input.defaultValue || null;
                 break;
         }
-        var inp = inputs.first(function (x) { return x.connection.name === name; })
+        var inp = inputs.first(function (x) { return x.to.name === name; })
         if (inp) {
             return inp.connection;
         }

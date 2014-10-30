@@ -349,21 +349,21 @@ MEPH.define('MEPH.audio.Audio', {
     waveShaper: function (options) {
         var me = this;
 
-        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.waveShaper; })
+        me.createNode(options || null, function () { return MEPH.audio.Audio.nodeTypes.waveShaper; })
         return me;
 
     },
     analyser: function (options) {
         var me = this;
 
-        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.analyser; })
+        me.createNode(options || null, function () { return MEPH.audio.Audio.nodeTypes.analyser; })
         return me;
     },
     splitter: function (options) {
         var me = this;
         options = options || {};
 
-        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.splitter; })
+        me.createNode(options || null, function () { return MEPH.audio.Audio.nodeTypes.splitter; })
         return me;
     },
     merger: function (options) {
@@ -538,7 +538,7 @@ MEPH.define('MEPH.audio.Audio', {
         return nodes;
     },
     complete: function (options) {
-        var me = this, last,
+        var me = this, last, targetnode,
             nodes = me.getNodes();
 
         nodes.foreach(function (x, index) {
@@ -546,11 +546,95 @@ MEPH.define('MEPH.audio.Audio', {
                 x.node = me.createAudioNode(x.type, options, x.options);
             }
             if (index) {
-                last.connect(x.node);
+                if (x.options.buffer && x.options.buffer.id) {//If point to a specific node, find it in the previous partss.
+                    me.completeTargetNodes(nodes, x);
+                }
+                else {
+                    last.connect(x.node);
+                }
             }
             last = x.node;
         });
         last.connect(me.createContext(options).destination);
         return me;
+    },
+    getBufferIndex: function (x) {
+        if (x.type === MEPH.audio.Audio.nodeTypes.merger)
+            switch (x.options.buffer.name) {
+                case 'buffer':
+                    return 0;
+                case 'buffer2':
+                    return 1;
+                case 'buffer3':
+                    return 2;
+                case 'buffer4':
+                    return 3;
+            }
+    },
+    completeTargetNodes: function (nodes, x) {
+        var targetnode,
+            me = this;
+
+        targetnode = nodes.first(function (node) {
+            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
+        });
+
+        switch (targetnode.type) {
+            case 'splitter':
+                if (x.options.buffer) {
+                    targetnode.node.connect(x.node, 0, me.getBufferIndex(x));
+                }
+                if (x.options.buffer2) {
+                    targetnode.node.connect(x.node, 1, me.getBufferIndex(x));
+                }
+                if (x.options.buffer3) {
+                    targetnode.node.connect(x.node, 2, me.getBufferIndex(x));
+                }
+                if (x.options.buffer4) {
+                    targetnode.node.connect(x.node, 3, me.getBufferIndex(x));
+                }
+                break;
+            default:
+                if (x.type === MEPH.audio.Audio.nodeTypes.merger) {
+                    //targetnode.node.connect(x.node, 0, me.getBufferIndex(x));
+
+                    if (x.options.buffer) {
+
+                        targetnode = nodes.first(function (node) {
+                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
+                        });
+
+                        targetnode.node.connect(x.node, 0, 0);
+                    }
+                    if (x.options.buffer2) {
+
+                        targetnode = nodes.first(function (node) {
+                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer2.id; });
+                        });
+
+                        targetnode.node.connect(x.node, 0, 1);
+                    }
+                    if (x.options.buffer3) {
+
+                        targetnode = nodes.first(function (node) {
+                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer3.id; });
+                        });
+
+                        targetnode.node.connect(x.node, 0, 2);
+                    }
+                    if (x.options.buffer4) {
+
+                        targetnode = nodes.first(function (node) {
+                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer4.id; });
+                        });
+
+                        targetnode.node.connect(x.node, 0, 3);
+                    }
+                }
+                else
+                    targetnode.node.connect(x.node);
+                break;
+        }
+
     }
 });
