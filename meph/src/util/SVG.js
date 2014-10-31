@@ -65,6 +65,9 @@ MEPH.define('MEPH.util.SVG', {
                 case MEPH.util.SVG.shapes.line:
                     result = result.concat(me.drawLine(options));
                     break;
+                case MEPH.util.SVG.shapes.text:
+                    result = result.concat(me.drawText(options));
+                    break;
                 case MEPH.util.SVG.shapes.circle:
                     result = result.concat(me.drawCircle(options));
                     break;
@@ -83,6 +86,30 @@ MEPH.define('MEPH.util.SVG', {
             if (t.shape.parentNode)
                 t.shape.parentNode.removeChild(t.shape);
         })
+    },
+    drawText: function (options) {
+        var shape;
+
+        var svgns = "http://www.w3.org/2000/svg";
+        shape = document.createElementNS(svgns, 'text');
+        shape.innerHTML = options.text;
+        if (options.hasOwnProperty('x'))
+            shape.setAttribute('x', options.x);
+        if (options.hasOwnProperty('y'))
+            shape.setAttribute('y', options.y);
+
+        if (options.hasOwnProperty('dx'))
+            shape.setAttribute('dx', options.dx);
+        if (options.hasOwnProperty('dy'))
+            shape.setAttribute('dy', options.dy);
+        if (options.hasOwnProperty('fill'))
+            shape.setAttribute('fill', options.fill);
+        var me = this;
+        var canvas = me.getCanvas();
+        canvas.appendChild(shape);
+        return {
+            shape: shape, options: options
+        };
     },
     drawLine: function (options, el) {
         var me = this,
