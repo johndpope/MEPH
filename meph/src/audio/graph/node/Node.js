@@ -42,6 +42,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         booleanFill: '',
         audioBufferFill: '',
         bodyy: null,
+        menuheightspace: 0,
         inputsy: 0,
         bodyry: 1,
         bodyrx: 1,
@@ -95,28 +96,56 @@ MEPH.define('MEPH.audio.graph.node.Node', {
 
         if (me.nodecontrols)
             me.nodecontrols.foreach(function (x) {
-                if (me[x]) {
-                    var input = me.nodeInputs.first(function (t) {
-                        return t.name + 'input' === x || t.name === x;
-                    });
+                me.setActiveControlZone(x, viewport, node);
+                //if (me[x]) {
+                //    var input = me.nodeInputs.first(function (t) {
+                //        return t.name + 'input' === x || t.name === x;
+                //    });
 
-                    input = input || me.nodeOutputs.first(function (t) {
-                        return t.name + 'output' === x || t.name === x;
-                    });
+                //    input = input || me.nodeOutputs.first(function (t) {
+                //        return t.name + 'output' === x || t.name === x;
+                //    });
 
-                    var zone = viewport.requestZone(node, {
-                        managed: true,
-                        id: node.getId() + '-' + x + '-connector',
-                        type: MEPH.graph.ActiveZone.type.connector,
-                        dom: me[x].connector,
-                        connectortype: input.type
-                    });
-                    zone.$options.option = {
-                        canConnect: me.canConnect.bind(me),
-                        isOutput: !me[x].left
-                    };
-                }
+                //    var zone = viewport.requestZone(node, {
+                //        managed: true,
+                //        id: node.getId() + '-' + x + '-connector',
+                //        type: MEPH.graph.ActiveZone.type.connector,
+                //        dom: me[x].connector,
+                //        connectortype: input.type
+                //    });
+                //    zone.$options.option = {
+                //        canConnect: me.canConnect.bind(me),
+                //        isOutput: !me[x].left
+                //    };
+                //}
             });
+    },
+    setActiveControlZone: function (x, viewport, node) {
+        var me = this;
+
+        viewport = viewport || me.$viewport;
+        node = node || me.$node;
+        if (me[x]) {
+            var input = me.nodeInputs.first(function (t) {
+                return t.name + 'input' === x || t.name === x;
+            });
+
+            input = input || me.nodeOutputs.first(function (t) {
+                return t.name + 'output' === x || t.name === x;
+            });
+
+            var zone = viewport.requestZone(node, {
+                managed: true,
+                id: node.getId() + '-' + x + '-connector',
+                type: MEPH.graph.ActiveZone.type.connector,
+                dom: me[x].connector,
+                connectortype: input.type
+            });
+            zone.$options.option = {
+                canConnect: me.canConnect.bind(me),
+                isOutput: !me[x].left
+            };
+        }
     },
     onLoaded: function () {
         var me = this;
@@ -140,7 +169,8 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.inputradius = me.inputradius || 8;
         me.inputstroke = 'black';
         me.bodystroke = "rgb(234,168,68)";
-        me.bufferoutput.left = false;
+        if (me.bufferoutput)
+            me.bufferoutput.left = false;
         me.bufferTitle = 'buffer';
         me.booleanSource = ['true', 'false'];
         me.normalizeTitle = 'normalize';
@@ -192,7 +222,8 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     setupActiveZones: function (viewport, node) {
         var me = this;
-
+        me.$viewport = viewport;
+        me.$node = node;
         me.setupActiveHeaderZone(viewport, node);
         me.setupActiveControlZones(viewport, node);
     },
@@ -237,7 +268,8 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     closeNode: function () {
         var me = this;
-        me.graph.removeNode(me.graphnode);
+        if (me.graph && me.graphnode)
+            me.graph.removeNode(me.graphnode);
         me.destroy();
     },
     defineNodeDependentProperties: function () {
@@ -253,6 +285,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     definePositionProperty: function () {
 
     },
+
     defineNodeHeightProperty: function () {
         var me = this;
         me.nodecontrols = me.nodecontrols || [];
@@ -283,6 +316,11 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     defineTitleProperties: function () {
         var me = this;
 
+        MEPH.util.Observable.defineDependentProperty('menutransform', me, ['headerbuffer', 'inputsx', 'menuheight'], function () {
+            var result = parseFloat(me.headerbuffer || 0) - parseFloat(me.menuheight || 0);
+
+            return 'translate(' + (me.inputsx || 0) + ',' + (result) + ')';
+        });
 
         MEPH.util.Observable.defineDependentProperty('inputtransform', me, ['inputoutputposition', 'inputsx', 'inputsy'], function () {
             var result = 'translate(' + (me.inputsx || 0) + ',' + ((me.inputoutputposition || 0) + (me.inputsy || 0)) + ')';
@@ -355,6 +393,19 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             }
         })
     },
+    getControlVerticalOffset: function (name) {
+        var me = this;
+        var offsets = me.nodecontrols.subset(0, me.nodecontrols.indexWhere(function (x) { return x === name; }).first());
+
+        offsets = offsets.concat(['headerbuffer']);
+        var sum = 0;
+        offsets.foreach(function (t) {
+            var temp = t + '.height';
+            var vv = MEPH.getPathValue(temp, me);
+            sum += parseFloat(vv || 0) + (me.controlverticalpadding || 0);
+        });
+        return sum;
+    },
     defineBodyWidthProperty: function () {
         var me = this;
 
@@ -370,9 +421,14 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     definerHeaderBufferProperties: function () {
         var me = this;
 
-        MEPH.util.Observable.defineDependentProperty('headerbuffer', me, ['headerheight'], function () {
+        MEPH.util.Observable.defineDependentProperty('menuheight', me, ['menuheightspace'], function () {
+            var result = me.menuheightspace || 0;
+            return result;
+        });
+
+        MEPH.util.Observable.defineDependentProperty('headerbuffer', me, ['headerheight', 'menuheight'], function () {
             var result = 0;
-            ['headerheight'].foreach(function (x) {
+            ['menuheight', 'headerheight'].foreach(function (x) {
                 if (me[x]) {
                     result += me[x];
                 }

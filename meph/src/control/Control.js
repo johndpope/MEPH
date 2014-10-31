@@ -433,16 +433,21 @@ MEPH.define('MEPH.control.Control', {
      * @param {String} classifiedName
      * @param {Object} dom
      * @param {MEPH.control.Control} parent
+     * @param {Object} attributes
      * @returns {Promise}
      **/
-    renderControl: function (classifiedName, dom, parent) {
+    renderControl: function (classifiedName, dom, parent, attributes) {
         var me = this, template,
             application;
 
         application = me.getApplication();
         if (application) {
             template = MEPH.createTemplateNode(classifiedName);
-
+            if (template && template.node && attributes) {
+                for (var i in attributes) {
+                    template.node.setAttribute(i, attributes[i]);
+                }
+            }
             return application.loadViewObject([template], dom, parent);
         }
 

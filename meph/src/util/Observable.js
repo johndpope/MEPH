@@ -38,6 +38,7 @@ MEPH.define('MEPH.util.Observable', {
         },
         defineDependentProperty: function (newproperty, object, properties, caculationFunction) {
             Object.defineProperty(object, newproperty, {
+                configurable: true,
                 get: function (props) {
                     return caculationFunction.apply(this, props);
                 }.bind(object, MEPH.Array(properties))

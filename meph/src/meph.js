@@ -1032,14 +1032,22 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      * @param {Array} config.requires
      */
     meph.getRequiredTemplates = function (config, className) {
+        var result;
         if ((config.templates && config.templates.length > 0)) {
-            return meph.Array(config.templates)
+            result = meph.Array(config.templates)
                         .where(function (x) { return x; });
         }
         else if (config.templates === true) {
-            return meph.Array([className]);
+            result = meph.Array([className]);
         }
-        return [];
+        else
+            result = [];
+        if (config.scripts && config.scripts.length) {
+            config.scripts.foreach(function (x) {
+                result.push(x);
+            })
+        }
+        return result;
     }
     var getRequiredTemplates = meph.getRequiredTemplates;
     /**
@@ -1265,6 +1273,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.addTemplateInformation = function (templateInfo) {
         var definedTemplate = getDefinedTemplate(templateInfo.classifiedName);
         if (!definedTemplate) {
+            var alias = meph.getTemplateByAlias(templateInfo.alias);
+            if (alias) {
+                templateInfo.alias = null;
+
+            }
+
             templates.push(templateInfo);
             meph.fire(meph.events.definedTemplate, templateInfo);
         }
@@ -1727,6 +1741,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                                     name === 'constructor' ||
                                    name === 'extend' ||
                                    name === 'templates' ||
+                                   name === 'scripts' ||
                                    name === 'mixins' ||
                                    name === 'observable' ||
                                    name === 'properties')
@@ -1752,6 +1767,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                     name === 'extend' ||
                     name === 'templates' ||
                     name === 'mixins' ||
+                    name === 'scripts' ||
                     name === 'observable' ||
                     name === 'properties')
                     continue;
@@ -1841,6 +1857,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 prototype.templates = _super.templates ? _super.templates.concat(templates) : templates;
 
             }
+            if (prop.scripts) {
+                var scripts = prop.scripts === true ? [type] : prop.scripts;
+                prototype.scripts = _super.scripts ? _super.scripts.concat(scripts) : scripts;
+
+            }
+
             if (prop.properties) {
                 prop.properties.____type = type;
             }

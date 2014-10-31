@@ -546,7 +546,7 @@ MEPH.define('MEPH.audio.Audio', {
                 x.node = me.createAudioNode(x.type, options, x.options);
             }
             if (index) {
-                if (x.options.buffer && x.options.buffer.id) {//If point to a specific node, find it in the previous partss.
+                if (x.options && x.options.buffer && x.options.buffer.id) {//If point to a specific node, find it in the previous partss.
                     me.completeTargetNodes(nodes, x);
                 }
                 else {

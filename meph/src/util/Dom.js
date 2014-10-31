@@ -317,10 +317,10 @@ Promise.resolve().then(function () {
                 var rect = element.getBoundingClientRect();
                 return rect;
             },
-            createInputElementOverSvg: function (svg, type) {
+            createInputElementOverSvg: function (svg, type, element) {
 
-                var sp = Dom.getScreenPosition(svg);
-                var element = document.createElement(type || 'input');
+                var sp = MEPH.util.Dom.getScreenPosition(svg);
+                element = element || document.createElement(type || 'input');
                 Style.width(element, sp.width);
                 Style.height(element, sp.height);
                 Style.position(element, 'absolute');
@@ -342,6 +342,12 @@ Promise.resolve().then(function () {
                     value: input2
                 }
             },
+            addOption: function (name, value, element) {
+                var option = document.createElement("option");
+                option.text = name;
+                option.value = value;
+                element.add(option);
+            },
             createSimpleSelectData: function (me, el, setfunc, initval, options) {
                 var element = MEPH.util.Dom.createInputElementOverSvg(el, 'select');
                 options.unshift('');
@@ -356,7 +362,7 @@ Promise.resolve().then(function () {
 
                 me.don('blur', element, function (x) {
                     setfunc(element.value);
-                    
+
                     setTimeout(function () {
                         if (element !== document.activeElement) {
                             if (element.parentNode)
@@ -407,7 +413,34 @@ Promise.resolve().then(function () {
                 }
                 return element;
             },
+            /**
+             * Adds simple data entry to disposable elements
+             * @param {Object} me
+             * The data context.
+             * @param {Array} elements
+             **/
+            addSimpleDataEntryToElments: function (me, elements, rootel) {
+                me.don('blur', elements.select(function (x) { return x.element; }), function (elements) {
+                    elements.foreach(function (elset) {
+                        elset.setFunc(elset.element.value);
+                    });
+                    //setfunc(element.value);
+                    setTimeout(function () {
+                        if (!MEPH.util.Dom.isDomDescendant(document.activeElement, rootel)) {
+                            if (rootel.parentNode)
+                                rootel.parentNode.removeChild(rootel);
 
+                            me.dun(elements);
+                        }
+                    }, 400)
+                }.bind(me, elements), elements);
+                elements.foreach(function (elset) {
+                    var element = elset.element;
+                    me.don('change', element, function (x) {
+                        elset.setFunc(element.value);
+                    }, element);
+                });
+            },
             getScreenEventPositions: function (evt, element) {
                 var positions = [];
                 if (evt.changedTouches) {

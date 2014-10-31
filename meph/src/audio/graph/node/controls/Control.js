@@ -20,6 +20,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
         bufferx: null,
         left: true,
         width: 200,
+        fresh: 0,
         margin: 4,
         controlheight: 0
     },
@@ -40,24 +41,24 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
         var me = this;
 
 
-        MEPH.util.Observable.defineDependentProperty('controlradius', me, ['hideconnector', 'radius'], function () {
+        MEPH.util.Observable.defineDependentProperty('controlradius', me, ['hideconnector', 'radius', 'fresh'], function () {
             var result = me.hideconnector ? 0 : parseFloat(me.radius) || 0;
 
             return result;
         });
 
-        MEPH.util.Observable.defineDependentProperty('height', me, ['fontsize', 'radius', 'controlheight'], function () {
+        MEPH.util.Observable.defineDependentProperty('height', me, ['fontsize', 'radius', 'controlheight', 'fresh'], function () {
             var result = parseFloat(me.fontsize) || 0;
             var radius = parseFloat(me.radius) || 0
 
             return Math.max(radius * 2, result, (parseFloat(me.controlheight) || 0)) + me.margin + me.margin;
         });
 
-        MEPH.util.Observable.defineDependentProperty('titlevalue', me, ['title', 'value'], function () {
+        MEPH.util.Observable.defineDependentProperty('titlevalue', me, ['title', 'value', 'fresh'], function () {
             var result = (me.title || '') + (me.value !== undefined && me.value !== null ? " : " + me.value : '');
             return result
         });
-        MEPH.util.Observable.defineDependentProperty('textx', me, ['left', 'width', 'connectorxmargin', 'radius', 'bufferx'], function () {
+        MEPH.util.Observable.defineDependentProperty('textx', me, ['left', 'width', 'connectorxmargin', 'radius', 'bufferx', 'fresh'], function () {
             var result;
             if (me.left) {
                 result = me.connectorxmargin + (me.radius || 0) + (me.bufferx || 0);
@@ -67,7 +68,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
             }
             return result;
         });
-        MEPH.util.Observable.defineDependentProperty('texttransform', me, ['left', 'width', 'connectorxmargin', 'radius', 'bufferx'], function () {
+        MEPH.util.Observable.defineDependentProperty('texttransform', me, ['left', 'width', 'connectorxmargin', 'radius', 'bufferx', 'fresh'], function () {
             var result;
             if (me.left) {
                 result = me.connectorxmargin + (me.radius || 0) + (me.bufferx || 0);
@@ -83,7 +84,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
 
 
 
-        MEPH.util.Observable.defineDependentProperty('connectortransform', me, ['radius', 'left', 'width', 'connectorxmargin', 'radius', 'bufferx'], function () {
+        MEPH.util.Observable.defineDependentProperty('connectortransform', me, ['radius', 'left', 'width', 'connectorxmargin', 'radius', 'bufferx', 'fresh'], function () {
             var result;
             if (me.left) {
                 result = 0;
@@ -98,7 +99,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
             return result;
         });
 
-        MEPH.util.Observable.defineDependentProperty('anchor', me, ['left'], function () {
+        MEPH.util.Observable.defineDependentProperty('anchor', me, ['left', 'fresh'], function () {
             var result;
             if (!me.left) {
                 result = 'end';
@@ -110,5 +111,9 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
         });
 
 
+    },
+    refresh: function () {
+        var me = this;
+        me.fresh += 1
     }
 });
