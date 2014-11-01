@@ -473,7 +473,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     createOutput: function (name, type) {
         return {
-            name: name,
+            name: name.split(' ').join('_'),
             title: name,
             type: type,
             connector: null,

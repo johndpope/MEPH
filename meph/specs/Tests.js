@@ -98,6 +98,7 @@
                         'audio/graph/node/DelayNode.spec.js',
                         'audio/graph/node/DynamicsCompressorNode.spec.js',
                         'audio/graph/node/GainNode.spec.js',
+                        'audio/graph/node/GeneratedNode.spec.js',
                         'audio/graph/node/InputNode.spec.js',
                         'audio/graph/node/Node.spec.js',
                         'audio/graph/node/OscillatorNode.spec.js',
