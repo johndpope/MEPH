@@ -101,20 +101,51 @@ MEPH.define('MEPH.audio.graph.node.Node', {
                 me.setActiveControlZone(x, viewport, node);
             });
     },
+    getCorrespondingMatch: function (t) {
+        var me = this;
+        var input = me.nodeInputs.first(function (t) {
+            return t.name + 'input' === x || t.name === x;
+        });
+
+        input = input || me.nodeOutputs.first(function (t) {
+            return t.name + 'output' === x || t.name === x;
+        });
+
+        var res = me.getCorrespondingControl(t);
+
+        if (res && !input) {
+            return me.getInputNodeObject(res);
+        }
+        return input;
+    },
+    getCorrespondingControls: function () {
+        var me = this;
+
+        me.$correspondingcontrols = me.$correspondingcontrols || [];
+        return me.$correspondingcontrols;
+    },
+    getCorrespondingControl: function (nodeput) {
+        var me = this;
+        return me.getCorrespondingControls().first(function (x) {
+            return x.inout === nodeput;
+        })
+    },
+    addCorrespondingControl: function (name, input) {
+        var me = this;
+        me.getCorrespondingControls().push({
+            name: name, inout: input
+        });
+    },
+    getInputNodeObject: function (res) {
+        return res.inout;
+    },
     setActiveControlZone: function (x, viewport, node) {
         var me = this;
 
         viewport = viewport || me.$viewport;
         node = node || me.$node;
         if (me[x]) {
-            var input = me.nodeInputs.first(function (t) {
-                return t.name + 'input' === x || t.name === x;
-            });
-
-            input = input || me.nodeOutputs.first(function (t) {
-                return t.name + 'output' === x || t.name === x;
-            });
-
+            var input = me.getCorrespondingMatch(t);
             var zone = viewport.requestZone(node, {
                 managed: true,
                 id: node.getId() + '-' + x + '-connector',
@@ -315,6 +346,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.nodecontrols = me.nodecontrols || [];
         var noncontrols = ['headerheight', 'footerheight', 'refresh'];
         var nodeheightdp = me.nodecontrols.concat(noncontrols);
+
         MEPH.util.Observable.defineDependentProperty('nodeheight', me, nodeheightdp, function () {
             var result = (me.titlepaddingtop || 0);
             nodeheightdp.foreach(function (t, i) {
@@ -405,8 +437,9 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         var me = this;
         [].interpolate(0, offsets.length + 1, function (x) {
             if (x) {
-                MEPH.util.Observable.defineDependentProperty(offsets[x - 1] + 'y', me, offsets.subset(0, x - 1).concat(['headerbuffer']), function (osets) {
+                MEPH.util.Observable.defineDependentProperty(offsets[x - 1] + 'y', me, offsets.subset(0, x - 1).concat(['headerbuffer', 'refresh']), function (osets) {
                     var result = 0;
+                    
                     osets.foreach(function (t) {
                         var temp = t + '.height';
                         var vv = MEPH.getPathValue(temp, me);
@@ -462,7 +495,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     createInput: function (name, type, options) {
         return {
-            name: name,
+            name: name.nodename(),
             title: name,
             type: type,
             connector: null,
@@ -473,7 +506,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     },
     createOutput: function (name, type) {
         return {
-            name: name.split(' ').join('_'),
+            name: name.nodename(),
             title: name,
             type: type,
             connector: null,

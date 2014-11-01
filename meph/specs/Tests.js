@@ -22,13 +22,13 @@
                 })
             }
         }
-        MEPH.render = function (type, tagname) {
+        MEPH.render = function (type, tagname, injections) {
             var app;
             return MEPH.requires(type, 'MEPHTests.helper.Application').then(function () {
                 app = new MEPHTests.helper.Application();
                 dom = app.createAppSpace(), div = document.createElement('div');
                 div.innerHTML = '<' + tagname + '></' + tagname + '>';
-                return app.create(type, div.firstElementChild);
+                return app.create(type, div.firstElementChild, injections);
             }).then(function (results) {
                 return app.loadViewObject([results], dom);
             }).then(function (results) {

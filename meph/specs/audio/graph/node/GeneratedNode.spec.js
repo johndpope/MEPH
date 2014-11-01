@@ -18,5 +18,31 @@
         expect(generated.nodeOutputs).toBeTruthy();
         expect(generated.nodeInputs.length).toBeTruthy();
         expect(generated.nodeOutputs.length).toBeTruthy();
+    });
+
+    it('can generate a template and store it in the framework base on the seed in the constructor', function () {
+        var generated = new MEPH.audio.graph.node.GeneratedNode(seed);
+
+        expect(generated.templates.length === 2).toBeTruthy();
+    });
+
+    it('can render a generated ndoe', function (done) {
+        MEPH.render('MEPH.audio.graph.node.GeneratedNode', 'generatednode', seed).then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom,
+                AudioGraph = results.first().classInstance;
+            ///Assert
+            dom = AudioGraph.getDomTemplate()[0]
+            expect(dom).toBeTruthy();
+            //if (app) {
+            //    app.removeSpace();
+            //}
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
     })
 });

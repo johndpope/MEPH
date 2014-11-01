@@ -170,6 +170,7 @@ MEPH.define('MEPH.dom.ControlLoader', {
                 });
             }
             if (found) {
+                
                 me.manageConnectionBetween(controlPackage, subcontrolPackage, subNode);
                 MEPH.Binder.bindControl(controlPackage.classInstance, subcontrolPackage.classInstance, subNode);
                 MEPH.Binder.bindDomControl(controlPackage, subcontrolPackage, subNode);
@@ -454,20 +455,6 @@ MEPH.define('MEPH.dom.ControlLoader', {
                         type: type,
                         classDefinition: $class
                     });
-                    //promises.push(Promise.resolve().then(function (information, classPathOrAlias, key) {
-                    //    return MEPH.create(information ? information.classifiedName : classPathOrAlias)
-                    //    .then(function (key, $class) {
-                    //        var type = MEPH.getBindPrefixShortCut(key);
-                    //        if (type) {
-                    //            type = type.type;
-                    //        }
-                    //        return {
-                    //            key: key,
-                    //            type: type,
-                    //            classDefinition: $class
-                    //        };
-                    //    }.bind(me, key));
-                    //}.bind(me, classInformation, classPathOrAlias, i)));
 
                 }
             }
@@ -505,7 +492,7 @@ MEPH.define('MEPH.dom.ControlLoader', {
             definedClass = MEPH.getDefinedClass(templateInfo.classifiedName);
             //templateNode = me.getTemplateDom(templateInfo);
             if (definedClass) {
-                classInstance = new definedClass();
+                classInstance = new definedClass(controlObject.injections || null);
                 classInstance.setUniqueId(MEPH.GUID());
 
                 if (controlObject.view) {

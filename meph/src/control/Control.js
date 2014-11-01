@@ -436,7 +436,7 @@ MEPH.define('MEPH.control.Control', {
      * @param {Object} attributes
      * @returns {Promise}
      **/
-    renderControl: function (classifiedName, dom, parent, attributes) {
+    renderControl: function (classifiedName, dom, parent, attributes, injections) {
         var me = this, template,
             application;
 
@@ -545,6 +545,20 @@ MEPH.define('MEPH.control.Control', {
     getTemplates: function () {
         var me = this;
         return MEPH.Array(me.templates);
+    },
+    /**
+     * Creates a new instance of the templates array.
+     **/
+    uniqueTemplates: function () {
+        var me = this;
+        me.templates = me.templates.select();
+    },
+    /**
+     * Adds a template to the list.
+     **/
+    addTemplate: function (classifiedName) {
+        var me = this;
+        me.templates.push(classifiedName);
     },
     getBindableProperties: function () {
 
@@ -749,7 +763,7 @@ MEPH.define('MEPH.control.Control', {
     getOrdereredConstructionInstructions: function () {
         var me = this,
             result;
-        result = MEPH.util.Array.create(me.templates).select(me.getTemplateInstructions.bind(me));
+        result = MEPH.util.Array.create(me.getTemplates()).select(me.getTemplateInstructions.bind(me));
         return result;
     },
     /**

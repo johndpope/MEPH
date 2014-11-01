@@ -54,3 +54,17 @@ if (!String.prototype.after) {
         }
     });
 }
+/**
+ * @method nodename
+ * @returns {String} returns a string appropriate for a node.
+ **/
+if (!String.prototype.nodename) {
+    Object.defineProperty(String.prototype, 'nodename', {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: function (suffix) {
+            return this.split(' ').join('_').replace(new RegExp("-", 'g'), '_');
+        }
+    });
+}

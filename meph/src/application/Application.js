@@ -150,7 +150,7 @@ MEPH.define('MEPH.application.Application', {
     /**
      * Creates the config.
      **/
-    create: function (classifiedName, dom) {
+    create: function (classifiedName, dom, injections) {
         return Promise.resolve().then(function () {
             return MEPH.requires(classifiedName);
         }).then(function () {
@@ -159,7 +159,8 @@ MEPH.define('MEPH.application.Application', {
             node = dom || document.createElement(information.alias);
             return {
                 alias: information.alias,
-                node: node
+                node: node,
+                injections: injections
             }
         })
     },
@@ -337,7 +338,7 @@ MEPH.define('MEPH.application.Application', {
         me.controlReader = new ControlReader();
         me.controlLoader = new ControlLoader();
         me.activityController = new ActivityController();
-        
+
         MEPH.MobileServices.add(me.activityController, {
             'static': true,
             name: 'activitycontroller',
