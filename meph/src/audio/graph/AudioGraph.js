@@ -82,7 +82,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         var result = {
             connections: savedgraph.connections.select(),
             nodes: savedgraph.nodes.select(function (x) {
-                return {
+                var res = {
                     id: x.id,
                     position: x.position,
                     data: {
@@ -92,6 +92,10 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
                         nodeOutputs: x.data.nodeOutputs.select(),
                     }
                 }
+                if (x.data.subGraph) {
+                    res.data.subGraph = JSON.parse(JSON.stringify(x.data.subGraph))
+                }
+                return res;
             })
         }
         return result;

@@ -7,6 +7,35 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     properties: {
         $graph: null
     },
+    statics: {
+        cloneUnique: function (graph) {
+
+
+            var ids = MEPH.audio.graph.AudioGraphReader.collectIds(graph).select(function (x) {
+                return {
+                    n: MEPH.GUID(),
+                    o: x
+                }
+            });
+
+            var str = JSON.stringify(graph);
+
+            ids.foreach(function (item) {
+                str = str.replace(new RegExp(item.o, 'g'), item.n);
+            });
+
+            var res = JSON.parse(str);
+            return res;
+        },
+        collectIds: function (graph) {
+            var nodeids = graph.nodes.concatFluent(function (x) {
+                return [x.id].concat(x.data.nodeInputs.select(function (x) { return x.id; }))
+                    .concat(x.data.nodeOutputs.select(function (x) { return x.id; })).concat(x.data.subGraph ? MEPH.audio.graph.AudioGraphReader.collectIds(x.data.subGraph) : []);
+            });
+            var connectionids = graph.connections.select(function (x) { return x.id; });
+            return nodeids.concat(connectionids)
+        }
+    },
     setGraph: function (graph) {
         var me = this;
         me.$graph = graph;

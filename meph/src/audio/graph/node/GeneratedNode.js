@@ -6,6 +6,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
     extend: 'MEPH.audio.graph.node.Node',
     alias: 'generatednode',
     templates: true,
+    requires: ['MEPH.audio.graph.AudioGraphReader'],
     scripts: ['MEPH.audio.graph.node.generated.Range',
                 'MEPH.audio.graph.node.generated.Select',
                 'MEPH.audio.graph.node.generated.Control'],
@@ -16,6 +17,8 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
 
         me.nodecontrols = me.nodecontrols || [];
         if (seed) {
+            seed = MEPH.audio.graph.AudioGraphReader.cloneUnique(seed);
+            me.subGraph = seed;
             input = seed.nodes.first(function (x) {
                 return x.data.type === 'MEPH.audio.graph.node.InputNode';
             });
@@ -105,25 +108,12 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
     },
     setGeneratedProperties: function (input, output) {
         var me = this;
-        input.nodeInputs.concat(output.nodeOutputs).unique(function (x) {
-            return x.name.nodename();
-        }).select(function (x) {
+        input.nodeInputs.concat(output.nodeOutputs).select(function (x) {
             var temp = me.getCorrespondingControl(x);
-            var dict = {
-                title: temp.name.nodename() + 'Title',
-                output: temp.name.nodename() + 'isoutput'
-            };
-            var tem = {
-                title: x.title,
-                output: !!!x.output
-            }
-            me[temp.name.nodename()].left = !!!x.output;
 
-            
-            
-            for (var i in dict) {
-                me[dict[i]] = tem[i];
-            }
+            me[temp.name.nodename()].left = !!!x.output;
+            me[temp.name.nodename()].title = x.title;
+
         });
     },
     /**
@@ -210,9 +200,8 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
         var me = this;
         me.super();
         me.title = 'Generated Node';
-        setTimeout(function () {
-            me.setGeneratedProperties(me.$input, me.$output);
-        }, 5000)
+        me.setGeneratedProperties(me.$input, me.$output);
+
         me.refresh++;
     }
 
