@@ -1683,7 +1683,10 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                     }
                     return true;
                 }).foreach(function (x) {
-                    x.func.apply(x.reference || null, args);
+                    try {
+                        x.func.apply(x.reference || null, args);
+                    }
+                    catch (e) { meph.Log(e) }
                 })
                 return this;
             }.bind(object)

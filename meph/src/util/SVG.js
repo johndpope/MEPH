@@ -87,6 +87,16 @@ MEPH.define('MEPH.util.SVG', {
                 t.shape.parentNode.removeChild(t.shape);
         })
     },
+    /**
+     * Clears the svg canvas of all objects
+     */
+    clear: function () {
+        var me = this, canvas = me.getCanvas();
+        canvas.childNodes.select().foreach(function (x) {
+            if (x.parentNode)
+                x.parentNode.removeChild(x);
+        })
+    },
     drawText: function (options) {
         var shape;
 

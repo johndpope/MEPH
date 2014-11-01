@@ -348,6 +348,11 @@ Promise.resolve().then(function () {
                 option.value = value;
                 element.add(option);
             },
+            clearSelect: function (select) {
+                while (select.length) {
+                    select.remove(0);
+                }
+            },
             createSimpleSelectData: function (me, el, setfunc, initval, options) {
                 var element = MEPH.util.Dom.createInputElementOverSvg(el, 'select');
                 options.unshift('');

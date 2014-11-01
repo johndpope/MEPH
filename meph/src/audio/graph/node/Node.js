@@ -174,6 +174,13 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             return x.getZones().contains(zone);
         });
     },
+    inAConnection: function (zone1, zone2) {
+
+        var me = this;
+        return me.graph.getConnections().where(function (x) {
+            return x.getZones().contains(zone1) && x.getZones().contains(zone2);
+        }).length > 0;
+    },
     isOutput: function (zone) {
         return zone.isOutput();
     },
@@ -186,19 +193,46 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         if (me.isOutput(zone1) !== !me.isOutput(zone2)) {
             return false;
         }
-        if (!me.isOutput(zone1) && me.involvedInConnections(zone1).length > 0) {//
-            return false;
-        }
+        if (!(me.getZoneType(zone1) === 'Anything' || me.getZoneType(zone2) === 'Anything'))
+            if (!me.isOutput(zone1) && me.involvedInConnections(zone1).length > 0) {//
+                return false;
+            }
 
         if (me.getZoneType(zone1) != me.getZoneType(zone2) && me.getZoneType(zone1) !== 'Anything' && me.getZoneType(zone2) !== 'Anything') {
             return false;
         }
+        if (me.inAConnection(zone1, zone2)) {
+            return false;
+        }
         return true;
     },
-    addNodeOutput: function (name, type) {
+    removeNodeOutput: function (output) {
         var me = this;
-        if (me.nodeOutputs.first(function (x) { return x.name === name; }) === null)
-            me.nodeOutputs.push(me.createOutput(name, type));
+        me.nodeOutputs.removeWhere(function (t) { return t === output; });
+    },
+    removeNodeInput: function (input) {
+        var me = this;
+        me.nodeInputs.removeWhere(function (t) { return t === input; });
+    },
+    addNodeInput: function (name, type, connector) {
+        var me = this;
+        if (!me.nodeInputs.some(function (x) { return x.connector === connector; })) {
+            var res = me.createInput(name, type)
+            res.connector = connector;
+            me.nodeInputs.push(res);
+            return res;
+        }
+        return false;
+    },
+    addNodeOutput: function (name, type, connector) {
+        var me = this;
+        if (!me.nodeOutputs.some(function (x) { return x.connector === connector; })) {
+            var res = me.createOutput(name, type)
+            res.connector = connector;
+            me.nodeOutputs.push(res);
+            return res;
+        }
+        return false;
     },
     getZoneType: function (zone) {
         var me = this;
@@ -431,6 +465,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             name: name,
             title: name,
             type: type,
+            connector: null,
             id: MEPH.GUID(),
             options: options || null,
             output: false
@@ -441,6 +476,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             name: name,
             title: name,
             type: type,
+            connector: null,
             id: MEPH.GUID(),
             output: true
         }

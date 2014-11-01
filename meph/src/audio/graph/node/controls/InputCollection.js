@@ -15,12 +15,7 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
         var me = this;
         me.super();
 
-        me.$parameterTypes = [{ name: 'Audio Buffer', value: MEPH.audio.graph.node.Node.AudioBuffer },
-        { name: 'Boolean', value: MEPH.audio.graph.node.Node.Boolean },
-        { name: 'Number', value: MEPH.audio.graph.node.Node.Number },
-        { name: 'String', value: MEPH.audio.graph.node.Node.String },
-        { name: 'Array', value: MEPH.audio.graph.node.Node.Float32Array }];
-        me.on('altered', function (type, args) {
+       me.on('altered', function (type, args) {
             if (args.path === 'collection') {
                 me.collection.un(me);
                 me.collection.on('changed', me.updateControlList.bind(me), me)
@@ -33,20 +28,18 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
         var me = this;
         me.createForm();
     },
-    onLoaded: function(){
+    onLoaded: function () {
         var me = this;
         me.super();
-        
+
         me.getFirstElement().dispatchEvent(MEPH.createEvent('height', { height: me.controlheight }));
     },
     updateControlList: function () {
         var me = this;
-        if (me.svgs) {
-            me.svgs.foreach(function (t) {
-                me.renderer.remove(t);
-            })
-        }
+
         me.renderer.setCanvas(me.collectiongroup);
+
+        me.renderer.clear();
         var step = 15;
         var last = -step;
         me.svgs = me.collection.select(function (x) {
@@ -56,7 +49,7 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
                 shape: MEPH.util.SVG.shapes.text,
                 dy: last,
                 fill: '#ffffff',
-                x: 0
+                x: 3
             }
         })
         me.renderer.draw(me.svgs);
@@ -80,47 +73,38 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
         var element = MEPH.util.Dom.createInputElementOverSvg(me.getFirstElement(), 'div');
         element.innerHTML = form.template;
         var select = element.querySelector('select');
-        select.setAttribute('placeholder', 'type')
-        me.$parameterTypes.foreach(function (t) {
-            MEPH.util.Dom.addOption(t.name, t.value, select);
-        });
+        select.setAttribute('placeholder', 'Input/Output(s)')
+        var updateselect = function () {
+            MEPH.util.Dom.clearSelect(select);
+            me.collection.foreach(function (t) {
+                MEPH.util.Dom.addOption(t.name, t.connector, select);
+            });
+        }
+        updateselect();
         Style.width(element, 300)
         var input = element.querySelector('input');
         input.setAttribute('placeholder', 'name');
 
-        var saveBtn = element.querySelector('[save]');
-        var cancelBtn = element.querySelector('[cancel]');
-
-        cancelBtn.addEventListener('click', function () {
-            document.body.focus();
-        });
-
-        saveBtn.addEventListener('click', function () {
-            if (name && type) {
-                if (me.addField({ name: name, title: name, type: type, output: false, id: MEPH.GUID() }))
-                    document.body.focus();
-            }
-        })
         var name;
-        var type;
+        var type, collectionitem;
         var elements = [{
             setFunc: function (v) {
-                name = v;
+                if (v && me.collection.all(function (x) { return x.name !== v; })) {
+                    if (collectionitem) {
+                        collectionitem.name = v;
+                        collectionitem.title = v;
+                        updateselect();
+                        me.updateControlList();
+                        select.selectedIndex = me.collection.indexOf(collectionitem);
+                    }
+                }
             },
             element: input
         }, {
             setFunc: function (v) {
-                type = v;
+                collectionitem = me.collection.first(function (x) { return x.connector === v; }) || collectionitem;
             },
             element: select
-        }, {
-            setFunc: function (v) {
-            },
-            element: saveBtn
-        }, {
-            setFunc: function (v) {
-            },
-            element: cancelBtn
         }];
 
         MEPH.util.Dom.addSimpleDataEntryToElments(me, elements, element);
