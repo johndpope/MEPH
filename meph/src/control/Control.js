@@ -448,6 +448,7 @@ MEPH.define('MEPH.control.Control', {
                     template.node.setAttribute(i, attributes[i]);
                 }
             }
+            template.injections = injections || null;
             return application.loadViewObject([template], dom, parent);
         }
 

@@ -5,7 +5,7 @@
 MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
     extend: 'MEPH.audio.graph.node.Node',
     alias: 'generatednode',
-    templates: false,
+    templates: true,
     scripts: ['MEPH.audio.graph.node.generated.Range',
                 'MEPH.audio.graph.node.generated.Select',
                 'MEPH.audio.graph.node.generated.Control'],
@@ -28,6 +28,13 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
 
                 input = input.data;
                 output = output.data;
+
+                output.nodeOutputs.foreach(function (inp) {
+                    var iname = 'output_' + MEPH.GUID().nodename();
+                    me.addCorrespondingControl(iname, inp)
+                    me.nodecontrols.push(iname);
+                });
+
                 input.nodeInputs.foreach(function (inp) {
                     var iname = 'input_' + MEPH.GUID().nodename();
                     me.addCorrespondingControl(iname, inp)
@@ -38,11 +45,6 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
                 me.$input = input;
                 me.$output = output;
 
-                output.nodeOutputs.foreach(function (inp) {
-                    var iname = 'output_' + MEPH.GUID().nodename();
-                    me.addCorrespondingControl(iname, inp)
-                    me.nodecontrols.push(iname);
-                });
                 me.generateInputTemplate(input, output);
                 me.generateProperties(input, output);
             }
@@ -50,7 +52,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
         //me.nodecontrols.push('bufferoutput');
         //me.nodecontrols.push('bufferinput');
         //me.nodecontrols.push('gain');
-        
+
         me.super();
         if (input && output) {
             input.nodeInputs.foreach(function (inp) {
@@ -102,25 +104,27 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
         });
     },
     setGeneratedProperties: function (input, output) {
-        var me = this; 
-            input.nodeInputs.concat(output.nodeOutputs).unique(function (x) {
-                return x.name.nodename();
-            }).select(function (x) {
-                var temp = me.getCorrespondingControl(x);
-                var dict = {
-                    title: temp.name.nodename() + 'Title',
-                    output: temp.name.nodename() + 'isoutput'
-                };
-                var tem = {
-                    title: x.title,
-                    output: !!!x.output
-                }
-                debugger
+        var me = this;
+        input.nodeInputs.concat(output.nodeOutputs).unique(function (x) {
+            return x.name.nodename();
+        }).select(function (x) {
+            var temp = me.getCorrespondingControl(x);
+            var dict = {
+                title: temp.name.nodename() + 'Title',
+                output: temp.name.nodename() + 'isoutput'
+            };
+            var tem = {
+                title: x.title,
+                output: !!!x.output
+            }
+            me[temp.name.nodename()].left = !!!x.output;
 
-                for (var i in dict) {
-                    me[dict[i]] = tem[i];
-                }
-            }); 
+            
+            
+            for (var i in dict) {
+                me[dict[i]] = tem[i];
+            }
+        });
     },
     /**
      * Generates the input templaet for the generated node.
@@ -134,7 +138,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
             var templateinfo = me.getGenNodeTemplateForType(x.type);
             var temp = me.getCorrespondingControl(x);
             var dict = {
-                id: 'c$.' + temp.name.nodename(),
+                id: temp.name.nodename(),
                 title: 'c$.' + temp.name.nodename() + 'Title',
                 y: 'c$.' + temp.name.nodename() + 'y',
                 types: 'c$.' + temp.name.nodename() + 'types'
@@ -144,7 +148,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
             var templateinfo = me.getGenNodeTemplateForType(x.type, 'MEPH.audio.graph.node.generated.Control');
             var temp = me.getCorrespondingControl(x);
             var dict = {
-                id: 'c$.' + temp.name.nodename(),
+                id: temp.name.nodename(),
                 title: 'c$.' + temp.name.nodename() + 'Title',
                 y: 'c$.' + temp.name.nodename() + 'y',
                 types: 'c$.' + temp.name.nodename() + 'types'
@@ -206,7 +210,9 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
         var me = this;
         me.super();
         me.title = 'Generated Node';
-        me.setGeneratedProperties(me.$input, me.$output);
+        setTimeout(function () {
+            me.setGeneratedProperties(me.$input, me.$output);
+        }, 5000)
         me.refresh++;
     }
 
