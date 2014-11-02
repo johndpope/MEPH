@@ -34,12 +34,14 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
 
                 output.nodeOutputs.foreach(function (inp) {
                     var iname = 'output_' + MEPH.GUID().nodename();
+                    inp.alternateId = iname;
                     me.addCorrespondingControl(iname, inp)
                     me.nodecontrols.push(iname);
                 });
 
                 input.nodeInputs.foreach(function (inp) {
                     var iname = 'input_' + MEPH.GUID().nodename();
+                    inp.alternateId = iname;
                     me.addCorrespondingControl(iname, inp)
                     me.nodecontrols.push(iname);
 

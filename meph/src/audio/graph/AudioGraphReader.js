@@ -33,6 +33,9 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
                     .concat(x.data.nodeOutputs.select(function (x) { return x.id; })).concat(x.data.subGraph ? MEPH.audio.graph.AudioGraphReader.collectIds(x.data.subGraph) : []);
             });
             var connectionids = graph.connections.select(function (x) { return x.id; });
+
+            connectionids = connectionids.concat(graph.connections.concatFluent(function (x) { return x.zones; }));
+            connectionids = connectionids.concat(graph.connections.concatFluent(function (x) { return x.nodes; }));
             return nodeids.concat(connectionids)
         }
     },
@@ -44,12 +47,38 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         var me = this;
         return me.$graph;
     },
-    getNodes: function () {
+    /**
+     * Gets the nodes from the graph
+     * @param {Object} [graph]
+     ***/
+    getNodes: function (graph) {
         var me = this;
 
-        var graph = me.getGraph();
+        graph = graph || me.getGraph();
 
-        return graph.nodes;
+        var nodes = graph.nodes;
+        nodes = nodes.concat(graph.nodes.where(function (x) { return x.data.subGraph; }).concatFluent(function (x) {
+
+
+            return me.getNodes(x.data.subGraph);
+        }));
+        return nodes.where(me.nodesToIgnore);
+    },
+    /**
+     * Gets the connections in the graph.
+     * @param {Object} [graph]
+     **/
+    getConnections: function (graph) {
+        var me = this;
+
+        graph = graph || me.getGraph();
+        var connections = graph.connections;
+        connections = connections.concat(graph.nodes.where(function (x) {
+            return x.data.subGraph;
+        }).concatFluent(function (x) {
+            return me.getConnections(x.data.subGraph);
+        }));
+        return connections;
     },
     /**
      * Constructs an audio object from the graph.
@@ -57,6 +86,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
      **/
     constructAudioNodeList: function () {
         var me = this;
+
         if (me.hasSingleRoot()) {
             var root = me.getRoot();
             var res = me.fillListWithOrderedTree(root);
@@ -127,12 +157,43 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         });
         return list;
     },
+    nodesToIgnore: function (x) {
+        return x.data.type !== 'MEPH.audio.graph.node.OutputNode' &&
+            x.data.type !== 'MEPH.audio.graph.node.InputNode' &&
+            x.data.type !== "MEPH.audio.graph.node.GeneratedNode";
+    },
     /**
      * Can get the root.
      **/
     getRoots: function () {
+        var me = this,
+            connections = me.getConnections(),
+            nodes = me.getNodes();
+        connections.foreach(function (connection) {
+            connection.zones.foreach(function (zone) {
+                var node = nodes.first(function (node) {
+                    return me.getOutputZones(node).first(function (nz) { return nz.id === zone; });
+                });
+                if (node) {
+                    nodes.removeWhere(function (n) { return n == node; });
+                }
+            });
+        });
+
+
+        return nodes;
+        //return me.getNodes().where(function (x) {
+        //    return me.getIndependentNodes(x).length === 0 && x.data.type !== 'MEPH.audio.graph.node.OutputNode'
+        //    && x.data.type !== "MEPH.audio.graph.node.GeneratedNode";
+        //});
+    },
+    getOutputZones: function (node) {
         var me = this;
-        return me.getNodes().where(function (x) { return me.getInpendentNodes(x).length === 0; });
+        return node.data.nodeOutputs;
+    },
+    getInputZones: function (node) {
+        var me = this;
+        return node.data.nodeInputs;
     },
     /**
      * Returns true if the graph has a single root.
@@ -153,18 +214,13 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
      * @param {Object} node
      * @return {Array}
      **/
-    getInpendentNodes: function (node) {
+    getIndependentNodes: function (node) {
         var me = this;
-        var result = me.getGraph().connections.where(function (x) {
+        var result = me.getConnections().where(function (x) {
             var cn = x.nodes.first(function (t) { return t === node.id; });
             if (cn) {
-                var cz = x.zones.first(function (t) {
-                    return t.indexOf(node.id) !== -1;
-                });
-                if (cz) {
-                    var res = me.getNodeConnectorById(cz);
-                    return res.output;
-                }
+                var zone = me.getOutputZonesOfNode(cn, x.zones);
+                return zone;
             }
             return false;
         }).select(function (x) {
@@ -175,6 +231,47 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
 
         return result;
     },
+
+    getOutputZonesOfNode: function (nodeid, zones) {
+        var me = this, res = me.getZonesOfNode(nodeid);
+        return res.outputs.first(function (t) {
+            return zones.some(function (x) {
+                return x === t.id;
+            });
+        });
+    },
+    getInputZonesOfNode: function (nodeid, zones) {
+        var me = this, res = me.getZonesOfNode(nodeid);
+        return res.inputs.first(function (t) {
+            return zones.some(function (x) {
+                return x === t.id;
+            });
+        });
+    },
+    getZonesOfNode: function (nodeId) {
+        var me = this;
+        return {
+            inputs: me.getNodeById(nodeId).data.nodeInputs,
+            outputs: me.getNodeById(nodeId).data.nodeOutputs
+        };
+    },
+    getZone: function (id) {
+        var me = this, nodes = me.getNodes();
+        return nodes.selectFirst(function (node) {
+            var z = me.getZonesOfNode(node.id);
+            return z.inputs.first(function (y) { return y.id === id; }) ||
+                z.outputs.first(function (y) { return y.id === id; });
+        });
+    },
+    getNodeByZone: function (zone) {
+        var me = this, nodes = me.getNodes();
+        return nodes.first(function (node) {
+            var zd = me.getZonesOfNode(node.id);
+            return zd.inputs.first(function (t) { return t === zone; }) ||
+                zd.outputs.first(function (t) { return t === zone; })
+
+        })
+    },
     /**
      * Gets the node's input connections.
      * @param {Object} node
@@ -182,34 +279,23 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
      **/
     getInputs: function (node) {
         var me = this;
-        var inpedentnodes = me.getGraph().connections.where(function (x) {
-            var cn = x.nodes.first(function (t) { return t === node.id; });
-            if (cn) {
-                var cz = x.zones.first(function (t) {
-                    return t.indexOf(node.id) !== -1;
-                });
-                if (cz) {
-                    var res = me.getNodeConnectorById(cz);
-                    return !res.output;
-                }
-            }
-            return false;
+        var inpedentnodes = me.getConnections().where(function (x) {
+
+            var zones = x.zones.select(function (t) { return me.getZone(t); }).where();
+            if (zones.length < 2) return false;
+            var target = zones.first(function (t) { return !t.output; });
+            return me.getNodeByZone(target) === node;
         }).select(function (x) {
-            var cn = x.nodes.first(function (t) { return t === node.id; });
-            if (cn) {
-                var cz = x.zones.first(function (t) {
-                    return t.indexOf(node.id) === -1;
-                });
-                var ctozone = x.zones.first(function (t) {
-                    return t.indexOf(node.id) !== -1;
-                });
-                var resto = me.getNodeConnectorById(ctozone);
-                var res = me.getNodeConnectorById(cz);
-                return {
-                    node: me.getNodeById(x.nodes.first(function (t) { return t !== node.id; })),
-                    connection: res,
-                    to: resto
-                }
+            var zones = x.zones.select(function (t) { return me.getZone(t); });
+            var input = zones.first(function (t) { return !t.output; });
+            var output = zones.first(function (t) { return t.output; });
+            var othernode = me.getNodeByZone(output);
+
+
+            return {
+                node: othernode,
+                connection: input,
+                to: output
             }
         });
         return inpedentnodes;
@@ -404,31 +490,6 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         return node.data.nodeInputs.first(function (x) { return x.name === name; })
     },
     /**
-     * Gets the nodes dependencies.
-     * @param {Object} node
-     * @return {Array}
-     **/
-    getDependentNodes: function (node) {
-        var me = this;
-        return me.getGraph().connections.where(function (x) {
-            var cn = x.nodes.first(function (t) { return t === node.id; });
-            if (cn) {
-                var cz = x.zones.first(function (t) {
-                    return t.indexOf(node.id) !== -1;
-                });
-                if (cz) {
-                    var res = me.getNodeConnectorById(cz);
-                    return !res.output;
-                }
-            }
-            return false;
-        }).select(function (x) {
-            var cn = x.nodes.first(function (t) { return t !== node.id; });
-
-            return me.getNodeById(cn);
-        })
-    },
-    /**
      * Gets node by id.
      * @param {String} id
      * @returns {Object}
@@ -436,29 +497,5 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
     getNodeById: function (id) {
         var me = this;
         return me.getNodes().first(function (x) { return x.id === id; });
-    },
-    /**
-     * Gets node connector by id
-     **/
-    getNodeConnectorById: function (id) {
-        var me = this;
-        var node = me.getNodes().first(function (x) {
-            return id.indexOf(x.id) === 0;
-        });
-        var connector = id.split('').subset(node.id.length).join('');
-        var inputoutputid = connector.split('-').where().first();
-        if (inputoutputid.indexOf('output') !== -1) {
-        }
-        var input = node.data.nodeInputs.first(function (x) {
-            return x.name === inputoutputid || x.name + 'input' === inputoutputid;
-        })
-
-        var output = node.data.nodeOutputs.first(function (x) {
-            return x.name === inputoutputid || x.name + 'output' === inputoutputid;
-        })
-
-        var io = input || output;
-
-        return io;
     }
 });

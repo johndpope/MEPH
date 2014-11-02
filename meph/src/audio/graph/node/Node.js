@@ -151,7 +151,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
             var input = me.getCorrespondingMatch(x);
             var zone = viewport.requestZone(node, {
                 managed: true,
-                id: node.getId() + '-' + x + '-connector',
+                id: input.id,//node.getId() + '-' + x + '-connector',
                 type: MEPH.graph.ActiveZone.type.connector,
                 property: x,
                 dom: me[x].connector,
@@ -248,21 +248,21 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         var me = this;
         me.nodeInputs.removeWhere(function (t) { return t === input; });
     },
-    addNodeInput: function (name, type, connector) {
+    addNodeInput: function (name, type, id) {
         var me = this;
-        if (!me.nodeInputs.some(function (x) { return x.connector === connector; })) {
+        if (!me.nodeInputs.some(function (x) { return x.id === id; })) {
             var res = me.createInput(name, type)
-            res.connector = connector;
+            res.id = id;
             me.nodeInputs.push(res);
             return res;
         }
         return false;
     },
-    addNodeOutput: function (name, type, connector) {
+    addNodeOutput: function (name, type, id) {
         var me = this;
-        if (!me.nodeOutputs.some(function (x) { return x.connector === connector; })) {
+        if (!me.nodeOutputs.some(function (x) { return x.id === id; })) {
             var res = me.createOutput(name, type)
-            res.connector = connector;
+            res.id = id;
             me.nodeOutputs.push(res);
             return res;
         }
