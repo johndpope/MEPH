@@ -353,6 +353,6 @@
         var reader = new AudioGraphReader();
         reader.setGraph(deepseed);
 
-        expect(reader.getConnections().length).toBe(15);
+        expect(reader.getConnections().length).toBe(7);
     })
 });

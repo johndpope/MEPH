@@ -369,7 +369,19 @@ MEPH.define('MEPH.audio.Audio', {
     merger: function (options) {
         var me = this;
         options = options || {};
-
+        if (options && options.buffer && options.buffer.id) {
+            
+            var count = me.nodes.count(function (node) {
+                if (node && node.options && node.options.node && node.options.node.data && node.options.node.data.nodeOutputs)
+                    return node.options.node.data.nodeOutputs.some(function (y) {
+                        return y.id === options.buffer.id;
+                    });
+                return false;
+            });
+            if (count > 2) {
+                
+            }
+        }
         me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.merger; })
         return me;
     },
@@ -466,9 +478,9 @@ MEPH.define('MEPH.audio.Audio', {
             case A.nodeTypes.analyser:
                 return me.createContext(options).createAnalyser();
             case A.nodeTypes.splitter:
-                return me.createContext(options).createChannelSplitter(nodeoptions.channels || 2);
+                return me.createContext(options).createChannelSplitter(nodeoptions.channels || 4);
             case A.nodeTypes.merger:
-                return me.createContext(options).createChannelMerger(nodeoptions.channels || 2);
+                return me.createContext(options).createChannelMerger(nodeoptions.channels || 4);
             case A.nodeTypes.periodicWave:
                 return me.createContext(options).createPeriodicWave(nodeoptions.real || real, nodeoptions.imaginary || imag);
             case A.nodeTypes.biquadFilter:
