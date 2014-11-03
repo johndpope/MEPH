@@ -362,15 +362,23 @@ MEPH.define('MEPH.audio.Audio', {
     splitter: function (options) {
         var me = this;
         options = options || {};
-
+        options.splitIndex = 0;
+        me.setChannels(options);
         me.createNode(options || null, function () { return MEPH.audio.Audio.nodeTypes.splitter; })
         return me;
     },
     merger: function (options) {
         var me = this;
         options = options || {};
+        options.mergeIndex = 0;
+        me.setChannels(options);
+        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.merger; })
+        return me;
+    },
+    setChannels: function (options) {
+        var me = this;
         if (options && options.buffer && options.buffer.id) {
-            
+
             var count = me.nodes.count(function (node) {
                 if (node && node.options && node.options.node && node.options.node.data && node.options.node.data.nodeOutputs)
                     return node.options.node.data.nodeOutputs.some(function (y) {
@@ -379,11 +387,9 @@ MEPH.define('MEPH.audio.Audio', {
                 return false;
             });
             if (count > 2) {
-                
+                options.channels = count;
             }
         }
-        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.merger; })
-        return me;
     },
     periodicWave: function (options) {
         var me = this;
@@ -478,9 +484,9 @@ MEPH.define('MEPH.audio.Audio', {
             case A.nodeTypes.analyser:
                 return me.createContext(options).createAnalyser();
             case A.nodeTypes.splitter:
-                return me.createContext(options).createChannelSplitter(nodeoptions.channels || 4);
+                return me.createContext(options).createChannelSplitter(nodeoptions.channels || 2);
             case A.nodeTypes.merger:
-                return me.createContext(options).createChannelMerger(nodeoptions.channels || 4);
+                return me.createContext(options).createChannelMerger(nodeoptions.channels || 2);
             case A.nodeTypes.periodicWave:
                 return me.createContext(options).createPeriodicWave(nodeoptions.real || real, nodeoptions.imaginary || imag);
             case A.nodeTypes.biquadFilter:
@@ -593,55 +599,67 @@ MEPH.define('MEPH.audio.Audio', {
 
         switch (targetnode.type) {
             case 'splitter':
-                if (x.options.buffer) {
-                    targetnode.node.connect(x.node, 0, me.getBufferIndex(x));
-                }
-                if (x.options.buffer2) {
-                    targetnode.node.connect(x.node, 1, me.getBufferIndex(x));
-                }
-                if (x.options.buffer3) {
-                    targetnode.node.connect(x.node, 2, me.getBufferIndex(x));
-                }
-                if (x.options.buffer4) {
-                    targetnode.node.connect(x.node, 3, me.getBufferIndex(x));
-                }
+                x.options.splitIndex = x.options.splitIndex || -1;
+                x.options.splitIndex++;
+
+                targetnode.node.connect(x.node, 0, x.options.splitIndex);
+
+                //if (x.options.buffer) {
+                //    targetnode.node.connect(x.node, 0, me.getBufferIndex(x));
+                //}
+                //if (x.options.buffer2) {
+                //    targetnode.node.connect(x.node, 1, me.getBufferIndex(x));
+                //}
+                //if (x.options.buffer3) {
+                //    targetnode.node.connect(x.node, 2, me.getBufferIndex(x));
+                //}
+                //if (x.options.buffer4) {
+                //    targetnode.node.connect(x.node, 3, me.getBufferIndex(x));
+                //}
                 break;
             default:
                 if (x.type === MEPH.audio.Audio.nodeTypes.merger) {
                     //targetnode.node.connect(x.node, 0, me.getBufferIndex(x));
+                    x.options.mergedIndex = x.options.mergedIndex || -1;
+                    x.options.mergedIndex++;
+                    targetnode = nodes.first(function (node) {
+                        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
+                    });
 
-                    if (x.options.buffer) {
+                    targetnode.node.connect(x.node, 0, x.options.mergedIndex);
 
-                        targetnode = nodes.first(function (node) {
-                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
-                        });
+                    //if (x.options.buffer) {
 
-                        targetnode.node.connect(x.node, 0, 0);
-                    }
-                    if (x.options.buffer2) {
+                    //    targetnode = nodes.first(function (node) {
+                    //        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
+                    //    });
+                    //    targetnode.node.connect(x.node, 0, 0);
 
-                        targetnode = nodes.first(function (node) {
-                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer2.id; });
-                        });
+                    //}
+                    //if (x.options.buffer2) {
 
-                        targetnode.node.connect(x.node, 0, 1);
-                    }
-                    if (x.options.buffer3) {
+                    //    targetnode = nodes.first(function (node) {
+                    //        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer2.id; });
+                    //    });
 
-                        targetnode = nodes.first(function (node) {
-                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer3.id; });
-                        });
+                    //    targetnode.node.connect(x.node, 0, 1);
+                    //}
+                    //if (x.options.buffer3) {
 
-                        targetnode.node.connect(x.node, 0, 2);
-                    }
-                    if (x.options.buffer4) {
+                    //    targetnode = nodes.first(function (node) {
+                    //        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer3.id; });
+                    //    });
 
-                        targetnode = nodes.first(function (node) {
-                            return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer4.id; });
-                        });
+                    //    targetnode.node.connect(x.node, 0, 2);
+                    //}
+                    //if (x.options.buffer4) {
 
-                        targetnode.node.connect(x.node, 0, 3);
-                    }
+                    //    targetnode = nodes.first(function (node) {
+                    //        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer4.id; });
+                    //    });
+
+                    //    targetnode.node.connect(x.node, 0, 3);
+                    //}
                 }
                 else
                     targetnode.node.connect(x.node);

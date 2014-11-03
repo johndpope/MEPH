@@ -218,6 +218,14 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     isOutput: function (zone) {
         return zone.isOutput();
     },
+    checkZoneTypeCompatibility: function (zone1, zone2) {
+        var me = this;
+        if (me.getZoneType(zone1) === MEPH.audio.graph.node.Node.String ||
+            me.getZoneType(zone2) === MEPH.audio.graph.node.Node.String) {
+            return me.getZoneType(zone1) === me.getZoneType(zone2);
+        }
+        return true;
+    },
     canConnect: function (zone1, zone2) {
         var me = this;
 
@@ -232,7 +240,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
                 return false;
             }
 
-        if (me.getZoneType(zone1) != me.getZoneType(zone2) && me.getZoneType(zone1) !== 'Anything' && me.getZoneType(zone2) !== 'Anything') {
+        if (!me.checkZoneTypeCompatibility(zone1, zone2)) {
             return false;
         }
         if (me.inAConnection(zone1, zone2)) {
