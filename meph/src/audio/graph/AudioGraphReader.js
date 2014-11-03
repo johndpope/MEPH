@@ -294,8 +294,8 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
 
             return {
                 node: othernode,
-                connection: input,
-                to: output
+                connection: output,
+                to: input
             }
         });
         return inpedentnodes;
