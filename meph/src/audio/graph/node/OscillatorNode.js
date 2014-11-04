@@ -20,7 +20,6 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
 
         me.nodecontrols = me.nodecontrols || [];
         me.nodecontrols.push('bufferoutput');
-        me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('frequency');
         me.nodecontrols.push('detune');
         me.nodecontrols.push('typeinput');

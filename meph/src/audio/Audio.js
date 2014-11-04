@@ -244,8 +244,15 @@ MEPH.define('MEPH.audio.Audio', {
     buffer: function (buffer, options) {
         var me = this;
         options = options || {};
+        if (!buffer && MEPH.audio.Audio.sourcebuffer) {
+            var res = MEPH.audio.Audio.sourcebuffer.first(function (x) { return x; })
+            if (res) {
+                buffer = res.buffer;
+            }
+        }
         options.buffer = buffer;
-        me.nodes.push({ options: options || null, buffer: buffer, type: MEPH.audio.Audio.nodeTypes.buffer })
+        options.noinputs = true;
+        me.nodes.push({ options: options, buffer: buffer, type: MEPH.audio.Audio.nodeTypes.buffer })
         return me;
     },
     /**
@@ -590,14 +597,21 @@ MEPH.define('MEPH.audio.Audio', {
                 if (x.options && x.options.buffer && x.options.buffer.id) {//If point to a specific node, find it in the previous partss.
                     me.completeTargetNodes(nodes, x);
                 }
+                else if (x.options && x.options.noinputs) {
+                    //do nothin.
+                }
                 else {
                     last.connect(x.node);
                 }
 
                 if (x.params) {
                     x.params.foreach(function (param) {
-                        if (x.options[param.name] && typeof x.options[param.name] === 'object') {
+                        if (x.options && x.options[param.name] && typeof x.options[param.name] === 'object') {
                             me.connectTargetToNode(nodes, x, param);
+                        }
+                        else if (x.node[param.name] && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
+    
+                            x.node[param.name].value = x.options[param.name];
                         }
                     })
                 }
