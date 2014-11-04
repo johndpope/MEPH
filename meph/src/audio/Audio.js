@@ -341,7 +341,9 @@ MEPH.define('MEPH.audio.Audio', {
     dynamicsCompressor: function (options) {
         var me = this, params = me.createK('attack', 'knee', 'ratio', 'reduction', 'release', 'threshold').concat(me.createA());
 
-        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.dynamicsCompressor }, params)
+        me.createNode(options, function () {
+            return MEPH.audio.Audio.nodeTypes.dynamicsCompressor
+        }, params)
         return me;
 
     },
@@ -419,20 +421,20 @@ MEPH.define('MEPH.audio.Audio', {
     },
     createK: function () {
         var me = this, args = MEPH.Array(arguments);
-        return me.createParams(['k'].concat(args))
+        return me.createParams.apply(me, ['k'].concat(args.select()))
     },
     createA: function () {
         var me = this, args = MEPH.Array(arguments);
-        return me.createParams(['a'].concat(args))
+        return me.createParams.apply(me, ['a'].concat(args.select()));
     },
     createS: function () {
         var me = this, args = MEPH.Array(arguments);
-        return me.createParams(['S'].concat(args))
+        return me.createParams.apply(me, (['S'].concat(args.select())));
     },
     createParams: function () {
         var me = this, args = MEPH.Array(arguments);
         var type = args.first();
-        return args.subset(1).select(function (x) {
+        return args.subset(1).select(function (name) {
             return {
                 type: type,
                 name: name
@@ -591,6 +593,14 @@ MEPH.define('MEPH.audio.Audio', {
                 else {
                     last.connect(x.node);
                 }
+
+                if (x.params) {
+                    x.params.foreach(function (param) {
+                        if (x.options[param.name] && typeof x.options[param.name] === 'object') {
+                            me.connectTargetToNode(nodes, x, param);
+                        }
+                    })
+                }
             }
             last = x.node;
         });
@@ -609,6 +619,40 @@ MEPH.define('MEPH.audio.Audio', {
                 case 'buffer4':
                     return 3;
             }
+    },
+    connectTargetToNode: function (nodes, x, param) {
+        var targetnode,
+            me = this;
+
+        targetnode = nodes.first(function (node) {
+            return node.options.node.data.nodeOutputs.some(function (y) {
+                return y.id === x.options[param.name].id;
+            });
+        });
+
+        switch (targetnode.type) {
+            case 'splitter':
+                x.options.splitIndex = x.options.splitIndex || -1;
+                x.options.splitIndex++;
+
+                targetnode.node.connect(x.node[param.name], 0, x.options.splitIndex);
+
+                break;
+            default:
+                if (x.type === MEPH.audio.Audio.nodeTypes.merger) {
+                    x.options.mergedIndex = x.options.mergedIndex || -1;
+                    x.options.mergedIndex++;
+                    targetnode = nodes.first(function (node) {
+                        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
+                    });
+
+                    targetnode.node.connect(x.node[param.name], 0, x.options.mergedIndex);
+
+                }
+                else
+                    targetnode.node.connect(x.node[param.name]);
+                break;
+        }
     },
     completeTargetNodes: function (nodes, x) {
         var targetnode,

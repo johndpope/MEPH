@@ -363,7 +363,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'k' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     })
 
 
@@ -374,7 +374,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'a' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 
 
@@ -385,7 +385,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'boolean' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 
     it('an delay node will have a defined listi of parameters which i can use for connecting and etc.', function () {
@@ -395,7 +395,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'a' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 
 
@@ -406,7 +406,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'k' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 
     it('an gain node will have a defined listi of parameters which i can use for connecting and etc.', function () {
@@ -416,7 +416,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'a' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 
     it('an waveShaper node will have a defined listi of parameters which i can use for connecting and etc.', function () {
@@ -426,7 +426,7 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'float32array' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 
     it('an analyser node will have a defined listi of parameters which i can use for connecting and etc.', function () {
@@ -436,6 +436,6 @@
         var params = audio.get({ node: 'node' }).first().params;
         expect(params).toBeTruthy();
         var krateParam = params.first(function (x) { return x.type === 'plainNumber' });
-        expect(krateParam);
+        expect(krateParam).toBeTruthy();
     });
 });
