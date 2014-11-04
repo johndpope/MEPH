@@ -295,7 +295,7 @@
         var audio = new Audio();
 
         audio.load(audiofile, audiofiletyp).then(function (resource) {
-            
+
             var result = audio.copyToBuffer(resource, 40, 40.2);
 
             var res = Audio.quickAnalysis(result);
@@ -356,4 +356,86 @@
         expect(thrown).toBeTruthy();
     })
 
+    it('an audio node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.biquadFilter({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'k' });
+        expect(krateParam);
+    })
+
+
+    it('an oscillator node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.oscillator({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'a' });
+        expect(krateParam);
+    });
+
+
+    it('an convolver node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.convolver({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'boolean' });
+        expect(krateParam);
+    });
+
+    it('an delay node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.delay({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'a' });
+        expect(krateParam);
+    });
+
+
+    it('an dynamicsCompressor node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.dynamicsCompressor({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'k' });
+        expect(krateParam);
+    });
+
+    it('an gain node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.gain({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'a' });
+        expect(krateParam);
+    });
+
+    it('an waveShaper node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.waveShaper({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'float32array' });
+        expect(krateParam);
+    });
+
+    it('an analyser node will have a defined listi of parameters which i can use for connecting and etc.', function () {
+        var audio = new Audio();
+
+        audio.analyser({ node: 'node' });
+        var params = audio.get({ node: 'node' }).first().params;
+        expect(params).toBeTruthy();
+        var krateParam = params.first(function (x) { return x.type === 'plainNumber' });
+        expect(krateParam);
+    });
 });

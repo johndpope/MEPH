@@ -320,6 +320,17 @@
         audio.complete();
     });
 
+
+    it('can create an audio node from a graph with connections between parameters and buffer outputs', function () {
+        var reader = new AudioGraphReader();
+        reader.setGraph(bufferParamGraph);
+
+        var audio = reader.createAudio();
+        expect(audio).toBeTruthy();
+        debugger
+        audio.complete();
+    });
+
     it('can produce a unique version of a graph, meaning the ids are switch , but all is relatively the same', function () {
         var result = AudioGraphReader.cloneUnique(seed);
 
@@ -347,7 +358,6 @@
         var reader = new AudioGraphReader();
         reader.setGraph(bufferParamGraph);
 
-        debugger
         var audio = reader.createAudio();
         expect(audio).toBeTruthy();
     })
