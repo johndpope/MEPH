@@ -3,7 +3,7 @@
  * Defines a base class for Audio.
  **/
 MEPH.define('MEPH.audio.Audio', {
-    requires: ['MEPH.util.Dom'],
+    requires: ['MEPH.util.Dom', 'MEPH.util.Observable'],
     statics: {
         /**
          * Audio context.
@@ -11,6 +11,7 @@ MEPH.define('MEPH.audio.Audio', {
         audioCtx: null,
 
         sourcebuffer: null,
+        CHANGED_BUFFER_SOURCE: 'CHANGED_BUFFER_SOURCE',
         nodeTypes: {
             oscillator: 'oscillator',
             gain: 'gain',
@@ -26,7 +27,9 @@ MEPH.define('MEPH.audio.Audio', {
             buffer: 'buffer ',
             biquadFilter: 'biquadFilter'
         },
-
+        GetSourceBuffer: function () {
+            return MEPH.audio.Audio.sourcebuffer;
+        },
         /**
          * Does a quick analysis of resource.
          **/
@@ -206,10 +209,31 @@ MEPH.define('MEPH.audio.Audio', {
         Audio.sourcebuffer = Audio.sourcebuffer || [];
         return MEPH.audio.Audio.sourcebuffer;
     },
+    /**
+     * Adds a buffer source.
+     * @param {Object} options
+     * @return {Array}
+     ***/
     addBufferSource: function (options) {
         var me = this, Audio = MEPH.audio.Audio;
-        Audio.sourcebuffer = Audio.sourcebuffer || [];
+        Audio.sourcebuffer = Audio.sourcebuffer || MEPH.util.Observable.observable([]);
+        options.id = options.id || MEPH.GUID();
         Audio.sourcebuffer.push(options);
+        MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, options, Audio.sourcebuffer);
+        return options;
+    },
+    /**
+     * Remove buffer source by id.
+     * @param {String} id
+     * @return {Array}
+     ***/
+    removeBufferSource: function (id) {
+        var Audio = MEPH.audio.Audio;
+        if (Audio.sourcebuffer) {
+            MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, Audio.sourcebuffer);
+            return Audio.sourcebuffer.removeWhere(function (t) { return t.id === id; });
+        }
+        return null;
     },
     createContext: function (options) {
         var me = this;
@@ -610,7 +634,7 @@ MEPH.define('MEPH.audio.Audio', {
                             me.connectTargetToNode(nodes, x, param);
                         }
                         else if (x.node[param.name] && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
-    
+
                             x.node[param.name].value = x.options[param.name];
                         }
                     })

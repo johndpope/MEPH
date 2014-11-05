@@ -4,6 +4,7 @@
  **/
 MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
     extend: 'MEPH.audio.graph.node.Node',
+    requires: ['MEPH.audio.Audio'],
     alias: 'audiobuffersource',
     templates: true,
     properties: {

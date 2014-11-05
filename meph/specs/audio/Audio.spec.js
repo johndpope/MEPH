@@ -201,6 +201,19 @@
         }).then(done);
     });
 
+    it('adding buffer source to audio will publish a CHANGED_BUFFER_SOURCE event', function () {
+        var audio = new MEPH.audio.Audio(),
+            called, buffersource;
+        MEPH.subscribe(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, function (type, added, buffer) {
+            called = true;
+        })
+        
+        buffersource = audio.addBufferSource({});
+
+        expect(called).toBeTruthy();
+        audio.removeBufferSource(buffersource.id);
+    })
+
     it('can render offline', function (done) {
         var audio = new MEPH.audio.Audio();
 
