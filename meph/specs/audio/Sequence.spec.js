@@ -94,16 +94,41 @@
         expect(result.length).toBe(1);
     });
 
-    it('a sequence can return the audio parts of another sequence which will begin with an certain range. ', function () {
+    it('a sequence can return the audio parts of another sequence which will begin within certain range. ', function () {
         var sequence = new MEPH.audio.Sequence();
         var sequence2 = new MEPH.audio.Sequence();
         var audio = new MEPH.audio.Audio();
         audio.duration = 3;
         sequence2.add(audio, 0);
         sequence.add(sequence2, 3);
-        
+
         var result = sequence.getScheduledAudio(2.3, 1);
 
         expect(result.length).toBe(1);
     });
+
+    it('a sequence can serialize to json', function () {
+        var sequence = new MEPH.audio.Sequence();
+        var sequence2 = new MEPH.audio.Sequence();
+        sequence.add(sequence2, 1);
+
+        var res = sequence.toJSON();
+        expect(res).toBeTruthy();
+    });
+
+    it('a sequence can deserialize from a json object', function () {
+        var sequence = new MEPH.audio.Sequence();
+        var sequence2 = new MEPH.audio.Sequence();
+        sequence.add(sequence2, 1);
+
+        var res = JSON.stringify(sequence.toJSON());
+        var deserialized = MEPH.audio.Sequence.deserialize(res, { get: function () { return new MEPH.audio.Audio(); } });
+        expect(deserialized).toBeTruthy();
+    });
+
+    it('items returns the list of parts ', function () {
+        var sequence = new MEPH.audio.Sequence();
+        var res = sequence.items();
+        expect(res).toBeTruthy();
+    })
 });

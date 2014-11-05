@@ -112,8 +112,9 @@ MEPH.define('MEPH.audio.Audio', {
         sourcebuffer: null,
         offlineContext: false
     },
-    initialize: function () {
+    initialize: function (injections) {
         var me = this;
+        MEPH.applyIf(injections, me);
         me.nodes = [];
         me.sourcebuffer = [];
     },

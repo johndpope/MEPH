@@ -9,6 +9,12 @@
         expect(audio).toBeTruthy();
     });
 
+    it('an audio object has an id', function () {
+        var audio = new MEPH.audio.Audio({ id: MEPH.GUID() });
+
+        expect(audio.id).toBeTruthy();
+    })
+
     it('can create an audio context', function () {
         var audio = new MEPH.audio.Audio();
 
@@ -207,7 +213,7 @@
         MEPH.subscribe(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, function (type, added, buffer) {
             called = true;
         })
-        
+
         buffersource = audio.addBufferSource({});
 
         expect(called).toBeTruthy();

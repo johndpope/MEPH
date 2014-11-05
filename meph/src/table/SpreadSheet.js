@@ -725,6 +725,9 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     updateCells: function () {
         var me = this;
+        if (!me.loaded) {
+            return;
+        }
         if (me.updateCellsAnimFrame !== null && me.updateCellsAnimFrame !== undefined) {
             cancelAnimationFrame(me.updateCellsAnimFrame);
         }

@@ -396,6 +396,16 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.any) {
+                Object.defineProperty(array, 'any', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        return this.select(function (x) { return x }).first(func) !== null
+                    }
+                })
+            }
 
             if (!array.firstIndex) {
                 Object.defineProperty(array, 'firstIndex', {
