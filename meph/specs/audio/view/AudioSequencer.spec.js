@@ -79,6 +79,41 @@
         var audiosequencer = new MEPH.audio.view.AudioSequencer();
         expect(audiosequencer.rowheader.function).toBeTruthy();
     })
+    it('the columnheader function is setup on the audiosequencer', function () {
+        var audiosequencer = new MEPH.audio.view.AudioSequencer();
+        expect(audiosequencer.columnheader.function).toBeTruthy();
+    })
+
+    it('the leftheadersource is setup on the audiosequencer', function () {
+        var audiosequencer = new MEPH.audio.view.AudioSequencer();
+        expect(audiosequencer.leftheadersource).toBeTruthy();
+    })
+
+    it('the topheadersource is setup on the audiosequencer', function () {
+        var audiosequencer = new MEPH.audio.view.AudioSequencer();
+        expect(audiosequencer.topheadersource).toBeTruthy();
+    })
+
+    it('the rowheaders is setup on the audiosequencer', function () {
+        var audiosequencer = new MEPH.audio.view.AudioSequencer();
+        expect(audiosequencer.rowheaders).toBeTruthy();
+    })
+
+
+    it('the columnheaders is setup on the audiosequencer', function () {
+        var audiosequencer = new MEPH.audio.view.AudioSequencer();
+        expect(audiosequencer.columnheaders).toBeTruthy();
+    })
+
+    it('the rowheader function can get the title of the row from the iteme in the sequence', function () {
+        var audiosequencer = new MEPH.audio.view.AudioSequencer();
+        var sequence = createSequence();
+        audiosequencer.sequence = sequence;
+        var item = sequence.itemSequences().first();
+
+        var time = audiosequencer.rowheader.function(item);
+        expect(time).toBeTruthy();
+    })
 
     it('the time function can get the time of an item in the sequence', function () {
         var audiosequencer = new MEPH.audio.view.AudioSequencer();
@@ -113,5 +148,49 @@
         var item = audiosequencer.settime.function(item, 0);
 
         expect(item.relativeTimeOffset).toBe(0);
-    })
+    });
+
+    it('can setup a key press variable to execute a command', function (done) {
+        MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var sequencer = results.first().classInstance;
+
+            sequencer.setContextMenuOpenKey('t');
+
+            sequencer.dispatchEvent('keypress', { which: 't'.charCodeAt(0) }, sequencer.canvas);
+
+            expect(sequencer.$canvasContextMenuEl).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('hitting the open context menu button over the canvas will open a menu', function () {
+        MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var sequencer = results.first().classInstance;
+
+            sequencer.dispatchEvent('keypress', { which: 'v'.charCodeAt(0) }, sequencer.canvas);
+            expect(sequencer.$canvasContextMenuEl).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
 });

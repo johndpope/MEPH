@@ -19,6 +19,11 @@
             "path": "/music/Visualizer"
         },
         {
+            "viewId": "audiosequencer",
+            "view": "MEPHControls.music.view.AudioSequencer",
+            "path": "/music/AudioSequencer"
+        },
+        {
             "viewId": "audiograph",
             "view": "MEPHControls.music.view.AudioGraph",
             "path": "/audio/graph"

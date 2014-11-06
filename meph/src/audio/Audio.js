@@ -110,12 +110,15 @@ MEPH.define('MEPH.audio.Audio', {
         audioCtx: null,
         nodes: null,
         sourcebuffer: null,
+        title: 'Untitled',
+        id: null,
         offlineContext: false
     },
     initialize: function (injections) {
         var me = this;
         MEPH.applyIf(injections, me);
         me.nodes = [];
+        me.id = MEPH.GUID();
         me.sourcebuffer = [];
     },
     /**

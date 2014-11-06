@@ -18,6 +18,13 @@
                     "path": "/communication/Communication"
                 },
                 {
+                    "viewId": "audiosequencer",
+                    "description": "Audio Sequencer",
+                    "iconType": "launch",
+                    "itemType": "launch",
+                    "path": "/music/AudioSequencer"
+                },
+                {
                     "viewId": "MEPH0102",
                     "description": "Music Visualizer",
                     "iconType": "launch",

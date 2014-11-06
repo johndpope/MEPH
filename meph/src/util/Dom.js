@@ -317,6 +317,20 @@ Promise.resolve().then(function () {
                 var rect = element.getBoundingClientRect();
                 return rect;
             },
+            createCenteredElement: function (type) {
+                var sp = {
+                    top: document.body.clientHeight / 2,
+                    width: document.body.clientWidth / 2
+                };
+                var element = document.createElement(type || 'div');
+                Style.position(element, 'absolute');
+                Style.zIndex(element, 100000);
+                Style.top(element, sp.top);
+                Style.left(element, sp.left);
+                document.body.appendChild(element);
+
+                return element;
+            },
             createInputElementOverSvg: function (svg, type, element) {
 
                 var sp = MEPH.util.Dom.getScreenPosition(svg);
@@ -437,7 +451,7 @@ Promise.resolve().then(function () {
 
                             me.dun(elements);
                         }
-                    }, 400)
+                    }, 40)
                 }.bind(me, elements), elements);
                 elements.foreach(function (elset) {
                     var element = elset.element;

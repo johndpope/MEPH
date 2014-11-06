@@ -277,6 +277,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.don('keypress', me.canvas, function (evt) {
             me.onKeyPress(evt);
         });
+
+        me.don('keypress', me.leftheader, function (evt) {
+            me.onKeyPress(evt);
+        });
+
         me.don('mousemove', me.canvas, function (evt) {
             if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
                 var cell = me.hovercells ? me.hovercells.first() : me.getCanvasCells(evt).first()
@@ -953,6 +958,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
                 switch (command.command) {
                     case 'select':
                         me.state === MEPH.table.SpreadSheet.states.Selecting ? me.endselect() : me.select();
+                        break;
+                    default:
+                        if (command.function) {
+                            command.function(evt);
+                        }
                         break;
                 }
             }

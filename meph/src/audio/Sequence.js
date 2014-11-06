@@ -17,6 +17,7 @@ MEPH.define('MEPH.audio.Sequence', {
     },
     properties: {
         parts: null,
+        title: 'Untitled',
         containsSequences: false
     },
     initialize: function () {
@@ -179,6 +180,7 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         return {
             parts: res,
+            title: me.title,
             sequence: me.containsSequences
         }
     },
@@ -187,6 +189,7 @@ MEPH.define('MEPH.audio.Sequence', {
      ***/
     deserialize: function (obj, audioservice) {
         var me = this;
+        me.title = obj.title || me.title;
         if (obj.sequence) {
             obj.parts.foreach(function (part) {
                 var newsequence = new MEPH.audio.Sequence();
