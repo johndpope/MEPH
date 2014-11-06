@@ -28,6 +28,10 @@ MEPH.ready().then(function () {
                         loginRequired: false
                     }
                 },
+                audioResources: {
+                    'static': true,
+                    type: 'MEPH.audio.AudioResources'
+                },
                 viewProvider: {
                     type: 'MEPH.mobile.providers.viewprovider.ViewProvider',
                     config: {

@@ -33,6 +33,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         selectedrangeleft: null,
         selectedrangetop: null,
         defaultColumnWidth: 80,
+        defaultHeaderColumnWidth: 80,
         gridlinecolor: "#d6ccf0",
         startColumn: 0,
         vbarposition: null,
@@ -99,7 +100,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
                         return me.defaultColumnWidth;
                     });
                     me.columnHeaderOffsets = [].interpolate(0, colheaders, function (x) {
-                        return me.defaultColumnWidth;
+                        return me.defaultHeaderColumnWidth;
                     })
                 }
                 if (!me.rowOffsets && rows && colheaders) {
@@ -701,14 +702,15 @@ MEPH.define('MEPH.table.SpreadSheet', {
      * @return {Number}
      ***/
     getRelativeColum: function (relativeY, offset) {
-        var me = this,
+        var me = this, columnwidth = me.defaultColumnWidth,
            offsets = me.columnOffsets;
         switch (offset) {
             case 'left':
+                columnwidth = me.defaultHeaderColumnWidth;
                 offsets = me.columnHeaderOffsets;
                 break;
         }
-        var visi = me.visible(relativeY, me.startColumn, offsets, me.defaultColumnWidth);
+        var visi = me.visible(relativeY, me.startColumn, offsets, columnwidth);
 
         return visi + me.startColumn;
     },

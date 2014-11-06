@@ -83,6 +83,7 @@ Promise.resolve().then(function () {
 
 }).then(function () {
     return MEPH.define('MEPH.util.Dom', {
+        requires: ['MEPH.util.Style'],
         statics: {
             commentType: 8,
             textType: 3,
@@ -320,7 +321,7 @@ Promise.resolve().then(function () {
             createCenteredElement: function (type) {
                 var sp = {
                     top: document.body.clientHeight / 2,
-                    width: document.body.clientWidth / 2
+                    left: document.body.clientWidth / 2
                 };
                 var element = document.createElement(type || 'div');
                 Style.position(element, 'absolute');
@@ -330,6 +331,15 @@ Promise.resolve().then(function () {
                 document.body.appendChild(element);
 
                 return element;
+            },
+            centerElement: function (element) {
+                var rect = element.getBoundingClientRect();
+                var sp = {
+                    top: document.body.clientHeight / 2 - (rect.height / 2),
+                    left: document.body.clientWidth / 2 - (rect.width / 2)
+                };
+                Style.top(element, sp.top);
+                Style.left(element, sp.left);
             },
             createInputElementOverSvg: function (svg, type, element) {
 
@@ -438,27 +448,32 @@ Promise.resolve().then(function () {
              * The data context.
              * @param {Array} elements
              **/
-            addSimpleDataEntryToElments: function (me, elements, rootel) {
-                me.don('blur', elements.select(function (x) { return x.element; }), function (elements) {
+            addSimpleDataEntryToElments: function (me, elements, rootel, destroyCallback) {
+                var blur = function (elements, close) {
                     elements.foreach(function (elset) {
                         elset.setFunc(elset.element.value);
                     });
                     //setfunc(element.value);
                     setTimeout(function () {
-                        if (!MEPH.util.Dom.isDomDescendant(document.activeElement, rootel)) {
+                        if (close || !MEPH.util.Dom.isDomDescendant(document.activeElement, rootel)) {
                             if (rootel.parentNode)
                                 rootel.parentNode.removeChild(rootel);
 
                             me.dun(elements);
+                            if (destroyCallback) {
+                                destroyCallback();
+                            }
                         }
                     }, 40)
-                }.bind(me, elements), elements);
+                }.bind(me, elements);
+                me.don('blur', elements.select(function (x) { return x.element; }), blur, elements);
                 elements.foreach(function (elset) {
                     var element = elset.element;
                     me.don('change', element, function (x) {
                         elset.setFunc(element.value);
                     }, element);
                 });
+                return blur;
             },
             getScreenEventPositions: function (evt, element) {
                 var positions = [];

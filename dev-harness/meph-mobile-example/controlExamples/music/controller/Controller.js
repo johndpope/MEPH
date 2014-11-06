@@ -48,7 +48,7 @@
                 return null;
         }
     },
-    loadBytes: function (songBytes) {
+    loadBytes: function (file, songBytes) {
         var me = this;
         if (!songBytes) {
             return null;
@@ -67,7 +67,8 @@
                 me.lastSong = null;
             }
             me.lastSong = songBytes;
-            return audio.loadByteArray(songBytes.res).then(function (result) {
+
+            return audio.loadByteArray(songBytes.res, null, file.name, file.type).then(function (result) {
                 me.result = result;
                 var start = timeScroll * result.buffer.buffer.duration;
                 var time = result.buffer.buffer.duration * magnification;
@@ -75,6 +76,16 @@
                 return res.first().data;
             })
         }
+    },
+    createResource: function (name, clip) {
+        debugger
+        var audio = new MEPH.audio.Audio();
+        audio.addBufferSource({
+            buffer: clip.clip.buffer,
+            file: clip.name,
+            type: null
+        })
+
     },
     timeWindowCalc: function () {
         var me = this;
@@ -102,7 +113,7 @@
 
     },
     playSnippet: function () {
-        
+
         var me = this;
         var arg = MEPH.Array(arguments).last();
         var _start = arg.domEvent.start;

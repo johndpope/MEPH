@@ -1860,6 +1860,11 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 prototype.templates = _super.templates ? _super.templates.concat(templates) : templates;
 
             }
+            if (prop.injections) {
+                var injections = prop.injections ? prop.injections : [];
+                prototype.injections = _super.injections ? _super.injections.concat(injections) : injections;
+            }
+
             if (prop.scripts) {
                 var scripts = prop.scripts === true ? [type] : prop.scripts;
                 prototype.scripts = _super.scripts ? _super.scripts.concat(scripts) : scripts;
@@ -1986,7 +1991,8 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 meph.workerthread = workerthread;
                 if (!workerthread) {
                     document.body.addEventListener('mousemove', function (e) {
-                        meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
+                        if (MEPH.util && MEPH.util.Dom)
+                            meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
                     });
                 }
             } catch (e) { }

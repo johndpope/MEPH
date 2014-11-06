@@ -6,6 +6,7 @@ MEPH.define('MEPH.control.Control', {
     requires: ['MEPH.dom.ControlLoader',
                 'MEPH.mixins.Referrerable',
                 'MEPH.util.Dom',
+                'MEPH.mobile.services.MobileServices',
                 'MEPH.util.Observable',
                'MEPH.mixins.Observable'],
     mixins: {
@@ -72,7 +73,27 @@ MEPH.define('MEPH.control.Control', {
         me.on('load', me.applyTransferableAttribute.bind(me));
         me.on('load', me.onLoaded.bind(me));
 
+        if (me.injections) {
+            me.$inj = {};
+            Promise.all(me.injections.select(function (injection) {
+                return MEPH.MobileServices.get(injection).then(function (provider) {
+                    me.$inj[injection] = provider;
+                });
+            })).then(function () {
+                me.onInjectionsComplete();
+            });
+        }
     },
+    onInjectionsComplete: function () {
+    },
+
+    getTemplateEl: function (tep) {
+        var form = MEPH.getTemplate(tep);
+        var el = MEPH.util.Dom.createCenteredElement();
+        el.innerHTML = form.template;
+        return el;
+    },
+
     /**
      * Gets the properties that will be automatically bound.
      * @returns {Array}

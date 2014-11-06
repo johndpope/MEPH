@@ -105,22 +105,12 @@
         expect(audiosequencer.columnheaders).toBeTruthy();
     })
 
-    it('the rowheader function can get the title of the row from the iteme in the sequence', function () {
-        var audiosequencer = new MEPH.audio.view.AudioSequencer();
-        var sequence = createSequence();
-        audiosequencer.sequence = sequence;
-        var item = sequence.itemSequences().first();
-
-        var time = audiosequencer.rowheader.function(item);
-        expect(time).toBeTruthy();
-    })
-
     it('the time function can get the time of an item in the sequence', function () {
         var audiosequencer = new MEPH.audio.view.AudioSequencer();
         var sequence = createSequence();
         audiosequencer.sequence = sequence;
         var item = sequence.itemSequences().first();
-
+        
         var time = audiosequencer.time.function(item);
         expect(time).toBe(2);
     });

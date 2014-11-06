@@ -6,14 +6,17 @@
 MEPH.define('MEPH.audio.view.AudioSequencer', {
     alias: 'audiosequencer',
     templates: true,
-    scripts: ['MEPH.audio.view.sequencer.CanvasContextMenu'],
+    scripts: ['MEPH.audio.view.sequencer.CanvasContextMenu',
+                'MEPH.audio.view.sequencer.CanvasHeaderLeftMenu'],
     extend: 'MEPH.table.Sequencer',
     requires: ['MEPH.audio.Audio',
         'MEPH.audio.Sequence', 'MEPH.util.Dom', 'MEPH.util.Observable'],
     statics: {
         ContextMenu: 'ContextMenu'
     },
+    injections: ['audioResources'],
     properties: {
+        defaultColumnWidth: 25,
         sequence: null
     },
     initialize: function () {
@@ -31,6 +34,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 me.translateToSource(me.sequence);
             }
         });
+        me.setupHeaders();
     },
     onLoaded: function () {
         var me = this;
@@ -72,7 +76,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         me.time = {
             'function': function (item) {
-                if (item instanceof MEPH.audio.Audio || item instanceof MEPH.audio.Sequence) {
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
                     return me.sequence.getAbsoluteTime(item);
                 }
                 return item.time;
@@ -81,7 +85,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         me.lane = {
             'function': function (item) {
-                if (item instanceof MEPH.audio.Audio || item instanceof MEPH.audio.Sequence)
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence))
                     return me.sequence.getParentIndexOf(item);
 
                 return item.lane;
@@ -91,7 +95,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         me.settime = {
             'function': function (item, time) {
-                if (item instanceof MEPH.audio.Audio || item instanceof MEPH.audio.Sequence) {
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
                     me.sequence.setRelativeTime(item, time);
                 }
                 return item;
@@ -100,7 +104,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         }
         me.length = {
             'function': function (item) {
-                if (item instanceof MEPH.audio.Audio || item instanceof MEPH.audio.Sequence) {
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
                     return me.sequence.getDuration(item)
 
                     return item.length;
@@ -120,23 +124,53 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             }
         }
     },
-    openContextMenu: function () {
+    openContextMenu: function (evt) {
         var me = this,
-            form = MEPH.getTemplate('MEPH.audio.view.sequencer.CanvasContextMenu');
-        var el = MEPH.util.Dom.createCenteredElement();
-        el.innerHTML = form.template;
-        me.$canvasContextMenuEl = el;
-        el.querySelector('[addsequence]').focus();
-        var elements = MEPH.Array(el.querySelectorAll('[addsequence]')).select(function (t) { return { setFunc: function () { }, element: t } });
-        Dom.addSimpleDataEntryToElments(me, elements, el);
+            form;
+
         var hovercells = me.hovercells;
-        me.don('click', elements.select(function (t) { return t.element; }), function () {
-            me.addSequence(hovercells);
-            me.canvas.focus();
-        }, 'button');
+        if (evt.currentTarget === me.leftheader) {
+            var el = me.getTemplateEl('MEPH.audio.view.sequencer.CanvasHeaderLeftMenu');
+            var select = el.querySelector('select');
+            select.focus();
+            if (me.$inj.audioResources) {
+                var resources = me.$inj.audioResources.getResources();
+                resources.foreach(function (x) {
+                    Dom.addOption(x.file, x.id, select);
+                })
+            }
+            Dom.addSimpleDataEntryToElments(me, [{
+                element: select,
+                setFunc: function (val) {
+                    me.setSequenceRowSource(val, hovercells)
+                }
+            }], el)
+        }
+        else {
+            var el = me.getTemplateEl('MEPH.audio.view.sequencer.CanvasContextMenu');
+            me.$canvasContextMenuEl = el;
+            el.querySelector('[addsequence]').focus();
+            var elements = MEPH.Array(el.querySelectorAll('[addsequence]')).select(function (t) { return { setFunc: function () { }, element: t } });
+            Dom.addSimpleDataEntryToElments(me, elements, el);
+            me.don('click', elements.select(function (t) { return t.element; }), function () {
+                me.addSequence(hovercells);
+                me.canvas.focus();
+            }, 'button');
+        }
+        Dom.centerElement(el);
     },
+    /**
+     * Set the resources source for each sequence in the row.
+     * @param {Object/String} val
+     * @param {Object} hovercells
+     **/
+    setSequenceRowSource: function (val, hovercells) {
+    },
+    /**
+     * Adds a sequence/audio source to the row at the cell.
+     **/
     addSequence: function (hovercells) {
-        debugger
+
     },
     setContextMenuOpenKey: function (key) {
         var me = this,
