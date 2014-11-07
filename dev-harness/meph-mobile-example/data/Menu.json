@@ -25,6 +25,13 @@
                     "path": "/music/AudioSequencer"
                 },
                 {
+                    "viewId": "audioresourcesmanager",
+                    "description": "Audio Resources Manager",
+                    "iconType": "launch",
+                    "itemType": "launch",
+                    "path": "/music/AudioResource/Manager"
+                },
+                {
                     "viewId": "MEPH0102",
                     "description": "Music Visualizer",
                     "iconType": "launch",

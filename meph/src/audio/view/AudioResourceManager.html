@@ -1,0 +1,16 @@
+﻿<div class="col-md-12">
+    <div class="col-md-4">
+        <h1>Audio Resources</h1>
+        <list meph-data-source="c$.audiobuffers">
+            <template name="audio_resource_manager_item_template">
+                <li class="list-group-item" meph-event-click="c$.parent.viewAudioBuffer,c$.data">
+                    <div class="meph-application-menu-categories-item-details">
+                        <span data-bind='"innerHTML": "c$.data.name"'></span>
+                        <span data-bind='"innerHTML": "c$.data.time"'></span> s
+                    </div>
+                </li>
+            </template>
+        </list>
+
+    </div>
+</div>

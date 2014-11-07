@@ -24,6 +24,11 @@
             "path": "/music/AudioSequencer"
         },
         {
+            "viewId": "audioresourcesmanager",
+            "view": "MEPHControls.music.view.AudioResourcesManager",
+            "path": "/music/AudioResourcesManager"
+        },
+        {
             "viewId": "audiograph",
             "view": "MEPHControls.music.view.AudioGraph",
             "path": "/audio/graph"
