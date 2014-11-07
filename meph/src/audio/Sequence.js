@@ -20,9 +20,12 @@ MEPH.define('MEPH.audio.Sequence', {
         title: 'Untitled',
         containsSequences: false
     },
-    initialize: function () {
+    initialize: function (args) {
         var me = this;
         me.parts = [];
+        if (args && args.title) {
+            me.title = args.title;
+        }
     },
     /**
      * Returns the instance used by the sequence.

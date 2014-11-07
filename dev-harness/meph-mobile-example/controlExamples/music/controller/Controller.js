@@ -78,7 +78,6 @@
         }
     },
     createResource: function (name, clip) {
-        debugger
         var audio = new MEPH.audio.Audio();
         audio.addBufferSource({
             buffer: clip.clip.buffer,

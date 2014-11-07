@@ -114,6 +114,9 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                             meph.fire(meph.events.definedClass + templateInfo.classifiedName + templateInfo.type, templateInfo);
                         });
                 }
+                else if (results.results && results.results[0] === undefined) {
+                    addNoTemplateInfo = true;
+                }
 
                 if (config.alias && addNoTemplateInfo) {
                     addTemplateInformation({
@@ -1017,9 +1020,15 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      */
     meph.getRequiredClasses = function (config) {
         if (config.extend || (config.requires)) {
-            return meph.Array(((config.extend ? [config.extend] : [])
-                                .concat(config.requires || [])))
-                        .where(function (x) { return x; });
+            var t = meph.Array(((config.extend ? [config.extend] : [])
+                                .concat(config.requires || [])));
+            var res = [];
+            for (var i = 0 ; i < t.length ; i++) {
+                if (t[i]) {
+                    res.push(t[i]);
+                }
+            }
+            return res;
         }
         return [];
     }
@@ -1951,9 +1960,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         });
     }
     meph.fire = function (type, args) {
-        meph.Array(meph.listeners).where(function (listener) {
+        meph.Array(meph.listeners).filter(function (listener) {
+
             return listener.type === type;
-        }).foreach(function (listener) {
+        }).forEach(function (listener) {
+
+
             listener.func.apply(listener.scope, meph.Array([args]));
         });
     }
@@ -2016,10 +2028,10 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     else {
         meph.requiredFiles = [
                 $frameWorkPath + '/util/String.js',
+                $frameWorkPath + '/util/Array.js',
                 $frameWorkPath + '/util/Dom.js',
                 $frameWorkPath + '/util/Template.js',
-                $frameWorkPath + '/util/Observable.js',
-                $frameWorkPath + '/util/Array.js'];
+                $frameWorkPath + '/util/Observable.js'];
         loadpromise = meph.loadScripts(meph.requiredFiles);
     }
 

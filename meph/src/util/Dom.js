@@ -384,8 +384,14 @@ Promise.resolve().then(function () {
                     return x;
                 }).foreach(function (x) {
                     var option = document.createElement("option");
-                    option.text = x;
-                    option.value = x;
+                    if (typeof x === 'object') {
+                        option.text = x.title;
+                        option.value = x.value;
+                    }
+                    else {
+                        option.text = x;
+                        option.value = x;
+                    }
                     element.add(option);
                 });
 

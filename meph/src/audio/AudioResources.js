@@ -10,11 +10,17 @@ MEPH.define('MEPH.audio.AudioResources', {
         resources: null
     },
     initialize: function () {
-        var me = this;
+        var me = this,
+            Audio = MEPH.audio.Audio;
+
         me.resources = [];
+
         MEPH.subscribe(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, me.onResourcesChanged.bind(me));
-        if (Audio.sourcebuffer)
-            Audio.sourcebuffer.foreach(function (t) { me.resources.push(t); })
+
+        if (Audio.GetSourceBuffer()) {
+            Audio.GetSourceBuffer().foreach(function (t) { me.resources.push(t); })
+            MEPH.publish(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, {});
+        }
     },
     onResourcesChanged: function (type, options, resources) {
         var me = this, newresources;

@@ -272,8 +272,8 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     getItemMetrics: function (sequenceItem, offset) {
         var me = this;
-        var lane = me.lane.function(sequenceItem);
-        var time = me.time.function(sequenceItem);
+        var lane = me.lane.function(sequenceItem, offset);
+        var time = me.time.function(sequenceItem, offset);
         var length = me.length.function(sequenceItem);
         var calctime = me.getScaled(time);
         var column = Math.floor(calctime);

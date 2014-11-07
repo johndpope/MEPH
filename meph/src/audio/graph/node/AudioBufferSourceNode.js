@@ -4,9 +4,10 @@
  **/
 MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
     extend: 'MEPH.audio.graph.node.Node',
-    requires: ['MEPH.audio.Audio'],
+    requires: ['MEPH.audio.Audio', 'MEPH.audio.AudioResources'],
     alias: 'audiobuffersource',
     templates: true,
+    injections: ['audioResources'],
     properties: {
         loopTitle: 'Q',
         loopEndTitle: 'loop',
@@ -29,7 +30,6 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         me.nodecontrols.push('loopEnd');
         me.nodecontrols.push('loopStart');
         me.nodecontrols.push('playbackRate');
-
         me.super();
         me.nodeInputs.push(me.createInput('source', MEPH.audio.graph.node.Node.String));
         me.nodeInputs.push(me.createInput('loop', MEPH.audio.graph.node.Node.Boolean));
@@ -38,8 +38,22 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         me.nodeInputs.push(me.createInput('playbackRate', MEPH.audio.graph.node.Node.Number, { path: 'playbackRate.value' }));
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
     },
+    onResourcesUpdated: function () {
+        var me = this;
+        me.audiobuffersources.clear();
+        if (me.$inj.audioResources) {
+            me.audiobuffersources.push.apply(me.audiobuffersources, me.$inj.audioResources.getResources());
+        }
+    },
+    onInjectionsComplete: function () {
+        var me = this;
+        me.onResourcesUpdated();
+    },
     onLoaded: function () {
         var me = this;
+        me.audiobuffersources = MEPH.util.Observable.observable([]);
+        MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onResourcesUpdated.bind(me));
+        me.onResourcesUpdated();
         me.super();
         me.title = 'Audio Buffer Source';
         me.hideConnector = true;

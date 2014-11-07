@@ -10,6 +10,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 'MEPH.audio.view.sequencer.CanvasHeaderLeftMenu'],
     extend: 'MEPH.table.Sequencer',
     requires: ['MEPH.audio.Audio',
+        'MEPH.audio.AudioResources',
         'MEPH.audio.Sequence', 'MEPH.util.Dom', 'MEPH.util.Observable'],
     statics: {
         ContextMenu: 'ContextMenu'
@@ -71,23 +72,30 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (!me.source) {
             me.source = sequence.itemSequences();
         }
+        else {
+            me.source.clear();
+            me.source.push.apply(me.source, sequence.itemSequences());
+        }
     },
     setupFunctions: function () {
         var me = this;
         me.time = {
-            'function': function (item) {
+            'function': function (item, offset) {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
                     return me.sequence.getAbsoluteTime(item);
+                }
+                if (offset === 'left') {
+                    return 0;
                 }
                 return item.time;
             }
         }
 
         me.lane = {
-            'function': function (item) {
+            'function': function (item, offset) {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence))
                     return me.sequence.getParentIndexOf(item);
-
+                
                 return item.lane;
 
             }
@@ -114,8 +122,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         me.rowheader = {
             'function': function (item) {
+
                 var seq = me.sequence.items()[item.lane];
-                return seq ? (seq.title || '') : '';
+                return seq && seq.source ? (seq.source.title || '') : '';
             }
         }
         me.columnheader = {
@@ -131,20 +140,18 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var hovercells = me.hovercells;
         if (evt.currentTarget === me.leftheader) {
             var el = me.getTemplateEl('MEPH.audio.view.sequencer.CanvasHeaderLeftMenu');
-            var select = el.querySelector('select');
+            var select = el.querySelector('input');
             select.focus();
-            if (me.$inj.audioResources) {
-                var resources = me.$inj.audioResources.getResources();
-                resources.foreach(function (x) {
-                    Dom.addOption(x.file, x.id, select);
-                })
-            }
+            var value;
             Dom.addSimpleDataEntryToElments(me, [{
                 element: select,
                 setFunc: function (val) {
-                    me.setSequenceRowSource(val, hovercells)
+                    value = val;
                 }
-            }], el)
+            }], el, function () {
+                if (value)
+                    me.addTrackSequence(value)
+            })
         }
         else {
             var el = me.getTemplateEl('MEPH.audio.view.sequencer.CanvasContextMenu');
@@ -164,7 +171,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
      * @param {Object/String} val
      * @param {Object} hovercells
      **/
-    setSequenceRowSource: function (val, hovercells) {
+    addTrackSequence: function (title) {
+        var me = this;
+        me.sequence.add(new MEPH.audio.Sequence({ title: title }));
+        me.update();
     },
     /**
      * Adds a sequence/audio source to the row at the cell.

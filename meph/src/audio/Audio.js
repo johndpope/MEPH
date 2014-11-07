@@ -28,6 +28,7 @@ MEPH.define('MEPH.audio.Audio', {
             biquadFilter: 'biquadFilter'
         },
         GetSourceBuffer: function () {
+            MEPH.audio.Audio.sourcebuffer = MEPH.audio.Audio.sourcebuffer || [];
             return MEPH.audio.Audio.sourcebuffer;
         },
         /**
