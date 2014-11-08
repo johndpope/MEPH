@@ -20,6 +20,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     injections: ['audioResources'],
     properties: {
         defaultColumnWidth: 25,
+        nearest: 4,
         sequence: null
     },
     initialize: function () {
@@ -105,9 +106,11 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         }
 
         me.settime = {
-            'function': function (item, time) {
+            'function': function (time, item) {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
+                    time = Math.round(time * me.nearest) / me.nearest;
                     me.sequence.setRelativeTime(item, time);
+                    me.update();
                 }
                 return item;
 
@@ -155,19 +158,21 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 if (value)
                     me.addTrackSequence(value)
             });
+            Dom.centerElement(el);
         }
         else {
-            var el = me.getTemplateEl('MEPH.audio.view.sequencer.CanvasContextMenu');
-            me.$canvasContextMenuEl = el;
-            el.querySelector('[addsequence]').focus();
-            var elements = MEPH.Array(el.querySelectorAll('[addsequence]')).select(function (t) { return { setFunc: function () { }, element: t } });
-            Dom.addSimpleDataEntryToElments(me, elements, el);
-            me.don('click', elements.select(function (t) { return t.element; }), function () {
-                me.addSequence(hovercells.first());
-                me.canvas.focus();
-            }, 'button');
+            me.addSequence(hovercells.first());
+
+            //var el = me.getTemplateEl('MEPH.audio.view.sequencer.CanvasContextMenu');
+            //me.$canvasContextMenuEl = el;
+            //el.querySelector('[addsequence]').focus();
+            //var elements = MEPH.Array(el.querySelectorAll('[addsequence]')).select(function (t) { return { setFunc: function () { }, element: t } });
+            //Dom.addSimpleDataEntryToElments(me, elements, el);
+            //me.don('click', elements.select(function (t) { return t.element; }), function () {
+            //    me.addSequence(hovercells.first());
+            //    me.canvas.focus();
+            //}, 'button');
         }
-        Dom.centerElement(el);
     },
     selectTrackResource: function (evt) {
         var me = this;

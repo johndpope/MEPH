@@ -110,7 +110,7 @@
         var sequence = createSequence();
         audiosequencer.sequence = sequence;
         var item = sequence.itemSequences().first();
-        
+
         var time = audiosequencer.time.function(item);
         expect(time).toBe(2);
     });
@@ -135,7 +135,7 @@
         audiosequencer.sequence = sequence;
         var item = sequence.itemSequences().first();
 
-        var item = audiosequencer.settime.function(item, 0);
+        var item = audiosequencer.settime.function(0, item);
 
         expect(item.relativeTimeOffset).toBe(0);
     });

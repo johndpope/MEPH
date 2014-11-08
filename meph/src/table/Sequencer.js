@@ -332,7 +332,7 @@ MEPH.define('MEPH.table.Sequencer', {
             var x = evt.position.x;
             var metrics = me.getItemMetrics(me.grabbeditem);
             me.lastgrabposition = { x: x, y: y };
-            me.positionGrabRep({ x: x, y: y, width: metrics.width, height: metrics.height });
+            me.positionGrabRep({ x: x + (parseFloat(me.leftheader.clientWidth) || 0) - (metrics.width / 2), y: y, width: metrics.width, height: metrics.height });
         }
     },
     dispatchEvent: function (evnt, args, canvas) {
