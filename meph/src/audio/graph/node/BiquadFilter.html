@@ -12,6 +12,9 @@
             meph-data-title="c$.qTitle"
             meph-data-stroke="c$.inputstroke"
             mephid="q"
+            meph-data-minvalue="0.0001"
+            meph-data-maxvalue="1000"
+            meph-data-default="100"
             meph-data-y="c$.qy"
             meph-event-updated="c$.updatedValue,q"
             meph-data-width="c$.bodywidth"></audiorange>
@@ -20,6 +23,9 @@
             meph-data-radius="c$.inputradius"
             meph-data-title="c$.frequencyTitle"
             meph-data-stroke="c$.inputstroke"
+            meph-data-minvalue="0"
+            meph-data-maxvalue="15000"
+            meph-data-default="440"
             meph-event-updated="c$.updatedValue,frequency"
             mephid="frequency"
             meph-data-y="c$.frequencyy"
@@ -31,6 +37,9 @@
             meph-data-stroke="c$.inputstroke"
             meph-event-updated="c$.updatedValue,detune"
             mephid="detune"
+            meph-data-minvalue="0"
+            meph-data-maxvalue="1500"
+            meph-data-default="0"
             meph-data-y="c$.detuney"
             meph-data-width="c$.bodywidth"></audiorange>
 
@@ -40,6 +49,9 @@
             meph-data-stroke="c$.inputstroke"
             mephid="gain"
             meph-data-y="c$.gainy"
+            meph-data-minvalue="-40"
+            meph-data-maxvalue="40"
+            meph-data-default="25"
             meph-event-updated="c$.updatedValue,gain"
             meph-data-width="c$.bodywidth"></audiorange>
 

@@ -419,6 +419,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
             coneOuterAngle: me.getNodeInputValue(node, inputs, 'coneOuterAngle'),
             coneOuterGain: me.getNodeInputValue(node, inputs, 'coneOuterGain'),
             refDistance: me.getNodeInputValue(node, inputs, 'refDistance'),
+            maxDistance: me.getNodeInputValue(node, inputs, 'maxDistance'),
             rolloffFactor: me.getNodeInputValue(node, inputs, 'rolloffFactor'),
             panningModel: me.getNodeInputValue(node, inputs, 'panningModel'),
             buffer: me.getNodeInputValue(node, inputs, 'buffer')

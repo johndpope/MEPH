@@ -11,6 +11,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         'MEPH.graph.SVGGraphViewPort',
         'MEPH.graph.SVGGraph',
         'MEPH.audio.graph.node.Convolver',
+        'MEPH.util.Dom',
         'MEPH.graph.renderer.svg.BlenderNodeRenderer',
     'MEPH.graph.renderer.svg.ConnectionRenderer',
     'MEPH.audio.graph.node.BiquadFilter',
@@ -27,6 +28,8 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     'MEPH.audio.graph.node.PannerNode',
     'MEPH.audio.graph.node.WaveShaperNode'
     ],
+    scripts: ['MEPH.audio.graph.AudioGraphNameChange'],
+    injections: ['audioResources'],
     initialize: function () {
         var me = this;
         me.graph = new MEPH.graph.SVGGraph();
@@ -99,6 +102,28 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
             })
         }
         return result;
+    },
+    nameGraph: function (graph) {
+        var me = this;
+        return new Promise(function (r, f) {
+            var tempEl = me.getTemplateEl('MEPH.audio.graph.AudioGraphNameChange');
+            var input = tempEl.querySelector('input');
+
+            var value;
+            Dom.addSimpleDataEntryToElments(me, [{
+                element: input,
+                setFunc: function (val) {
+                    value = val;
+                }
+            }], tempEl, function () {
+                if (value) {
+                    graph.name = value;
+                    r(graph);
+                }
+            })
+
+            input.focus();
+        });
     },
     save: function () {
         var me = this;

@@ -9,7 +9,7 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.removeSelectedConnections">
         <span class="glyphicon glyphicon-remove"></span>
     </mephbutton>
-    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveGraph">
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveGraph | c$.nameGraph | c$.broadCast,AUDIO_GRAPH_SAVED">
         <span class="glyphicon glyphicon-save"></span>
     </mephbutton>
 </div>

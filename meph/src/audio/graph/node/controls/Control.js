@@ -56,7 +56,7 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
 
         MEPH.util.Observable.defineDependentProperty('titlevalue', me, ['title', 'value', 'fresh'], function () {
             var result = (me.title || '') + (me.value !== undefined && me.value !== null ? " : " + me.value : '');
-            return result.substring(0, 45);
+            return result.substring(0, 30);
         });
         MEPH.util.Observable.defineDependentProperty('textx', me, ['left', 'width', 'connectorxmargin', 'radius', 'bufferx', 'fresh'], function () {
             var result;

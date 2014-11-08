@@ -30,7 +30,7 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
         me.super();
         me.title = 'Gain';
 
-        me.gainTitle = 'delay';
+        me.gainTitle = 'Volume';
 
     }
 

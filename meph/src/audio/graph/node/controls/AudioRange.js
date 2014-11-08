@@ -17,6 +17,7 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioRange', {
 
         element.min = me.minvalue || 0;
         element.max = me.maxvalue || 10;
+        element.value = me.default || 0;
         element.step = me.increment || .01;
     }
 })

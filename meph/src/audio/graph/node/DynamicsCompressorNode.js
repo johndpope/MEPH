@@ -28,6 +28,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('attack');
         me.nodecontrols.push('knee');
+        me.nodecontrols.push('release');
         me.nodecontrols.push('ratio');
         me.nodecontrols.push('reduction');
         me.nodecontrols.push('threshold');
@@ -36,7 +37,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('attack', MEPH.audio.graph.node.Node.Number, { path: 'attack.value' }));
         me.nodeInputs.push(me.createInput('knee', MEPH.audio.graph.node.Node.Number, { path: 'knee.value' }));
-        me.nodeInputs.push(me.createInput('ratio', MEPH.audio.graph.node.Node.Number, { path: 'ratio.value' }));
+        me.nodeInputs.push(me.createInput('ratio', MEPH.audio.graph.node.Node.Number, { path: 'ratio.value' })); 
         me.nodeInputs.push(me.createInput('reduction', MEPH.audio.graph.node.Node.Number, { path: 'reduction.value' }));
         me.nodeInputs.push(me.createInput('release', MEPH.audio.graph.node.Node.Number, { path: 'release.value' }));
         me.nodeInputs.push(me.createInput('threshold', MEPH.audio.graph.node.Node.Number, { path: 'threshold.value' }));

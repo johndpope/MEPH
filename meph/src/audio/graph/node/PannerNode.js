@@ -31,6 +31,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
         me.nodecontrols.push('coneOuterAngle');
         me.nodecontrols.push('coneOuterGain');
         me.nodecontrols.push('refDistance');
+        me.nodecontrols.push('maxDistance');
         me.nodecontrols.push('rolloffFactor');
         me.nodecontrols.push('panningModel');
 
@@ -41,6 +42,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
         me.nodeInputs.push(me.createInput('coneOuterAngle', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('coneOuterGain', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('refDistance', MEPH.audio.graph.node.Node.Number));
+        me.nodeInputs.push(me.createInput('maxDistance', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('rolloffFactor', MEPH.audio.graph.node.Node.Number));
         me.nodeInputs.push(me.createInput('panningModel', MEPH.audio.graph.node.Node.String, {
             values: ['equalpower', 'HRTF']

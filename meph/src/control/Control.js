@@ -86,7 +86,11 @@ MEPH.define('MEPH.control.Control', {
     },
     onInjectionsComplete: function () {
     },
+    broadCast: function (arg1, arg2) {
+        var me = this;
 
+        MEPH.publish(arg1, arg2);
+    },
     getTemplateEl: function (tep) {
         var form = MEPH.getTemplate(tep);
         var el = MEPH.util.Dom.createCenteredElement();
