@@ -83,6 +83,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         var me = this;
         var savedgraph = me.graph.save();
         var result = {
+            id: me.graph.id || MEPH.GUID(),
             connections: savedgraph.connections.select(),
             nodes: savedgraph.nodes.select(function (x) {
                 var res = {

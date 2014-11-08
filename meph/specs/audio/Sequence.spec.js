@@ -131,4 +131,13 @@
         var res = sequence.items();
         expect(res).toBeTruthy();
     })
+
+    it('can set the default item to add on a sequence', function () {
+        
+        var sequence = new MEPH.audio.Sequence();
+        sequence.setDefault('graph', 'id');
+
+        expect(sequence.$defaultType).toBe('graph');
+        expect(sequence.$defatulRefId).toBe('id');
+    })
 });

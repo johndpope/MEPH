@@ -209,6 +209,10 @@ MEPH.define('MEPH.audio.Audio', {
         source.buffer = myArrayBuffer;
         return { name: MEPH.GUID(), buffer: source, type: '' };
     },
+    duration: function () {
+        //Todo: define a proper way to get the duration of the audio.
+        return 1;
+    },
     getBufferSources: function () {
         var me = this, Audio = MEPH.audio.Audio;
         Audio.sourcebuffer = Audio.sourcebuffer || [];

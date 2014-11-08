@@ -7,6 +7,7 @@ MEPH.define('MEPH.graph.Graph', {
     requires: ['MEPH.util.Observable',
                 'MEPH.graph.Node'],
     properties: {
+        id: null
     },
     on: function (evt, func) {
         var me = this;
@@ -47,6 +48,9 @@ MEPH.define('MEPH.graph.Graph', {
     load: function (result) {
         var me = this;
         result = JSON.parse(JSON.stringify(result));
+        if (result.id) {
+            me.id = result.id;
+        }
         var nodes = result.nodes.select(function (nodeinfo) {
             var node = new MEPH.graph.Node();
             node.setId(nodeinfo.id);

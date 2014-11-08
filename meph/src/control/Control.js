@@ -6,12 +6,14 @@ MEPH.define('MEPH.control.Control', {
     requires: ['MEPH.dom.ControlLoader',
                 'MEPH.mixins.Referrerable',
                 'MEPH.util.Dom',
+                'MEPH.mixins.Injections',
                 'MEPH.mobile.services.MobileServices',
                 'MEPH.util.Observable',
                'MEPH.mixins.Observable'],
     mixins: {
         observable: 'MEPH.mixins.Observable',
-        referrerable: 'MEPH.mixins.Referrerable'
+        referrerable: 'MEPH.mixins.Referrerable',
+        injectable: 'MEPH.mixins.Injections'
     },
     statics: {
         operations: {
@@ -56,6 +58,7 @@ MEPH.define('MEPH.control.Control', {
         me.$listOfTransferableAttributes = [];
         me.mixins.referrerable.init.apply(me);
         me.mixins.observable.init.apply(me);
+        me.mixins.injectable.init.apply(me);
         me.$referenceConnections = MEPH.Array([{
             type: MEPH.control.Control.connectables.control, obj: me
         }]);
@@ -73,18 +76,16 @@ MEPH.define('MEPH.control.Control', {
         me.on('load', me.applyTransferableAttribute.bind(me));
         me.on('load', me.onLoaded.bind(me));
 
-        if (me.injections) {
-            me.$inj = {};
-            Promise.all(me.injections.select(function (injection) {
-                return MEPH.MobileServices.get(injection).then(function (provider) {
-                    me.$inj[injection] = provider;
-                });
-            })).then(function () {
-                me.onInjectionsComplete();
-            });
-        }
-    },
-    onInjectionsComplete: function () {
+        //if (me.injections) {
+        //    me.$inj = {};
+        //    Promise.all(me.injections.select(function (injection) {
+        //        return MEPH.MobileServices.get(injection).then(function (provider) {
+        //            me.$inj[injection] = provider;
+        //        });
+        //    })).then(function () {
+        //        me.onInjectionsComplete();
+        //    });
+        //}
     },
     broadCast: function (arg1, arg2) {
         var me = this;

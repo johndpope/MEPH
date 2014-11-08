@@ -3,7 +3,8 @@
  * Audio resources are tracked from this service.
  **/
 MEPH.define('MEPH.audio.AudioResources', {
-    requires: ['MEPH.audio.Constants'],
+    requires: ['MEPH.audio.Constants',
+                'MEPH.audio.graph.AudioGraphReader'],
     statics: {
         RESOURCE_MANAGER_UPDATE: 'RESOURCE_MANAGER_UPDATE'
     },
@@ -14,7 +15,7 @@ MEPH.define('MEPH.audio.AudioResources', {
     initialize: function () {
         var me = this,
             Audio = MEPH.audio.Audio;
-
+        me.graphReader = new MEPH.audio.graph.AudioGraphReader();
         me.resources = [];
         me.graphs = [];
 
@@ -46,8 +47,28 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         return me.graphs.select();
     },
+    getGraphInstance: function (id) {
+        var me = this,
+            graphRecipe = me.getGraphs().first(function (x) { return x.id === id; });
+
+        if (graphRecipe) {
+            me.graphReader.setGraph(graphRecipe);
+            try {
+                return  me.graphReader.createAudio();
+            }
+            catch (e) {
+                MEPH.Log(e);
+            }
+        }
+
+        return null;
+    },
     getResources: function () {
         var me = this;
         return me.resources.select();
+    },
+    clearResources: function () {
+        var me = this;
+        me.resources.clear();
     }
 })

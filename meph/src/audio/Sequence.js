@@ -3,6 +3,10 @@
  * Defines a base class for an audio sequence.
  **/
 MEPH.define('MEPH.audio.Sequence', {
+    requires: ['MEPH.mixins.Injections'],
+    mixins: {
+        injections: 'MEPH.mixins.Injections'
+    },
     statics: {
         /**
          * Translates a string into a sequence.
@@ -15,17 +19,43 @@ MEPH.define('MEPH.audio.Sequence', {
             return sequence;
         }
     },
+    injections: ['audioResources'],
     properties: {
         parts: null,
         title: 'Untitled',
+        id: null,
         containsSequences: false
     },
     initialize: function (args) {
         var me = this;
         me.parts = [];
-        if (args && args.title) {
-            me.title = args.title;
+        me.mixins.injections.init.apply(me);
+        me.id = MEPH.GUID();
+        if (args) {
+            if (args.title) {
+                me.title = args.title;
+            }
+            if (args.id) {
+                me.id = args.id;
+            }
         }
+    },
+    setDefault: function (type, id) {
+        var me = this;
+        me.$defaultType = type;
+        me.$defatulRefId = id;
+    },
+    getDefaultInstance: function () {
+        var me = this,
+            result = null;
+        if (me.$inj.audioResources) {
+            switch (me.$defaultType) {
+                case 'graph':
+                    result = me.$inj.audioResources.getGraphInstance(me.$defatulRefId);
+                    break;
+            }
+        }
+        return result;
     },
     /**
      * Returns the instance used by the sequence.
@@ -112,10 +142,15 @@ MEPH.define('MEPH.audio.Sequence', {
      * @param {Number} timeOffset
      ***/
     add: function (source, timeOffset) {
-        var me = this, args = MEPH.Array(arguments);
+        var me = this,
+            defaults,
+            args = MEPH.Array(arguments);
 
         if (me.parts.length === 0) {
             me.containsSequences = args.first() instanceof MEPH.audio.Sequence;
+        }
+        if (!source) {
+            source = me.getDefaultInstance();
         }
         if ((me.containsSequences && source instanceof MEPH.audio.Sequence) ||
             (!me.containsSequences && source instanceof MEPH.audio.Audio)) {
@@ -183,6 +218,7 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         return {
             parts: res,
+            id: me.id,
             title: me.title,
             sequence: me.containsSequences
         }
