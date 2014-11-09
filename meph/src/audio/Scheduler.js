@@ -89,7 +89,7 @@ MEPH.define('MEPH.audio.Scheduler', {
         }, [], function (message) {
         })
         //me.$queryWorker.terminate();
-        me.un('play');
+        me.un(null, 'play');
         me.playing = false;
     },
     sequence: function (s) {
