@@ -407,7 +407,7 @@
             audio.complete();
 
             // start the source playing
-            MEPH.audio.Audio.sourcebuffer.first().buffer.start()
+            MEPH.audio.Audio.$sourcebuffer.first().buffer.start()
             setTimeout(function () {
                 audio.disconnect();
                 done();
