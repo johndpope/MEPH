@@ -167,7 +167,7 @@ MEPH.define('MEPH.audio.Sequence', {
             if (x.containsSequences)
                 return x.source.duration() + x.relativeTimeOffset;
             else
-                return x.source.duration + x.relativeTimeOffset;
+                return x.source.duration() + x.relativeTimeOffset;
         })
     },
     getDuration: function (item) {
@@ -182,17 +182,32 @@ MEPH.define('MEPH.audio.Sequence', {
     getScheduledAudio: function (start, length) {
         var me = this;
         if (me.containsSequences) {
-            return me.parts.where(function (sequence) {
-                return sequence.relativeTimeOffset >= start && sequence.relativeTimeOffset <= start + length;
-            }).concatFluent(function (sequence) {
-                return sequence.source.getScheduledAudio(start - sequence.relativeTimeOffset, length);
+            return me.parts.concatFluent(function (sequence) {
+                return sequence.source.getScheduledAudio(sequence.relativeTimeOffset - start, length);
             });;
         }
         else {
             return me.parts.where(function (x) {
-                return x.relativeTimeOffset >= start && x.relativeTimeOffset <= start + length;
+                return x.relativeTimeOffset >= start && x.relativeTimeOffset <= (start + length);
             })
         }
+    },
+    getAudios: function () {
+        var me = this;
+        if (me.containsSequences) {
+            return me.parts.concatFluent(function (sequence) {
+                return sequence.source.getAudios();
+            });;
+        }
+        else {
+            return me.parts.select();
+        }
+    },
+    getAudioWithAbsoluteTime: function () {
+        var me = this, audios = me.getAudios().foreach(function (t) {
+            t.absoluteTime = me.getAbsoluteTime(t);
+        })
+        return audios;
     },
     toJSON: function () {
         var me = this,

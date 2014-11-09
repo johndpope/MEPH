@@ -209,9 +209,15 @@ MEPH.define('MEPH.audio.Audio', {
         source.buffer = myArrayBuffer;
         return { name: MEPH.GUID(), buffer: source, type: '' };
     },
-    duration: function () {
+    /**
+     * Sets the duration to be played.
+     **/
+    duration: function (time) {
         //Todo: define a proper way to get the duration of the audio.
-        return 1;
+        if (time !== undefined || time !== null) {
+            this.$duration = time;
+        }
+        return this.$duration || 1;
     },
     getBufferSources: function () {
         var me = this, Audio = MEPH.audio.Audio;
@@ -358,7 +364,11 @@ MEPH.define('MEPH.audio.Audio', {
      **/
     oscillator: function (options) {
         var me = this, params = me.createK().concat(me.createA('frequency', 'detune')).concat(me.createS('type'));
-        me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.oscillator; }, params)
+        options = options || {};
+        options.noinputs = true;
+        me.createNode(options, function () {
+            return MEPH.audio.Audio.nodeTypes.oscillator;
+        }, params)
         return me;
     },
     /**
@@ -489,6 +499,24 @@ MEPH.define('MEPH.audio.Audio', {
         return me;
 
     },
+    play: function (delay) {
+        var me = this;
+        delay = delay || 0;
+        me.nodes.where(function (x) {
+            return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
+        }).foreach(function (node) {
+            node.node.start(delay);
+        })
+    },
+    stop: function (delay) {
+        var me = this;
+        delay = delay || 0;
+        me.nodes.where(function (x) {
+            return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
+        }).foreach(function (node) {
+            node.node.stop(delay);
+        })
+    },
     disconnect: function () {
         var me = this, last, context = me.createContext();
         me.nodes.foreach(function (x, i) {
@@ -500,6 +528,7 @@ MEPH.define('MEPH.audio.Audio', {
             }
         });
         last.disconnect(context.destination);
+        me.completed = false;
     },
     gain: function (options) {
         var me = this, params = me.createK().concat(me.createA('gain')).concat(me.createS());
@@ -621,7 +650,7 @@ MEPH.define('MEPH.audio.Audio', {
     complete: function (options) {
         var me = this, last, targetnode,
             nodes = me.getNodes();
-
+        me.completed = true;
         nodes.foreach(function (x, index) {
             if (!x.node) {
                 x.node = me.createAudioNode(x.type, options, x.options);
@@ -637,17 +666,18 @@ MEPH.define('MEPH.audio.Audio', {
                     last.connect(x.node);
                 }
 
-                if (x.params) {
-                    x.params.foreach(function (param) {
-                        if (x.options && x.options[param.name] && typeof x.options[param.name] === 'object') {
-                            me.connectTargetToNode(nodes, x, param);
-                        }
-                        else if (x.node[param.name] && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
 
-                            x.node[param.name].value = x.options[param.name];
-                        }
-                    })
-                }
+            }
+            if (x.params) {
+                x.params.foreach(function (param) {
+                    if (x.options && x.options[param.name] && typeof x.options[param.name] === 'object') {
+                        me.connectTargetToNode(nodes, x, param);
+                    }
+                    else if (x.node[param.name] && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
+
+                        x.node[param.name].value = x.options[param.name];
+                    }
+                })
             }
             last = x.node;
         });
@@ -721,12 +751,25 @@ MEPH.define('MEPH.audio.Audio', {
                 if (x.type === MEPH.audio.Audio.nodeTypes.merger) {
                     x.options.mergedIndex = x.options.mergedIndex || -1;
                     x.options.mergedIndex++;
-                    targetnode = nodes.first(function (node) {
-                        return node.options.node.data.nodeOutputs.some(function (y) { return y.id === x.options.buffer.id; });
+
+                    var options = [].interpolate(0, 4, function (i) {
+                        if (i) {
+                            return 'buffer' + (i + 1)
+                        }
+                        return 'buffer';
                     });
 
-                    targetnode.node.connect(x.node, 0, x.options.mergedIndex);
-
+                    options.where(function (t) {
+                        return x.options[t];
+                    }).foreach(function (op) {
+                        targetnode = nodes.first(function (node) {
+                            return node.options.node.data.nodeOutputs.some(function (y) {
+                                return y.id === x.options[op].id;
+                            });
+                        });
+                        if (targetnode)
+                            targetnode.node.connect(x.node, 0, x.options.mergedIndex);
+                    })
                 }
                 else
                     targetnode.node.connect(x.node);

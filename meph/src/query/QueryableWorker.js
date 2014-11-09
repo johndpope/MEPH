@@ -47,6 +47,24 @@ MEPH.define('MEPH.query.QueryableWorker', {
             return promise;
         });
     },
+    terminate: function () {
+        var me = this;
+        
+        me.$worker.terminate();
+    },
+    message: function (code, args, handler) {
+        var me = this;
+
+        if (!handler) throw new Error('There must be a handler');
+
+        me.$worker.addEventListener("message", handler, false);
+
+        me.$worker.postMessage({
+            work: code.toString(),
+            args: args,
+            func: 'exec'
+        })
+    },
     postSync: function (message, callback) {
         var me = this;
 

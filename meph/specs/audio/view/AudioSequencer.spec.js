@@ -146,12 +146,13 @@
             var app = r.app, called;
 
             var sequencer = results.first().classInstance;
-
+            sequencer.hovercells = [{ column: 0, row: 0 }]
+            sequencer.addSequence = function () { called = true; }
             sequencer.setContextMenuOpenKey('t');
-
+            
             sequencer.dispatchEvent('keypress', { which: 't'.charCodeAt(0) }, sequencer.canvas);
 
-            expect(sequencer.$canvasContextMenuEl).toBeTruthy();
+            expect(called).toBeTruthy();
 
             if (app) {
                 app.removeSpace();
@@ -163,25 +164,25 @@
         });
     });
 
-    it('hitting the open context menu button over the canvas will open a menu', function () {
-        MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
-            var results = r.res;
-            var app = r.app, called;
+    //it('hitting the open context menu button over the canvas will open a menu', function () {
+    //    MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
+    //        var results = r.res;
+    //        var app = r.app, called;
 
-            var sequencer = results.first().classInstance;
+    //        var sequencer = results.first().classInstance;
 
-            sequencer.dispatchEvent('keypress', { which: 'v'.charCodeAt(0) }, sequencer.canvas);
-            expect(sequencer.$canvasContextMenuEl).toBeTruthy();
+    //        sequencer.dispatchEvent('keypress', { which: 'v'.charCodeAt(0) }, sequencer.canvas);
+    //       // expect(sequencer.$canvasContextMenuEl).toBeTruthy();
 
-            if (app) {
-                app.removeSpace();
-            }
-        }).catch(function (error) {
-            expect(error || new Error('did not render as expected')).caught();
-        }).then(function () {
-            done();
-        });
-    });
+    //        if (app) {
+    //            app.removeSpace();
+    //        }
+    //    }).catch(function (error) {
+    //        expect(error || new Error('did not render as expected')).caught();
+    //    }).then(function () {
+    //        done();
+    //    });
+    //});
 
 
 });
