@@ -51,6 +51,7 @@ MEPH.define('MEPH.query.QueryableWorker', {
         var me = this;
         
         me.$worker.terminate();
+        me.$worker = null;
     },
     message: function (code, args, handler) {
         var me = this;

@@ -37,6 +37,7 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioSelect', {
             else {
                 me.title = null;
             }
+            me.getFirstElement().dispatchEvent(MEPH.createEvent('updated', { value: me.value }));
         }, me.value, source);
 
     }

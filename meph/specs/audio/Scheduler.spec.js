@@ -115,6 +115,7 @@
             if (tikked > 4) {
                 expect(true).toBeTruthy();
                 scheduler.stop();
+                scheduler.terminate();
                 done();
             }
         });
@@ -148,11 +149,13 @@
             schedule.play()
         }).catch(function (e) {
             schedule.stop();
+            schedule.terminate();
             done();
             expect(e).caught();
         });
         schedule.on('complete', function () {
             schedule.stop();
+            schedule.terminate();
             done();
         })
     });
@@ -169,11 +172,13 @@
             schedule.play()
         }).catch(function (e) {
             schedule.stop();
+            schedule.terminate();
             done();
             expect(e).caught();
         });
         schedule.on('complete', function () {
             schedule.stop();
+            schedule.terminate();
             done();
         })
     });

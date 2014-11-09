@@ -28,8 +28,8 @@ MEPH.define('MEPH.audio.Audio', {
             biquadFilter: 'biquadFilter'
         },
         GetSourceBuffer: function () {
-            MEPH.audio.Audio.sourcebuffer = MEPH.audio.Audio.sourcebuffer || [];
-            return MEPH.audio.Audio.sourcebuffer;
+            MEPH.audio.Audio.$sourcebuffer = MEPH.audio.Audio.$sourcebuffer || [];
+            return MEPH.audio.Audio.$sourcebuffer;
         },
         /**
          * Does a quick analysis of resource.
@@ -221,8 +221,8 @@ MEPH.define('MEPH.audio.Audio', {
     },
     getBufferSources: function () {
         var me = this, Audio = MEPH.audio.Audio;
-        Audio.sourcebuffer = Audio.sourcebuffer || [];
-        return MEPH.audio.Audio.sourcebuffer;
+        Audio.$sourcebuffer = Audio.$sourcebuffer || [];
+        return MEPH.audio.Audio.$sourcebuffer.select();
     },
     /**
      * Adds a buffer source.
@@ -231,10 +231,11 @@ MEPH.define('MEPH.audio.Audio', {
      ***/
     addBufferSource: function (options) {
         var me = this, Audio = MEPH.audio.Audio;
-        Audio.sourcebuffer = Audio.sourcebuffer || MEPH.util.Observable.observable([]);
+        
+        Audio.$sourcebuffer = Audio.$sourcebuffer || ([]);//MEPH.util.Observable.observable
         options.id = options.id || MEPH.GUID();
-        Audio.sourcebuffer.push(options);
-        MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, options, Audio.sourcebuffer);
+        Audio.$sourcebuffer.push(options);
+        MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, options, Audio.$sourcebuffer);
         return options;
     },
     /**
@@ -244,9 +245,9 @@ MEPH.define('MEPH.audio.Audio', {
      ***/
     removeBufferSource: function (id) {
         var Audio = MEPH.audio.Audio;
-        if (Audio.sourcebuffer) {
-            MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, Audio.sourcebuffer);
-            return Audio.sourcebuffer.removeWhere(function (t) { return t.id === id; });
+        if (Audio.$sourcebuffer) {
+            MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, Audio.$sourcebuffer);
+            return Audio.$sourcebuffer.removeWhere(function (t) { return t.id === id; });
         }
         return null;
     },
@@ -283,13 +284,20 @@ MEPH.define('MEPH.audio.Audio', {
     buffer: function (buffer, options) {
         var me = this;
         options = options || {};
-        if (!buffer && MEPH.audio.Audio.sourcebuffer) {
-            var res = MEPH.audio.Audio.sourcebuffer.first(function (x) { return x; })
+
+        if (!buffer && options.source) {
+            var res = MEPH.audio.Audio.$sourcebuffer.first(function (x) { return x.id === options.source; })
             if (res) {
                 buffer = res.buffer.buffer;
             }
         }
-        options.buffer = buffer;
+        if (!buffer && MEPH.audio.Audio.$sourcebuffer) {
+            var res = MEPH.audio.Audio.$sourcebuffer.first(function (x) { return x; })
+            if (res) {
+                buffer = res.buffer.buffer;
+            }
+        }
+        options.buffer = buffer instanceof AudioBufferSourceNode ? buffer.buffer : buffer;
         options.noinputs = true;
         me.nodes.push({ options: options, buffer: buffer, type: MEPH.audio.Audio.nodeTypes.buffer })
         return me;

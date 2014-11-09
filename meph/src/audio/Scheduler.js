@@ -87,10 +87,14 @@ MEPH.define('MEPH.audio.Scheduler', {
         me.$queryWorker.message(function () {
             MEPH.audio.AudioTimer.stop();
         }, [], function (message) {
-        })
-        //me.$queryWorker.terminate();
+        });
+
         me.un(null, 'play');
         me.playing = false;
+    },
+    terminate: function () {
+        var me = this;
+        me.$queryWorker.terminate();
     },
     sequence: function (s) {
         if (s instanceof MEPH.audio.Sequence) {
