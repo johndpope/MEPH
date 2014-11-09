@@ -15,9 +15,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.Sequence', 'MEPH.util.Dom', 'MEPH.util.Observable'],
     statics: {
         TrackResource: 'TrackResource',
-        ContextMenu: 'ContextMenu'
+        ContextMenu: 'ContextMenu',
+        Play: 'Play'
     },
-    injections: ['audioResources'],
+    injections: ['audioResources', 'scheduler'],
     properties: {
         defaultColumnWidth: 25,
         nearest: 4,
@@ -70,6 +71,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         me.setContextMenuOpenKey('v');
         me.setTrackResourceOpenKey('t');
+        me.setPlayButton('p');
     },
     translateToSource: function (sequence) {
         var me = this;
@@ -177,7 +179,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     selectTrackResource: function (evt) {
         var me = this;
         var hovercells = MEPH.clone(me.hovercells);
-        if (me.$inj.audioResources) {
+        if (me.$inj.audioResources && hovercells) {
             var el = me.getTemplateEl('MEPH.audio.view.sequencer.SequencerResourcesSelect');
             var select = el.querySelector('select');
             select.focus();
@@ -251,6 +253,22 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
 
         me.setCommand(key, MEPH.audio.view.AudioSequencer.TrackResource, me.selectTrackResource.bind(me));
+    },
+    setPlayButton: function (key) {
+        var me = this;
+        me.setCommand(key, MEPH.audio.view.AudioSequencer.Play, function () {
+            
+            if (me.$inj && me.$inj.scheduler) {
+                if (!me.$inj.scheduler.playing) {
+                    me.$inj.scheduler.sequence(me.sequence);
+                    me.$inj.scheduler.play();
+                }
+                else {
+                    me.$inj.scheduler.sequence(me.sequence);
+                    me.$inj.scheduler.stop();
+                }
+            }
+        });
     },
     setCommand: function (key, commandCode, func) {
         var me = this,

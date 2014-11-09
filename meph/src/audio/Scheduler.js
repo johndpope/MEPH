@@ -10,11 +10,16 @@ MEPH.define('MEPH.audio.Scheduler', {
         $sequence: null,
         $queryWorker: null,
         playWindow: 2,
-        interval: 50
+        interval: 50,
+        playing: false
     },
-    initialize: function () {
+    initialize: function (args) {
         var me = this;
         MEPH.Events(me);
+
+        if (args && args.init) {
+            me.init();
+        }
     },
     get: function (from, duration) {
         var me = this;
@@ -37,20 +42,23 @@ MEPH.define('MEPH.audio.Scheduler', {
                 lasttime += started;
             }
             var items = me.getAudio(currentTime - started, me.playWindow);
-            items.where(function (t) { return played.indexOf(t) === -1; }).foreach(function (audio) {
+            items = items.where(function (t) { return played.indexOf(t) === -1; })
+            items.foreach(function (audio) {
                 var time = me.sequence().getAbsoluteTime(audio);
-                if (!audio.source.completed) {
-                    audio.source.complete();
-                }
+
+                audio.source.complete();
                 audio.source.play(time + started);
                 audio.source.stop(time + started + audio.source.duration());
                 played.push(audio);
             });
-            if (lasttime < currentTime) {
+            if (lasttime < currentTime && me.playing) {
                 me.fire('complete', { currentTime: currentTime });
+
+                me.stop();
             }
-        })
+        }, 'play')
         me.start();
+        me.playing = true;
     },
     /**
      * Initializes a scheduler.
@@ -64,8 +72,9 @@ MEPH.define('MEPH.audio.Scheduler', {
     },
     start: function () {
         var me = this;
+        if (me.playing) return;
         me.$queryWorker.message(function () {
-            MEPH.audio.AudioTimer.start(50);
+            MEPH.audio.AudioTimer.start(100);
         }, [], function (message) {
             if (message.data && message.data.tick) {
                 me.fire('tick', true);
@@ -74,11 +83,14 @@ MEPH.define('MEPH.audio.Scheduler', {
     },
     stop: function () {
         var me = this;
+        if (!me.playing) return;
         me.$queryWorker.message(function () {
             MEPH.audio.AudioTimer.stop();
         }, [], function (message) {
         })
-        me.$queryWorker.terminate();
+        //me.$queryWorker.terminate();
+        me.un('play');
+        me.playing = false;
     },
     sequence: function (s) {
         if (s instanceof MEPH.audio.Sequence) {

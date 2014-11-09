@@ -40,7 +40,8 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
     },
     onResourcesUpdated: function () {
         var me = this;
-        me.audiobuffersources.clear();
+        if (me.audiobuffersources)
+            me.audiobuffersources.clear();
         if (me.$inj.audioResources) {
             me.audiobuffersources.push.apply(me.audiobuffersources, me.$inj.audioResources.getResources());
         }

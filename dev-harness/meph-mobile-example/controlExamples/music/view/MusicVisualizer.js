@@ -60,14 +60,14 @@
     playSnippet: function (snippet) {
         if (snippet) {
             var audio = new MEPH.audio.Audio();
-            audio.buffer(snippet.buffer).gain({ name: 'gain', volume: 1 }).complete();
-
-            snippet.buffer.onended = function () {
+            audio.buffer(snippet.buffer.buffer, { name: 'buffer' }).gain({ name: 'gain', volume: 1 }).complete();
+            var snippet = audio.get({ name: 'buffer' });
+            snippet.first().node.onended = function () {
                 audio.disconnect();
                 delete audio;
-                delete snippet.buffer;
+                delete snippet.first().node;
             }
-            snippet.buffer.start();
+            snippet.first().node.start();
         }
     },
     onLoaded: function () {

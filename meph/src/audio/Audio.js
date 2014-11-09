@@ -286,7 +286,7 @@ MEPH.define('MEPH.audio.Audio', {
         if (!buffer && MEPH.audio.Audio.sourcebuffer) {
             var res = MEPH.audio.Audio.sourcebuffer.first(function (x) { return x; })
             if (res) {
-                buffer = res.buffer;
+                buffer = res.buffer.buffer;
             }
         }
         options.buffer = buffer;
@@ -505,7 +505,11 @@ MEPH.define('MEPH.audio.Audio', {
         me.nodes.where(function (x) {
             return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
         }).foreach(function (node) {
+            if (node.node.played) {
+                debugger
+            }
             node.node.start(delay);
+            node.node.played = true;
         })
     },
     stop: function (delay) {
@@ -520,14 +524,10 @@ MEPH.define('MEPH.audio.Audio', {
     disconnect: function () {
         var me = this, last, context = me.createContext();
         me.nodes.foreach(function (x, i) {
-            if (i === me.nodes.length - 1) {
-                last = x.node;
-            }
-            else {
-                x.node.disconnect(me.nodes[i + 1].node);
-            }
+            x.node.disconnect();
+            x.node = null;
         });
-        last.disconnect(context.destination);
+        //last.disconnect(context.destination);
         me.completed = false;
     },
     gain: function (options) {
@@ -584,7 +584,9 @@ MEPH.define('MEPH.audio.Audio', {
             case A.nodeTypes.biquadFilter:
                 return me.createContext(options).createBiquadFilter();
             case A.nodeTypes.buffer:
-                return nodeoptions.buffer
+                var bs = me.createContext(options).createBufferSource();
+                bs.buffer = nodeoptions.buffer;
+                return bs;
             case A.nodeTypes.bufferSource:
                 return me.createContext(options).createBufferSource();
             default:
@@ -650,6 +652,9 @@ MEPH.define('MEPH.audio.Audio', {
     complete: function (options) {
         var me = this, last, targetnode,
             nodes = me.getNodes();
+        if (me.completed) {
+            me.disconnect();
+        }
         me.completed = true;
         nodes.foreach(function (x, index) {
             if (!x.node) {

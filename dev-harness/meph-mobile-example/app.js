@@ -32,6 +32,13 @@ MEPH.ready().then(function () {
                     'static': true,
                     type: 'MEPH.audio.AudioResources'
                 },
+                scheduler: {
+                    'static': true,
+                    type: 'MEPH.audio.Scheduler',
+                    config: {
+                        init: true
+                    }
+                },
                 viewProvider: {
                     type: 'MEPH.mobile.providers.viewprovider.ViewProvider',
                     config: {
