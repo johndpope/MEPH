@@ -363,7 +363,7 @@
         reader.setGraph(graphwithaudiosource);
         var audio = reader.createAudio();
         expect(audio).toBeTruthy();
-        debugger
+        
         var buf = audio.get({ type: 'buffer' }).first();
     })
 

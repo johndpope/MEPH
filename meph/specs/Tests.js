@@ -108,6 +108,7 @@
                         'audio/graph/node/PannerNode.spec.js',
                         'audio/graph/node/WaveShaperNode.spec.js',
                         'audio/graph/AudioGraphReader.spec.js',
+                        'audio/music/theory/Scales.spec.js',
                         'audio/view/AudioResourceManager.spec.js',
                         'audio/view/AudioSequencer.spec.js',
                         'audio/view/Visualizer.spec.js',

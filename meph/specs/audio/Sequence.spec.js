@@ -133,6 +133,6 @@
         sequence.setDefault('graph', 'id');
 
         expect(sequence.$defaultType).toBe('graph');
-        expect(sequence.$defatulRefId).toBe('id');
+        expect(sequence.$defaultRefId).toBe('id');
     })
 });
