@@ -9634,13 +9634,25 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* line 30, ../sass/meph-default/controls/view/_misc.scss */
-.spreadsheetbody {
-  position: relative;
-  margin-right: 30px;
-  margin-bottom: 30px;
+.audiosequenceheader {
+  position: absolute;
+  height: 40px;
+  width: 100%;
+  z-index: 100;
 }
 
-/* line 38, ../sass/meph-default/controls/view/_misc.scss */
+/* line 37, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheetwrapper {
+  padding-bottom: 40px;
+  padding-top: 67px;
+}
+
+/* line 42, ../sass/meph-default/controls/view/_misc.scss */
+.spreadsheetbody {
+  position: relative;
+}
+
+/* line 48, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheetscrollbarright {
   position: absolute;
   right: 0;
@@ -9652,7 +9664,7 @@ input[type="range"]::-webkit-slider-thumb {
   padding-bottom: 20px;
 }
 
-/* line 49, ../sass/meph-default/controls/view/_misc.scss */
+/* line 59, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheetscrollbarbotom {
   width: 100%;
   background-color: white;
@@ -9664,13 +9676,13 @@ input[type="range"]::-webkit-slider-thumb {
   padding-right: 20px;
 }
 
-/* line 60, ../sass/meph-default/controls/view/_misc.scss */
+/* line 70, ../sass/meph-default/controls/view/_misc.scss */
 .scrollbarhandle {
   background-color: #c1c1c1;
   position: absolute;
 }
 
-/* line 65, ../sass/meph-default/controls/view/_misc.scss */
+/* line 75, ../sass/meph-default/controls/view/_misc.scss */
 .scrollbar {
   height: 100%;
   width: 100%;
@@ -9679,7 +9691,7 @@ input[type="range"]::-webkit-slider-thumb {
   border: 1px solid #c1c1c1;
 }
 
-/* line 73, ../sass/meph-default/controls/view/_misc.scss */
+/* line 83, ../sass/meph-default/controls/view/_misc.scss */
 .selectarea,
 .activearea {
   display: none;
@@ -9688,51 +9700,51 @@ input[type="range"]::-webkit-slider-thumb {
   pointer-events: none;
 }
 
-/* line 81, ../sass/meph-default/controls/view/_misc.scss */
+/* line 91, ../sass/meph-default/controls/view/_misc.scss */
 .selectarea.active,
 .activearea.active {
   display: block;
   z-index: 4;
 }
 
-/* line 87, ../sass/meph-default/controls/view/_misc.scss */
+/* line 97, ../sass/meph-default/controls/view/_misc.scss */
 .selectarea.active {
   background-color: rgba(93, 186, 204, 0.2);
 }
 
-/* line 91, ../sass/meph-default/controls/view/_misc.scss */
+/* line 101, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheet .bottom {
   z-index: -1;
 }
 
-/* line 95, ../sass/meph-default/controls/view/_misc.scss */
+/* line 105, ../sass/meph-default/controls/view/_misc.scss */
 .spreadsheet .spreadsheet,
 .spreadsheet .topheader,
 .spreadsheet .leftheader {
   position: absolute;
 }
 
-/* line 101, ../sass/meph-default/controls/view/_misc.scss */
+/* line 111, ../sass/meph-default/controls/view/_misc.scss */
 .grabrep {
   position: absolute;
   background-color: rgba(1, 233, 204, 0.2);
 }
 
-/* line 106, ../sass/meph-default/controls/view/_misc.scss */
+/* line 116, ../sass/meph-default/controls/view/_misc.scss */
 .tweeneditor {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
-/* line 112, ../sass/meph-default/controls/view/_misc.scss */
+/* line 122, ../sass/meph-default/controls/view/_misc.scss */
 .tweeneditor svg {
   width: 100%;
   height: 100%;
   position: relative;
 }
 
-/* line 120, ../sass/meph-default/controls/view/_misc.scss */
+/* line 130, ../sass/meph-default/controls/view/_misc.scss */
 .tweeneditorspace {
   position: absolute;
   top: 0px;
@@ -9740,71 +9752,71 @@ input[type="range"]::-webkit-slider-thumb {
   padding-bottom: 50px;
 }
 
-/* line 127, ../sass/meph-default/controls/view/_misc.scss */
+/* line 137, ../sass/meph-default/controls/view/_misc.scss */
 .tweeneditorspace circle {
   cursor: pointer;
   r: 6px;
 }
 
-/* line 132, ../sass/meph-default/controls/view/_misc.scss */
+/* line 142, ../sass/meph-default/controls/view/_misc.scss */
 .button_row {
   position: absolute;
   height: 50px;
   bottom: 0px;
 }
 
-/* line 138, ../sass/meph-default/controls/view/_misc.scss */
+/* line 148, ../sass/meph-default/controls/view/_misc.scss */
 .spectrogram canvas,
 .spectrogram {
   height: 100%;
   width: 100%;
 }
 
-/* line 144, ../sass/meph-default/controls/view/_misc.scss */
+/* line 154, ../sass/meph-default/controls/view/_misc.scss */
 svg[control] {
   overflow: visible;
 }
 
-/* line 150, ../sass/meph-default/controls/view/_misc.scss */
+/* line 160, ../sass/meph-default/controls/view/_misc.scss */
 svg path.preconnection {
   stroke-dasharray: 10, 5;
 }
 
-/* line 154, ../sass/meph-default/controls/view/_misc.scss */
+/* line 164, ../sass/meph-default/controls/view/_misc.scss */
 svg text {
   user-select: none;
 }
 
-/* line 158, ../sass/meph-default/controls/view/_misc.scss */
+/* line 168, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection {
   stroke: #1fc03c;
   stroke-width: 3px;
 }
 
-/* line 164, ../sass/meph-default/controls/view/_misc.scss */
+/* line 174, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection:hover {
   stroke: yellow;
   stroke-width: 10px;
 }
 
-/* line 169, ../sass/meph-default/controls/view/_misc.scss */
+/* line 179, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection.selected {
   stroke: orange;
   stroke-width: 4px;
 }
 
-/* line 174, ../sass/meph-default/controls/view/_misc.scss */
+/* line 184, ../sass/meph-default/controls/view/_misc.scss */
 svg path.connection.selected:hover {
   stroke: red;
   stroke-width: 10px;
 }
 
-/* line 179, ../sass/meph-default/controls/view/_misc.scss */
+/* line 189, ../sass/meph-default/controls/view/_misc.scss */
 svg text.ignore {
   pointer-events: none;
 }
 
-/* line 184, ../sass/meph-default/controls/view/_misc.scss */
+/* line 194, ../sass/meph-default/controls/view/_misc.scss */
 .contextmenu {
   position: absolute;
   width: 150px;

@@ -27,6 +27,18 @@
         expect(sequence.get().first().source).toBe(audio);
     })
 
+    it('a sequence can not have any circular references ', function () {
+        var sequence = new MEPH.audio.Sequence();
+        var sequence2 = new MEPH.audio.Sequence();
+        var sequence3 = new MEPH.audio.Sequence();
+        var caught;
+        sequence.add(sequence2, 0);
+        sequence2.add(sequence3, 0);
+
+        var res = sequence3.add(sequence, 0);
+        expect(res).toBe(false);
+    })
+
     it('a sequence can reference either an audio object or sequences but not both.', function () {
         var sequence = new MEPH.audio.Sequence();
         var audio = new MEPH.audio.Audio();
@@ -40,7 +52,7 @@
     it('a sequence has a length associated with it .', function () {
         var sequence = new MEPH.audio.Sequence();
         var audio = new MEPH.audio.Audio();
-        
+
         sequence.add(audio);
         expect(sequence.duration()).toBe(1);
     });
@@ -49,7 +61,7 @@
     it('a sequence can set a relative time offset on a sequence', function () {
         var sequence = new MEPH.audio.Sequence();;
         var audio = new MEPH.audio.Audio();
-        
+
 
         sequence.add(audio, 12);
 
@@ -70,9 +82,9 @@
     it('a sequence can calculate the duration based on relativetimes and durations of its components.', function () {
         var sequence = new MEPH.audio.Sequence();;
         var audio = new MEPH.audio.Audio();
-      
+
         var audio2 = new MEPH.audio.Audio();
-      
+
         sequence.add(audio, 12);
         sequence.add(audio2, 14);
 
@@ -116,7 +128,7 @@
     })
 
     it('can set the default item to add on a sequence', function () {
-        
+
         var sequence = new MEPH.audio.Sequence();
         sequence.setDefault('graph', 'id');
 

@@ -149,7 +149,7 @@
             sequencer.hovercells = [{ column: 0, row: 0 }]
             sequencer.addSequence = function () { called = true; }
             sequencer.setContextMenuOpenKey('t');
-            
+
             sequencer.dispatchEvent('keypress', { which: 't'.charCodeAt(0) }, sequencer.canvas);
 
             expect(called).toBeTruthy();
@@ -164,25 +164,82 @@
         });
     });
 
-    //it('hitting the open context menu button over the canvas will open a menu', function () {
-    //    MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
-    //        var results = r.res;
-    //        var app = r.app, called;
+    it('can save a sequence to the audioresources', function (done) {
+        MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
 
-    //        var sequencer = results.first().classInstance;
+            var sequencer = results.first().classInstance;
 
-    //        sequencer.dispatchEvent('keypress', { which: 'v'.charCodeAt(0) }, sequencer.canvas);
-    //       // expect(sequencer.$canvasContextMenuEl).toBeTruthy();
+            sequencer.$inj = {
+                audioResources: {
+                    addSequence: function () {
+                        called = true;
+                    }
+                }
+            }
 
-    //        if (app) {
-    //            app.removeSpace();
-    //        }
-    //    }).catch(function (error) {
-    //        expect(error || new Error('did not render as expected')).caught();
-    //    }).then(function () {
-    //        done();
-    //    });
-    //});
+            sequencer.saveSequence();
+            expect(called).toBeTruthy();
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
 
+    it('can create a new sequence', function (done) {
+        MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var sequencer = results.first().classInstance;
+            var old = sequencer.sequence;
+
+            sequencer.newSequence();
+            expect(old !== sequencer.sequence).toBeTruthy();
+            expect(sequencer.sequence instanceof MEPH.audio.Sequence).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('can create a open sequence', function (done) {
+        MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
+            var results = r.res;
+            var app = r.app, called;
+
+            var sequencer = results.first().classInstance;
+            var old = sequencer.sequence;
+            sequencer.$inj = {
+                audioResources: {
+                    getSequenceInstance: function () {
+                        return old;
+                    }
+                }
+            }
+            sequencer.newSequence();
+            sequencer.openSequence(old.id);
+            expect(old === sequencer.sequence).toBeTruthy();
+            expect(sequencer.sequence instanceof MEPH.audio.Sequence).toBeTruthy();
+
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
 
 });

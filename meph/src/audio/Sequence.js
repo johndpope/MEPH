@@ -22,7 +22,7 @@ MEPH.define('MEPH.audio.Sequence', {
     injections: ['audioResources'],
     properties: {
         parts: null,
-        title: 'Untitled',
+        title: null,
         id: null,
         containsSequences: false
     },
@@ -43,7 +43,7 @@ MEPH.define('MEPH.audio.Sequence', {
     setDefault: function (type, id) {
         var me = this;
         me.$defaultType = type;
-        me.$defatulRefId = id;
+        me.$defaultRefId = id;
     },
     getDefaultInstance: function () {
         var me = this,
@@ -51,8 +51,12 @@ MEPH.define('MEPH.audio.Sequence', {
         if (me.$inj.audioResources) {
             switch (me.$defaultType) {
                 case 'graph':
-                    result = me.$inj.audioResources.getGraphInstance(me.$defatulRefId);
+                    result = me.$inj.audioResources.getGraphInstance(me.$defaultRefId);
                     break;
+                case 'sequence':
+                    result = me.$inj.audioResources.getSequenceInstance(me.$defaultRefId)
+                    break;
+                default: throw new Error('unhandled case');
             }
         }
         return result;
@@ -134,7 +138,15 @@ MEPH.define('MEPH.audio.Sequence', {
      ***/
     hasDescendant: function (item) {
         var me = this;
-        return me.items().any(function (x) { return x === item || (me.containsSequences ? x.source.hasDescendant(item) : false); });
+        return me.items().any(function (x) {
+            return x === item || (me.containsSequences ? x.source.hasDescendant(item) : false);
+        });
+    },
+    containsRef: function (source) {
+        var me = this;
+        return me.items().any(function (x) {
+            return x.source === source || (me.containsSequences ? x.source.containsRef(source) : false);
+        });
     },
     /**
      * Adds a source to the sequence.
@@ -146,16 +158,20 @@ MEPH.define('MEPH.audio.Sequence', {
             defaults,
             args = MEPH.Array(arguments);
 
-        if (me.parts.length === 0) {
-            me.containsSequences = args.first() instanceof MEPH.audio.Sequence;
-        }
         if (!source) {
             source = me.getDefaultInstance();
         }
-        if ((me.containsSequences && source instanceof MEPH.audio.Sequence) ||
-            (!me.containsSequences && source instanceof MEPH.audio.Audio)) {
-            me.parts.push({ source: source, relativeTimeOffset: timeOffset || 0 });
+
+        if (me.parts.length === 0) {
+            me.containsSequences = source instanceof MEPH.audio.Sequence;
         }
+
+        if (((me.containsSequences && source instanceof MEPH.audio.Sequence) ||
+            (!me.containsSequences && source instanceof MEPH.audio.Audio)) && (source instanceof MEPH.audio.Audio || (!me.containsRef(source) && !source.containsRef(me)))) {
+            me.parts.push({ source: source, relativeTimeOffset: timeOffset || 0 });
+            return true;
+        }
+        return false;
     },
     get: function () {
         var me = this;

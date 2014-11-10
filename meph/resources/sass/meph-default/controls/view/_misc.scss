@@ -27,10 +27,20 @@
     position: relative;
 }
 
+.audiosequenceheader {
+    position: absolute;
+    height: 40px;
+    width: 100%;
+    z-index: 100;
+}
+
+.spreadsheetwrapper {
+    padding-bottom: 40px;
+    padding-top: 67px;
+}
+
 .spreadsheetbody {
     position: relative;
-    margin-right: 30px;
-    margin-bottom: 30px;
 }
 
 $padding-distance: 20px;

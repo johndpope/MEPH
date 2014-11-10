@@ -12,7 +12,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     extend: 'MEPH.table.Sequencer',
     requires: ['MEPH.audio.Audio',
         'MEPH.audio.AudioResources',
-        'MEPH.audio.Sequence', 'MEPH.util.Dom', 'MEPH.util.Observable'],
+        'MEPH.input.Text',
+        'MEPH.audio.Sequence',
+        'MEPH.util.Dom',
+        'MEPH.util.Observable'],
     statics: {
         TrackResource: 'TrackResource',
         ContextMenu: 'ContextMenu',
@@ -45,9 +48,39 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         me.super();
         me.setupHeaders();
+        me.sequence.title = me.sequence.title || 'untitled';
+        me.fire('altered', { property: 'sequence' })
+    },
+    /**
+     * Save sequence.
+     **/
+    saveSequence: function () {
+        var me = this;
+        if (me.$inj && me.$inj.audioResources) {
+            me.$inj.audioResources.addSequence(me.sequence);
+        }
+    },
+    /**
+     * New sequence.
+     **/
+    newSequence: function () {
+        var me = this;
+        me.sequence = new MEPH.audio.Sequence();
+        me.update();
+    },
+    /**
+     * Opens a sequence
+     * @param {String} id
+     **/
+    openSequence: function (id) {
+        var me = this;
+        if (me.$inj && me.$inj.audioResources) {
+            me.sequence = me.$inj.audioResources.getSequenceInstance(id) || me.sequence;
+
+        }
     },
     setupHeaders: function () {
-        var me = this, columns = 1000, rows = 100;
+        var me = this, columns = 500, rows = 50;
         me.leftheadersource = [].interpolate(0, rows, function (x) {
             return MEPH.util.Observable.observable({
                 lane: x,
@@ -176,6 +209,41 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             //}, 'button');
         }
     },
+    openSavedSequence: function () {
+        var me = this;
+        return new Promise(function (resolve) {
+            if (me.$inj.audioResources) {
+                var el = me.getTemplateEl('MEPH.audio.view.sequencer.SequencerResourcesSelect');
+                var select = el.querySelector('select');
+                select.focus();
+                var value;
+                var sequences = me.$inj.audioResources.getSequences();
+
+
+                var selectOptions = sequences.select(function (x, index) {
+                    return {
+                        title: x.title,
+                        value: x.id
+                    }
+                });
+
+                selectOptions.foreach(function (t) {
+                    Dom.addOption(t.title, t.value, select);
+                });
+
+                Dom.addSimpleDataEntryToElments(me, [{
+                    element: select,
+                    setFunc: function (val) {
+                        value = val;
+                    }
+                }], el, function () {
+                    var val = sequences.first(function (x) { return x.id === value; })
+                    me.openSequence(val.id);
+                    resolve();
+                });
+            }
+        })
+    },
     selectTrackResource: function (evt) {
         var me = this;
         var hovercells = MEPH.clone(me.hovercells);
@@ -185,12 +253,24 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             select.focus();
             var value;
             var graphs = me.$inj.audioResources.getGraphs();
+            var sequences = me.$inj.audioResources.getSequences();
+
+
             var selectOptions = graphs.select(function (x, index) {
                 return {
                     title: x.name,
-                    value: index
+                    value: x.id
                 }
-            }).foreach(function (t) {
+            });
+
+            sequences.foreach(function (x) {
+                selectOptions.push({
+                    title: x.title,
+                    value: x.id
+                });
+            });
+
+            selectOptions.foreach(function (t) {
                 Dom.addOption(t.title, t.value, select);
             });
 
@@ -200,7 +280,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                     value = val;
                 }
             }], el, function () {
-                me.setTrackResource(hovercells.first().row, graphs[value])
+                var val = graphs.first(function (x) { return x.id === value; }) ||
+                    sequences.first(function (x) { return x.id === value; })
+                me.setTrackResource(hovercells.first().row, val)
             });
         }
     },
@@ -211,7 +293,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     setTrackResource: function (lane, graph) {
         var me = this, sequence = me.sequence.items()[lane];
         if (sequence) {
-            sequence.source.setDefault('graph', graph.id)
+            sequence.source.setDefault(graph instanceof MEPH.audio.Sequence ? 'sequence' : 'graph', graph.id)
         }
     },
     /**
@@ -257,7 +339,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     setPlayButton: function (key) {
         var me = this;
         me.setCommand(key, MEPH.audio.view.AudioSequencer.Play, function () {
-            
+
             if (me.$inj && me.$inj.scheduler) {
                 if (!me.$inj.scheduler.playing) {
                     me.$inj.scheduler.sequence(me.sequence);

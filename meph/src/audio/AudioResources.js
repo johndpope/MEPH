@@ -9,6 +9,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         RESOURCE_MANAGER_UPDATE: 'RESOURCE_MANAGER_UPDATE'
     },
     properties: {
+        sequences: null,
         resources: null,
         graphs: null
     },
@@ -18,6 +19,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         me.graphReader = new MEPH.audio.graph.AudioGraphReader();
         me.resources = [];
         me.graphs = [];
+        me.sequences = [];
 
         MEPH.subscribe(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, me.onResourcesChanged.bind(me));
 
@@ -54,7 +56,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         if (graphRecipe) {
             me.graphReader.setGraph(graphRecipe);
             try {
-                return  me.graphReader.createAudio();
+                return me.graphReader.createAudio();
             }
             catch (e) {
                 MEPH.Log(e);
@@ -62,6 +64,20 @@ MEPH.define('MEPH.audio.AudioResources', {
         }
 
         return null;
+    },
+    getSequenceInstance: function (id) {
+        var me = this;
+        return me.sequences.first(function (x) { return x.id === id; })
+    },
+    addSequence: function (sequence) {
+        var me = this;
+        if (sequence.title)
+            if (me.sequences.indexOf(sequence) === -1)
+                me.sequences.push(sequence);
+    },
+    getSequences: function () {
+        var me = this;
+        return me.sequences.select();
     },
     getResources: function () {
         var me = this;
