@@ -210,6 +210,49 @@ MEPH.define('MEPH.audio.Audio', {
         return { name: MEPH.GUID(), buffer: source, type: '' };
     },
     /**
+     * Serializes a buffer object in to a string.
+     * @param {Object} bufferObject
+     **/
+    serializeBuffer: function (bufferObject) {
+        var me = this, res = {};
+        res.name = bufferObject.name;
+        res.type = bufferObject.type;
+        var bufer = [].interpolate(0, bufferObject.buffer.numberOfChannels, function (channel) {
+            var data = bufferObject.buffer.getChannelData(channel);
+            return {
+                channel: channel,
+                data: [].interpolate(0, data.length, function (x) { return data[x]; })
+            }
+        });
+        res.sampleRate = bufferObject.buffer.sampleRate;
+        res.buffer = bufer;
+        res.id = bufferObject.id;
+        return btoa(JSON.stringify(res));
+    },
+    /**
+     * Deserializes a string in to a buffer.
+     **/
+    deserializeBuffer: function (bufferString) {
+        var me = this;
+        var jsonstring = atob(bufferString);
+        var obj = JSON.parse(jsonstring);
+        var channels = obj.buffer.length;
+        var frameCount = obj.buffer.first().data.length;
+        var source = me.createContext().createBuffer(channels, frameCount, obj.sampleRate);
+        obj.buffer.foreach(function (channelData, i) {
+            var data = source.getChannelData(channelData.channel);
+            channelData.data.foreach(function (t, y) {
+                data[y] = t;
+            });
+        });
+        return {
+            name: obj.name,
+            type: obj.type,
+            buffer: source,
+            id: obj.id
+        }
+    },
+    /**
      * Sets the duration to be played.
      **/
     duration: function (time) {
@@ -231,7 +274,7 @@ MEPH.define('MEPH.audio.Audio', {
      ***/
     addBufferSource: function (options) {
         var me = this, Audio = MEPH.audio.Audio;
-        
+
         Audio.$sourcebuffer = Audio.$sourcebuffer || ([]);//MEPH.util.Observable.observable
         options.id = options.id || MEPH.GUID();
         Audio.$sourcebuffer.push(options);

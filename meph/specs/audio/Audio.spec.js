@@ -174,6 +174,38 @@
         });
     });
 
+    it('can serialize a audiobuffer object to a string', function () {
+        var audio = new MEPH.audio.Audio(), channels = 1, frameCount = 1000;
+
+        var source = audio.createContext().createBuffer(channels, frameCount, 44000);
+        var nowBuffering = source.getChannelData(0);
+        for (var i = 0; i < frameCount; i++) {
+            nowBuffering[i] = Math.sin(i / 100);
+        }
+        var res = audio.serializeBuffer({ name: MEPH.GUID(), buffer: source, type: '' });
+
+        expect(res).toBeTruthy();
+    });
+
+    it('can deserialize a audiobufferstring to a working audiobuffer', function () {
+        var audio = new MEPH.audio.Audio(), channels = 1, frameCount = 1000;
+
+        var source = audio.createContext().createBuffer(channels, frameCount, 44000);
+        var nowBuffering = source.getChannelData(0);
+        for (var i = 0; i < frameCount; i++) {
+            nowBuffering[i] = Math.sin(i / 100);
+        }
+        var guid = MEPH.GUID();
+        var res = audio.serializeBuffer({ name: guid, buffer: source, type: 'type', id: 'id' });
+
+        var result = audio.deserializeBuffer(res);
+        expect(res).toBeTruthy();
+        expect(result.type === 'type').toBeTruthy();
+        expect(result.name === guid).toBeTruthy();
+        expect(result.buffer.numberOfChannels === 1).toBeTruthy();
+        expect(result.id === 'id').toBeTruthy();
+    })
+
     it('can copy a clip of sound ', function (done) {
         var audio = new MEPH.audio.Audio();
 
