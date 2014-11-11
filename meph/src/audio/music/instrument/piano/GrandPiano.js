@@ -19,10 +19,12 @@ MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
             });
             var keysequence = new MEPH.audio.Sequence();
             var split = resource.file.split('.');
-            var name = split[split.length - 2]
+            var name = resource.file;
             var notegraph = me.createPianoNoteGraph(resource.id, name);
             keysequence.setDefaultGraph(notegraph.id);
-            keysequence.title = name;
+            var prefix = 'MEPH.audio.music.instrument.piano.mp3.';
+            prefix = MEPH.getClassPath(prefix)
+            keysequence.title = name.split(prefix).last().split('.mp3').first();
             sequence.add(keysequence, 0);
         });
         sequence.title = 'Grand Piano';
@@ -40,7 +42,7 @@ MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
         node.data = audiobuffer;
         graph.addNode(node);
         var result = graph.saveGraph();
-        
+
         result.name = name;
         audiobuffer.destroy();
         MEPH.publish(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, result);

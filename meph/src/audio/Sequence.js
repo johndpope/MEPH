@@ -173,7 +173,7 @@ MEPH.define('MEPH.audio.Sequence', {
         if (((me.containsSequences && source instanceof MEPH.audio.Sequence) ||
             (!me.containsSequences && source instanceof MEPH.audio.Audio)) && (source instanceof MEPH.audio.Audio || (!me.containsRef(source) && !source.containsRef(me)))) {
             me.parts.push({ source: source, relativeTimeOffset: timeOffset || 0 });
-            return true;
+            return source;
         }
         return false;
     },

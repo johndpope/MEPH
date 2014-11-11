@@ -65,10 +65,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (!me.pianoloaded) {
             me.pianoloaded = true;
             return MEPH.requires('MEPH.audio.music.instrument.piano.GrandPiano').then(function (piano) {
-                
+
                 var grandpiano = new MEPH.audio.music.instrument.piano.GrandPiano();
                 return grandpiano.ready().then(function () {
-                    debugger
                     var sequence = grandpiano.createSequence();
                     if (me.$inj && me.$inj.audioResources) {
                         me.$inj.audioResources.addSequence(sequence);
@@ -122,6 +121,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         me.setContextMenuOpenKey('v');
         me.setTrackResourceOpenKey('t');
+        me.setDurationKeys()
         me.setPlayButton('p');
     },
     translateToSource: function (sequence) {
@@ -339,6 +339,40 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.update();
         }
     },
+    addSequenceDuration: function (key) {
+        var me = this;
+        var location = me.hovercells.first();
+        var me = this,
+            sequence,
+            row = location.row,
+            column = location.column;
+        sequence = me.getSequenceItem(row);
+        if (sequence) {
+            var res = sequence.source.add(null, column);
+            if (res instanceof MEPH.audio.Audio) {
+                res.duration(me.getDuration(key))
+            }
+            me.translateToSource(me.sequence);
+            me.update();
+        }
+    },
+    getDuration: function (key) {
+        switch (key) {
+            case '1':
+                return 16;
+            case '2':
+                return 8;
+            case '3':
+                return 6;
+            case '4':
+                return 4;
+            case '5':
+                return 2;
+            case '6':
+                return 1;
+            default: return 1;
+        }
+    },
     /**
      * Get sequence item.
      * @param {Number} item
@@ -391,5 +425,11 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     setContextMenuOpenKey: function (key) {
         var me = this;
         me.setCommand(key, MEPH.audio.view.AudioSequencer.ContextMenu, me.openContextMenu.bind(me));
+    },
+    setDurationKeys: function () {
+        var me = this;
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].foreach(function (key) {
+            me.setCommand(key.toString(), 'AddSequence' + key, me.addSequenceDuration.bind(me, key.toString()));
+        });
     }
 });
