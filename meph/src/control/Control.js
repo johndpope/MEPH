@@ -32,6 +32,7 @@ MEPH.define('MEPH.control.Control', {
         }
     },
     properties: {
+        $subscriptions: null,
         $listOfTransferableAttributes: null,
         $domTemplate: null,
         $controls: null,
@@ -62,6 +63,7 @@ MEPH.define('MEPH.control.Control', {
         me.$referenceConnections = MEPH.Array([{
             type: MEPH.control.Control.connectables.control, obj: me
         }]);
+        me.$subscriptions = [];
 
         me.addTransferableAttribute('MEPHId', {
             object: me,
@@ -151,6 +153,10 @@ MEPH.define('MEPH.control.Control', {
         if (!me.getListOfTransferableAttributes().some(function (x) { return x.name === attributeName; })) {
             me.getListOfTransferableAttributes().push({ name: attributeName, options: attributeOptions });
         }
+    },
+    subscription: function (id) {
+        var me = this;
+        me.$subscriptions.push(id);
     },
     /**
      * @private
@@ -525,6 +531,9 @@ MEPH.define('MEPH.control.Control', {
                 x.obj.dun(null, me);
             }
         });
+
+        MEPH.unsubscribe(me.$subscriptions);
+
         me.un();
         me.dun();
     },

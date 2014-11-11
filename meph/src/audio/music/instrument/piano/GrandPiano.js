@@ -5,6 +5,47 @@
  **/
 MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
     extend: 'MEPH.audio.music.instrument.Instrument',
+    requires: ['MEPH.audio.Sequence',
+        'MEPH.graph.Graph',
+        'MEPH.graph.Node',
+        'MEPH.audio.Constants',
+        'MEPH.audio.graph.node.AudioBufferSourceNode'],
+    createSequence: function () {
+        var me = this,
+            sequence = new MEPH.audio.Sequence();
+        me.resources().foreach(function (x) {
+            var resource = MEPH.audio.Audio.GetSourceBuffer().first(function (t) {
+                return t.file === x.file;
+            });
+            var keysequence = new MEPH.audio.Sequence();
+            var split = resource.file.split('.');
+            var name = split[split.length - 2]
+            var notegraph = me.createPianoNoteGraph(resource.id, name);
+            keysequence.setDefaultGraph(notegraph.id);
+            keysequence.title = name;
+            sequence.add(keysequence, 0);
+        });
+        sequence.title = 'Grand Piano';
+        return sequence;
+    },
+    createPianoNoteGraph: function (id, name) {
+
+        var graph = new MEPH.graph.Graph(),
+            node, audiobuffer = new MEPH.audio.graph.node.AudioBufferSourceNode();
+        node = new MEPH.graph.Node();
+        node.setId(MEPH.GUID());
+        audiobuffer.id = MEPH.GUID();
+        audiobuffer.setNodeInputDefaultValue('source', id)
+        node.appendData(audiobuffer);
+        node.data = audiobuffer;
+        graph.addNode(node);
+        var result = graph.saveGraph();
+        
+        result.name = name;
+        audiobuffer.destroy();
+        MEPH.publish(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, result);
+        return result;
+    },
     getResourcesToLoad: function () {
         var me = this;
         var prefix = 'MEPH.audio.music.instrument.piano.mp3.';

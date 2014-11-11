@@ -60,6 +60,24 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.$inj.audioResources.addSequence(me.sequence);
         }
     },
+    loadGrandPiano: function () {
+        var me = this;
+        if (!me.pianoloaded) {
+            me.pianoloaded = true;
+            return MEPH.requires('MEPH.audio.music.instrument.piano.GrandPiano').then(function (piano) {
+                
+                var grandpiano = new MEPH.audio.music.instrument.piano.GrandPiano();
+                return grandpiano.ready().then(function () {
+                    debugger
+                    var sequence = grandpiano.createSequence();
+                    if (me.$inj && me.$inj.audioResources) {
+                        me.$inj.audioResources.addSequence(sequence);
+                        me.openSequence(sequence.id);
+                    }
+                })
+            })
+        }
+    },
     /**
      * New sequence.
      **/

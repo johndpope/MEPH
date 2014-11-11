@@ -18,6 +18,20 @@
             expect(e).caught();
         }).then(function () {
             done();
-        })
+        });
+    });
+
+    it('can create a sequence', function (done) {
+        var audio = new MEPH.audio.music.instrument.piano.GrandPiano();
+        audio.ready().then(function (ready) {
+            var sequence = audio.createSequence();
+            expect(sequence.items()).toBeTruthy();
+            expect(sequence.items().length).toBeTruthy();
+            expect(sequence.title === 'Grand Piano').toBeTruthy();
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(function () {
+            done();
+        });
     })
 });

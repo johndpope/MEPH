@@ -45,6 +45,10 @@ MEPH.define('MEPH.audio.Sequence', {
         me.$defaultType = type;
         me.$defaultRefId = id;
     },
+    setDefaultGraph: function (id) {
+        var me = this;
+        me.setDefault('graph', id);
+    },
     getDefaultInstance: function () {
         var me = this,
             result = null;

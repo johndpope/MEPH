@@ -40,6 +40,7 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
     },
     onResourcesUpdated: function () {
         var me = this;
+        me.audiobuffersources = me.audiobuffersources || MEPH.util.Observable.observable([]);
         if (me.audiobuffersources)
             me.audiobuffersources.clear();
         if (me.$inj.audioResources) {
@@ -53,7 +54,7 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
     onLoaded: function () {
         var me = this;
         me.audiobuffersources = MEPH.util.Observable.observable([]);
-        MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onResourcesUpdated.bind(me));
+        me.subscription(MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onResourcesUpdated.bind(me)));
         me.onResourcesUpdated();
         me.super();
         me.title = 'Audio Buffer Source';

@@ -5,11 +5,17 @@
 MEPH.define('MEPH.audio.music.instrument.Instrument', {
     requires: ['MEPH.audio.Audio'],
     properties: {
-        $audios: null
+        $audios: null,
+        $resources: null
     },
     initialize: function () {
         var me = this;
+        me.$resources = [];
         me.$audios = [];
+    },
+    resources: function(){
+        var me = this;
+        return me.$resources;
     },
     ready: function (option) {
         var me = this,
@@ -17,6 +23,7 @@ MEPH.define('MEPH.audio.music.instrument.Instrument', {
         return Promise.all(toload.select(function (x) {
             var audio = new Audio();
             me.$audios.push(audio);
+            me.$resources.push({ file: x.file, type: x.type });
             return audio.load(x.file, x.type, option);
         })).then(function () {
             return true;

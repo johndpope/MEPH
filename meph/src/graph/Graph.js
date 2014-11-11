@@ -9,6 +9,7 @@ MEPH.define('MEPH.graph.Graph', {
     properties: {
         id: null
     },
+
     on: function (evt, func) {
         var me = this;
         me.addListener(evt, func);
@@ -43,6 +44,30 @@ MEPH.define('MEPH.graph.Graph', {
             nodes: me.nodes.select(function (node) { return node.save(); }),
             connections: me.connections.select(function (connection) { return connection.save(); })
         };
+        return result;
+    },
+    saveGraph: function () {
+        var me = this;
+        var result = {
+            id: me.id || MEPH.GUID(),
+            connections: me.connections.select(),
+            nodes: me.nodes.select(function (x) {
+                var res = {
+                    id: x.id,
+                    position: x.position,
+                    data: {
+                        id: x.data.id,
+                        type: x.data.____type,
+                        nodeInputs: x.data.nodeInputs.select(),
+                        nodeOutputs: x.data.nodeOutputs.select(),
+                    }
+                }
+                if (x.data.subGraph) {
+                    res.data.subGraph = JSON.parse(JSON.stringify(x.data.subGraph))
+                }
+                return res;
+            })
+        }
         return result;
     },
     load: function (result) {
