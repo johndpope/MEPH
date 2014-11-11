@@ -35,6 +35,18 @@ if (!String.prototype.startsWith) {
     });
 }
 
+if (!String.prototype.trim)
+    String.prototype.trim = function () { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
+
+if (!String.prototype.ltrim)
+    String.prototype.ltrim = function () { return this.replace(/^\s+/, ''); };
+
+if (!String.prototype.rtrim)
+    String.prototype.rtrim = function () { return this.replace(/\s+$/, ''); };
+
+if (!String.prototype.fulltrim)
+    String.prototype.fulltrim = function () { return this.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g, '').replace(/\s+/g, ' '); };
+
 /**
  * @method after
  * @param {String} suffix

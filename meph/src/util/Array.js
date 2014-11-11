@@ -47,6 +47,7 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
+
             //if (!array.observable) {
             //    object.defineproperty(array, 'observable', {
             //        enumerable: false,
