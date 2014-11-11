@@ -98,7 +98,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         }
     },
     setupHeaders: function () {
-        var me = this, columns = 500, rows = 50;
+        var me = this, columns = 500, rows = 88;
         me.leftheadersource = [].interpolate(0, rows, function (x) {
             return MEPH.util.Observable.observable({
                 lane: x,

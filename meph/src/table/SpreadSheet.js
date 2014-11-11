@@ -101,7 +101,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
                     });
                     me.columnHeaderOffsets = [].interpolate(0, colheaders, function (x) {
                         return me.defaultHeaderColumnWidth;
-                    })
+                    });
+                    me.refreshRowColPositions();
                 }
                 if (!me.rowOffsets && rows && colheaders) {
 
@@ -111,11 +112,31 @@ MEPH.define('MEPH.table.SpreadSheet', {
                     me.rowHeaderOffsets = [].interpolate(0, rowheaders, function (x) {
                         return me.defaultRowHeight;
                     })
+                    me.refreshRowColPositions();
                 }
 
                 me.update();
             }
         });
+    },
+    refreshRowColPositions: function () {
+        var me = this;
+
+        if (me.columnOffsets) {
+            me.columnPositions = me.columnOffsets.subset(0, me.columnOffsets.length).cumsum();
+
+
+            me.columnHeaderPositions = me.columnHeaderOffsets.subset(0, me.columnHeaderOffsets.length).cumsum();
+        }
+
+        if (me.rowOffsets) {
+            me.rowPositions = me.rowOffsets.subset(0, me.rowOffsets.length).cumsum();
+
+            me.rowHeaderPositions = me.rowHeaderOffsets.subset(0, me.rowHeaderOffsets.length).cumsum();
+
+        }
+
+
     },
     onLoaded: function () {
         var me = this;
@@ -589,9 +610,10 @@ MEPH.define('MEPH.table.SpreadSheet', {
             });
         }
         else {
-            me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
-                u += x;
-            });
+            return me.columnPositions[cell.column] - me.columnPositions[me.startColumn];
+            //me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
+            //    u += x;
+            //});
         }
         return u;
     },
@@ -608,9 +630,10 @@ MEPH.define('MEPH.table.SpreadSheet', {
             });
         }
         else {
-            me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
-                t += x;
-            });
+            return me.rowPositions[cell.row] - me.rowPositions[me.startRow];
+            //me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
+            //    t += x;
+            //});
         }
         return t;
     },
