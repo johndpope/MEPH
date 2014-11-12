@@ -38,5 +38,11 @@
     it('has signature points ', function () {
         var sig = Notes.signaturePoints;
         expect(sig).toBeTruthy();
+    });
+
+    it('can translate a Ab4 to a midi number', function () {
+        var midinote = Notes.convertToMidi('Ab4');
+
+        expect(midinote).toBe(57);
     })
 });

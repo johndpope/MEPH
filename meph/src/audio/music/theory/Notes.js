@@ -45,6 +45,14 @@
                 }
             return scalelib;
         },
+        convertToMidi: function (note) {
+            var Notes = MEPH.audio.music.theory.Notes;
+            var res = note.split('').where(function (x) { return isNaN(x); }).join('');
+            var key = Notes.library[(res.split('')[0] + (res.split('')[0] === 'b' ? Notes.flat : ''))];
+
+            var octave = parseInt(note.split('').where(function (x) { return !isNaN(x); }).first());
+            return octave * 12 + key;
+        },
         /**
          * Gets the key
          **/
