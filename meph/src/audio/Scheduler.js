@@ -11,6 +11,7 @@ MEPH.define('MEPH.audio.Scheduler', {
         $queryWorker: null,
         playWindow: 2,
         interval: 50,
+        bpm: null,
         playing: false
     },
     initialize: function (args) {
@@ -74,7 +75,7 @@ MEPH.define('MEPH.audio.Scheduler', {
         var me = this;
         if (me.playing) return;
         me.$queryWorker.message(function () {
-            MEPH.audio.AudioTimer.start(100);
+            MEPH.audio.AudioTimer.start(1000);
         }, [], function (message) {
             if (message.data && message.data.tick) {
                 me.fire('tick', true);

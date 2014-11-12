@@ -256,7 +256,6 @@ MEPH.define('MEPH.audio.Audio', {
      * Sets the duration to be played.
      **/
     duration: function (time) {
-        //Todo: define a proper way to get the duration of the audio.
         if (time !== undefined && time !== null) {
             this.$duration = time;
         }

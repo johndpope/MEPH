@@ -9,6 +9,10 @@ MEPH.define('MEPH.audio.Sequence', {
     },
     statics: {
         /**
+         * Modified beats per minute.
+         **/
+        mbpm: null,
+        /**
          * Translates a string into a sequence.
          ***/
         deserialize: function (str, audioservice) {
@@ -96,8 +100,11 @@ MEPH.define('MEPH.audio.Sequence', {
             }
             return false;
         });
-        return (found || 0) + rel;
-
+        var unittime = (found || 0) + rel;
+        if (MEPH.audio.Sequence.mbpm) {
+            return unittime * MEPH.audio.Sequence.mbpm;
+        }
+        return unittime;
     },
     setRelativeTime: function (item, time) {
         var me = this;

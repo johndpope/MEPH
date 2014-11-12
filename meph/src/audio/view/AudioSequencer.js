@@ -25,7 +25,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     properties: {
         defaultColumnWidth: 25,
         nearest: 4,
-        sequence: null
+        sequence: null,
+        bpm: 75 / 16 / 60
     },
     initialize: function () {
         var me = this;
@@ -43,6 +44,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             }
         });
         me.setupHeaders();
+
+        MEPH.audio.Sequence.mbpm = me.bpm;
     },
     onLoaded: function () {
         var me = this;
@@ -50,6 +53,12 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.setupHeaders();
         me.sequence.title = me.sequence.title || 'untitled';
         me.fire('altered', { property: 'sequence' })
+    },
+    onInjectionsComplete: function () {
+        var me = this;
+        if (me.$inj && me.$inj.scheduler) {
+            me.$inj.scheduler.bpm = me.bpm;
+        }
     },
     /**
      * Save sequence.
@@ -139,7 +148,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.time = {
             'function': function (item, offset) {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
-                    return me.sequence.getAbsoluteTime(item);
+                    return me.sequence.getAbsoluteTime(item) / me.bpm;
                 }
                 if (offset === 'left') {
                     return 0;
