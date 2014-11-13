@@ -33,6 +33,38 @@ MEPH.define('MEPH.audio.Scheduler', {
             return x.absoluteTime >= from && x.absoluteTime <= (duration + from)
         })
     },
+    render: function () {
+        var me = this, started;
+        var duration = me.sequence().duration();
+        var audios = me.get(0, duration);
+        audios.foreach(function (audio) {
+
+            audio.source.disconnect();
+            audio.source.offlineMode = true;
+        });
+        var currentTime = MEPH.audio.Audio.AudioContext.currentTime;
+        if (started === undefined) {
+            started = currentTime;
+        }
+        var samplerate = MEPH.audio.Audio.AudioContext.sampleRate;
+        MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(2, samplerate * duration, samplerate);
+        audios.foreach(function (audio) {
+            var time = me.sequence().getAbsoluteTime(audio);
+
+            audio.source.complete();
+            audio.source.play(time + started);
+            audio.source.stop(time + started + audio.source.duration());
+        });
+        var toresolve;
+        var promise = new Promise(function (x, f) {
+            toresolve = x;
+        });
+        MEPH.audio.Audio.OfflineAudioContext.oncomplete = function (e) {
+            toresolve(e);
+        }
+        MEPH.audio.Audio.OfflineAudioContext.startRendering();
+        return promise;
+    },
     play: function () {
         var me = this, played = [], started;
         var lasttime = me.sequence().duration();

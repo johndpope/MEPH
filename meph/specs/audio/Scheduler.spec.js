@@ -61,7 +61,7 @@
         [].interpolate(0, 5, function (i) {
             var s = new MEPH.audio.Sequence();
             var audio = reader.createAudio();
-            
+
             s.add(audio, i * 1.1);
             sequence.add(s, i)
         });
@@ -183,5 +183,23 @@
         })
     });
 
-    
+    it('can render a sequence', function (done) {
+        var schedule = new MEPH.audio.Scheduler();
+        var sequencer = new MEPH.audio.Sequence();
+        sequencer.add(createSequence4(), 0);
+        sequencer.add(createSequence3(), 1);
+        sequencer.add(createSequence5(), 0);
+        schedule.sequence(sequencer);
+
+        schedule.init().then(function () {
+            return schedule.render().then(function (res) {
+                expect(res.renderedBuffer).toBeTruthy();
+                schedule.terminate();
+            })
+        }).catch(function (e) {
+            schedule.terminate();
+            expect(e).caught();
+        }).then(done)
+
+    });
 });

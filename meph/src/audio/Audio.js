@@ -574,7 +574,8 @@ MEPH.define('MEPH.audio.Audio', {
     disconnect: function () {
         var me = this, last, context = me.createContext();
         me.nodes.foreach(function (x, i) {
-            x.node.disconnect();
+            if (x.node)
+                x.node.disconnect();
             x.node = null;
         });
         //last.disconnect(context.destination);

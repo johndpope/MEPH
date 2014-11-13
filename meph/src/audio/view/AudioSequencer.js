@@ -412,6 +412,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 }
             }
         });
+        me.setCommand('r', 'render', function () {
+            if (me.$inj && me.$inj.scheduler) {
+                me.$inj.scheduler.render().then(function (x) {
+                    debugger;
+                    var res = x;
+                }).catch(function (e) {
+                    debugger
+                })
+            }
+        })
     },
     setCommand: function (key, commandCode, func) {
         var me = this,
