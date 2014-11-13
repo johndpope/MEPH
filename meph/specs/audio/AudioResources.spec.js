@@ -16,4 +16,11 @@
         expect(audioresources.getResources()).toBeTruthy();
         expect(audioresources.getResources().length).toBe(1);
     })
+
+    it('can collect everything that needs to save into a string', function () {
+        var audioresources = new MEPH.audio.AudioResources();
+        var res = audioresources.collectProject();
+
+        expect(res).toBeTruthy();
+    });
 });

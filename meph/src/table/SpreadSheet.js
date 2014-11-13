@@ -610,10 +610,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
             });
         }
         else {
-            return me.columnPositions[cell.column] - me.columnPositions[me.startColumn];
-            //me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
-            //    u += x;
-            //});
+            if (me.columnPositions)
+                return me.columnPositions[cell.column] - me.columnPositions[me.startColumn];
+            me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
+                u += x;
+            });
         }
         return u;
     },
@@ -630,10 +631,11 @@ MEPH.define('MEPH.table.SpreadSheet', {
             });
         }
         else {
-            return me.rowPositions[cell.row] - me.rowPositions[me.startRow];
-            //me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
-            //    t += x;
-            //});
+            if (me.rowPositions)
+                return me.rowPositions[cell.row] - me.rowPositions[me.startRow];
+            me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
+                t += x;
+            });
         }
         return t;
     },

@@ -268,14 +268,19 @@ MEPH.define('MEPH.audio.Sequence', {
     /**
      * Translates an object into a sequence.
      ***/
-    deserialize: function (obj, audioservice) {
+    deserialize: function (obj, audioservice, sequences) {
         var me = this;
+        sequences = sequences || [];
+        me.id = obj.id;
         me.title = obj.title || me.title;
         if (obj.sequence) {
             obj.parts.foreach(function (part) {
                 var newsequence = new MEPH.audio.Sequence();
-                me.add(newsequence, part.relativeTimeOffset);
-                newsequence.deserialize(part.sequence, audioservice);
+                var res = me.add(newsequence, part.relativeTimeOffset);
+                if (!sequences.some(function (x) { return x === part.sequence.id; })) {
+                    sequences.push(newsequence.id);
+                    newsequence.deserialize(part.sequence, audioservice, sequences);
+                }
             });
         }
         else {

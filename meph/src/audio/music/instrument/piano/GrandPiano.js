@@ -117,7 +117,8 @@ MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
                 file: MEPH.getClassPath(prefix + 'Gb' + x) + '.mp3',
                 type: 'mp3'
             }
-        }))
+        }));
+
         return files.orderBy(function (x, y) {
             return MEPH.audio.music.theory.Notes.convertToMidi(x.key) -
                         MEPH.audio.music.theory.Notes.convertToMidi(y.key)

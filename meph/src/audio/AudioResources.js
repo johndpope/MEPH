@@ -30,6 +30,15 @@ MEPH.define('MEPH.audio.AudioResources', {
             MEPH.publish(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, {});
         }
     },
+    collectProject: function () {
+        var me = this,
+            audio = new Audio(),
+            result = {};
+        result.graphs = me.getGraphs();
+        result.resources = me.resources.select(function (x) { return audio.serializeBuffer(x); });
+        result.sequences = me.sequences.select(function (x) { return JSON.stringify(x.toJSON()); });
+        return result;
+    },
     onAudioGraphSaved: function (type, graph) {
         var me = this;
         me.graphs.push(graph);
