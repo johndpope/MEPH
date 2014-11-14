@@ -1,4 +1,14 @@
 ﻿MEPH.define('MEPH.file.FileSaver', {
+    requires: ['MEPH.Constants', 'MEPH.audio.Constants'],
+    initialize: function () {
+        var me = this;
+        MEPH.subscribe(MEPH.Constants.REQUEST_BLOB_SAVE, function (type, blob, name) {
+            me.save(blob, name);
+        })
+    },
+    save: function (blob, name) {
+        window.saveAs(blob, name || (new Date().toISOString() + '.wav'));
+    }
 }).then(function () {
     /* FileSaver.js
  * A saveAs() FileSaver implementation.

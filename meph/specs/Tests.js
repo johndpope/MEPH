@@ -89,6 +89,7 @@
                         'MEPH.spec.js',
                         'audio/Audio.spec.js',
                         'audio/AudioResources.spec.js',
+                        'audio/Recorder.spec.js',
                         'audio/Scheduler.spec.js',
                         'audio/Sequence.spec.js',
                         'audio/graph/AudioGraph.spec.js',

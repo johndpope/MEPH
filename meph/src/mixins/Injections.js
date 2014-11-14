@@ -12,7 +12,7 @@ MEPH.define('MEPH.mixins.Injections', {
     init: function () {
         var me = this,
            i,
-           referrerFunctions = MEPH.mixins.Injections.referrerFunctions;
+           referrerFunctions = MEPH.mixins.Injections.injectFunctions;
 
         for (i in referrerFunctions) {
             me[i] = referrerFunctions[i].bind(me);

@@ -2052,9 +2052,6 @@ if (self) {
         switch (oEvent.data.func) {
             case 'start':
                 eval(oEvent.data.src);
-                //self[oEvent.data.framework].ready().then(function () {
-                //    postMessage({ "success": true });
-                //});
                 break;
             case 'import':
                 importScripts(oEvent.data.src);

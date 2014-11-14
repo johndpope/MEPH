@@ -32,6 +32,14 @@ MEPH.ready().then(function () {
                     'static': true,
                     type: 'MEPH.audio.AudioResources'
                 },
+                fileSaver: {
+                    'static': true,
+                    type: 'MEPH.file.FileSaver'
+                },
+                recorder: {
+                    'static': true,
+                    type: 'MEPH.audio.Recorder'
+                },
                 scheduler: {
                     'static': true,
                     type: 'MEPH.audio.Scheduler',

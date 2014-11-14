@@ -83,7 +83,10 @@
             });
         }
         else {
-            tofail();
+            if (tofail)
+                tofail();
+            else
+                MEPH.Log('SignalR service')
         }
         return promise;
     },

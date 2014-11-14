@@ -10,6 +10,8 @@
         RequestControllAccess: 'MEPH.RequestControllAccess',
         ActivityStarted: 'ActivityStarted',
         ACTIVITY_HEART_BEAT: 'MEPH.ACTIVITY_HEART_BEAT',
-        closeView: 'MEPH.events.closeView'
+        closeView: 'MEPH.events.closeView',
+        ActivityDestroyed: 'ActivityDestroyed',
+        REQUEST_BLOB_SAVE: 'REQUEST_BLOB_SAVE'
     }
 });

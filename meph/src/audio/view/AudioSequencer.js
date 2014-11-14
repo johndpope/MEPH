@@ -15,13 +15,17 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.input.Text',
         'MEPH.audio.Sequence',
         'MEPH.util.Dom',
+        'MEPH.audio.Constants',
         'MEPH.util.Observable'],
     statics: {
         TrackResource: 'TrackResource',
         ContextMenu: 'ContextMenu',
         Play: 'Play'
     },
-    injections: ['audioResources', 'scheduler'],
+    injections: ['audioResources',
+        'fileSaver',
+        'recorder',
+        'scheduler'],
     properties: {
         defaultColumnWidth: 25,
         nearest: 4,
@@ -45,6 +49,12 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         });
         me.setupHeaders();
 
+
+        MEPH.subscribe(MEPH.audio.Constants.RECORDING_COMPLETE, function (type, result) {
+            var name = prompt("Save As : ", "");
+            MEPH.publish(MEPH.Constants.REQUEST_BLOB_SAVE, result, name + '.wav')
+        });
+
         MEPH.audio.Sequence.mbpm = me.bpm;
     },
     onLoaded: function () {
@@ -59,6 +69,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (me.$inj && me.$inj.scheduler) {
             me.$inj.scheduler.bpm = me.bpm;
         }
+        debugger
     },
     /**
      * Save sequence.
@@ -396,6 +407,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
 
         me.setCommand(key, MEPH.audio.view.AudioSequencer.TrackResource, me.selectTrackResource.bind(me));
+    },
+    saveSequenceAsWave: function () {
+        var me = this;
+        if (me.$inj && me.$inj.scheduler) {
+            me.$inj.scheduler.render().then(function (x) {
+                debugger
+
+                MEPH.publish(MEPH.audio.Constants.REQUEST_RECORDING, { buffer: { buffer: x.renderedBuffer } });
+            });;
+        }
     },
     setPlayButton: function (key) {
         var me = this;

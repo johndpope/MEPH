@@ -32,7 +32,7 @@ MEPH.define('MEPH.audio.AudioResources', {
     },
     collectProject: function () {
         var me = this,
-            audio = new Audio(),
+            audio = new MEPH.audio.Audio(),
             result = {};
         result.graphs = me.getGraphs();
         result.resources = me.resources.select(function (x) { return audio.serializeBuffer(x); });
