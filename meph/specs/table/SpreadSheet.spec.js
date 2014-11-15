@@ -670,4 +670,13 @@
             done();
         });
     });
+
+    it('can get the most visible column', function () {
+        var spreadsheet = new MEPH.table.SpreadSheet();
+        debugger
+        var t = spreadsheet.qvisible(300, 0, [].interpolate(0, 10000, function (x) {
+            return x * 100;
+        }), null, 100);
+        expect(t === 3).toBeTruthy();
+    })
 });

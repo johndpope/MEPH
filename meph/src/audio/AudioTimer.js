@@ -17,6 +17,7 @@ MEPH.define('MEPH.audio.AudioTimer', {
             console.log("stopping");
             clearInterval(MEPH.audio.AudioTimer.timerID);
             MEPH.audio.AudioTimer.timerID = null;
+            
         },
         interval: function (interval) {
             console.log("setting interval");

@@ -31,7 +31,7 @@ MEPH.define('MEPH.audio.Recorder', {
         var audio = new MEPH.audio.Audio();
         var newSource = audio.createContext().createBufferSource();
         newSource.buffer = resource.buffer.buffer;
-        debugger
+        
         var path = MEPH.getClassPath('MEPH.audio.RecorderWorker') + '.js';
         var recorder = new _Recorder(newSource, { workerPath: path });
         recorder.recordBuffer([resource.buffer.buffer.getChannelData(0), resource.buffer.buffer.getChannelData(1)]);

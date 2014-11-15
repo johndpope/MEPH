@@ -30,6 +30,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         defaultColumnWidth: 25,
         nearest: 4,
         sequence: null,
+        animatemode: true,
         bpm: 75 / 16 / 60
     },
     initialize: function () {
@@ -69,7 +70,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (me.$inj && me.$inj.scheduler) {
             me.$inj.scheduler.bpm = me.bpm;
         }
-        
+
     },
     /**
      * Save sequence.
@@ -159,7 +160,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.time = {
             'function': function (item, offset) {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
-                    return me.sequence.getAbsoluteTime(item) / me.bpm;
+                    return (me.sequence.getAbsoluteTime(item));//
                 }
                 if (offset === 'left') {
                     return 0;

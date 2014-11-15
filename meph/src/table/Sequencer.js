@@ -103,7 +103,6 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     onSourceUpdated: function () {
         var me = this;
-        me.update();
         if (me.source && MEPH.util.Observable.isObservable(me.source)) {
             me.source.on('changed', me.sourceItemChanged.bind(me), me);
             me.source.foreach(function (item) {
@@ -112,10 +111,11 @@ MEPH.define('MEPH.table.Sequencer', {
                 }
             });
         }
+        me.updateCells();
     },
     sourceItemChanged: function (type, args) {
         var me = this;
-        me.update();
+        me.updateCells();
     },
     getMainContentInstructions: function (visibleCellData) {
         var me = this;

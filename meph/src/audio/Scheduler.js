@@ -9,9 +9,9 @@ MEPH.define('MEPH.audio.Scheduler', {
     properties: {
         $sequence: null,
         $queryWorker: null,
-        playWindow: 2,
+        playWindow: 200,
         interval: 50,
-        bpm: null,
+        bpm: 75 / 16 / 60,
         playing: false
     },
     initialize: function (args) {
@@ -30,7 +30,8 @@ MEPH.define('MEPH.audio.Scheduler', {
         var me = this;
         me.orderedSequence = me.orderedSequence = me.sequence().getAudioWithAbsoluteTime();
         return me.orderedSequence.where(function (x) {
-            return x.absoluteTime >= from && x.absoluteTime <= (duration + from)
+            return x.absoluteTime * me.bpm >= from &&
+                x.absoluteTime * me.bpm <= (duration * me.bpm + from)
         })
     },
     render: function () {
@@ -42,18 +43,17 @@ MEPH.define('MEPH.audio.Scheduler', {
             audio.source.disconnect();
             audio.source.offlineMode = true;
         });
-        var currentTime = MEPH.audio.Audio.AudioContext.currentTime;
         if (started === undefined) {
-            started = currentTime;
+            started = 0;
         }
         var samplerate = MEPH.audio.Audio.AudioContext.sampleRate;
         MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(2, samplerate * duration, samplerate);
         audios.foreach(function (audio) {
-            var time = me.sequence().getAbsoluteTime(audio);
+            var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
             audio.source.complete();
             audio.source.play(time + started);
-            audio.source.stop(time + started + audio.source.duration());
+            audio.source.stop(time + started + (audio.source.duration() * me.bpm));
         });
         var toresolve;
         var promise = new Promise(function (x, f) {
@@ -67,7 +67,7 @@ MEPH.define('MEPH.audio.Scheduler', {
     },
     play: function () {
         var me = this, played = [], started;
-        var lasttime = me.sequence().duration();
+        var lasttime = me.sequence().duration() * me.bpm;
         me.on('tick', function () {
             var currentTime = MEPH.audio.Audio.AudioContext.currentTime;
             if (started === undefined) {
@@ -77,11 +77,11 @@ MEPH.define('MEPH.audio.Scheduler', {
             var items = me.getAudio(currentTime - started, me.playWindow);
             items = items.where(function (t) { return played.indexOf(t) === -1; })
             items.foreach(function (audio) {
-                var time = me.sequence().getAbsoluteTime(audio);
+                var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
                 audio.source.complete();
                 audio.source.play(time + started);
-                audio.source.stop(time + started + audio.source.duration());
+                audio.source.stop(time + started + (audio.source.duration() * me.bpm));
                 played.push(audio);
             });
             if (lasttime < currentTime && me.playing) {

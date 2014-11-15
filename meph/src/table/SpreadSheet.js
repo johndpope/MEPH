@@ -19,6 +19,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         width: 0,
         height: 0,
         vertical: false,
+        animatemode: false,
         animFrame: null,
         columnOffsets: null,
         rowOffsets: null,
@@ -289,13 +290,12 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.don('click', me.canvas, function (evt) {
             me.handleSingleCellCalculations(evt, 'cellclicked');
         });
-        me.don('mousemove', me.canvas, function (evt) {
-            me.handleSingleCellCalculations(evt, 'mousemovecell');
-        });
+        //me.don('mousemove', me.canvas, function (evt) {
+        //    me.handleSingleCellCalculations(evt, 'mousemovecell');
+        //});
 
-        me.don('mousemove', me.canvas, function (evt) {
-            me.handleSingleCellCalculations(evt, 'mouseovercell');
-        });
+        //me.don('mousemove', me.canvas, function (evt) {
+        //});
         me.don('keypress', me.canvas, function (evt) {
             me.onKeyPress(evt);
         });
@@ -303,14 +303,25 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.don('keypress', me.leftheader, function (evt) {
             me.onKeyPress(evt);
         });
-
+        if (me.movemoverequest) {
+            cancelAnimationFrame(me.movemoverequest)
+        }
         me.don('mousemove', me.canvas, function (evt) {
-            if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
-                var cell = me.hovercells ? me.hovercells.first() : me.getCanvasCells(evt).first()
-                me.selecting.end = cell;
-                me.canvas.dispatchEvent(MEPH.createEvent('mousemoveselect', {
-                    selecting: me.selecting
-                }));
+            var t = function () {
+                me.handleSingleCellCalculations(evt, ['mouseovercell', 'mousemovecell']);
+                if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
+                    var cell = me.hovercells ? me.hovercells.first() : me.getCanvasCells(evt).first()
+                    me.selecting.end = cell;
+                    me.canvas.dispatchEvent(MEPH.createEvent('mousemoveselect', {
+                        selecting: me.selecting
+                    }));
+                }
+            }
+            if (me.animatemode) {
+                me.movemoverequest = requestAnimationFrame(t);
+            }
+            else {
+                t();
             }
         });
 
@@ -559,10 +570,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var cells = me.getCanvasCells(evt);
         var pos = MEPH.util.Dom.getEventPositions(evt, me.canvas);
         me.hovercells = cells || me.hovercells;
-        me.canvas.dispatchEvent(MEPH.createEvent(outevnt, {
-            cells: cells,
-            position: pos.first()
-        }));
+        outevnt = Array.isArray(outevnt) ? outevnt : [outevnt];
+        pos = pos.first();
+        outevnt.foreach(function (outevnt) {
+            me.canvas.dispatchEvent(MEPH.createEvent(outevnt, {
+                cells: cells,
+                position: pos
+            }));
+        })
     },
     getHeaderCells: function (evt, offsets) {
         var me = this;
@@ -611,7 +626,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
         else {
             if (me.columnPositions)
-                return me.columnPositions[cell.column] - me.columnPositions[me.startColumn];
+                return me.columnPositions[cell.column ? cell.column - 1 : 0] - me.columnPositions[me.startColumn];
             me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
                 u += x;
             });
@@ -632,7 +647,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
         else {
             if (me.rowPositions)
-                return me.rowPositions[cell.row] - me.rowPositions[me.startRow];
+                return me.rowPositions[cell.row ? cell.row - 1 : 0] - me.rowPositions[me.startRow];
             me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
                 t += x;
             });
@@ -710,13 +725,13 @@ MEPH.define('MEPH.table.SpreadSheet', {
     getRelativeRow: function (relativeX, offset) {
         var me = this,
             startrow = me.startRow,
-            offsets = me.rowOffsets;
+            offsets = me.rowPositions;
         switch (offset) {
             case 'top':
-                offsets = me.rowHeaderOffsets;
+                offsets = me.rowHeaderPositions;
                 break;
         }
-        var visi = me.visible(relativeX, startrow, offsets, me.defaultRowHeight);
+        var visi = me.qvisible(relativeX, startrow, offsets, null, me.defaultRowHeight);
 
         return visi + me.startRow;
     },
@@ -728,14 +743,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
      ***/
     getRelativeColum: function (relativeY, offset) {
         var me = this, columnwidth = me.defaultColumnWidth,
-           offsets = me.columnOffsets;
+           offsets = me.columnPositions;
         switch (offset) {
             case 'left':
                 columnwidth = me.defaultHeaderColumnWidth;
-                offsets = me.columnHeaderOffsets;
+                offsets = me.columnHeaderPositions;
                 break;
         }
-        var visi = me.visible(relativeY, me.startColumn, offsets, columnwidth);
+        var visi = me.qvisible(relativeY, me.startColumn, offsets, null, columnwidth);
 
         return visi + me.startColumn;
     },
@@ -933,7 +948,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
      ****/
     visibleColumns: function (width, start) {
         var me = this;
-        return me.visible(width, start, me.columnOffsets, me.defaultColumnWidth);
+        return me.qvisible(width, start, me.columnPositions, null, me.defaultColumnWidth);
     },
     /**
      * Gets the number of visible rows.
@@ -942,7 +957,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
      ****/
     visibleRows: function (height, start) {
         var me = this;
-        return me.visible(height, start, me.rowOffsets, me.defaultRowHeight);
+        return me.qvisible(height, start, me.rowPositions, null, me.defaultRowHeight);
     },
     /**
      * Gets the number of visible parts from a set of offsets.
@@ -951,24 +966,46 @@ MEPH.define('MEPH.table.SpreadSheet', {
      * @param {Array} offsets
      * @param {Number} defaultWidth
      ***/
-    visible: function (width, start, offsets, defaultWidth) {
-        var me = this;
-        var columns = 0;
-        var total = 0;
-        var res = offsets.subset(start).first(function (x) {
-            if (total + x < width) {
-                columns++;
-                total += x;
-                return false;
-            }
-            return true;
-        });
+    //visible: function (width, start, offsets, defaultWidth) {
+    //    var me = this;
+    //    var columns = 0;
+    //    var total = 0;
+    //    var res = offsets.subset(start).first(function (x) {
+    //        if (total + x < width) {
+    //            columns++;
+    //            total += x;
+    //            return false;
+    //        }
+    //        return true;
+    //    });
 
-        if (total + defaultWidth < width) {
-            columns += Math.ceil((width - total) / defaultWidth);
+    //    if (total + defaultWidth < width) {
+    //        columns += Math.ceil((width - total) / defaultWidth);
+    //    }
+
+    //    return columns;
+    //},
+    qvisible: function (width, start, offsets, end, defaultWidth, count, cstart) {
+        var me = this, result;
+        count = count || 0;
+        cstart = cstart || start;
+        count++;
+        end = end || (offsets.length - 1);
+        var mid = Math.round((end - cstart) / 2) + cstart;
+        var tempWidth = offsets[mid] - offsets[start];
+        if (count > 20) {
+            debugger;
         }
-
-        return columns;
+        if ((Math.abs(end - cstart) <= 1)) {
+            result = mid - start;
+        }
+        else if (tempWidth > width) {
+            result = me.qvisible(width, start, offsets, mid, defaultWidth, count, cstart);
+        }
+        else {
+            result = me.qvisible(width, start, offsets, end, defaultWidth, count, mid);
+        }
+        return result;
     },
     /**
      * Handles key presses.
