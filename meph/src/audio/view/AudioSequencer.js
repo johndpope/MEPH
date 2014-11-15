@@ -69,7 +69,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (me.$inj && me.$inj.scheduler) {
             me.$inj.scheduler.bpm = me.bpm;
         }
-        debugger
+        
     },
     /**
      * Save sequence.
@@ -412,8 +412,6 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         if (me.$inj && me.$inj.scheduler) {
             me.$inj.scheduler.render().then(function (x) {
-                debugger
-
                 MEPH.publish(MEPH.audio.Constants.REQUEST_RECORDING, { buffer: { buffer: x.renderedBuffer } });
             });;
         }
