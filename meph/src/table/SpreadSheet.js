@@ -781,14 +781,17 @@ MEPH.define('MEPH.table.SpreadSheet', {
         me.updateCellsAnimFrame = requestAnimationFrame(function () {
             var headerInstructions = me.getTopHeaderInstructions(me.visibletopheader);
             if (headerInstructions) {
+                me.topContentRenderer.clear();
                 me.topContentRenderer.draw(headerInstructions);
             };
             headerInstructions = me.getLeftHeaderInstructions(me.visibleleftheader);
             if (headerInstructions) {
+                me.leftContentRenderer.clear();
                 me.leftContentRenderer.draw(headerInstructions);
             }
             headerInstructions = me.getMainContentInstructions(me.visiblegrid);
             if (headerInstructions) {
+                me.rendererContent.clear();
                 me.rendererContent.draw(headerInstructions);
             }
             me.updateCellsAnimFrame = null;
@@ -809,14 +812,13 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
         me.animFrame = requestAnimationFrame(function () {
             var rows, columns, headers;
-            me.animFrame = null;
 
             if (!me.rendered) {
                 me.renderer.setCanvas(me.canvas);
                 me.leftRenderer.setCanvas(me.leftheader);
                 me.topRenderer.setCanvas(me.topheader);
             }
-            me.renderer.clear();
+            me.lastCanvasSize = me.lastCanvasSize || {};
             var canvasheight = me.body.clientHeight;
             var canvaswidth = me.body.clientWidth;
             var leftcanvasWidth = me.getLeftCanvasWidth();
@@ -826,23 +828,36 @@ MEPH.define('MEPH.table.SpreadSheet', {
             me.calculateVertical();
             me.calculateHorizontal();
 
-            me.positionCanvas(me.canvas, leftcanvasWidth, topcanvasHeight, canvaswidth, canvasheight);
-            me.positionCanvas(me.canvascontent, leftcanvasWidth, topcanvasHeight, canvaswidth, canvasheight);
+            if (me.lastCanvasSize.height === canvasheight && me.lastCanvasSize.width === canvaswidth) {
 
-            me.positionCanvas(me.leftheader, 0, topcanvasHeight, leftcanvasWidth, canvasheight);
-            me.positionCanvas(me.leftheadercontent, 0, topcanvasHeight, leftcanvasWidth, canvasheight);
+            }
+            else {
 
-            me.positionCanvas(me.topheader, leftcanvasWidth, 0, canvaswidth, topcanvasHeight);
-            me.positionCanvas(me.topheadercontent, leftcanvasWidth, 0, canvaswidth, topcanvasHeight);
+                me.positionCanvas(me.canvas, leftcanvasWidth, topcanvasHeight, canvaswidth, canvasheight);
+                me.positionCanvas(me.canvascontent, leftcanvasWidth, topcanvasHeight, canvaswidth, canvasheight);
 
-            row = me.height;
-            columns = me.width;
-            columnheaders = me.columnheaders;
-            rowheaders = me.rowheaders;
-            me.drawGrid(canvasheight, canvaswidth);
-            me.drawTopGrid(topcanvasHeight, canvaswidth);
-            me.drawLeftGrid(canvasheight, leftcanvasWidth);
+                me.positionCanvas(me.leftheader, 0, topcanvasHeight, leftcanvasWidth, canvasheight);
+                me.positionCanvas(me.leftheadercontent, 0, topcanvasHeight, leftcanvasWidth, canvasheight);
 
+                me.positionCanvas(me.topheader, leftcanvasWidth, 0, canvaswidth, topcanvasHeight);
+                me.positionCanvas(me.topheadercontent, leftcanvasWidth, 0, canvaswidth, topcanvasHeight);
+
+
+                me.renderer.clear();
+            }
+            //row = me.height;
+            //columns = me.width;
+            //columnheaders = me.columnheaders;
+            //rowheaders = me.rowheaders;
+            var canceldraw = me.lastCanvasSize.height === canvasheight && me.lastCanvasSize.width === canvaswidth;
+            me.drawGrid(canvasheight, canvaswidth, canceldraw);
+            me.drawTopGrid(topcanvasHeight, canvaswidth, canceldraw);
+            me.drawLeftGrid(canvasheight, leftcanvasWidth, canceldraw);
+            me.lastCanvasSize = {
+                height: canvasheight,
+                width: canvaswidth
+            }
+            me.animFrame = null;
         });
     },
     positionCanvas: function (canvas, left, top, width, height) {
@@ -865,75 +880,85 @@ MEPH.define('MEPH.table.SpreadSheet', {
         });
         return me.cache.topcanvasheight;
     },
-    drawTopGrid: function (height, width) {
+    drawTopGrid: function (height, width, canceldraw) {
         var me = this;
-        me.visibletopheader = me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, me.startTopRow, me.startColumn);
+        me.visibletopheader = me.drawSubGrid(me.topheader, me.rowHeaderOffsets, me.columnOffsets, height, width, me.topRenderer, me.startTopRow, me.startColumn, canceldraw);
     },
-    drawLeftGrid: function (height, width) {
+    drawLeftGrid: function (height, width, canceldraw) {
         var me = this;
-        me.visibleleftheader = me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, me.startRow, me.startLeftColumn);
+        me.visibleleftheader = me.drawSubGrid(me.leftheader, me.rowOffsets, me.columnHeaderOffsets, height, width, me.leftRenderer, me.startRow, me.startLeftColumn, canceldraw);
     },
-    drawGrid: function (height, width) {
+    drawGrid: function (height, width, canceldraw) {
         var me = this;
-        me.visiblegrid = me.drawSubGrid(me.canvas, me.rowOffsets, me.columnOffsets, height, width, me.renderer, me.startRow, me.startColumn);
+        me.visiblegrid = me.drawSubGrid(me.canvas, me.rowOffsets, me.columnOffsets, height, width, me.renderer, me.startRow, me.startColumn, canceldraw);
     },
-    drawSubGrid: function (canvas, rowOffsets, columnOffsets, height, width, renderer, startRow, startColumn) {
+    rowDrawInstruction: function (row, width) {
+        var me = this;
+        return {
+            shape: MEPH.util.Renderer.shapes.line,
+            end: {
+                x: width,
+                y: row
+            },
+            start: {
+                x: 0,
+                y: row
+            },
+            strokeStyle: me.gridlinecolor
+        }
+    },
+    columnDrawInstruction: function (col, height) {
+        var me = this;
+        return {
+            shape: MEPH.util.Renderer.shapes.line,
+            end: {
+                x: col,
+                y: height
+            },
+            start: {
+                x: col,
+                y: 0
+            },
+            strokeStyle: me.gridlinecolor
+        };
+    },
+    drawSubGrid: function (canvas, rowOffsets, columnOffsets, height, width, renderer, startRow, startColumn, canceldraw) {
         var me = this;
         var row = 0;
         var rowDrawFunc = function (rowOffset) {
-            var res = {
-                shape: MEPH.util.Renderer.shapes.line,
-                end: {
-                    x: width,
-                    y: row
-                },
-                start: {
-                    x: 0,
-                    y: row
-                },
-                strokeStyle: me.gridlinecolor
-            }
+            var res = me.rowDrawInstruction(row, width);
             row += rowOffset;
             return res;
         };
         var col = 0;
         var colDrawFunc = function (columnOffset) {
-            var res = {
-                shape: MEPH.util.Renderer.shapes.line,
-                end: {
-                    x: col,
-                    y: height
-                },
-                start: {
-                    x: col,
-                    y: 0
-                },
-                strokeStyle: me.gridlinecolor
-            };
+            var res = me.columnDrawInstruction(col, height);
             col += columnOffset;
             return res;
         };
         var visRows = me.visibleRows(height, startRow)
-        var drawInstructions = rowOffsets.subset(startRow, startRow + visRows + 1).select(rowDrawFunc);
+        var drawInstructions = rowOffsets.subset(startRow, startRow + visRows + 1).select(rowDrawFunc).where();
 
-        if (rowOffsets.length < startRow + visRows) {
+        if (rowOffsets.length < startRow + visRows && !canceldraw) {
             drawInstructions = drawInstructions.concat([].interpolate(0, startRow + visRows - rowOffsets.length, function (x) {
                 return me.defaultRowHeight;
-            }).select(rowDrawFunc));
+            }).select(rowDrawFunc).where());
         }
 
-        var visCols = me.visibleColumns(width, startColumn)
-        drawInstructions = drawInstructions.concat(columnOffsets.subset(startColumn, startColumn + visCols + 1).select(colDrawFunc));
-
-        if (columnOffsets.length < startColumn + visCols) {
+        var visCols = me.visibleColumns(width, startColumn);
+        if (!canceldraw) {
+            drawInstructions = drawInstructions.concat(columnOffsets.subset(startColumn, startColumn + visCols + 1).select(colDrawFunc).where());
+        }
+        if (columnOffsets.length < startColumn + visCols && !canceldraw) {
             drawInstructions = drawInstructions.concat([].interpolate(0, startColumn + visCols - columnOffsets.length, function (x) {
                 return me.defaultColumnWidth;
-            }).select(colDrawFunc));
+            }).select(colDrawFunc).where());
         }
-
-        Style.height(canvas, height)
-        Style.width(canvas, width);
-        renderer.draw(drawInstructions);
+        if (!canceldraw) {
+            Style.height(canvas, height)
+            Style.width(canvas, width);
+            renderer.draw(drawInstructions);
+        }
         return {
             visibleColumns: visCols,
             visibleRows: visRows,

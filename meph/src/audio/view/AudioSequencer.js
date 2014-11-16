@@ -31,6 +31,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         nearest: 4,
         sequence: null,
         animatemode: true,
+        smallestnote: 16,
         bpm: 75 / 16 / 60
     },
     initialize: function () {
@@ -56,7 +57,6 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             MEPH.publish(MEPH.Constants.REQUEST_BLOB_SAVE, result, name + '.wav')
         });
 
-        MEPH.audio.Sequence.mbpm = me.bpm;
     },
     onLoaded: function () {
         var me = this;
@@ -209,7 +209,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         }
         me.columnheader = {
             'function': function (item) {
-                return item.time + " ";
+                return item.time % me.smallestnote === 0 ? (item.time / me.smallestnote) + " " : null;
             }
         }
     },
@@ -470,5 +470,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].foreach(function (key) {
             me.setCommand(key.toString(), 'AddSequence' + key, me.addSequenceDuration.bind(me, key.toString()));
         });
+    },
+    //////////////// Sequencer Rendering///
+    rowDrawInstruction: function () {
+        return null;
     }
 });

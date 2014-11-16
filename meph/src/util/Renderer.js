@@ -45,6 +45,8 @@ MEPH.define('MEPH.util.Renderer', {
                 case MEPH.util.Renderer.shapes.canvas:
                     me.drawCanvas(options);
                     break;
+                case MEPH.util.Renderer.shapes.none:
+                    break;
                 default:
                     throw 'undefined shape type';
 
@@ -196,7 +198,8 @@ MEPH.define('MEPH.util.Renderer', {
             circle: 'circle',
             text: 'text',
             line: 'line',
-            canvas: 'canvas'
+            canvas: 'canvas',
+            none: 'none'
         },
         defaultShapeOptions: {
             x: 50,

@@ -9,10 +9,6 @@ MEPH.define('MEPH.audio.Sequence', {
     },
     statics: {
         /**
-         * Modified beats per minute.
-         **/
-        mbpm: null,
-        /**
          * Translates a string into a sequence.
          ***/
         deserialize: function (str, audioservice) {
@@ -84,6 +80,9 @@ MEPH.define('MEPH.audio.Sequence', {
     },
     getAbsoluteTime: function (item) {
         var me = this;
+        if (item.absoluteTime !== undefined && item.absoluteTime) {
+            return item.absoluteTime;
+        }
         var found = me.items().first(function (x) { return x === item; });
 
         if (found) {
@@ -101,9 +100,7 @@ MEPH.define('MEPH.audio.Sequence', {
             return false;
         });
         var unittime = (found || 0) + rel;
-        if (MEPH.audio.Sequence.mbpm) {
-            return unittime * MEPH.audio.Sequence.mbpm;
-        }
+        item.absoluteTime = unittime;
         return unittime;
     },
     setRelativeTime: function (item, time) {
@@ -111,6 +108,7 @@ MEPH.define('MEPH.audio.Sequence', {
         var parent = me.getParent(item);
         if (parent.source.isChild(item)) {
             item.relativeTimeOffset = Math.max(0, time);
+            item.absoluteTime = undefined;
         }
         else {
             parent.source.setRelativeTime(item, time - parent.relativeTimeOffset);
@@ -122,11 +120,18 @@ MEPH.define('MEPH.audio.Sequence', {
      * @returns {Number}s
      **/
     getParentIndexOf: function (item) {
-        var me = this;
+        var me = this,
+            res;
 
-        var res = me.getParent(item);
-
-        return me.items().indexOf(res);
+        if (item.parentIndex !== undefined) {
+            return item.parentIndex;
+        }
+        else {
+            res = me.getParent(item);
+            item.parent = res;
+        }
+        item.parentIndex = me.items().indexOf(res);
+        return item.parentIndex;
     },
     /**
      * Gets the parent/ ancestor
