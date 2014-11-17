@@ -69,7 +69,7 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
             var handleoffset = MEPH.util.Dom.getEventPositions(e).first();
             me.state = me.dragging
             me.start_position = me.horizontal ? position.x : position.y;
-            console.log(me.start_position)
+
             me.handlePos = me.getBarPosition();
             me.handleoffset = handleoffset;
         });

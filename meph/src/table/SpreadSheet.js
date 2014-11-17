@@ -614,7 +614,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     getCellColumnPx: function (cell, offset) {
         var me = this;
-        return me.getCellColumnPosition({ column: cell.column + 1 }, offset);
+        return me.getCellColumnPosition({ column: cell.column }, offset);
     },
     getCellColumnPosition: function (cell, offset) {
         var me = this,
@@ -626,7 +626,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
         else {
             if (me.columnPositions)
-                return me.columnPositions[cell.column ? cell.column - 1 : 0] - me.columnPositions[me.startColumn];
+                return me.columnPositions[cell.column] - me.columnPositions[me.startColumn];
             me.columnOffsets.subset(me.startColumn, cell.column).first(function (x) {
                 u += x;
             });
@@ -635,7 +635,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     getCellRowPx: function (cell, offset) {
         var me = this;
-        return me.getCellRowPosition({ row: cell.row + 1 }, offset);
+        return me.getCellRowPosition({ row: cell.row }, offset);
     },
     getCellRowPosition: function (cell, offset) {
         var me = this;
@@ -647,7 +647,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         }
         else {
             if (me.rowPositions)
-                return me.rowPositions[cell.row ? cell.row - 1 : 0] - me.rowPositions[me.startRow];
+                return me.rowPositions[cell.row] - me.rowPositions[me.startRow];
             me.rowOffsets.subset(me.startRow, cell.row).first(function (x) {
                 t += x;
             });
@@ -1014,13 +1014,14 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this, result;
         count = count || 0;
         cstart = cstart || start;
-        count++;
+
         end = end || (offsets.length - 1);
-        var mid = Math.round((end - cstart) / 2) + cstart;
+        var mid = Math.floor((end - cstart) / 2) + cstart;
         var tempWidth = offsets[mid] - offsets[start];
         if (count > 20) {
             debugger;
         }
+
         if ((Math.abs(end - cstart) <= 1)) {
             result = mid - start;
         }

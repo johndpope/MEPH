@@ -237,7 +237,8 @@ MEPH.define('MEPH.table.Sequencer', {
             metrics.textAlign = 'left';
             // metrics.x = me.getCellColumnPx(metrics, 'left')
             metrics.x += me.leftHeaderLeftPadding;
-            metrics.y = me.getCellRowPx(metrics, 'left') - 12;
+            metrics.y = me.getCellRowPx(metrics, 'left');
+            metrics.textBaseline = 'top';
             metrics.shape = MEPH.util.Renderer.shapes.text;
             metrics.text = res;
             return [metrics];
@@ -260,7 +261,8 @@ MEPH.define('MEPH.table.Sequencer', {
             metrics.textAlign = 'left';
             // metrics.x = me.getCellColumnPx(metrics, 'left')
             metrics.x += me.leftHeaderLeftPadding;
-            metrics.y = me.getCellRowPx(metrics, 'top') - 12;
+            metrics.y = me.getCellRowPx(metrics, 'top');
+            metrics.textBaseline = 'top';
             metrics.shape = MEPH.util.Renderer.shapes.text;
             metrics.text = res;
             return [metrics];
