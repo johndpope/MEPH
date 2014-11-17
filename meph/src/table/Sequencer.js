@@ -329,12 +329,14 @@ MEPH.define('MEPH.table.Sequencer', {
 
         var me = this;
         if (me.state === MEPH.table.Sequencer.grabbing) {
+
             var lane = me.lane.function(me.grabbeditem);
-            var y = Math.min(parseFloat(canvas.clientHeight), Math.max(0, me.getCellRowPx({ row: lane })));
+            var y = Math.min(parseFloat(canvas.clientHeight), Math.max(0, me.getCellRowPx({ row: lane }))) + me.topheader.clientHeight;
             var x = evt.position.x;
             var metrics = me.getItemMetrics(me.grabbeditem);
             me.lastgrabposition = { x: x, y: y };
-            me.positionGrabRep({ x: x + (parseFloat(me.leftheader.clientWidth) || 0) - (metrics.width / 2), y: y, width: metrics.width, height: metrics.height });
+
+            me.positionGrabRep({ x: x + (parseFloat(me.leftheader.clientWidth) || 0), y: y, width: metrics.width, height: metrics.height });
         }
     },
     dispatchEvent: function (evnt, args, canvas) {
@@ -361,6 +363,7 @@ MEPH.define('MEPH.table.Sequencer', {
         if (me.settime && typeof (me.settime.function) === 'function' && !me.state) {
             me.state = MEPH.table.Sequencer.grabbing;
             me.grabbeditem = item;
+            Style.show(me.grabrep);
             return true;
         }
         else return false;
@@ -373,10 +376,11 @@ MEPH.define('MEPH.table.Sequencer', {
             var col = me.getRelativeColum(position.x);
             var colpos = me.getCellColumnPosition({ column: col });
             var extrac = (me.lastgrabposition.x - colpos) / me.getColumnWidth(col);
-            var time = col + extrac - 1;
+            var time = col + extrac;
             time = Math.max(0, time);
             var unscaledtime = me.unscaleValue(time);
             me.settime.function(unscaledtime, item);
+            Style.hide(me.grabrep);
             me.state = null;
         }
     },

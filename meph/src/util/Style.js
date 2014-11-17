@@ -7,13 +7,19 @@
                 dom.style.transform = "translate(" + (x) + "px," + (y) + "px)";
             }
         },
-        setPosition: function(dom, x,y){
+        setPosition: function (dom, x, y) {
             Style.left(dom, x);
             Style.top(dom, y);
         },
         height: function (dom, height) {
             dom.style.height = parseFloat(height) + 'px';
             dom.height = parseFloat(height);
+        },
+        hide: function (dom) {
+            dom.style.display = 'none';
+        },
+        show: function(dom){
+            dom.style.display = '';
         },
         clear: function (dom, prop) {
             dom.style.removeProperty(prop);
