@@ -165,6 +165,18 @@ MEPH.define('MEPH.audio.Sequence', {
         });
     },
     /**
+     * Removes the source from the sequence.
+     * @param {Object} source
+     * @return {Array}
+     **/
+    remove: function (source) {
+        var me = this;
+
+        return me.items().removeWhere(function (x) {
+            return x === source;
+        });
+    },
+    /**
      * Adds a source to the sequence.
      * @param  { Object} source
      * @param {Number} timeOffset

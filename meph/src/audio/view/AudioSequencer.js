@@ -143,6 +143,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.setContextMenuOpenKey('v');
         me.setTrackResourceOpenKey('t');
         me.setDurationKeys()
+        me.setRemoveKey('x');
         me.setPlayButton('p');
     },
     translateToSource: function (sequence) {
@@ -360,10 +361,23 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.update();
         }
     },
-    addSequenceDuration: function (key) {
-        var me = this;
-        var location = me.hovercells.first();
+    removeSequence: function () {
         var me = this,
+            location = me.hovercells.first(),
+            sequence,
+            row = location.row,
+            column = location.column;
+        sequence = me.getSequenceItem(row);
+        if (sequence && me.lastitem) {
+            var res = sequence.source.remove(me.lastitem);
+
+            me.translateToSource(me.sequence);
+            me.update();
+        }
+    },
+    addSequenceDuration: function (key) {
+        var me = this,
+            location = me.hovercells.first(),
             sequence,
             row = location.row,
             column = location.column;
@@ -464,6 +478,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     setContextMenuOpenKey: function (key) {
         var me = this;
         me.setCommand(key, MEPH.audio.view.AudioSequencer.ContextMenu, me.openContextMenu.bind(me));
+    },
+    setRemoveKey: function (key) {
+        var me = this;
+        me.setCommand(key, 'RemoveSequence', me.removeSequence.bind(me));
     },
     setDurationKeys: function () {
         var me = this;

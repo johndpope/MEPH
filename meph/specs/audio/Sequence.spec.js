@@ -18,6 +18,19 @@
         expect(sequence.get().first().source).toBe(audio);
     })
 
+    it('a sequence can remove an audio that has been added', function () {
+        var sequence = new MEPH.audio.Sequence();
+        var audio = new MEPH.audio.Audio();
+
+        sequence.add(audio);
+        expect(sequence.get().first()).toBeTruthy();
+        expect(sequence.get().first().source).toBe(audio);
+        sequence.remove(sequence.get().first());
+
+        expect(sequence.get().first()).toBe(null);
+
+    });
+
     it('a sequence can reference either a sequence.', function () {
         var sequence = new MEPH.audio.Sequence();
         var audio = new MEPH.audio.Sequence();
