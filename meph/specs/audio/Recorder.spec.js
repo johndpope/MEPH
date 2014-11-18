@@ -36,7 +36,7 @@
     it('can listen to request for recordings', function () {
         var called,
             recorder = new MEPH.audio.Recorder();
-
+        
         recorder.requestRecording = function () {
             called = true;
         }

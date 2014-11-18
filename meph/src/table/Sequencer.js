@@ -363,7 +363,9 @@ MEPH.define('MEPH.table.Sequencer', {
         if (me.settime && typeof (me.settime.function) === 'function' && !me.state) {
             me.state = MEPH.table.Sequencer.grabbing;
             me.grabbeditem = item;
-            Style.show(me.grabrep);
+            if (me.grabrep) {
+                Style.show(me.grabrep);
+            }
             return true;
         }
         else return false;
@@ -372,15 +374,19 @@ MEPH.define('MEPH.table.Sequencer', {
         var me = this;
         if (me.grabbeditem === item && me.state === MEPH.table.Sequencer.grabbing) {
             me.grabbeditem = null;
-            var position = MEPH.util.Dom.getRelativePosition(me.grabrep, me.canvas);
-            var col = me.getRelativeColum(position.x);
-            var colpos = me.getCellColumnPosition({ column: col });
-            var extrac = (me.lastgrabposition.x - colpos) / me.getColumnWidth(col);
-            var time = col + extrac;
-            time = Math.max(0, time);
-            var unscaledtime = me.unscaleValue(time);
-            me.settime.function(unscaledtime, item);
-            Style.hide(me.grabrep);
+            if (me.grabrep) {
+                var position = MEPH.util.Dom.getRelativePosition(me.grabrep, me.canvas);
+                var col = me.getRelativeColum(position.x);
+                var colpos = me.getCellColumnPosition({ column: col });
+                var extrac = (me.lastgrabposition.x - colpos) / me.getColumnWidth(col);
+                var time = col + extrac;
+                time = Math.max(0, time);
+                var unscaledtime = me.unscaleValue(time);
+                me.settime.function(unscaledtime, item);
+                Style.hide(me.grabrep);
+
+            }
+
             me.state = null;
         }
     },

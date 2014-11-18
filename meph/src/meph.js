@@ -225,7 +225,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         meph.Array(pubsubevents).where(function (x) {
             return x.event === event;
         }).foreach(function (x) {
-            x.func.apply(null, args);
+            try {
+                x.func.apply(null, args);
+            }
+            catch (e) {
+                meph.Log(e);
+            }
         });
     }
 

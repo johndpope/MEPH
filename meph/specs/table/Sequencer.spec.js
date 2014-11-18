@@ -416,7 +416,7 @@
                     y: 10
                 }
             });
-            
+
             sequencer.canvas.dispatchEvent(evt);
             expect(sequencer.lastgrabposition).toBeTruthy();
             expect(called).toBeTruthy();
@@ -455,31 +455,48 @@
     });
 
     it('can ungrab an item', function () {
-        var sequence = new Sequencer(), called;
-        sequence.setActiveCell = function () { };;
-        sequence.settime = { 'function': function () { called = true; } }
-        sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
-        sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
-        sequence.getCellPosition = function () {
-            return { x: 0, y: 0 };
-        }
-        sequence.updateCells = function () { }
-        var item = { prop: 'p' };
-        MEPH.Observable.observable(item);
-        var source1 = MEPH.Observable.observable([item]);
-        sequence.source = source1;
 
-        var result = sequence.grab(item);
-        sequence.lastgrabposition = { x: 1, y: 1 };
-        expect(sequence.grabbeditem === item).toBeTruthy();
-        expect(sequence.state).toBeTruthy();
-        expect(result).toBeTruthy();
+        MEPH.render('MEPH.table.Sequencer', 'sequencer').then(function (r) {
+            var results = r.res;
+            var called, app = r.app;
+
+            var dom,
+                called,
+                sequence = results.first().classInstance;
+            sequence.setActiveCell = function () { };;
+            sequence.settime = { 'function': function () { called = true; } }
+            sequence.columnOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequence.rowOffsets = [].interpolate(0, 10, function (x) { return 12; });
+            sequence.getCellPosition = function () {
+                return { x: 0, y: 0 };
+            }
+            sequence.updateCells = function () { }
+            var item = { prop: 'p' };
+            MEPH.Observable.observable(item);
+            var source1 = MEPH.Observable.observable([item]);
+            sequence.source = source1;
+            sequence.getRelativeColum = function () {
+                return 0;
+            }
+            sequence.getCellColumnPosition = function () {
+                return 0;
+            }
+            var result = sequence.grab(item);
+            sequence.lastgrabposition = { x: 1, y: 1 };
+            expect(sequence.grabbeditem === item).toBeTruthy();
+            expect(sequence.state).toBeTruthy();
+            expect(result).toBeTruthy();
 
 
-        sequence.ungrab(item);
-        expect(called).toBeTruthy();
-        expect(sequence.grabbeditem).toBe(null);
-        expect(sequence.state).toBe(null);
+            sequence.ungrab(item);
+            expect(called).toBeTruthy();
+            expect(sequence.grabbeditem).toBe(null);
+            expect(sequence.state).toBe(null);
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
 
     });
 
