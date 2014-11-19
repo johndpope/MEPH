@@ -328,6 +328,9 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.don('close', [me.svg], function (e) {
         });
         me.graphnode = node;
+        me.graphnode.on('removed', function () {
+            me.closeNode();
+        })
     },
     closeNode: function () {
         var me = this;

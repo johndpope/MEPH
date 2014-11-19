@@ -34,11 +34,11 @@ MEPH.define('MEPH.graph.SVGGraph', {
                 node = new MEPH.graph.Node();
                 node.setId(nodeinfo.id);
                 node.appendData(res.classInstance);
-                control.addNode(node);
                 res.classInstance.nodeInputs.clear();
                 res.classInstance.nodeOutputs.clear();
                 nodeinfo.data.nodeInputs.foreach(function (x) { res.classInstance.nodeInputs.push(x); });
                 nodeinfo.data.nodeOutputs.foreach(function (x) { res.classInstance.nodeOutputs.push(x); });
+                control.addNode(node);
                 node.setPosition(nodeinfo.position.x, nodeinfo.position.y, nodeinfo.position.z);
                 return node;
             })
