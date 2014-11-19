@@ -9,9 +9,12 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     requires: ['MEPH.button.Button',
         'MEPH.audio.graph.node.DelayNode',
         'MEPH.graph.SVGGraphViewPort',
+        'MEPH.list.List',
         'MEPH.graph.SVGGraph',
+        'MEPH.util.Style',
         'MEPH.audio.graph.node.Convolver',
         'MEPH.util.Dom',
+        'MEPH.input.Text',
         'MEPH.graph.renderer.svg.BlenderNodeRenderer',
     'MEPH.graph.renderer.svg.ConnectionRenderer',
     'MEPH.audio.graph.node.BiquadFilter',
@@ -26,13 +29,19 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     'MEPH.audio.graph.node.InputNode',
     'MEPH.audio.graph.node.OscillatorNode',
     'MEPH.audio.graph.node.PannerNode',
-    'MEPH.audio.graph.node.WaveShaperNode'
+    'MEPH.audio.graph.node.WaveShaperNode',
+    'MEPH.audio.AudioResources'
     ],
     scripts: ['MEPH.audio.graph.AudioGraphNameChange'],
+    properties: {
+        graphsources: null
+    },
     injections: ['audioResources'],
     initialize: function () {
         var me = this;
         me.graph = new MEPH.graph.SVGGraph();
+        MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.updateGraphList.bind(me));
+        MEPH.subscribe('opengraphinstance', me.openGraphInstanceHandler.bind(me));;
         me.super();
     },
     statics: {
@@ -66,18 +75,60 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
             return graphviewport;
         }
     },
+    openGraphInstanceHandler: function (type, name) {
+        var me = this;
+        
+        var graph = me.graphsources.first(function (x) { return x.name === name; });
+        var strgraph = JSON.stringify(graph);
+        me.graph.load(strgraph, me);
+    },
     onLoaded: function () {
         var me = this;
         me.id = 'graph' + MEPH.GUID();
+        me.graphsources = MEPH.util.Observable.observable([]);
         me.querySelectorAll('div.graphBody').first().parentNode.setAttribute('id', me.id);
         me.graphviewport = MEPH.audio.graph.AudioGraph.screate(me.graph || new MEPH.graph.SVGGraph(), {
             element: 'svg'
         }, '#' + me.id + ' div.graphBody', '#' + me.id);
+
+        me.don('click', document.body, function () {
+            if (!MEPH.util.Dom.isDomDescendant(document.activeElement, me.audiographpopup)) {
+                me.closepopup();
+            }
+        }, me);
     },
     removeSelectedConnections: function () {
         var me = this;
         me.graph.removeConnections(me.graphviewport.getSelectedConnections().select());
         me.graphviewport.removeSelectedConnections();
+    },
+    updateGraphList: function () {
+        var me = this;
+        if (me.$inj && me.$inj.audioResources) {
+
+            me.graphsources.clear();
+            me.graphsources.push.apply(me.graphsources, me.$inj.audioResources.getGraphs());
+        }
+    },
+    openGraphInstance: function (name) {
+        var me = this;
+        MEPH.publish('opengraphinstance', name);
+    },
+    openGraph: function () {
+        var me = this;
+        if (!me.openedonce) {
+            me.openedonce = true;
+            document.body.appendChild(me.audiographpopup);
+            MEPH.util.Dom.centerElement(me.audiographpopup);
+        }
+        me.popupopen = true;
+        Style.show(me.audiographpopup);
+        MEPH.util.Dom.centerElement(me.audiographpopup);
+    },
+    closepopup: function () {
+        var me = this;
+        me.popupopen = false;
+        Style.hide(me.audiographpopup);
     },
     saveGraph: function () {
         var me = this;

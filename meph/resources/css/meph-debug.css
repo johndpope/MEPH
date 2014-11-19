@@ -9822,6 +9822,12 @@ svg text.ignore {
   width: 150px;
 }
 
+/* line 199, ../sass/meph-default/controls/view/_misc.scss */
+.audiographpopup {
+  position: absolute;
+  top: 0px;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

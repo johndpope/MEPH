@@ -107,6 +107,7 @@
                         'audio/graph/node/Node.spec.js',
                         'audio/graph/node/OscillatorNode.spec.js',
                         'audio/graph/node/PannerNode.spec.js',
+                        'audio/graph/node/SequenceNode.spec.js',
                         'audio/graph/node/WaveShaperNode.spec.js',
                         'audio/graph/AudioGraphReader.spec.js',
                         'audio/music/instrument/Instrument.spec.js',

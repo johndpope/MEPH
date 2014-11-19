@@ -6,6 +6,9 @@
     </mephbutton>
 </div>
 <div class="btn-group">
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.openGraph">
+        <span class="glyphicon glyphicon-open"></span>
+    </mephbutton>
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.removeSelectedConnections">
         <span class="glyphicon glyphicon-remove"></span>
     </mephbutton>
@@ -24,7 +27,7 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addOutput">
         Output <span class="glyphicon glyphicon-plus"></span>
     </mephbutton>
-    
+
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addConvolver">
         Convolver  <span class="glyphicon glyphicon-plus"></span>
     </mephbutton>
@@ -59,5 +62,22 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addWaveShaper">
         Wave Shaper <span class="glyphicon glyphicon-plus"></span>
     </mephbutton>
+</div>
+<div class="audiographpopup" mephid="audiographpopup" style="display: none;">
+    <div class="panel panel-default">
+        <div class="panel-heading">Add Graph</div>
+        <div class="panel-body">
+            <textfield mephid="field"></textfield>
+            <hr />
+            <list data-bind='"source": "c$.graphsources"'>
+                <template name="audio_graph_source_list">
+                    <div class="meph-application-menu-categories-item-details" meph-event-click="c$.list.parent.openGraphInstance, c$.data.name">
+                        <span>Name</span>
+                        <span data-bind='"innerHTML": "c$.data.name"'></span>
+                    </div>
+                </template>
+            </list>
+        </div>
+    </div>
 </div>
 <!-- "instruction": true, "name" : "injectop", "close": true -->
