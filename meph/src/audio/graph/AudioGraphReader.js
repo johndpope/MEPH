@@ -93,6 +93,61 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
             return res;
         }
     },
+    connectGraph: function (graph) {
+        var me = this;
+        if (me.hasSingleRoot()) {
+            var input = me.getNodeOfType(graph, 'MEPH.audio.graph.node.InputNode');
+            var inputNodesToConnectToFromRoot = me.getNodesConnectedToOutputsOf(input, graph);
+            inputNodesToConnectToFromRoot.select(function (x) {
+                return {
+                    zones: me.getZoneToConnectToFromInput(input, x, graph),
+                    node: x
+                }
+            })
+            var root = me.getRoot();
+
+            debugger
+        }
+    },
+    /**
+     * Gets a node of a type from a graph.
+     * @param {Object} graph
+     * @param {String} type
+     * @return {Object}
+     */
+    getNodeOfType: function (graph, type) {
+        var me = this;
+        return graph.nodes.first(function (x) { return x.data.type === type; });
+    },
+    /**
+     * Gets the nodes connected to the outputs of the node.
+     * @param {Object} node 
+     * @param {Object} graph
+     * @return {Array}
+     **/
+    getNodesConnectedToOutputsOf: function (node, graph) {
+        var me = this;
+        var connections = graph.connections.where(function (x) {
+            return x.nodes.some(function (x) { return node.id === x; });
+        });
+
+        var othernodes = connections.select(function (x) {
+            return x.nodes.first(function (x) { return node.id !== x; });
+        });
+        return graph.nodes.where(function (x) { return othernodes.some(function (t) { return t === x.id; }) });
+    },
+    getZoneToConnectToFromInput: function (inputnode, outputnode, graph) {
+        var zones = graph.connections.where(function (x) {
+            return x.nodes.all(function (x) { return x === inputnode.id || x === outputnode.id; });
+        }).select(function (x) {
+            return x.zones.first(function (t) {
+                return outputnode.data.nodeInputs.some(function (y) {
+                    return y.id === t;
+                });
+            })
+        });
+        return zones;
+    },
     createAudio: function () {
         var me = this, audio = new MEPH.audio.Audio();
         var list = me.constructAudioNodeList();
