@@ -453,9 +453,9 @@
         reader.setGraph(simpleAudio);
 
         reader.connectGraph(MEPH.audio.Sequence.defaultSequenceGraphRecipe);
-
+        
         var audio = reader.createAudio();
-        var node = audio.get({ type: MEPH.audio.Audio.nodeTypes.gain });
+        var node = audio.nodes.first(function (x) { return x.type === MEPH.audio.Audio.nodeTypes.gain });
         expect(node).toBeTruthy();
     })
 });

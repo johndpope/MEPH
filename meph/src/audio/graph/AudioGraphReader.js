@@ -98,15 +98,41 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         if (me.hasSingleRoot()) {
             var input = me.getNodeOfType(graph, 'MEPH.audio.graph.node.InputNode');
             var inputNodesToConnectToFromRoot = me.getNodesConnectedToOutputsOf(input, graph);
-            inputNodesToConnectToFromRoot.select(function (x) {
+            var nodeAndTargetZones = inputNodesToConnectToFromRoot.select(function (x) {
                 return {
                     zones: me.getZoneToConnectToFromInput(input, x, graph),
                     node: x
                 }
             })
             var root = me.getRoot();
-
-            debugger
+            var audiooutputs = root.data.nodeOutputs.where(function (t) {
+                return t.type === 'AudioBuffer';
+            });
+            var currentgraph = me.getGraph();
+            var res = nodeAndTargetZones.select(function (x) {
+                return {
+                    id: MEPH.GUID(),
+                    nodes: [x.node.id, root.id],
+                    zones: [x.zones.first(), audiooutputs.first().id]
+                }
+            });
+            graph.nodes.where(me.nodesToIgnore).foreach(function (node) {
+                currentgraph.nodes.push(node);
+            })
+            graph.connections.foreach(function (connection) {
+                if (!graph.nodes.where(function (x) {
+                    return !me.nodesToIgnore(x);
+                }).some(function (t) {
+                    
+                    return connection.nodes.some(function (y) { return y === t.id; });
+                })) {
+                    currentgraph.connections.push(connection);
+                }
+            });
+            res.foreach(function (connection) {
+                currentgraph.connections.push(connection);
+            });
+            
         }
     },
     /**
