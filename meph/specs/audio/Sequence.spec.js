@@ -147,5 +147,11 @@
 
         expect(sequence.$defaultType).toBe('graph');
         expect(sequence.$defaultRefId).toBe('id');
+    });
+
+    it('can get a sequences graph', function () {
+        var sequence = new MEPH.audio.Sequence();
+
+        expect(sequence.getGraph()).toBeTruthy();
     })
 });

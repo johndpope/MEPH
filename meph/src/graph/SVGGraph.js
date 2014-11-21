@@ -40,6 +40,7 @@ MEPH.define('MEPH.graph.SVGGraph', {
                 nodeinfo.data.nodeOutputs.foreach(function (x) { res.classInstance.nodeOutputs.push(x); });
                 control.addNode(node);
                 node.setPosition(nodeinfo.position.x, nodeinfo.position.y, nodeinfo.position.z);
+                res.classInstance.applyNodeInputsAndOutputs();
                 return node;
             })
         })).then(function (nodes) {

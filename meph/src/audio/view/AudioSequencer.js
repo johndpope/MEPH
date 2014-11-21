@@ -67,7 +67,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.fire('altered', { property: 'sequence' });
         document.body.appendChild(me.audiographholder);
         me.don('click', document.body, function (evt) {
-            if (!MEPH.util.Dom.isDomDescendant(document.activeElement, me.audiographholder)) {
+            if (!MEPH.util.Dom.isDomDescendant(evt.srcElement, me.audiographholder) &&
+                !evt.srcElement.classList.contains('form-control')) {
                 me.hideGraph();
             }
         });
@@ -81,6 +82,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     hideGraph: function () {
         var me = this;
         Style.hide(me.audiographholder);
+        if (me.editedSequence) {
+            me.editedSequence.saveGraph(me.audiographinstance.saveGraph());
+        }
     },
     showGraph: function () {
         var me = this;
@@ -89,18 +93,26 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     showGraphForSequence: function () {
         var me = this,
             hovercells = MEPH.clone(me.hovercells),
-            row = hovercells.first().row;
+            lane = hovercells.first().row;
 
-        return Promise.resolve().then(function () {
-            return me.audiographinstance || me.createAudioGraph();
-        }).then(function (t) {
-            if (!me.audiographinstance) {
-                var res = t.first();
-                me.audiographholder = res.classInstance;
-            }
-        }).then(function () {
-            me.showGraph();
-        })
+        var seq = me.sequence.items()[lane];
+        if (seq) {
+            return Promise.resolve().then(function () {
+                return me.audiographinstance || me.createAudioGraph();
+            }).then(function (t) {
+                if (!me.audiographinstance) {
+                    var res = t.first();
+                    me.audiographinstance = res.classInstance;
+                }
+            }).then(function () {
+                me.showGraph();
+            }).then(function () {
+                me.editedSequence = seq.source;
+                return me.audiographinstance.loadGraph(JSON.stringify(seq.source.getGraph()));
+            }).then(function () {
+                me.audiographinstance.resize();
+            });;
+        }
     },
     onInjectionsComplete: function () {
         var me = this;

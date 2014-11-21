@@ -190,17 +190,27 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.bufferTitle = 'buffer';
         me.booleanSource = ['true', 'false'];
         me.normalizeTitle = 'normalize';
+        me.applyNodeInputsAndOutputs();
+        //setTimeout(function () {
+        //    me.nodeg.setAttributeNS(null, "id", "node" + (me.id || MEPH.GUID()));
+        //}, 1000)
+    },
+    applyNodeInputsAndOutputs: function () {
+        var me = this;
         me.nodeInputs.foreach(function (input) {
             input.canConnect = me.canConnect.bind(me);
             input.isOutput = false;
+            if (me[input.name] && input.defaultValue) {
+                me[input.name].value = input.defaultValue;
+            }
         });
         me.nodeOutputs.foreach(function (input) {
             input.canConnect = me.canConnect.bind(me);
             input.isOutput = false;
+            if (me[input.name] && input.defaultValue) {
+                me[input.name].value = input.defaultValue;
+            }
         });
-        //setTimeout(function () {
-        //    me.nodeg.setAttributeNS(null, "id", "node" + (me.id || MEPH.GUID()));
-        //}, 1000)
     },
     involvedInConnections: function (zone) {
         var me = this;
@@ -304,6 +314,11 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         var input = me.nodeInputs.first(function (t) {
             return t.name === prop;
         });
+
+        input = input || me.nodeOutputs.first(function (t) {
+            return t.name === prop;
+        });
+
         if (input) {
             input.defaultValue = value;
         }

@@ -3,7 +3,8 @@
  * Defines a base class for an audio sequence.
  **/
 MEPH.define('MEPH.audio.Sequence', {
-    requires: ['MEPH.mixins.Injections'],
+    requires: ['MEPH.mixins.Injections',
+               'MEPH.audio.graph.AudioGraphReader'],
     mixins: {
         injections: 'MEPH.mixins.Injections'
     },
@@ -49,6 +50,15 @@ MEPH.define('MEPH.audio.Sequence', {
     setDefaultGraph: function (id) {
         var me = this;
         me.setDefault('graph', id);
+    },
+    getGraph: function () {
+        var me = this;
+        me.$graph = me.$graph || MEPH.audio.graph.AudioGraphReader.cloneUnique(MEPH.audio.Sequence.defaultSequenceGraphRecipe);
+        return me.$graph;
+    },
+    saveGraph: function (graph) {
+        var me = this;
+        me.$graph = graph;
     },
     getDefaultInstance: function () {
         var me = this,

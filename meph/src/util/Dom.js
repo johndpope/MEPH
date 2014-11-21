@@ -410,10 +410,10 @@ Promise.resolve().then(function () {
 
             },
             createSimpleDataEntry: function (me, el, type, setfunc, initval) {
-
                 var res = Dom.createInputElementOverSvgWithDisplay(el);
                 var element = res.input;
                 element.type = type || 'range';
+                element.classList.add('dataentry')
                 element.max = me.maxvalue || 10;
                 element.classList.add('form-control');
                 res.value.classList.add('form-control');

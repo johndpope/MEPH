@@ -36,6 +36,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
 
             connectionids = connectionids.concat(graph.connections.concatFluent(function (x) { return x.zones; }));
             connectionids = connectionids.concat(graph.connections.concatFluent(function (x) { return x.nodes; }));
+            connectionids.push(graph.id);
             return nodeids.concat(connectionids)
         }
     },

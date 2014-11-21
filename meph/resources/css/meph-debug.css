@@ -9859,6 +9859,12 @@ svg text.ignore {
   position: relative;
 }
 
+/* line 232, ../sass/meph-default/controls/view/_misc.scss */
+div.graphBody div:first-child {
+  height: 100%;
+  width: 100%;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

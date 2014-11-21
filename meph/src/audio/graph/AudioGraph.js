@@ -92,11 +92,15 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
             element: 'svg'
         }, '#' + me.id + ' div.graphBody', '#' + me.id);
 
-        me.don('click', document.body, function () {
+        me.don('click', document.body, function (evt) {
             if (!MEPH.util.Dom.isDomDescendant(document.activeElement, me.audiographpopup)) {
                 me.closepopup();
             }
         }, me);
+    },
+    resize: function () {
+        var me = this;
+        me.graphviewport.resize();
     },
     removeSelectedConnections: function () {
         var me = this;

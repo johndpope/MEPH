@@ -228,3 +228,8 @@ svg text.ignore {
     width: 100%;
     position: relative;
 }
+
+div.graphBody div:first-child {
+    height: 100%;
+    width: 100%;
+}
