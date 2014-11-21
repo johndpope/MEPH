@@ -54,8 +54,3 @@
   display: block;
   background-color: white;
 }
-
-/* line 30, ../sass/meph-example/_all.scss */
-.meph-graph-control {
-  height: 500px;
-}

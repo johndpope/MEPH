@@ -14,6 +14,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.AudioResources',
         'MEPH.input.Text',
         'MEPH.audio.Sequence',
+        'MEPH.audio.graph.AudioGraph',
         'MEPH.util.Dom',
         'MEPH.audio.Constants',
         'MEPH.util.Observable'],
@@ -63,7 +64,43 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.super();
         me.setupHeaders();
         me.sequence.title = me.sequence.title || 'untitled';
-        me.fire('altered', { property: 'sequence' })
+        me.fire('altered', { property: 'sequence' });
+        document.body.appendChild(me.audiographholder);
+        me.don('click', document.body, function (evt) {
+            if (!MEPH.util.Dom.isDomDescendant(document.activeElement, me.audiographholder)) {
+                me.hideGraph();
+            }
+        });
+        me.hideGraph();
+    },
+    createAudioGraph: function () {
+        var me = this;
+        return me.renderControl('MEPH.audio.graph.AudioGraph', me.audiographholder, me)
+    },
+
+    hideGraph: function () {
+        var me = this;
+        Style.hide(me.audiographholder);
+    },
+    showGraph: function () {
+        var me = this;
+        Style.show(me.audiographholder);
+    },
+    showGraphForSequence: function () {
+        var me = this,
+            hovercells = MEPH.clone(me.hovercells),
+            row = hovercells.first().row;
+
+        return Promise.resolve().then(function () {
+            return me.audiographinstance || me.createAudioGraph();
+        }).then(function (t) {
+            if (!me.audiographinstance) {
+                var res = t.first();
+                me.audiographholder = res.classInstance;
+            }
+        }).then(function () {
+            me.showGraph();
+        })
     },
     onInjectionsComplete: function () {
         var me = this;
@@ -144,6 +181,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.setTrackResourceOpenKey('t');
         me.setDurationKeys()
         me.setRemoveKey('x');
+        me.setSequenceGraphMod('m');
         me.setPlayButton('p');
     },
     translateToSource: function (sequence) {
@@ -478,6 +516,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     setContextMenuOpenKey: function (key) {
         var me = this;
         me.setCommand(key, MEPH.audio.view.AudioSequencer.ContextMenu, me.openContextMenu.bind(me));
+    },
+    setSequenceGraphMod: function (key) {
+        var me = this;
+        me.setCommand(key, 'sequencegraphmod', me.showGraphForSequence.bind(me));
     },
     setRemoveKey: function (key) {
         var me = this;

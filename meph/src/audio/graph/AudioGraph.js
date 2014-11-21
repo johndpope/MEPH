@@ -77,7 +77,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
     },
     openGraphInstanceHandler: function (type, name) {
         var me = this;
-        
+
         var graph = me.graphsources.first(function (x) { return x.name === name; });
         me.graph.clear();
         var strgraph = JSON.stringify(graph);
