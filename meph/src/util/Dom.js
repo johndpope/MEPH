@@ -345,6 +345,10 @@ Promise.resolve().then(function () {
 
                 var sp = MEPH.util.Dom.getScreenPosition(svg);
                 element = element || document.createElement(type || 'input');
+                if (element.classList && element.classList.add) {
+                    element.classList.add('dataentry');
+                    element.classList.add('form-control');
+                }
                 Style.width(element, sp.width);
                 Style.height(element, sp.height);
                 Style.position(element, 'absolute');
