@@ -53,8 +53,8 @@ MEPH.define('MEPH.graph.Graph', {
             connections: me.connections.select(),
             nodes: me.nodes.select(function (x) {
                 var res = {
-                    id: x.id,
-                    position: x.position,
+                    id: x.id || x.$id,
+                    position: x.position || x.$position,
                     data: {
                         id: x.data.id,
                         type: x.data.____type,

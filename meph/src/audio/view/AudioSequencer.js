@@ -84,6 +84,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         Style.hide(me.audiographholder);
         if (me.editedSequence) {
             me.editedSequence.saveGraph(me.audiographinstance.saveGraph());
+            me.editedSequence = null;
         }
     },
     showGraph: function () {

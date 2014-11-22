@@ -34,7 +34,9 @@ MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
     createPianoNoteGraph: function (id, name) {
 
         var graph = new MEPH.graph.Graph(),
-            node, audiobuffer = new MEPH.audio.graph.node.AudioBufferSourceNode();
+            node,
+            audiobuffer = new MEPH.audio.graph.node.AudioBufferSourceNode();
+        
         node = new MEPH.graph.Node();
         node.setId(MEPH.GUID());
         audiobuffer.id = MEPH.GUID();
@@ -43,7 +45,7 @@ MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
         node.data = audiobuffer;
         graph.addNode(node);
         var result = graph.saveGraph();
-
+        result.id = result.id || MEPH.GUID();
         result.name = name;
         audiobuffer.destroy();
         MEPH.publish(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, result);

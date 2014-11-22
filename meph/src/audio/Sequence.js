@@ -216,7 +216,14 @@ MEPH.define('MEPH.audio.Sequence', {
             me.parts.push({
                 source: source,
                 relativeTimeOffset: timeOffset || 0,
-                duration: duration
+                duration: duration,
+                getAudio: function () {
+                    if (typeof this.source === 'string') {
+                        this.audioSource.duration(this.duration);
+                        return this.audioSource;
+                    }
+                    return this.source;
+                }
             });
             return source;
         }
@@ -229,12 +236,13 @@ MEPH.define('MEPH.audio.Sequence', {
     duration: function (graphExtensions) {
         var me = this;
         graphExtensions = graphExtensions || [];
+        var graphextension = me.getGraph(true) || null;
+        if (graphextension) {
+            graphExtensions = graphExtensions.concat([graphextension]);
+        }
         return me.parts.maximum(function (x) {
             if (x.containsSequences) {
-                var graphextension = me.getGraph(true) || null;
-                if (graphextension) {
-                    graphExtensions = graphExtensions.concat([graphextension]);
-                }
+
                 return x.source.duration(graphExtensions) + x.relativeTimeOffset;
             }
             else {
@@ -257,11 +265,11 @@ MEPH.define('MEPH.audio.Sequence', {
     getScheduledAudio: function (start, length, graphExtensions) {
         var me = this;
         graphExtensions = graphExtensions || [];
+        var graphextension = me.getGraph(true) || null;
+        if (graphextension) {
+            graphExtensions = graphExtensions.concat([graphextension]);
+        }
         if (me.containsSequences) {
-            var graphextension = me.getGraph(true) || null;
-            if (graphextension) {
-                graphExtensions = graphExtensions.concat([graphextension]);
-            }
             return me.parts.concatFluent(function (sequence) {
                 return sequence.source.getScheduledAudio(sequence.relativeTimeOffset - start, length, graphExtensions);
             });;
@@ -271,22 +279,31 @@ MEPH.define('MEPH.audio.Sequence', {
                 return x.relativeTimeOffset >= start && x.relativeTimeOffset <= (start + length);
             }).select(function (x) {
                 if (typeof x.source === 'string') {
-                    var clone = MEPH.clone(x);
-                    clone.source = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
-                    return clone;
+                    x.audioSource = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
+                    return x;
                 }
                 return x;
             });
         }
     },
+    clone: function (x) {
+        var t = {
+        };
+        for (var i in x) {
+            t[i] = x[i];
+        }
+        return t;
+    },
     getAudios: function (graphExtensions) {
         var me = this;
         graphExtensions = graphExtensions || [];
+
+        var graphextension = me.getGraph(true) || null;
+        if (graphextension) {
+            graphExtensions = graphExtensions.concat([graphextension]);
+        }
+
         if (me.containsSequences) {
-            var graphextension = me.getGraph(true) || null;
-            if (graphextension) {
-                graphExtensions = graphExtensions.concat([graphextension]);
-            }
             return me.parts.concatFluent(function (sequence) {
                 return sequence.source.getAudios(graphExtensions);
             });;
@@ -294,9 +311,8 @@ MEPH.define('MEPH.audio.Sequence', {
         else {
             return me.parts.select().select(function (x) {
                 if (typeof x.source === 'string') {
-                    var clone = MEPH.clone(x);
-                    clone.source = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
-                    return clone;
+                    x.audioSource = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
+                    return x;
                 }
                 return x;
             });

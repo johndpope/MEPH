@@ -63,7 +63,10 @@ MEPH.define('MEPH.audio.AudioResources', {
             graphRecipe = me.getGraphs().first(function (x) { return x.id === id; });
 
         if (graphRecipe) {
-            me.graphReader.setGraph(graphRecipe);
+            me.graphReader.setGraph(MEPH.audio.graph.AudioGraphReader.cloneUnique(graphRecipe));
+            graphextension.foreach(function (extension) {
+                me.graphReader.connectGraph(extension);
+            });
             try {
                 return me.graphReader.createAudio();
             }

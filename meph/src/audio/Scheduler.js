@@ -40,8 +40,8 @@ MEPH.define('MEPH.audio.Scheduler', {
         var audios = me.get(0, duration);
         audios.foreach(function (audio) {
 
-            audio.source.disconnect();
-            audio.source.offlineMode = true;
+            audio.getAudio().disconnect();
+            audio.getAudio().offlineMode = true;
         });
         if (started === undefined) {
             started = 0;
@@ -51,9 +51,9 @@ MEPH.define('MEPH.audio.Scheduler', {
         audios.foreach(function (audio) {
             var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
-            audio.source.complete();
-            audio.source.play(time + started);
-            audio.source.stop(time + started + (audio.source.duration() * me.bpm));
+            audio.getAudio().complete();
+            audio.getAudio().play(time + started);
+            audio.getAudio().stop(time + started + (audio.source.duration() * me.bpm));
         });
         var toresolve;
         var promise = new Promise(function (x, f) {
@@ -79,9 +79,9 @@ MEPH.define('MEPH.audio.Scheduler', {
             items.foreach(function (audio) {
                 var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
-                audio.source.complete();
-                audio.source.play(time + started);
-                audio.source.stop(time + started + (audio.source.duration() * me.bpm));
+                audio.getAudio().complete();
+                audio.getAudio().play(time + started);
+                audio.getAudio().stop(time + started + (audio.getAudio().duration() * me.bpm));
                 played.push(audio);
             });
             if (lasttime < currentTime && me.playing) {
