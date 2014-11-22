@@ -210,7 +210,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         me.time = {
             'function': function (item, offset) {
-                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence) || typeof item.source === 'string') {
                     return (me.sequence.getAbsoluteTime(item));//
                 }
                 if (offset === 'left') {
@@ -222,7 +222,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         me.lane = {
             'function': function (item, offset) {
-                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence))
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence || typeof item.source === 'string'))
                     return me.sequence.getParentIndexOf(item);
 
                 return item.lane;
@@ -232,7 +232,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         me.settime = {
             'function': function (time, item) {
-                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence || typeof item.source === 'string')) {
                     time = Math.round(time * me.nearest) / me.nearest;
                     me.sequence.setRelativeTime(item, time);
                     me.update();
@@ -247,6 +247,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                     return me.sequence.getDuration(item)
 
                     return item.length;
+                }
+                else if (item && typeof item.source === 'string') {
+                    return item.duration;
                 }
             }
         }
@@ -433,7 +436,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             column = location.column;
         sequence = me.getSequenceItem(row);
         if (sequence) {
-            var res = sequence.source.add(null, column);
+            var res = sequence.source.add(null, column, me.getDuration(key));
             if (res instanceof MEPH.audio.Audio) {
                 res.duration(me.getDuration(key))
             }

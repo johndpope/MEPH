@@ -36,7 +36,8 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
 
             connectionids = connectionids.concat(graph.connections.concatFluent(function (x) { return x.zones; }));
             connectionids = connectionids.concat(graph.connections.concatFluent(function (x) { return x.nodes; }));
-            connectionids.push(graph.id);
+            if (graph.id)
+                connectionids.push(graph.id);
             return nodeids.concat(connectionids)
         }
     },
@@ -124,7 +125,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
                 if (!graph.nodes.where(function (x) {
                     return !me.nodesToIgnore(x);
                 }).some(function (t) {
-                    
+
                     return connection.nodes.some(function (y) { return y === t.id; });
                 })) {
                     currentgraph.connections.push(connection);
@@ -133,7 +134,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
             res.foreach(function (connection) {
                 currentgraph.connections.push(connection);
             });
-            
+
         }
     },
     /**

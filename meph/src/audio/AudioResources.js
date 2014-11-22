@@ -58,7 +58,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         return me.graphs.select();
     },
-    getGraphInstance: function (id) {
+    getGraphInstance: function (id, graphextension) {
         var me = this,
             graphRecipe = me.getGraphs().first(function (x) { return x.id === id; });
 

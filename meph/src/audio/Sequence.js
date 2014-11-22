@@ -51,8 +51,10 @@ MEPH.define('MEPH.audio.Sequence', {
         var me = this;
         me.setDefault('graph', id);
     },
-    getGraph: function () {
+    getGraph: function (raw) {
         var me = this;
+        if (raw)
+            return me.$graph;
         me.$graph = me.$graph || MEPH.audio.graph.AudioGraphReader.cloneUnique(MEPH.audio.Sequence.defaultSequenceGraphRecipe);
         return me.$graph;
     },
@@ -66,7 +68,7 @@ MEPH.define('MEPH.audio.Sequence', {
         if (me.$inj.audioResources) {
             switch (me.$defaultType) {
                 case 'graph':
-                    result = me.$inj.audioResources.getGraphInstance(me.$defaultRefId);
+                    result = me.$defaultRefId;//me.$inj.audioResources.getGraphInstance();
                     break;
                 case 'sequence':
                     result = me.$inj.audioResources.getSequenceInstance(me.$defaultRefId)
@@ -191,8 +193,9 @@ MEPH.define('MEPH.audio.Sequence', {
      * Adds a source to the sequence.
      * @param  { Object} source
      * @param {Number} timeOffset
+     * @param {Number} duration
      ***/
-    add: function (source, timeOffset) {
+    add: function (source, timeOffset, duration) {
         var me = this,
             defaults,
             args = MEPH.Array(arguments);
@@ -206,8 +209,15 @@ MEPH.define('MEPH.audio.Sequence', {
         }
 
         if (((me.containsSequences && source instanceof MEPH.audio.Sequence) ||
-            (!me.containsSequences && source instanceof MEPH.audio.Audio)) && (source instanceof MEPH.audio.Audio || (!me.containsRef(source) && !source.containsRef(me)))) {
-            me.parts.push({ source: source, relativeTimeOffset: timeOffset || 0 });
+            (!me.containsSequences && source instanceof MEPH.audio.Audio) ||
+            (!me.containsSequences && typeof source === 'string')) &&
+            (typeof source === 'string' ||
+             source instanceof MEPH.audio.Audio || (!me.containsRef(source) && !source.containsRef(me)))) {
+            me.parts.push({
+                source: source,
+                relativeTimeOffset: timeOffset || 0,
+                duration: duration
+            });
             return source;
         }
         return false;
@@ -216,13 +226,23 @@ MEPH.define('MEPH.audio.Sequence', {
         var me = this;
         return me.parts.select();
     },
-    duration: function () {
+    duration: function (graphExtensions) {
         var me = this;
+        graphExtensions = graphExtensions || [];
         return me.parts.maximum(function (x) {
-            if (x.containsSequences)
+            if (x.containsSequences) {
+                var graphextension = me.getGraph(true) || null;
+                if (graphextension) {
+                    graphExtensions = graphExtensions.concat([graphextension]);
+                }
+                return x.source.duration(graphExtensions) + x.relativeTimeOffset;
+            }
+            else {
+                if (typeof x.source === 'string') {
+                    return x.duration; //me.$inj.audioResources.getGraphInstance(x.source, graphExtensions).duration();
+                }
                 return x.source.duration() + x.relativeTimeOffset;
-            else
-                return x.source.duration() + x.relativeTimeOffset;
+            }
         })
     },
     getDuration: function (item) {
@@ -234,28 +254,52 @@ MEPH.define('MEPH.audio.Sequence', {
      * @param {Number} length
      * @return {Object}
      **/
-    getScheduledAudio: function (start, length) {
+    getScheduledAudio: function (start, length, graphExtensions) {
         var me = this;
+        graphExtensions = graphExtensions || [];
         if (me.containsSequences) {
+            var graphextension = me.getGraph(true) || null;
+            if (graphextension) {
+                graphExtensions = graphExtensions.concat([graphextension]);
+            }
             return me.parts.concatFluent(function (sequence) {
-                return sequence.source.getScheduledAudio(sequence.relativeTimeOffset - start, length);
+                return sequence.source.getScheduledAudio(sequence.relativeTimeOffset - start, length, graphExtensions);
             });;
         }
         else {
             return me.parts.where(function (x) {
                 return x.relativeTimeOffset >= start && x.relativeTimeOffset <= (start + length);
-            })
+            }).select(function (x) {
+                if (typeof x.source === 'string') {
+                    var clone = MEPH.clone(x);
+                    clone.source = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
+                    return clone;
+                }
+                return x;
+            });
         }
     },
-    getAudios: function () {
+    getAudios: function (graphExtensions) {
         var me = this;
+        graphExtensions = graphExtensions || [];
         if (me.containsSequences) {
+            var graphextension = me.getGraph(true) || null;
+            if (graphextension) {
+                graphExtensions = graphExtensions.concat([graphextension]);
+            }
             return me.parts.concatFluent(function (sequence) {
-                return sequence.source.getAudios();
+                return sequence.source.getAudios(graphExtensions);
             });;
         }
         else {
-            return me.parts.select();
+            return me.parts.select().select(function (x) {
+                if (typeof x.source === 'string') {
+                    var clone = MEPH.clone(x);
+                    clone.source = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
+                    return clone;
+                }
+                return x;
+            });
         }
     },
     getAudioWithAbsoluteTime: function () {
@@ -290,6 +334,7 @@ MEPH.define('MEPH.audio.Sequence', {
             parts: res,
             id: me.id,
             title: me.title,
+            graph: me.getGraph(true),
             sequence: me.containsSequences
         }
     },
@@ -301,6 +346,7 @@ MEPH.define('MEPH.audio.Sequence', {
         sequences = sequences || [];
         me.id = obj.id;
         me.title = obj.title || me.title;
+        me.$graph = obj.graph || null;
         if (obj.sequence) {
             obj.parts.foreach(function (part) {
                 var newsequence = new MEPH.audio.Sequence();

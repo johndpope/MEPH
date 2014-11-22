@@ -28,7 +28,7 @@ MEPH.define('MEPH.audio.Scheduler', {
     },
     getAudio: function (from, duration) {
         var me = this;
-        me.orderedSequence = me.orderedSequence = me.sequence().getAudioWithAbsoluteTime();
+        me.orderedSequence = me.sequence().getAudioWithAbsoluteTime();
         return me.orderedSequence.where(function (x) {
             return x.absoluteTime * me.bpm >= from &&
                 x.absoluteTime * me.bpm <= (duration * me.bpm + from)
