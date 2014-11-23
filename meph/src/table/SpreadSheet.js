@@ -818,6 +818,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
                 me.leftRenderer.setCanvas(me.leftheader);
                 me.topRenderer.setCanvas(me.topheader);
             }
+            if (!me.body) return;
             me.lastCanvasSize = me.lastCanvasSize || {};
             var canvasheight = me.body.clientHeight;
             var canvaswidth = me.body.clientWidth;
@@ -868,16 +869,16 @@ MEPH.define('MEPH.table.SpreadSheet', {
     },
     getLeftCanvasWidth: function () {
         var me = this;
-        me.cache.leftcanvaswidth = me.cache.leftcanvaswidth || me.columnHeaderOffsets.summation(function (i, total) {
+        me.cache.leftcanvaswidth = me.cache.leftcanvaswidth || (me.columnHeaderOffsets ? me.columnHeaderOffsets.summation(function (i, total) {
             return total += i;
-        });
+        }) : 0);
         return me.cache.leftcanvaswidth;
     },
     getTopCanvasHeight: function () {
         var me = this;
-        me.cache.topcanvasheight = me.cache.topcanvasheight || me.rowHeaderOffsets.summation(function (i, total) {
+        me.cache.topcanvasheight = me.cache.topcanvasheight || (me.rowHeaderOffsets ? me.rowHeaderOffsets.summation(function (i, total) {
             return total += i;
-        });
+        }) : 0);
         return me.cache.topcanvasheight;
     },
     drawTopGrid: function (height, width, canceldraw) {

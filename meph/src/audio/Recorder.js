@@ -28,6 +28,8 @@ MEPH.define('MEPH.audio.Recorder', {
 
         //var res = recorder.record([resource.buffer.buffer.getChannelData(0), resource.buffer.buffer.getChannelData(1)])
         //.exportWAV('audio/wav');
+        if (!resource || !resource.buffer || !resource.buffer.buffer)
+            return;
         var audio = new MEPH.audio.Audio();
         var newSource = audio.createContext().createBufferSource();
         newSource.buffer = resource.buffer.buffer;
