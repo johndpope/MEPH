@@ -210,6 +210,11 @@ MEPH.define('MEPH.audio.Audio', {
         source.buffer = myArrayBuffer;
         return { name: MEPH.GUID(), buffer: source, type: '' };
     },
+    createBuffer: function (channels, frameCount, sampleRate, options) {//2, frameCount, audioCtx.sampleRate
+        var me = this;
+        var audioCtx = me.createContext(options);
+        return audioCtx.createBuffer(channels, frameCount, sampleRate);
+    },
     /**
      * Serializes a buffer object in to a string.
      * @param {Object} bufferObject

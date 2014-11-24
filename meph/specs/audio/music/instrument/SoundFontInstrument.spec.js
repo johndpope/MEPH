@@ -104,10 +104,31 @@
                 expect(bytearray).toBeTruthy();
                 return bytearray;
             }).then(function (resource) {
-                audio.audioelement(resource);
-                resource.play();
-                //return audio.loadByteArray(resource, null, 'file', 'ty').then(function (resource) {
 
+                var myArrayBuffer = audio.createBuffer(2, resource.length / 2, 44100);
+                var data1 = myArrayBuffer.getChannelData(0);
+                var data2 = myArrayBuffer.getChannelData(1);
+                for (var i = 0 ; i < resource.length / 2; i++) {
+                    data1[i] = resource[2 * i];
+                    data2[i] = resource[(2 * i) + 1];
+                }
+                var source = audio.createContext().createBufferSource();
+                source.buffer = myArrayBuffer;
+                debugger
+                audio.buffer(source).complete();
+                //source.connect(audio.createContext().destination);
+                // source.start();
+                audio.getNodes().first().node.start();
+                var promise = new Promise(function (r) {
+                    setTimeout(function () {
+                        r();
+                    }, 5000)
+                })
+                return promise;
+                //audio.audioelement(resource);
+                //resource.play();
+                //return audio.loadByteArray(resource, null, 'file', 'ty').then(function (resource) {
+                //    debugger
                 //    audio.buffer(resource.buffer).complete();
                 //    resource.buffer.start();
                 //    var promise = new Promise(function (r) {

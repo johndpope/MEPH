@@ -130,18 +130,18 @@
         var target = new SFByteArray(intarget);
         var sampleraite = me.samplerate();
         decoder.extract(target, (endPos - startPos) / 2, 0, sampleraite);
-        var samples2 = me.convert255(target._dataview);
-        debugger
+        var samples2 = me.converFloat32(target._dataview);
 
-        var wave = new SoundFontInstrument.RiffWave();
-        wave.header.sampleRate = sampleraite;
-        wave.header.numChannels = 2;
-        wave.Make(samples2);
+        return samples2;
+        //var wave = new SoundFontInstrument.RiffWave();
+        //wave.header.sampleRate = sampleraite;
+        //wave.header.numChannels = 2;
+        //wave.Make(samples2);
 
-        var audio = new Audio();
-        audio.src = wave.dataURI;
-        audio.loop = true;
-        return audio;
+        //var audio = new Audio();
+        //audio.src = wave.dataURI;
+        //audio.loop = true;
+        //return audio;
     },
     loadDataUri: function (datauri) {
         var toResolve,
@@ -161,6 +161,16 @@
         };
         XHR.send();
         return promise;
+    },
+    converFloat32: function (data) {
+        var data_0_255 = new Float32Array(data.byteLength / 4);
+        //for (var j = 0 ; j < 2 ; j++)
+        for (var i = 0; i < data.byteLength / 4; i++) {
+            var flo = data.getFloat32(i * 4, true)
+            data_0_255[i] = flo;
+            //data_0_255[i + (j * data.length)] = Math.max(.01 * data_0_255[i], ((data.length - i) / data.length) * data_0_255[i]);
+        }
+        return data_0_255;
     },
     convert255: function (data) {
         var data_0_255 = [];
