@@ -16,7 +16,7 @@ struct sfSample
 */
 MEPH.define("MEPH.audio.soundfont.chunks.data.SampleRecord", {
     requires: ['MEPH.audio.soundfont.utils.SFByteArray'],
-    extend: 'MEPH.audio.soundfont.SFObject'],
+    extend: 'MEPH.audio.soundfont.SFObject',
     statics: {
 
 

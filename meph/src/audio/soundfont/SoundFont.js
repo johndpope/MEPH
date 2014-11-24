@@ -7,7 +7,7 @@
 
 MEPH.define("MEPH.audio.soundfont.SoundFont", {
     requires: ['MEPH.audio.soundfont.chunks.data.DataChunk',
-                'MEPH.audio.soundfont.chunks.data.PresetRecord',
+               'MEPH.audio.soundfont.chunks.data.PresetRecord',
                 'MEPH.audio.soundfont.Preset',
                 'MEPH.audio.soundfont.NoteSample',
                 'MEPH.audio.soundfont.chunks.SoundFontChunk',
@@ -107,7 +107,12 @@ MEPH.define("MEPH.audio.soundfont.SoundFont", {
         }
         return null;
     },
-
+    getPresetIds: function () {
+        var me = this;
+        return me._presets.select(function (x) {
+            return x.getPresetID();
+        })
+    },
     buildInstruments: function (dataChunk) //:DataChunk //:void
     {
         for (var i = 0  ; i < dataChunk.getInstrumentRecords().length ; i++)//:InstrumentRecord

@@ -6,10 +6,10 @@
 
 
 MEPH.define("MEPH.audio.soundfont.NoteSample", {
-    requires: [ 'MEPH.audio.soundfont.chunks.data.SampleRecord',
-                "MEPH.audio.soundfont.NoteSample",
+    requires: ['MEPH.audio.soundfont.chunks.data.SampleRecord',
+                //"MEPH.audio.soundfont.NoteSample",
                 'MEPH.audio.soundfont.utils.SFByteArray'],
-    extend: 'MEPH.audio.soundfont.SoundPropertyObject'],
+    extend: 'MEPH.audio.soundfont.SoundPropertyObject',
     statics: {
         PROPERTY_NAMES: [],//:Array = 
         DEFAULTS: {},//:Object = ;

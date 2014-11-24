@@ -15,7 +15,7 @@ MEPH.define("MEPH.audio.soundfont.chunks.data.DataChunk", {
         'MEPH.audio.soundfont.chunks.data.ModulatorsSubchunk',
         'MEPH.audio.soundfont.chunks.data.SamplesSubchunk',
                 'MEPH.audio.soundfont.utils.SFByteArray'],
-    extend: 'MEPH.audio.soundfont.chunks.Chunk'],
+    extend: 'MEPH.audio.soundfont.chunks.Chunk',
     statics: {
         DATA_TAG: "pdta",//:String = 
         PRESET_TAG: "phdr",//:String = ;

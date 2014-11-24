@@ -16,7 +16,7 @@
  */
 MEPH.define("MEPH.audio.soundfont.chunks.data.BagRecord", {
     requires: [],
-    extend: 'MEPH.audio.soundfont.SFObject'],
+    extend: 'MEPH.audio.soundfont.SFObject',
     statics: {
     },
     properties: {

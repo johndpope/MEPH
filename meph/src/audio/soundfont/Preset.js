@@ -15,7 +15,7 @@ MEPH.define("MEPH.audio.soundfont.Preset", {
                 'MEPH.audio.soundfont.chunks.data.InstrumentsSubchunk',
                 'MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk',
                 'MEPH.audio.soundfont.chunks.data.operators.RangeOperator'],
-    extend: 'MEPH.audio.soundfont.ZoneContainer'],
+    extend: 'MEPH.audio.soundfont.ZoneContainer',
     statics: {
     },
     initialize: function (record)//:PresetRecord

@@ -5,7 +5,7 @@
 MEPH.define("MEPH.audio.soundfont.utils.PCMDecoder", {
     requires: ['MEPH.audio.soundfont.NoteSample',
                 'MEPH.audio.soundfont.utils.SFByteArray',
-                "MEPH.audio.soundfont.utils.PCMDecoder",
+                //"MEPH.audio.soundfont.utils.PCMDecoder",
                 "MEPH.audio.soundfont.utils.PCM16BitMono44Khz"],
     extend: "MEPH.audio.soundfont.SFObject",
     properties: {

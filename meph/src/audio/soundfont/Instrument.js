@@ -1,12 +1,11 @@
 ﻿/**
+ * @class MEPH.audio.soundfont.Instrument
+ * @extend MEPH.audio.soundfont.ZoneContainer
  * Instrument represents the parsed and compiled contents of a SoundFont instrument element. It contains "zone"
  * definitions for determining which sample waveforms and dsp properties to use to create a specified keyNum abd
  * velocity. The data property contains the InstrumentRecord which represents the lower-level data for the
  * instrument (without any generators and modulators.)
  */
-
-
-
 MEPH.define("MEPH.audio.soundfont.Instrument", {
     requires: ["MEPH.audio.soundfont.chunks.data.InstrumentRecord",
                 "MEPH.audio.soundfont.chunks.data.GeneratorRecord",

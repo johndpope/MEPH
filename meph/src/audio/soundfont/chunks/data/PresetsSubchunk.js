@@ -12,10 +12,10 @@
 */
 
 MEPH.define("MEPH.audio.soundfont.chunks.data.PresetsSubchunk", {
-    requires: [ 'MEPH.audio.soundfont.chunks.data.PresetRecord',
+    requires: ['MEPH.audio.soundfont.chunks.data.PresetRecord',
                 'MEPH.audio.soundfont.utils.SFByteArray'
-                ],
-    extend: 'MEPH.audio.soundfont.chunks.data.ZonesSubchunk'],
+    ],
+    extend: 'MEPH.audio.soundfont.chunks.data.ZonesSubchunk',
     statics: {
         END_OF_PRESETS_TAG: "EOP",//:String = ;
         RECORD_SIZE: 38,//:int = ;

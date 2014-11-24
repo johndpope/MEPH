@@ -2443,7 +2443,7 @@
     }
   };
 
-  global['TextEncoder'] = global['TextEncoder'] || TextEncoder;
-  global['TextDecoder'] = global['TextDecoder'] || TextDecoder;
+  global['TextEncoder'] = TextEncoder;//global['TextEncoder'] || 
+  global['TextDecoder'] = TextDecoder;//global['TextDecoder'] || 
 }(this));
 MEPH.define('MEPH.audio.external.stringencoding.encoding', {});

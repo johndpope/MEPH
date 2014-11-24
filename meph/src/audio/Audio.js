@@ -17,6 +17,7 @@ MEPH.define('MEPH.audio.Audio', {
             gain: 'gain',
             convolver: 'convolver',
             delay: 'delay',
+            audioElement: 'audioElement',
             dynamicsCompressor: 'dynamicsCompressor',
             waveShaper: 'waveShaper',
             analyser: 'analyser',
@@ -454,6 +455,17 @@ MEPH.define('MEPH.audio.Audio', {
         return me;
 
     },
+    audioelement: function (node, options) {
+        var me = this;
+        options = options || {};
+        options.node = node;
+
+        me.createNode(options || null, function () {
+            return MEPH.audio.Audio.nodeTypes.audioElement;
+        });
+
+        return me;
+    },
     analyser: function (options) {
         var me = this, params = me.createS().concat(me.createParams('plainNumber', 'fftSize', 'frequencyBinCount', 'maxDecibels', 'minDecibels', 'smoothingTimeConstant'));
 
@@ -622,6 +634,8 @@ MEPH.define('MEPH.audio.Audio', {
                 return me.createContext(options).createDelay();
             case A.nodeTypes.dynamicsCompressor:
                 return me.createContext(options).createDynamicsCompressor();
+            case MEPH.audio.Audio.nodeTypes.audioElement:
+                return me.createContext(options).createMediaElementSource(nodeoptions.node);
             case A.nodeTypes.waveShaper:
                 return me.createContext(options).createWaveShaper();
             case A.nodeTypes.analyser:

@@ -19,7 +19,7 @@ according to the structure:
 
 MEPH.define("MEPH.audio.soundfont.chunks.data.SamplesSubchunk", {
     requires: ['MEPH.audio.soundfont.utils.SFByteArray'],
-    extend: 'MEPH.audio.soundfont.chunks.Subchunk'],
+    extend: 'MEPH.audio.soundfont.chunks.Subchunk',
     statics: {
         RECORD_SIZE: 46//:int = ;
     },
@@ -46,7 +46,7 @@ MEPH.define("MEPH.audio.soundfont.chunks.data.SamplesSubchunk", {
     createRecord: function (bytes)//:SFByteArray // :Object
     {
         var record = new SampleRecord();//:SampleRecord 
-       
+
         record.id = this.getNumRecords();
         record.name = bytes.readString(20);
         record.start = bytes.readDWord() * 2;

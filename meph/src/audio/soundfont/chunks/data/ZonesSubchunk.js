@@ -2,10 +2,10 @@
 
 
 MEPH.define("MEPH.audio.soundfont.chunks.data.ZonesSubchunk", {
-    requires: [ 'MEPH.audio.soundfont.chunks.data.operators.Operator',
+    requires: ['MEPH.audio.soundfont.chunks.data.operators.Operator',
                 'MEPH.audio.soundfont.chunks.data.GeneratorRecord',
                 'MEPH.audio.soundfont.utils.SFByteArray'],
-    extend: 'MEPH.audio.soundfont.chunks.Subchunk'],
+    extend: 'MEPH.audio.soundfont.chunks.Subchunk',
     statics: {
     },
     initialize: function (type, source, chunkSize, recordSize)//:String    //:SFByteArray   //:uint //:int

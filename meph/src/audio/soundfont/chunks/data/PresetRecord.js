@@ -38,7 +38,7 @@
 */
 MEPH.define("MEPH.audio.soundfont.chunks.data.PresetRecord", {
     requires: [],
-    extend: 'MEPH.audio.soundfont.chunks.data.ZoneRecord'],
+    extend: 'MEPH.audio.soundfont.chunks.data.ZoneRecord',
     statics: {
     },
     properties: {

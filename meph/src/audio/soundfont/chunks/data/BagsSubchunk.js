@@ -62,9 +62,9 @@
 
 
 MEPH.define("MEPH.audio.soundfont.chunks.data.BagsSubchunk", {
-    requires: [ 'MEPH.audio.soundfont.utils.SFByteArray',
+    requires: ['MEPH.audio.soundfont.utils.SFByteArray',
                 'MEPH.audio.soundfont.chunks.data.BagRecord'],
-    extend: 'MEPH.audio.soundfont.chunks.Subchunk'],
+    extend: 'MEPH.audio.soundfont.chunks.Subchunk',
     statics: {
 
         RECORD_SIZE: 4,//:int = 

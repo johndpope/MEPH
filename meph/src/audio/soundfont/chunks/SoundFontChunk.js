@@ -11,7 +11,7 @@ MEPH.define("MEPH.audio.soundfont.chunks.SoundFontChunk", {
     'MEPH.audio.soundfont.chunks.info.InfoChunk',
     'MEPH.audio.soundfont.chunks.samples.SamplesChunk',
     'MEPH.audio.soundfont.chunks.data.SampleRecord'],
-    extend: 'MEPH.audio.soundfont.chunks.Chunk'],
+    extend: 'MEPH.audio.soundfont.chunks.Chunk',
     statics: {
         SOUND_FONT_BANK_TAG: "sfbk",//:String =  ;
     },

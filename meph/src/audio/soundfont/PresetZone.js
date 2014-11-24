@@ -5,7 +5,7 @@
 
 MEPH.define("MEPH.audio.soundfont.PresetZone", {
     requires: [],
-    extend: 'MEPH.audio.soundfont.Zone'],
+    extend: 'MEPH.audio.soundfont.Zone',
     statics: {
         PROPERTY_NAMES: [],//:Array = ;
         DEFAULTS: {},//:Object = ;

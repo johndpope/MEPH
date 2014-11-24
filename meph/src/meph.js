@@ -682,7 +682,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             }
             toResolve(filename, filetype);
         }
-        else if (filetype === 'mp3') {
+        else if (filetype === 'mp3' || filetype === 'audio') {
 
             var XHR = new XMLHttpRequest();
             XHR.open('GET', filename, true);

@@ -112,6 +112,8 @@
                         'audio/graph/AudioGraphReader.spec.js',
                         'audio/music/instrument/Instrument.spec.js',
                         'audio/music/instrument/piano/GrandPiano.spec.js',
+                        'audio/music/instrument/trumpet/Trumpet.spec.js',
+                        'audio/music/instrument/SoundFontInstrument.spec.js',
                         'audio/music/theory/Notes.spec.js',
                         'audio/music/theory/Scales.spec.js',
                         'audio/soundfont/SFObject.spec.js',

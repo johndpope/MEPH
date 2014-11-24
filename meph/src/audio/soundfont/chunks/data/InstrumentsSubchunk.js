@@ -17,9 +17,9 @@
 
 
 MEPH.define("MEPH.audio.soundfont.chunks.data.InstrumentsSubchunk", {
-    requires: [ 'MEPH.audio.soundfont.utils.SFByteArray',
+    requires: ['MEPH.audio.soundfont.utils.SFByteArray',
                 'MEPH.audio.soundfont.chunks.data.InstrumentRecord'],
-    extend: 'MEPH.audio.soundfont.chunks.data.ZonesSubchunk'],
+    extend: 'MEPH.audio.soundfont.chunks.data.ZonesSubchunk',
     statics: {
         END_OF_INSTRUMENTS_TAG: "EOI",//:String = ;
         RECORD_SIZE: 22//:int = ;

@@ -2,7 +2,7 @@
 MEPH.define("MEPH.audio.soundfont.chunks.data.ModulatorsSubchunk", {
     requires: ['MEPH.audio.soundfont.utils.SFByteArray',
                 'MEPH.audio.soundfont.chunks.data.ModulatorRecord'],
-    extend: 'MEPH.audio.soundfont.chunks.Subchunk'],
+    extend: 'MEPH.audio.soundfont.chunks.Subchunk',
     statics: {
         RECORD_SIZE: 10
     },
