@@ -2,7 +2,7 @@
     extend: 'MEPH.audio.music.instrument.Instrument',
     alternateNames: ['SoundFontInstrument'],
     requires: ['MEPH.audio.soundfont.SoundFontParser',
-
+        'MEPH.audio.Audio',
         'MEPH.audio.soundfont.utils.SFByteArray',
         'MEPH.audio.soundfont.utils.NoteSampleDecoder'],
     statics: {
@@ -118,30 +118,48 @@
      * @param {Number } key 
      * @param {Number } velocity
      **/
-    note: function (key, velocity) {
+    note: function (key, velocity, duration) {
         var me = this;
+        var audio = new MEPH.audio.Audio();
         var notesample = me.selectPreset().notesample(key, velocity);
         var decoder = me.decoder(notesample);
 
         var startPos = notesample.getStart();
         var endPos = notesample.getEnd();
 
-        var intarget = new ArrayBuffer((endPos - startPos) * 8);
-        var target = new SFByteArray(intarget);
+        var startloop = notesample.getLoopStart();
+        var endloop = notesample.getLoopEnd();
         var sampleraite = me.samplerate();
-        decoder.extract(target, (endPos - startPos) / 2, 0, sampleraite);
-        var samples2 = me.converFloat32(target._dataview);
+        duration = Math.round(duration * sampleraite) || (endPos - startPos);
 
-        return samples2;
-        //var wave = new SoundFontInstrument.RiffWave();
-        //wave.header.sampleRate = sampleraite;
-        //wave.header.numChannels = 2;
-        //wave.Make(samples2);
+        var target = new ArrayBuffer(duration * 8);
+        var finaltarget = new SFByteArray(target);
+        decoder.extract(finaltarget, (duration) / 2, 0, sampleraite);
+        var resource = me.converFloat32(finaltarget._dataview);
 
-        //var audio = new Audio();
-        //audio.src = wave.dataURI;
-        //audio.loop = true;
-        //return audio;
+        var myArrayBuffer = audio.createBuffer(2, resource.length / 2, sampleraite);
+        var data1 = myArrayBuffer.getChannelData(0);
+        var data2 = myArrayBuffer.getChannelData(1);
+
+        for (var i = 0 ; i < resource.length / 2; i++) {
+            data1[i] = resource[2 * i];
+            data2[i] = resource[(2 * i) + 1];
+        }
+
+        return myArrayBuffer;
+    },
+    sampleChunks: function () {
+        var me = this;
+        return me.$soundfont._data.dataChunk.samplesSubchunk.records.select();
+    },
+    trimResource: function (resource) {
+        var start = resource.firstIndex(function (x) { return x !== 0; });
+        var end = resource.lastIndex(function (x) { return x !== 0; });
+        if (end % 2) {
+            end = Math.min(end + 1, resource.length)
+        }
+        resource = resource.subset(start, end);
+        return resource;
     },
     loadDataUri: function (datauri) {
         var toResolve,

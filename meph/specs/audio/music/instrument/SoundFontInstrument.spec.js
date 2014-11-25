@@ -79,7 +79,7 @@
             audio.ready().then(function () {
                 return audio.prepare()
             }).then(function (x) {
-                audio.samplerate(2000);
+                audio.samplerate(4000);
                 var bytearray = audio.note(60, 100);
 
                 expect(bytearray).toBeTruthy();
@@ -102,22 +102,43 @@
                 var bytearray = soundfont.note(54, 100);
 
                 expect(bytearray).toBeTruthy();
+
                 return bytearray;
             }).then(function (resource) {
-
-                var myArrayBuffer = audio.createBuffer(2, resource.length / 2, 44100);
-                var data1 = myArrayBuffer.getChannelData(0);
-                var data2 = myArrayBuffer.getChannelData(1);
-                for (var i = 0 ; i < resource.length / 2; i++) {
-                    data1[i] = resource[2 * i];
-                    data2[i] = resource[(2 * i) + 1];
-                }
                 var source = audio.createContext().createBufferSource();
-                source.buffer = myArrayBuffer;
-                debugger
+                source.buffer = resource;
+                var promise = new Promise(function (r) {
+                    setTimeout(function () {
+                        r();
+                    }, 50)
+                })
+                return promise;
+            }).catch(function (e) {
+                expect(e).caught();
+            }).then(done);
+        });
+
+
+        it('can get the presets from the soundfontinstrument', function (done) {
+            var soundfont = new MEPH.audio.music.instrument.SoundFontInstrument();
+            var audio = new MEPH.audio.Audio();
+            soundfont.setFontFile('MEPH.audio.music.instrument.trumpet.ReedOrgan');
+            soundfont.ready().then(function () {
+                return soundfont.prepare()
+            }).then(function (x) {
+
+                soundfont.samplerate(44100);
+
+                var bytearray = soundfont.note(60, 100, 3);
+
+                expect(bytearray).toBeTruthy();
+
+                return bytearray;
+            }).then(function (resource) {
+                var source = audio.createContext().createBufferSource();
+                source.buffer = resource;
                 audio.buffer(source).complete();
-                //source.connect(audio.createContext().destination);
-                // source.start();
+
                 audio.getNodes().first().node.start();
                 var promise = new Promise(function (r) {
                     setTimeout(function () {
@@ -125,21 +146,56 @@
                     }, 5000)
                 })
                 return promise;
-                //audio.audioelement(resource);
-                //resource.play();
-                //return audio.loadByteArray(resource, null, 'file', 'ty').then(function (resource) {
-                //    debugger
-                //    audio.buffer(resource.buffer).complete();
-                //    resource.buffer.start();
-                //    var promise = new Promise(function (r) {
-                //        setTimeout(function () {
-                //            r();
-                //        }, 5000)
-                //    })
-                //    return promise;
-                //})
             }).catch(function (e) {
                 expect(e).caught();
             }).then(done);
-        })
+        });
+
+        it('can get the presets from the soundfontinstrument', function (done) {
+            var soundfont = new MEPH.audio.music.instrument.SoundFontInstrument();
+            var audio = new MEPH.audio.Audio();
+            soundfont.setFontFile('MEPH.audio.music.instrument.percussion.TR808');
+            soundfont.ready().then(function () {
+                return soundfont.prepare()
+            }).then(function (x) {
+
+                soundfont.samplerate(44100);
+
+                var bytearray = soundfont.note(60, 100);
+
+                expect(bytearray).toBeTruthy();
+
+                return bytearray;
+            }).then(function (resource) {
+                var source = audio.createContext().createBufferSource();
+                source.buffer = resource;
+                audio.buffer(source).complete();
+
+                audio.getNodes().first().node.start();
+                var promise = new Promise(function (r) {
+                    setTimeout(function () {
+                        r();
+                    }, 1000)
+                })
+                return promise;
+            }).catch(function (e) {
+                expect(e).caught();
+            }).then(done);
+        });
+
+        it('can get name of notes', function (done) {
+            var soundfont = new MEPH.audio.music.instrument.SoundFontInstrument();
+            var audio = new MEPH.audio.Audio();
+            soundfont.setFontFile('MEPH.audio.music.instrument.percussion.TR808');
+            soundfont.ready().then(function () {
+                return soundfont.prepare()
+            }).then(function (x) {
+
+                soundfont.samplerate(44100);
+                var chunks = soundfont.sampleChunks();
+                expect(chunks.length).toBeTruthy(135);
+            }).catch(function (e) {
+                expect(e).caught();
+            }).then(done);
+        });
     });
