@@ -165,27 +165,19 @@ MEPH.define('MEPH.util.Observable', {
                         });
 
                         var funcpre = '$';
-
-                        for (var i = properties.length ; i--;) {
-                            var propName = properties[i],
-                                oldvalue = obj[propName];
-                            if (typeof (oldvalue) === 'function') {
-                                continue;
-                            }
-                            Object.defineProperty(obj, propName, {
-                                enumerable: true,
-                                get: function (propName) {
-                                    return this[nonEnumerablePropertyPrefix + propName];
-                                }.bind(obj, propName),
-                                set: function (propName, value) {
-                                    var old = this[nonEnumerablePropertyPrefix + propName];
+                        if (Object.observe) {
+                            Object.observe(obj, function (changes) {
+                                changes.foreach(function (change) {
+                                    var propName = change.name;
+                                    var old = change.oldValue;
+                                    var value = obj[change.name];
 
                                     this.fire('beforeset' + propName, { old: old, new: value });
 
                                     removeAlteredListeners(old, this);
                                     attachAlteredListeners(value, this, propName);
 
-                                    this[nonEnumerablePropertyPrefix + propName] = value;
+                                    //this[nonEnumerablePropertyPrefix + propName] = value;
                                     //this.fire('afterset' + propName, { old: old, new: value });
 
                                     if (!this.is_paused || !this.is_paused()) {
@@ -202,24 +194,65 @@ MEPH.define('MEPH.util.Observable', {
                                             });
                                         }
                                     }
-                                    return true;
-                                }.bind(obj, propName)
-                            });
-
-                            Object.defineProperty(obj, nonEnumerablePropertyPrefix + propName, {
-                                enumerable: false,
-                                writable: true,
-                                configurable: false,
-                                value: null
-                            });
-
-                            obj[nonEnumerablePropertyPrefix + propName] = oldvalue;
-                            if (MEPH.IsObject(oldvalue) && !isObservable(oldvalue)) {
-                                removeAlteredListeners(oldvalue, obj);
-                                //MEPH.Observable.observable(oldvalue);
-                                attachAlteredListeners(oldvalue, obj, propName);
-                            }
+                                }.bind(this))
+                                return true;
+                            }.bind(obj))
                         }
+                        else
+                            for (var i = properties.length ; i--;) {
+                                var propName = properties[i],
+                                    oldvalue = obj[propName];
+                                if (typeof (oldvalue) === 'function') {
+                                    continue;
+                                }
+                                Object.defineProperty(obj, propName, {
+                                    enumerable: true,
+                                    get: function (propName) {
+                                        return this[nonEnumerablePropertyPrefix + propName];
+                                    }.bind(obj, propName),
+                                    set: function (propName, value) {
+                                        var old = this[nonEnumerablePropertyPrefix + propName];
+
+                                        this.fire('beforeset' + propName, { old: old, new: value });
+
+                                        removeAlteredListeners(old, this);
+                                        attachAlteredListeners(value, this, propName);
+
+                                        this[nonEnumerablePropertyPrefix + propName] = value;
+                                        //this.fire('afterset' + propName, { old: old, new: value });
+
+                                        if (!this.is_paused || !this.is_paused()) {
+                                            this.fire('set' + propName, { old: old, 'new': value, property: propName });
+                                            if (old !== value) {
+                                                this.fire('change_' + propName, { old: old, 'new': value, property: propName });
+                                                this.fire('changed', { old: old, 'new': value, property: propName });
+                                                this.fire('altered', {
+                                                    references: MEPH.Array([this]),
+                                                    path: propName,
+                                                    old: old,
+                                                    'value': value,
+                                                    property: propName
+                                                });
+                                            }
+                                        }
+                                        return true;
+                                    }.bind(obj, propName)
+                                });
+
+                                Object.defineProperty(obj, nonEnumerablePropertyPrefix + propName, {
+                                    enumerable: false,
+                                    writable: true,
+                                    configurable: false,
+                                    value: null
+                                });
+
+                                obj[nonEnumerablePropertyPrefix + propName] = oldvalue;
+                                if (MEPH.IsObject(oldvalue) && !isObservable(oldvalue)) {
+                                    removeAlteredListeners(oldvalue, obj);
+                                    //MEPH.Observable.observable(oldvalue);
+                                    attachAlteredListeners(oldvalue, obj, propName);
+                                }
+                            }
 
                         properties.foreach(function (x) {
                             if (!obj[MEPH.isObservablePropertyKey].properties.contains(function (y) { return x === y; })) {
