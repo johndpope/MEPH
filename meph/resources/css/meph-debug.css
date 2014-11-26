@@ -9603,7 +9603,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 /* line 3, ../sass/meph-default/controls/view/_misc.scss */
 .dropbox {
-  border: 10px dashed #ccc;
+  border: 10px dashed red;
   margin: 20px auto;
   height: 300px;
 }
@@ -9823,12 +9823,16 @@ svg text.ignore {
 }
 
 /* line 199, ../sass/meph-default/controls/view/_misc.scss */
+.resourceloaderholder,
+.soundfontlistpopup,
 .audiographpopup {
   position: absolute;
   top: 0px;
 }
 
-/* line 204, ../sass/meph-default/controls/view/_misc.scss */
+/* line 206, ../sass/meph-default/controls/view/_misc.scss */
+.resourceloaderholder,
+.soundfontlistholder,
 .audiographholder {
   width: 100%;
   position: absolute;
@@ -9840,9 +9844,10 @@ svg text.ignore {
   padding-left: 40px;
   padding-right: 40px;
   z-index: 100;
+  background-color: rgba(255, 255, 255, 0.65);
 }
 
-/* line 217, ../sass/meph-default/controls/view/_misc.scss */
+/* line 222, ../sass/meph-default/controls/view/_misc.scss */
 .graphBody {
   height: 100%;
   position: absolute;
@@ -9852,14 +9857,14 @@ svg text.ignore {
   background-color: rgba(255, 255, 255, 0.65);
 }
 
-/* line 226, ../sass/meph-default/controls/view/_misc.scss */
+/* line 231, ../sass/meph-default/controls/view/_misc.scss */
 .meph-graph-control {
   height: 100%;
   width: 100%;
   position: relative;
 }
 
-/* line 232, ../sass/meph-default/controls/view/_misc.scss */
+/* line 237, ../sass/meph-default/controls/view/_misc.scss */
 div.graphBody div:first-child {
   height: 100%;
   width: 100%;

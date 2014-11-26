@@ -1,7 +1,7 @@
 ﻿
 
 .dropbox {
-    border: 10px dashed #ccc;
+    border: 10px dashed red;
     margin: 20px auto;
     height: 300px;
 }
@@ -196,11 +196,15 @@ svg text.ignore {
     width: 150px;
 }
 
+.resourceloaderholder,
+.soundfontlistpopup,
 .audiographpopup {
     position: absolute;
     top: 0px;
 }
 
+.resourceloaderholder,
+.soundfontlistholder,
 .audiographholder {
     width: 100%;
     position: absolute;
@@ -212,6 +216,7 @@ svg text.ignore {
     padding-left: 40px;
     padding-right: 40px;
     z-index: 100;
+    background-color: rgba(255, 255, 255, 0.65);
 }
 
 .graphBody {

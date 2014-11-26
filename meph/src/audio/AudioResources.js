@@ -20,7 +20,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         me.resources = [];
         me.graphs = [];
         me.sequences = [];
-
+        me.soundfonts = [];
         MEPH.subscribe(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, me.onResourcesChanged.bind(me));
 
         MEPH.subscribe(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, me.onAudioGraphSaved.bind(me));
@@ -29,6 +29,19 @@ MEPH.define('MEPH.audio.AudioResources', {
             Audio.GetSourceBuffer().foreach(function (t) { me.resources.push(t); })
             MEPH.publish(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, {});
         }
+    },
+    addResources: function (resources) {
+        var me = this;
+        
+
+        resources.foreach(function (resource) {
+            if (resource.file && resource.file.name.indexOf('.sf2') !== -1) {
+
+                me.soundfonts.push({
+                    resource: resource, id: MEPH.GUID()
+                });
+            }
+        });
     },
     collectProject: function () {
         var me = this,
@@ -93,7 +106,7 @@ MEPH.define('MEPH.audio.AudioResources', {
     },
     getResources: function () {
         var me = this;
-        return me.resources.select();
+        return me.resources.select().concat(me.soundfonts.select());
     },
     clearResources: function () {
         var me = this;

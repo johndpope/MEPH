@@ -15,7 +15,7 @@ MEPH.define('MEPH.mixins.Injections', {
            referrerFunctions = MEPH.mixins.Injections.injectFunctions;
 
         for (i in referrerFunctions) {
-            me[i] = referrerFunctions[i].bind(me);
+            me[i] = me[i] || referrerFunctions[i].bind(me);
         }
 
         if (me.injections) {

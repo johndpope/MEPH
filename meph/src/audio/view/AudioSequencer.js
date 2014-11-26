@@ -14,8 +14,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.AudioResources',
         'MEPH.input.Text',
         'MEPH.audio.Sequence',
+        'MEPH.util.FileReader',
         'MEPH.audio.graph.AudioGraph',
         'MEPH.util.Dom',
+        'MEPH.file.Dropbox',
         'MEPH.audio.Constants',
         'MEPH.util.Observable'],
     statics: {
@@ -33,11 +35,12 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         sequence: null,
         animatemode: true,
         smallestnote: 16,
-        bpm: 75 / 16 / 60
+        fontlistsource: null,
+        bpm: 75 / 16 / 60,
+        resources: null
     },
     initialize: function () {
         var me = this;
-
         me.setupFunctions();
         me.setupKeyCommands();
 
@@ -62,33 +65,99 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     onLoaded: function () {
         var me = this;
         me.super();
+        me.resources = MEPH.util.Observable.observable([]);
+        me.fontlistsource = MEPH.util.Observable.observable([]);
         me.setupHeaders();
         me.sequence.title = me.sequence.title || 'untitled';
         me.fire('altered', { property: 'sequence' });
+        document.body.appendChild(me.soundfontlistholder);
         document.body.appendChild(me.audiographholder);
+        document.body.appendChild(me.resourceloader);
+
+        me.hideSoundFontList();
+        me.hideParts(me.audiographholder, me.hideGraph.bind(me));
+        me.hideParts(me.soundfontlistholder, me.hideSoundFontList.bind(me));
+        me.hideParts(me.resourceloader, me.hideResource.bind(me));
+        //me.don('click', document.body, function (evt) {
+        //    if (!MEPH.util.Dom.isDomDescendant(evt.srcElement, me.audiographholder) &&
+        //        !evt.srcElement.classList.contains('form-control')) {
+        //        me.hideGraph();
+        //    }
+        //});
+
+        //me.hideGraph();
+    },
+    hideParts: function (part, hidefunc) {
+        var me = this;
         me.don('click', document.body, function (evt) {
-            if (!MEPH.util.Dom.isDomDescendant(evt.srcElement, me.audiographholder) &&
+            if (!MEPH.util.Dom.isDomDescendant(evt.srcElement, part) &&
                 !evt.srcElement.classList.contains('form-control')) {
-                me.hideGraph();
+                hidefunc();
             }
         });
-        me.hideGraph();
+        hidefunc();
     },
     createAudioGraph: function () {
         var me = this;
         return me.renderControl('MEPH.audio.graph.AudioGraph', me.audiographholder, me)
     },
+    loadResources: function () {
 
+        var me = this;
+        return MEPH.util.FileReader.readFileList(MEPH.Array(arguments).last().domEvent.files, { readas: 'ArrayBuffer' })
+            .then(function (fileResults) {
+                if (me.$inj && me.$inj.audioResources) {
+                    me.$inj.audioResources.addResources(fileResults);
+                    me.resources.clear();
+                    me.$inj.audioResources.getResources().foreach(function (t) {
+                        me.resources.push(t);
+                    })
+                }
+            })
+    },
+    viewResource: function (resource) {
+        var me = this;
+        alert('view resource');
+    },
+    openResources: function () {
+        var me = this;
+        me.showResource();
+    },
+    showResource: function () {
+        var me = this;
+        Style.show(me.resourceloader);
+        me.$resourcehidden = false;
+    },
+    hideResource: function () {
+        var me = this;
+        if (me.$resourcehidden) { return; }
+        Style.hide(me.resourceloader);
+        me.$resourcehidden = true;
+    },
+    hideSoundFontList: function () {
+        var me = this;
+        if (me.$fontlisthidden) { return; }
+        Style.hide(me.soundfontlistholder);
+        me.$fontlisthidden = true;
+    },
+    showSoundFontList: function () {
+        var me = this;
+        Style.show(me.soundfontlistholder);
+        me.$fontlisthidden = false;
+    },
     hideGraph: function () {
         var me = this;
+        if (me.$graphhidden) { return; }
         Style.hide(me.audiographholder);
         if (me.editedSequence) {
             me.editedSequence.saveGraph(me.audiographinstance.saveGraph());
             me.editedSequence = null;
         }
+        me.$graphhidden = true;
     },
     showGraph: function () {
         var me = this;
+        me.$graphhidden = false;
         Style.show(me.audiographholder);
     },
     showGraphForSequence: function () {
@@ -302,6 +371,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             //    me.canvas.focus();
             //}, 'button');
         }
+    },
+    onInjectionsComplete: function () {
+        var me = this;
+        if (me.$inj.audioResources) {
+            MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, function () {
+
+            });
+
+        }
+
     },
     openSavedSequence: function () {
         var me = this;

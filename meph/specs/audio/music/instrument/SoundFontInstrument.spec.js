@@ -193,6 +193,8 @@
 
                 soundfont.samplerate(44100);
                 var chunks = soundfont.sampleChunks();
+                
+
                 expect(chunks.length).toBeTruthy(135);
             }).catch(function (e) {
                 expect(e).caught();
