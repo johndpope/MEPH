@@ -46,13 +46,16 @@
         })
     });
 
-    it('can render an set a sequencer to the audiosequencer and render', function () {
+    it('can render an set a sequencer to the audiosequencer and render', function (done) {
         //Assert
         var audioSequencer = new MEPH.audio.view.AudioSequencer();
         var sequence = createSequence();
         audioSequencer.sequence = sequence;
         expect(audioSequencer).toBeTruthy();
-        expect(audioSequencer.source).toBeTruthy();
+        setTimeout(function () {
+            expect(audioSequencer.source).toBeTruthy();
+            done();
+        }, 100);
     });
 
     it('the time function is setup on the audiosequencer', function () {

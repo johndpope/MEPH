@@ -599,6 +599,10 @@ MEPH.define('MEPH.control.Control', {
     getBindableProperties: function () {
 
     },
+    toggleBoolean: function (data, prop) {
+        var me = this;
+        data[prop] = !!!data[prop];
+    },
 
     /**
      * Generates a dom object from the templates.

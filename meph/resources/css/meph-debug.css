@@ -9870,6 +9870,17 @@ div.graphBody div:first-child {
   width: 100%;
 }
 
+/* line 243, ../sass/meph-default/controls/view/_misc.scss */
+.square_list {
+  float: left;
+  width: 25%;
+  padding: 2px;
+  font-size: 10px;
+  line-height: 1.4;
+  background-color: #f9f9f9;
+  border: 1px solid #fff;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

@@ -51,6 +51,10 @@ MEPH.define('MEPH.audio.Sequence', {
         var me = this;
         me.setDefault('graph', id);
     },
+    setDefaultSoundFont: function (id) {
+        var me = this;
+        me.setDefault('soundfont', id);
+    },
     getGraph: function (raw) {
         var me = this;
         if (raw)
@@ -72,6 +76,9 @@ MEPH.define('MEPH.audio.Sequence', {
                     break;
                 case 'sequence':
                     result = me.$inj.audioResources.getSequenceInstance(me.$defaultRefId)
+                    break;
+                case 'soundfont':
+                    result = me.$inj.audioResources.getSoundFontInstance(me.$defaultRefId);
                     break;
                 default: throw new Error('unhandled case');
             }
@@ -278,13 +285,21 @@ MEPH.define('MEPH.audio.Sequence', {
             return me.parts.where(function (x) {
                 return x.relativeTimeOffset >= start && x.relativeTimeOffset <= (start + length);
             }).select(function (x) {
-                if (typeof x.source === 'string') {
-                    x.audioSource = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
-                    return x;
-                }
-                return x;
+                return me.assignAudioSource(x);
             });
         }
+    },
+    assignAudioSource: function (x) {
+        var me = this;
+        if (typeof x.source === 'string') {
+            if (me.$defaultType === 'soundfont') {
+                x.audioSource = me.$inj.audioResources.getSoundFontAudioInstance(me.$defaultRefId)
+            }
+            else {
+                x.audioSource = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
+            }
+        }
+        return x;
     },
     clone: function (x) {
         var t = {
@@ -310,11 +325,7 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         else {
             return me.parts.select().select(function (x) {
-                if (typeof x.source === 'string') {
-                    x.audioSource = me.$inj.audioResources.getGraphInstance(x.source, graphExtensions);
-                    return x;
-                }
-                return x;
+                return me.assignAudioSource(x);
             });
         }
     },

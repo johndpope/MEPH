@@ -46,7 +46,7 @@ MEPH.define('MEPH.audio.Scheduler', {
         if (started === undefined) {
             started = 0;
         }
-        var samplerate = MEPH.audio.Audio.AudioContext.sampleRate;
+        var samplerate = MEPH.audio.Audio.GetContext().sampleRate;
         MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(2, samplerate * duration, samplerate);
         audios.foreach(function (audio) {
             var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
@@ -69,7 +69,7 @@ MEPH.define('MEPH.audio.Scheduler', {
         var me = this, played = [], started;
         var lasttime = me.sequence().duration() * me.bpm;
         me.on('tick', function () {
-            var currentTime = MEPH.audio.Audio.AudioContext.currentTime;
+            var currentTime = MEPH.audio.Audio.GetContext().currentTime;
             if (started === undefined) {
                 started = currentTime;
                 lasttime += started;

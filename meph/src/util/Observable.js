@@ -140,6 +140,7 @@ MEPH.define('MEPH.util.Observable', {
                                             alteredOptions,
                                             path = options.path.split(MEPH.pathDelimiter),
                                             references;
+                                        options.references = options.references || [];
                                         path.unshift(propName);
                                         if (!options.references.contains(function (x) { return x === obj; })) {
                                             references = MEPH.Array([this].concat(options.references));
@@ -165,7 +166,7 @@ MEPH.define('MEPH.util.Observable', {
                         });
 
                         var funcpre = '$';
-                        if (Object.observe) {
+                        if (false) {
                             Object.observe(obj, function (changes) {
                                 changes.foreach(function (change) {
                                     var propName = change.name;

@@ -28,13 +28,21 @@
 <div mephid="audiographholder" class="audiographholder">
 </div>
 <div mephid="soundfontlistholder" class="soundfontlistholder">
-    <div class="col-md-3">
-        <list data-bind='"source": "c$.fontlistsource"'>
+    <div class="col-md-2">
+        <h2 data-bind='"innerHTML" : "c$.selectedSoundFont"'></h2>
+        <div class="btn-group">
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addToSequence">
+                <span class="glyphicon glyphicon-plus">&nbsp; Add To Sequence</span>
+            </mephbutton>
+        </div>
+    </div>
+    <div class="col-md-10" style="overflow:auto;height: 100%;">
+        <list data-bind='"source": "c$.selectedSoundFontChunks"'>
             <template name="soundfontlist_template">
-                <div class="meph-application-menu-categories-item-details">
-                    <span>Name</span>
-                    <span data-bind='"innerHTML": "c$.data.resource.name"'></span>
-                </div>
+                <li class="square_list">
+                    <input type="checkbox" meph-event-click="c$.toggleBoolean, c$.data, selected " />
+                    <span data-bind='"innerHTML" : "c$.data.name"'></span>
+                </li>
             </template>
         </list>
     </div>
@@ -43,14 +51,14 @@
     <div class="col-md-2">
         <dropbox data-events='"filesdropped":"c$.loadResources"'></dropbox>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-10">
         <list data-bind='"source": "c$.resources"'>
             <template name="resourcelist_template">
                 <li class="list-group-item">
-                    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.list.parent.viewResource, c$.data">
+                    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.list.parent.viewResource, c$.data.id">
                         <span class="glyphicon glyphicon-folder-open">View</span>
                     </mephbutton>
-                    <span data-bind='"innerHTML": "c$.data.resource.file.name"'></span>
+                    <span data-bind='"innerHTML": "c$.data.name"'></span>
                 </li>
             </template>
         </list>

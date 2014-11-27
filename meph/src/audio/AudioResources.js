@@ -4,6 +4,8 @@
  **/
 MEPH.define('MEPH.audio.AudioResources', {
     requires: ['MEPH.audio.Constants',
+                'MEPH.audio.Audio',
+                'MEPH.audio.music.instrument.SoundFontInstrument',
                 'MEPH.audio.graph.AudioGraphReader'],
     statics: {
         RESOURCE_MANAGER_UPDATE: 'RESOURCE_MANAGER_UPDATE'
@@ -32,13 +34,23 @@ MEPH.define('MEPH.audio.AudioResources', {
     },
     addResources: function (resources) {
         var me = this;
-        
+
 
         resources.foreach(function (resource) {
             if (resource.file && resource.file.name.indexOf('.sf2') !== -1) {
 
+
+                var soundfontInstrument = new MEPH.audio.music.instrument.SoundFontInstrument();
+                var id = MEPH.GUID();
+                soundfontInstrument.addResource(resource.file.name, '.sf2', resource.res, id);
+                soundfontInstrument.setFontFile(resource.file.name);
+                soundfontInstrument.samplerate();
+                soundfontInstrument.prepare(resource.file.name);
                 me.soundfonts.push({
-                    resource: resource, id: MEPH.GUID()
+                    resource: resource,
+                    type: 'soundfont',
+                    id: id,
+                    soundfontInstrument: soundfontInstrument
                 });
             }
         });
@@ -74,7 +86,7 @@ MEPH.define('MEPH.audio.AudioResources', {
     getGraphInstance: function (id, graphextension) {
         var me = this,
             graphRecipe = me.getGraphs().first(function (x) { return x.id === id; });
-
+        graphextension = graphextension || [];
         if (graphRecipe) {
             me.graphReader.setGraph(MEPH.audio.graph.AudioGraphReader.cloneUnique(graphRecipe));
             graphextension.foreach(function (extension) {
@@ -94,6 +106,39 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         return me.sequences.first(function (x) { return x.id === id; })
     },
+    getSoundFontInstance: function (id) {
+        var me = this;
+        return id.sid + '/' + id.id;
+    },
+    getSoundFontAudioInstance: function (info) {
+        var me = this,
+            id = me.getSoundFontInstance(info),
+            data = me.getSoundFont(info);
+        data.cache = data.cache || {};
+        if (!data.cache[id]) {
+            
+            var buffer = { buffer: data.soundfontInstrument.note(info.id) };
+            var bufferid = MEPH.GUID();
+            var graph = data.soundfontInstrument.createNoteGraph(bufferid, data.resource.file.name)
+            data.cache[id] = {
+                graphid: graph.id
+            }
+            me.graphs.push(graph);
+            var audio = new MEPH.audio.Audio();
+            audio.addBufferSource({
+                sid: info.sid,
+                id: bufferid,
+                buffer: buffer
+            })
+        }
+        return me.getGraphInstance(data.cache[id].graphid);
+    },
+    getSoundFont: function (info) {
+        var me = this;
+        return me.soundfonts.first(function (x) {
+            return x.id === info.sid;
+        })
+    },
     addSequence: function (sequence) {
         var me = this;
         if (sequence.title)
@@ -107,6 +152,14 @@ MEPH.define('MEPH.audio.AudioResources', {
     getResources: function () {
         var me = this;
         return me.resources.select().concat(me.soundfonts.select());
+    },
+    getResourceById: function (id) {
+        var me = this;
+        var resource = me.getResources().first(function (x) {
+            return x.id === id;
+        });
+
+        return resource;
     },
     clearResources: function () {
         var me = this;

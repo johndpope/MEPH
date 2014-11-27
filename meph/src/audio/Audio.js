@@ -32,6 +32,10 @@ MEPH.define('MEPH.audio.Audio', {
             MEPH.audio.Audio.$sourcebuffer = MEPH.audio.Audio.$sourcebuffer || [];
             return MEPH.audio.Audio.$sourcebuffer;
         },
+        GetContext: function (options) {
+            var audio = new MEPH.audio.Audio();
+            return audio.createContext(options);
+        },
         /**
          * Does a quick analysis of resource.
          **/
