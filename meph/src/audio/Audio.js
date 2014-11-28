@@ -266,10 +266,10 @@ MEPH.define('MEPH.audio.Audio', {
      * Sets the duration to be played.
      **/
     duration: function (time) {
-        if (time !== undefined && time !== null) {
+        if (time !== undefined) {
             this.$duration = time;
         }
-        return this.$duration || 1;
+        return this.$duration;
     },
     getBufferSources: function () {
         var me = this, Audio = MEPH.audio.Audio;

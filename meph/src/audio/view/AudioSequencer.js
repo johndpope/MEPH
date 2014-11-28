@@ -33,6 +33,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     properties: {
         defaultColumnWidth: 25,
         nearest: 4,
+        singleUnit: 1,
         sequence: null,
         animatemode: true,
         smallestnote: 16,
@@ -258,20 +259,20 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     },
     loadGrandPiano: function () {
         var me = this;
-        if (!me.pianoloaded) {
-            me.pianoloaded = true;
-            return MEPH.requires('MEPH.audio.music.instrument.piano.GrandPiano').then(function (piano) {
+        //if (!me.pianoloaded) {
+        me.pianoloaded = true;
+        return MEPH.requires('MEPH.audio.music.instrument.piano.GrandPiano').then(function (piano) {
 
-                var grandpiano = new MEPH.audio.music.instrument.piano.GrandPiano();
-                return grandpiano.ready().then(function () {
-                    var sequence = grandpiano.createSequence();
-                    if (me.$inj && me.$inj.audioResources) {
-                        me.$inj.audioResources.addSequence(sequence);
-                        me.openSequence(sequence.id);
-                    }
-                })
+            var grandpiano = new MEPH.audio.music.instrument.piano.GrandPiano();
+            return grandpiano.ready().then(function () {
+                var sequence = grandpiano.createSequence();
+                if (me.$inj && me.$inj.audioResources) {
+                    me.$inj.audioResources.addSequence(sequence);
+                    me.openSequence(sequence.id);
+                }
             })
-        }
+        })
+        //   }
     },
     /**
      * New sequence.
@@ -370,11 +371,15 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.length = {
             'function': function (item) {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
-                    return me.sequence.getDuration(item)
+                    var duration = me.sequence.getDuration(item)
 
-                    return item.length;
+
+                    return duration;
                 }
                 else if (item && typeof item.source === 'string') {
+                    if (item.duration === null) {
+                        return me.singleUnit;
+                    }
                     return item.duration;
                 }
             }

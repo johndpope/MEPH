@@ -46,14 +46,21 @@ MEPH.define('MEPH.audio.Scheduler', {
         if (started === undefined) {
             started = 0;
         }
-        var samplerate = MEPH.audio.Audio.GetContext().sampleRate;
+        var samplerate = MEPH.audio.Audio.GetContext().sampleRate,
+            audioduration;
         MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(2, samplerate * duration, samplerate);
         audios.foreach(function (audio) {
             var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
             audio.getAudio().complete();
             audio.getAudio().play(time + started);
-            audio.getAudio().stop(time + started + (audio.source.duration() * me.bpm));
+            audioduration = audio.getAudio().duration();
+            if (audioduration !== null) {
+                audio.getAudio().stop(time + started + (audioduration * me.bpm));
+            }
+            else {
+                console.log('percussion')
+            }
         });
         var toresolve;
         var promise = new Promise(function (x, f) {
@@ -74,14 +81,21 @@ MEPH.define('MEPH.audio.Scheduler', {
                 started = currentTime;
                 lasttime += started;
             }
-            var items = me.getAudio(currentTime - started, me.playWindow);
+            var items = me.getAudio(currentTime - started, me.playWindow),
+                audioduration;
             items = items.where(function (t) { return played.indexOf(t) === -1; })
             items.foreach(function (audio) {
                 var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
                 audio.getAudio().complete();
                 audio.getAudio().play(time + started);
-                audio.getAudio().stop(time + started + (audio.getAudio().duration() * me.bpm));
+                audioduration = audio.getAudio().duration();
+                if (audioduration !== null) {
+                    audio.getAudio().stop(time + started + (audioduration * me.bpm));
+                }
+                else {
+                    console.log('percussion')
+                }
                 played.push(audio);
             });
             if (lasttime < currentTime && me.playing) {

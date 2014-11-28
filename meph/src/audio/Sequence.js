@@ -80,7 +80,6 @@ MEPH.define('MEPH.audio.Sequence', {
                 case 'soundfont':
                     result = me.$inj.audioResources.getSoundFontInstance(me.$defaultRefId);
                     break;
-                default: throw new Error('unhandled case');
             }
         }
         return result;
@@ -206,10 +205,14 @@ MEPH.define('MEPH.audio.Sequence', {
         var me = this,
             defaults,
             args = MEPH.Array(arguments);
-
+        duration = duration || null;
         if (!source) {
             source = me.getDefaultInstance();
+            if (!source) {
+                return;
+            }
         }
+
 
         if (me.parts.length === 0) {
             me.containsSequences = source instanceof MEPH.audio.Sequence;
@@ -219,7 +222,7 @@ MEPH.define('MEPH.audio.Sequence', {
             (!me.containsSequences && source instanceof MEPH.audio.Audio) ||
             (!me.containsSequences && typeof source === 'string')) &&
             (typeof source === 'string' ||
-             source instanceof MEPH.audio.Audio || (!me.containsRef(source) && !source.containsRef(me)))) {
+             source instanceof MEPH.audio.Audio || (!source.containsRef(me)))) {
             me.parts.push({
                 source: source,
                 relativeTimeOffset: timeOffset || 0,
@@ -289,7 +292,7 @@ MEPH.define('MEPH.audio.Sequence', {
             });
         }
     },
-    assignAudioSource: function (x) {
+    assignAudioSource: function (x, graphExtensions) {
         var me = this;
         if (typeof x.source === 'string') {
             if (me.$defaultType === 'soundfont') {
@@ -325,7 +328,7 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         else {
             return me.parts.select().select(function (x) {
-                return me.assignAudioSource(x);
+                return me.assignAudioSource(x, graphExtensions);
             });
         }
     },
