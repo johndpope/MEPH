@@ -276,6 +276,22 @@ MEPH.define('MEPH.audio.Audio', {
         Audio.$sourcebuffer = Audio.$sourcebuffer || [];
         return MEPH.audio.Audio.$sourcebuffer.select();
     },
+
+    /**
+     * Gets the array buffer by id.
+     * @param {String} id
+     * @return {ArrayBuffer}
+     **/
+    getBuffer: function (id) {
+        var me = this;
+        var buffer = me.getBufferSources().first(function (x) { return x.id === id; });
+        if (buffer && buffer.buffer && buffer.buffer.buffer) {
+            return buffer.buffer.buffer;
+        }
+        else if (buffer && buffer.buffer) {
+            return buffer.buffer;
+        }
+    },
     /**
      * Adds a buffer source.
      * @param {Object} options
@@ -438,6 +454,9 @@ MEPH.define('MEPH.audio.Audio', {
      **/
     convolver: function (options) {
         var me = this, params = me.createK().concat(me.createA()).concat(me.createParams('boolean', 'normalize'));
+        var convobuffer = me.createParams('buffer', 'convobuffer').first();
+        convobuffer.alias = 'buffer';
+        params.push(convobuffer);
 
         me.createNode(options, function () { return MEPH.audio.Audio.nodeTypes.convolver }, params)
         return me;
@@ -765,6 +784,13 @@ MEPH.define('MEPH.audio.Audio', {
                     else if (x.node[param.name] && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
 
                         x.node[param.name].value = x.options[param.name];
+                    }
+                    else if (param.alias) {
+                        switch (param.type) {
+                            case 'buffer':
+                                x.node[param.alias] = me.getBuffer(x.options[param.name]);
+                                break;
+                        }
                     }
                 })
             }

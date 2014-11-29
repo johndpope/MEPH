@@ -462,6 +462,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         var me = this;
         return {
             node: node,
+            convobuffer: me.getNodeInputValue(node, inputs, 'convobuffer'),
             buffer: me.getNodeInputValue(node, inputs, 'buffer'),
             normalize: me.getNodeInputValue(node, inputs, 'normalize')
         };
@@ -559,6 +560,9 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         switch (input.type) {
             case 'Number':
                 value = isNaN(input.defaultValue) ? null : parseFloat(input.defaultValue);
+                break;
+            case 'Boolean':
+                value = (input.defaultValue && input.defaultValue.toLowerCase() === 'true') ? true : false;
                 break;
             default:
                 value = input.defaultValue || null;

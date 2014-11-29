@@ -11,10 +11,23 @@
              meph-data-radius="c$.inputradius"
              meph-data-title="c$.normalizeTitle"
              meph-data-stroke="c$.inputstroke"
-             mephid="normalizeinput"
+             mephid="normalize"
              meph-event-updated="c$.updatedValue,normalize"
              meph-data-source="c$.booleanSource"
-             meph-data-y="c$.normalizeinputy"
+             meph-data-y="c$.normalizey"
+             meph-data-width="c$.bodywidth"></audioselect>
+
+
+<audioselect meph-data-fill="c$.audioBufferFill"
+             meph-data-radius="c$.inputradius"
+             meph-data-title="Convo Buffer"
+             meph-data-stroke="c$.inputstroke"
+             meph-data-titlekey="file"
+             meph-data-valuekey="id"
+             mephid="convobuffer"
+             meph-event-updated="c$.updatedValue,convobuffer"
+             meph-data-source="c$.audiobuffersources"
+             meph-data-y="c$.convobuffery"
              meph-data-width="c$.bodywidth"></audioselect>
 
 

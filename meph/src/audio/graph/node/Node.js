@@ -15,7 +15,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
     extend: 'MEPH.control.Control',
     statics: {
         AudioBuffer: 'AudioBuffer',
-        Boolean: 'boolean',
+        Boolean: 'Boolean',
         Number: 'Number',
         Anything: 'Anything',
         String: 'String',
