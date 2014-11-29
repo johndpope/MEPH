@@ -1,7 +1,18 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "beforesheet", "before" : true -->
 <div class="audiosequenceheader ">
-    <textfield value="c$.sequence.title" labeltext="Name"></textfield>
 
+    <div class="col-md-2 col-sm-4 col-xs-4">
+        <textfield value="c$.sequence.title" labeltext="Name"></textfield>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-4 ">
+        <range value="c$.scalevalue"
+               labeltext="Zoom"
+               meph-data-min="0.01"
+               meph-data-max="1"
+               meph-data-step="0.01"
+               meph-event-change="c$.update"></range>
+    </div>
+    <div class="col-md-8 col-xs-2 col-sm-2"></div>
     <div class="btn-group">
         <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequence">
             <span class="glyphicon glyphicon-save"></span>

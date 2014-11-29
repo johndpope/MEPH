@@ -589,11 +589,21 @@ MEPH.define('MEPH.audio.Audio', {
         me.nodes.where(function (x) {
             return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
         }).foreach(function (node) {
+
+            node.node.onended = function () {
+                me.disconnect();
+            };
+
             node.node.stop(delay);
-        })
+        });
     },
     disconnect: function () {
-        var me = this, last, context = me.createContext();
+        var me = this,
+            last,
+            context = me.createContext();
+        if (!me.completed) {
+            return;
+        }
         me.nodes.foreach(function (x, i) {
             if (x.node)
                 x.node.disconnect();

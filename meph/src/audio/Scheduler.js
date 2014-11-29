@@ -39,8 +39,9 @@ MEPH.define('MEPH.audio.Scheduler', {
      **/
     render: function () {
         var me = this, started;
-        var duration = (me.sequence().duration() || 0) * me.bpm;
-        var audios = me.get(0, duration);
+        var sequencetime = (me.sequence().duration() || 0);
+        var duration = sequencetime * me.bpm;
+        var audios = me.getAudio(0, sequencetime);
         audios.foreach(function (audio) {
             audio.getAudio().disconnect();
             audio.getAudio().offlineMode = true;
@@ -95,9 +96,6 @@ MEPH.define('MEPH.audio.Scheduler', {
                 audioduration = audio.getAudio().duration();
                 if (audioduration !== null) {
                     audio.getAudio().stop(time + started + (audioduration * me.bpm));
-                }
-                else {
-                    console.log('percussion')
                 }
                 played.push(audio);
             });

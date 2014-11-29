@@ -63,7 +63,13 @@
                 <h1>Controls</h1>
                 <ul class="list-group">
                     <li class="list-group-item">
-                        <range descriptiontext="Magnification" labeltext="Magnification" meph-data-value="ct$.magnification" meph-event-change="ct$.loadBytes, c$.data.file, ct$.lastSong | v$.drawBytes" meph-data-step="0.01" meph-data-min="0" meph-data-max="1000"></range>
+                        <range descriptiontext="Magnification" 
+                               labeltext="Magnification" 
+                               meph-data-value="ct$.magnification" 
+                               meph-event-change="ct$.loadBytes, c$.data.file, ct$.lastSong | v$.drawBytes" 
+                               meph-data-step="0.01" 
+                               meph-data-min="0" 
+                               meph-data-max="1000"></range>
                     </li>
                     <li class="list-group-item">
                         <range descriptiontext="Time Scroll" labeltext="Time Scroll" meph-data-value="ct$.timeScroll" meph-event-change="ct$.loadBytes, c$.data.file, ct$.lastSong | v$.drawBytes" meph-data-step="0.01" meph-data-min="0" meph-data-max="100"></range>

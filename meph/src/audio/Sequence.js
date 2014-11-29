@@ -251,6 +251,10 @@ MEPH.define('MEPH.audio.Sequence', {
                     return this.source;
                 }
             });
+            if (source instanceof MEPH.audio.Audio && duration) {
+                source.duration(duration)
+            }
+
             return source;
         }
         return false;

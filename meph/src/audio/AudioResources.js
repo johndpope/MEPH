@@ -116,8 +116,8 @@ MEPH.define('MEPH.audio.AudioResources', {
             data = me.getSoundFont(info);
         data.cache = data.cache || {};
         if (!data.cache[id]) {
-            
-            var buffer = { buffer: data.soundfontInstrument.note(info.id) };
+
+            var buffer = { buffer: data.soundfontInstrument.note(info.id, 30) };
             var bufferid = MEPH.GUID();
             var graph = data.soundfontInstrument.createNoteGraph(bufferid, data.resource.file.name)
             data.cache[id] = {
