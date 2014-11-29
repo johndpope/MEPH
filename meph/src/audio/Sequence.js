@@ -98,14 +98,14 @@ MEPH.define('MEPH.audio.Sequence', {
         })
     },
     applyAbsoluteTime: function (rel) {
-        var me = this;
-        rel = rel || 0;
-        me.items().foreach(function (x) {
-            if (x.source instanceof MEPH.audio.Sequence) {
-                x.source.applyAbsoluteTime(rel + x.relativeTimeOffset);
-            }
-            x.absoluteTime = rel + x.relativeTimeOffset;
-        })
+        //var me = this;
+        //rel = rel || 0;
+        //me.items().foreach(function (x) {
+        //    if (x.source instanceof MEPH.audio.Sequence) {
+        //        x.source.applyAbsoluteTime(rel + x.relativeTimeOffset);
+        //    }
+        //    x.absoluteTime = rel + x.relativeTimeOffset;
+        //})
 
     },
     getAbsoluteTime: function (item) {
