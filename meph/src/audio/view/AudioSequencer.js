@@ -362,6 +362,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence || typeof item.source === 'string')) {
                     time = Math.round(time * me.nearest) / me.nearest;
                     me.sequence.setRelativeTime(item, time);
+                    me.sequence.applyAbsoluteTime();
                     me.update();
                 }
                 return item;
@@ -539,6 +540,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this,
             sequence = new MEPH.audio.Sequence({ title: title });
         me.sequence.add(sequence);
+        me.sequence.applyAbsoluteTime();
         me.update();
         return sequence;
     },
@@ -553,6 +555,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         sequence = me.getSequenceItem(row);
         if (sequence) {
             sequence.source.add(null, column);
+            me.sequence.applyAbsoluteTime();
             me.translateToSource(me.sequence);
             me.update();
         }
@@ -580,6 +583,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         sequence = me.getSequenceItem(row);
         if (sequence) {
             var res = sequence.source.add(null, column, me.getDuration(key));
+            me.sequence.applyAbsoluteTime();
             if (res instanceof MEPH.audio.Audio) {
                 res.duration(me.getDuration(key))
             }

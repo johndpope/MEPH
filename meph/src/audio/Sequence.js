@@ -97,30 +97,43 @@ MEPH.define('MEPH.audio.Sequence', {
             return x.source.items();
         })
     },
+    applyAbsoluteTime: function (rel) {
+        var me = this;
+        rel = rel || 0;
+        me.items().foreach(function (x) {
+            if (x.source instanceof MEPH.audio.Sequence) {
+                x.source.applyAbsoluteTime(rel + x.relativeTimeOffset);
+            }
+            x.absoluteTime = rel + x.relativeTimeOffset;
+        })
+
+    },
     getAbsoluteTime: function (item) {
         var me = this;
-        if (item.absoluteTime !== undefined && item.absoluteTime) {
+        if (item.absoluteTime !== undefined) {
             return item.absoluteTime;
         }
-        var found = me.items().first(function (x) { return x === item; });
+        //var found = me.items().first(function (x) { return x === item; });
 
-        if (found) {
-            return found.relativeTimeOffset;
-        }
-        var rel = 0;
-        found = me.items().selectFirst(function (x) {
-            if (me.containsSequences) {
-                var res = x.source.getAbsoluteTime(item);
-                if (res) {
-                    rel = x.relativeTimeOffset;
-                    return res;
-                }
-            }
-            return false;
-        });
-        var unittime = (found || 0) + rel;
-        item.absoluteTime = unittime;
-        return unittime;
+        //if (found) {
+        //    return found.relativeTimeOffset;
+        //}
+        //var rel = 0;
+        //found = me.items().selectFirst(function (x) {
+        //    if (me.containsSequences) {
+        //        var res = x.source.getAbsoluteTime(item);
+        //        if (res) {
+        //            rel = x.relativeTimeOffset;
+        //            return res;
+        //        }
+        //    }
+        //    return false;
+        //});
+        //if (found === false) {
+        //    return false
+        //}
+        //var unittime = (found || 0) + rel;
+        //return unittime;
     },
     setRelativeTime: function (item, time) {
         var me = this;
@@ -147,6 +160,9 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         else {
             res = me.getParent(item);
+            if (item.parent && item.parent !== res) {
+                debugger
+            }
             item.parent = res;
         }
         item.parentIndex = me.items().indexOf(res);
@@ -252,12 +268,11 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         return me.parts.maximum(function (x) {
             if (x.containsSequences) {
-
                 return x.source.duration(graphExtensions) + x.relativeTimeOffset;
             }
             else {
                 if (typeof x.source === 'string') {
-                    return x.duration; //me.$inj.audioResources.getGraphInstance(x.source, graphExtensions).duration();
+                    return x.duration + x.relativeTimeOffset; //me.$inj.audioResources.getGraphInstance(x.source, graphExtensions).duration();
                 }
                 return x.source.duration() + x.relativeTimeOffset;
             }
@@ -312,8 +327,9 @@ MEPH.define('MEPH.audio.Sequence', {
         }
         return t;
     },
-    getAudios: function (graphExtensions) {
-        var me = this;
+    getAudios: function (graphExtensions, rel) {
+        var me = this, res;
+        rel = rel || 0
         graphExtensions = graphExtensions || [];
 
         var graphextension = me.getGraph(true) || null;
@@ -322,20 +338,27 @@ MEPH.define('MEPH.audio.Sequence', {
         }
 
         if (me.containsSequences) {
-            return me.parts.concatFluent(function (sequence) {
-                return sequence.source.getAudios(graphExtensions);
-            });;
-        }
-        else {
-            return me.parts.select().select(function (x) {
-                return me.assignAudioSource(x, graphExtensions);
+            res = [];
+            me.parts.foreach(function (sequence) {
+                var subres = sequence.source.getAudios(graphExtensions, rel + sequence.relativeTimeOffset);
+                subres.foreach(function (t) {
+                    if (res.indexOf(t) === -1) {
+                        res.push(t);
+                    }
+                });
             });
         }
+        else {
+            res = me.parts.select(function (x) {
+                var clone = me.clone(me.assignAudioSource(x, graphExtensions));
+                clone.absoluteTime = rel + x.relativeTimeOffset
+                return clone;
+            });
+        }
+        return res;
     },
     getAudioWithAbsoluteTime: function () {
-        var me = this, audios = me.getAudios().foreach(function (t) {
-            t.absoluteTime = me.getAbsoluteTime(t);
-        })
+        var me = this, audios = me.getAudios()
         return audios;
     },
     toJSON: function () {

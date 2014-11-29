@@ -75,6 +75,7 @@ MEPH.define('MEPH.audio.Scheduler', {
     play: function () {
         var me = this, played = [], started;
         var lasttime = me.sequence().duration() * me.bpm;
+        me.sequence().applyAbsoluteTime();
         me.on('tick', function () {
             var currentTime = MEPH.audio.Audio.GetContext().currentTime;
             if (started === undefined) {
