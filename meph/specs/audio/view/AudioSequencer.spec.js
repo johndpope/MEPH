@@ -115,7 +115,7 @@
         var item = sequence.itemSequences().first();
 
         var time = audiosequencer.time.function(item);
-        expect(time).toBe(2);
+        expect(time).toBe(1);
     });
 
 

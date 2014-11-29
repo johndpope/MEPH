@@ -18,8 +18,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.graph.AudioGraph',
         'MEPH.input.Checkbox',
         'MEPH.util.Dom',
+        'MEPH.input.Dropdown',
         'MEPH.file.Dropbox',
         'MEPH.audio.Constants',
+        'MEPH.audio.music.theory.Scales',
         'MEPH.util.Observable'],
     statics: {
         TrackResource: 'TrackResource',
@@ -31,17 +33,20 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'recorder',
         'scheduler'],
     properties: {
+        selectedSoundFontValue: null,
         defaultColumnWidth: 25,
         nearest: 4,
         singleUnit: 1,
         sequence: null,
         animatemode: true,
+        currentSoundFontSelection: null,
         smallestnote: 16,
         selectedSoundFont: null,
         fontlistsource: null,
         bpm: 75 / 16 / 60,
         selectedSoundFontChunks: null,
-        resources: null
+        resources: null,
+        scales: null
     },
     initialize: function () {
         var me = this;
@@ -82,7 +87,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.super();
         me.resources = MEPH.util.Observable.observable([]);
         me.fontlistsource = MEPH.util.Observable.observable([]);
-        me.selectedSoundFontChunks = MEPH.util.Observable.observable([]);
+        me.currentSoundFontSelection = MEPH.util.Observable.observable([]);
+        me.scales = TheoryScales.getScales();
+
         me.setupHeaders();
         me.sequence.title = me.sequence.title || 'untitled';
         me.fire('altered', { path: 'sequence' });
@@ -95,14 +102,6 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.hideParts(me.soundfontlistholder, me.hideSoundFontList.bind(me));
         me.hideParts(me.resourceloader, me.hideResource.bind(me));
 
-        //me.don('click', document.body, function (evt) {
-        //    if (!MEPH.util.Dom.isDomDescendant(evt.srcElement, me.audiographholder) &&
-        //        !evt.srcElement.classList.contains('form-control')) {
-        //        me.hideGraph();
-        //    }
-        //});
-
-        //me.hideGraph();
     },
     hideParts: function (part, hidefunc) {
         var me = this;
@@ -173,9 +172,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.hideAll();
         var chunks = soundFontInstrument.sampleChunks();
         me.selectedSoundFont = soundFontInstrument.$soundfontfile;
-        me.selectedSoundFontChunks.clear();
-        chunks.select(function (x) {
-            me.selectedSoundFontChunks.push({
+        me.selectedSoundFontChunks = chunks.select(function (x) {
+            return ({
                 name: x.name,
                 id: x.id,
                 sid: info.id
@@ -183,9 +181,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         });
         me.showSoundFontList();
     },
+    addToSelection: function (chunkid) {
+        var me = this;
+        var info = me.selectedSoundFontChunks.first(function (x) { return x.id.toString() === chunkid; })
+        if (info) {
+            me.currentSoundFontSelection.push(info);
+        }
+    },
     addToSequence: function () {
         var me = this;
-        me.selectedSoundFontChunks.where(function (x) {
+        me.currentSoundFontSelection.where(function (x) {
             return x.selected;
         }).foreach(function (x) {
 
@@ -194,7 +199,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 sid: x.sid,
                 id: x.id
             });
-        })
+        });
+        me.currentSoundFontSelection.clear();
     },
     hideAll: function () {
         var me = this;

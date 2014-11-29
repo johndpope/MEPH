@@ -34,12 +34,14 @@ MEPH.define('MEPH.audio.Scheduler', {
                 x.absoluteTime * me.bpm <= (duration * me.bpm + from)
         })
     },
+    /**
+     * Renderse the sequence.
+     **/
     render: function () {
         var me = this, started;
-        var duration = me.sequence().duration();
+        var duration = (me.sequence().duration() || 0) * me.bpm;
         var audios = me.get(0, duration);
         audios.foreach(function (audio) {
-
             audio.getAudio().disconnect();
             audio.getAudio().offlineMode = true;
         });
@@ -72,10 +74,13 @@ MEPH.define('MEPH.audio.Scheduler', {
         MEPH.audio.Audio.OfflineAudioContext.startRendering();
         return promise;
     },
+    /**
+     * Plays the scheduler.
+     ***/
     play: function () {
         var me = this, played = [], started;
-        var lasttime = me.sequence().duration() * me.bpm;
-        me.sequence().applyAbsoluteTime();
+        var lasttime = (me.sequence().duration() || 0) * me.bpm;
+
         me.on('tick', function () {
             var currentTime = MEPH.audio.Audio.GetContext().currentTime;
             if (started === undefined) {

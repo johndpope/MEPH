@@ -10,6 +10,7 @@
         [].interpolate(0, 10, function (i) {
             var s = new MEPH.audio.Sequence();
             var audio = new MEPH.audio.Audio();
+            audio.duration(1);
             audio.oscillator({
                 frequency: 440,
                 detune: 10,
@@ -25,6 +26,7 @@
         [].interpolate(0, 2, function (i) {
             var s = new MEPH.audio.Sequence();
             var audio = new MEPH.audio.Audio();
+            audio.duration(1);
             audio.oscillator({
                 frequency: 440,
                 detune: 10,
@@ -42,6 +44,7 @@
             var s = new MEPH.audio.Sequence();
             var audio = new MEPH.audio.Audio();
             var f = Math.pow(2, (i) / 12) * 440;
+            audio.duration(1);
             audio.oscillator({
                 frequency: f,
                 detune: 10,
@@ -61,6 +64,7 @@
         [].interpolate(0, 5, function (i) {
             var s = new MEPH.audio.Sequence();
             var audio = reader.createAudio();
+            audio.duration(1);
 
             s.add(audio, i * 1.1);
             sequence.add(s, i)
@@ -77,7 +81,7 @@
         [].interpolate(0, 5, function (i) {
             var s = new MEPH.audio.Sequence();
             var audio = reader.createAudio();
-
+            audio.duration(1);
             s.add(audio, i * 1.1);
             sequence.add(s, i)
         });
@@ -168,6 +172,12 @@
         sequencer.add(createSequence5(), 0);
         schedule.sequence(sequencer);
 
+        schedule.on('complete', function () {
+            schedule.stop();
+            schedule.terminate();
+            done();
+        })
+
         schedule.init().then(function () {
             schedule.play()
         }).catch(function (e) {
@@ -176,11 +186,7 @@
             done();
             expect(e).caught();
         });
-        schedule.on('complete', function () {
-            schedule.stop();
-            schedule.terminate();
-            done();
-        })
+
     });
 
     it('can render a sequence', function (done) {

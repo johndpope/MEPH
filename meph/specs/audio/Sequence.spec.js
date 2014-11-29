@@ -65,7 +65,7 @@
     it('a sequence has a length associated with it .', function () {
         var sequence = new MEPH.audio.Sequence();
         var audio = new MEPH.audio.Audio();
-
+        audio.duration(1);
         sequence.add(audio);
         expect(sequence.duration()).toBe(1);
     });
@@ -74,7 +74,7 @@
     it('a sequence can set a relative time offset on a sequence', function () {
         var sequence = new MEPH.audio.Sequence();;
         var audio = new MEPH.audio.Audio();
-
+        audio.duration(1);
 
         sequence.add(audio, 12);
 
@@ -85,7 +85,7 @@
     it('a sequence can set a relative time offset on a sequence', function () {
         var sequence = new MEPH.audio.Sequence();;
         var audio = new MEPH.audio.Audio();
-
+        audio.duration(1);
         sequence.add(audio, 12);
 
         expect(sequence.get().first().relativeTimeOffset).toBe(12);
@@ -95,9 +95,9 @@
     it('a sequence can calculate the duration based on relativetimes and durations of its components.', function () {
         var sequence = new MEPH.audio.Sequence();;
         var audio = new MEPH.audio.Audio();
-
+        audio.duration(1);
         var audio2 = new MEPH.audio.Audio();
-
+        audio2.duration(1);
         sequence.add(audio, 12);
         sequence.add(audio2, 14);
 
@@ -108,6 +108,7 @@
     it('a sequence can return the audio parts which will begin with an certain range. ', function () {
         var sequence = new MEPH.audio.Sequence();
         var audio = new MEPH.audio.Audio();
+        audio.duration(1);
         sequence.add(audio, 3);
         var result = sequence.getScheduledAudio(2.3, 1);
 

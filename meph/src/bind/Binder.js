@@ -567,7 +567,7 @@ MEPH.define('MEPH.bind.Binder', {
             result = [],
             template;
 
-        if (dom.length !== undefined &&
+        if (dom.length !== undefined && (dom.nodeName ? dom.nodeName.toLowerCase() !== 'select' : true) &&
             dom.nodeType !== MEPH.util.Dom.textType &&
             dom.nodeType !== MEPH.util.Dom.commentType) {
             result = MEPH.Array(dom).concatFluentReverse(function (d) {

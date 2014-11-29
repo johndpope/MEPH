@@ -1,15 +1,29 @@
 ﻿MEPH.define('MEPH.audio.music.theory.Scales', {
     alias: 'theory_scales',
+    alternateNames: ['TheoryScales'],
     requires: ['MEPH.audio.music.theory.data.Voices'],
     scripts: ['MEPH.audio.music.theory.data.ChordData'],
 
     statics: {
         init: function () {
             var Scales = MEPH.audio.music.theory.Scales;
+            if (Scales.completedScales) {
+                return Scales.completedScales;
+            }
             var voices = Scales.getVoices();
             var invertedVoices = Scales.invertVoices(voices);
             Scales.completedScales = Scales.complete(invertedVoices);
             return Scales.completedScales;
+        },
+        getScales: function () {
+            var res = [];
+            for (var i in TheoryScales.scales) {
+                if (TheoryScales.scales.hasOwnProperty(i)) {
+                    TheoryScales.scales[i].id = TheoryScales.scales[i].id || MEPH.GUID();
+                    res.push(TheoryScales.scales[i])
+                }
+            }
+            return res;
         },
         getChordData: function () {
             var template = MEPH.getTemplate('MEPH.audio.music.theory.data.ChordData').template;

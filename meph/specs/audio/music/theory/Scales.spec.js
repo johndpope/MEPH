@@ -41,5 +41,11 @@
         var data = MEPH.audio.music.theory.Scales.init();
         var scale = MEPH.audio.music.theory.Scales.getScaleById(384);
         expect(scale.name).toBe("augmented 0");
+    });
+
+    it('can get a list of scales ', function () {
+        var scales = TheoryScales.getScales();
+        expect(scales).toBeTruthy();
+        expect(scales.length > 10).toBeTruthy();
     })
 });
