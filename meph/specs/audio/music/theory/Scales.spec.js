@@ -45,7 +45,24 @@
 
     it('can get a list of scales ', function () {
         var scales = TheoryScales.getScales();
+
         expect(scales).toBeTruthy();
         expect(scales.length > 10).toBeTruthy();
+    });
+
+    it('can get a scale ', function () {
+        var scale = TheoryScales.getScales();
+
+        var foundscale = TheoryScales.getScale(scale.first().id);
+        expect(foundscale).toBeTruthy();
+    });
+
+    it('get notes for scale in range', function () {
+        var scale = TheoryScales.getScales();
+
+        var foundscale = TheoryScales.getNotesInScale(scale.first().id, 30, 42);
+
+        expect(foundscale).toBeTruthy();
+        expect(foundscale.length).toBe(7);
     })
 });

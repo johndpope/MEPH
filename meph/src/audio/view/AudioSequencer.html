@@ -36,8 +36,22 @@
             </mephbutton>
         </div>
         <dropdown meph-data-source="c$.scales"
+                  labeltext="Scales"
+                  descriptiontext="Available scales"
+                  meph-data-value="c$.selectedScale"
                   meph-data-labelfield="name"
                   meph-data-valuefield="id"></dropdown>
+
+        <number descriptiontext="First midi note included" meph-data-value="c$.firstMidiNote" labeltext="Start"></number>
+        <number descriptiontext="Last midi note included" meph-data-value="c$.lastMidiNote" labeltext="End"></number>
+
+        <div class="btn-group">
+            <mephbutton type="button" class="btn btn-primary btn-xs"
+                        meph-event-click="c$.selectSoundFontNotes">
+                <span class="glyphicon glyphicon-plus"></span>
+            </mephbutton>
+        </div>
+
         <hr />
         <h5>Sound Chunks</h5>
         <dropdown meph-data-source="c$.selectedSoundFontChunks"

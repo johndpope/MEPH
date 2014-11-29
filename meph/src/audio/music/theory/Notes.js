@@ -45,6 +45,17 @@
                 }
             return scalelib;
         },
+        convertToNote: function (note) {
+            var key = note % 12, foundkey;
+            var Notes = MEPH.audio.music.theory.Notes;
+            for (var i in Notes.library) {
+                if (Notes.library[i] === key) {
+                    foundkey = i;
+                    break;
+                }
+            }
+            return foundkey + '/' + Math.floor(note / 12)
+        },
         convertToMidi: function (note) {
             var Notes = MEPH.audio.music.theory.Notes;
             var res = note.split('').where(function (x) { return isNaN(x); }).join('');

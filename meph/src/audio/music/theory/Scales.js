@@ -25,6 +25,23 @@
             }
             return res;
         },
+        getNotesInScale: function (id, from, to) {
+            var scale = TheoryScales.getScale(id);
+            
+            var re = [].interpolate(from, to, function (x) {
+                var note = (x - from) % 12;
+                var res = scale.base12.first(function (t) { return t === note; });
+                if (res !== null) {
+                    return x;
+                }
+                return -1;
+            }).where(function (x) { return x !== -1; });
+            return re;
+        },
+        getScale: function (id) {
+            var scales = TheoryScales.getScales();
+            return scales.first(function (x) { return x.id === id; });
+        },
         getChordData: function () {
             var template = MEPH.getTemplate('MEPH.audio.music.theory.data.ChordData').template;
             return JSON.parse(template);

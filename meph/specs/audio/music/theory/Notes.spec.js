@@ -45,4 +45,9 @@
 
         expect(midinote).toBe(57);
     })
+
+    it('can conver midi to a note ', function () {
+        var res = Notes.convertToNote(60);
+        expect(res).toBe('C/5');
+    })
 });

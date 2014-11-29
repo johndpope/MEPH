@@ -60,9 +60,6 @@ MEPH.define('MEPH.audio.Scheduler', {
             if (audioduration !== null) {
                 audio.getAudio().stop(time + started + (audioduration * me.bpm));
             }
-            else {
-                console.log('percussion')
-            }
         });
         var toresolve;
         var promise = new Promise(function (x, f) {

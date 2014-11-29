@@ -11,6 +11,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.view.sequencer.CanvasHeaderLeftMenu'],
     extend: 'MEPH.table.Sequencer',
     requires: ['MEPH.audio.Audio',
+        'MEPH.audio.music.theory.Notes',
         'MEPH.audio.AudioResources',
         'MEPH.input.Text',
         'MEPH.audio.Sequence',
@@ -18,6 +19,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.graph.AudioGraph',
         'MEPH.input.Checkbox',
         'MEPH.util.Dom',
+        'MEPH.input.Number',
         'MEPH.input.Dropdown',
         'MEPH.file.Dropbox',
         'MEPH.audio.Constants',
@@ -33,6 +35,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'recorder',
         'scheduler'],
     properties: {
+        firstMidiNote: null,
+        lastMidiNote: null,
         selectedSoundFontValue: null,
         defaultColumnWidth: 25,
         nearest: 4,
@@ -85,10 +89,12 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     onLoaded: function () {
         var me = this;
         me.super();
+        me.firstMidiNote = 0;
+        me.lastMidiNote = 192;
         me.resources = MEPH.util.Observable.observable([]);
         me.fontlistsource = MEPH.util.Observable.observable([]);
         me.currentSoundFontSelection = MEPH.util.Observable.observable([]);
-        me.scales = TheoryScales.getScales();
+        me.scales = [{ id: null, name: 'none' }].concat(TheoryScales.getScales());
 
         me.setupHeaders();
         me.sequence.title = me.sequence.title || 'untitled';
@@ -171,6 +177,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             soundFontInstrument = info.soundfontInstrument;
         me.hideAll();
         var chunks = soundFontInstrument.sampleChunks();
+        me.selectedSoundFontId = info.id;
         me.selectedSoundFont = soundFontInstrument.$soundfontfile;
         me.selectedSoundFontChunks = chunks.select(function (x) {
             return ({
@@ -180,6 +187,32 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             });
         });
         me.showSoundFontList();
+    },
+    selectSoundFontNotes: function () {
+        var me = this,
+            scale, selection;
+
+        scale = me.selectedScale;
+        me.currentSoundFontSelection.clear();
+        if (scale === 'none' || !scale) {
+            selection = [].interpolate(parseInt(me.firstMidiNote), parseInt(me.lastMidiNote) + 1, function (x) {
+                return x;
+            });
+        }
+        else {
+            selection = TheoryScales.getNotesInScale(scale, parseInt(me.firstMidiNote), parseInt(me.lastMidiNote) + 1);
+        }
+        selection = selection.select(function (x) {
+            return {
+                name: Notes.convertToNote(x),
+                id: x,
+                selected: true,
+                sid: me.selectedSoundFontId
+            }
+        })
+        selection.foreach(function (t) {
+            me.currentSoundFontSelection.push(t);
+        })
     },
     addToSelection: function (chunkid) {
         var me = this;
