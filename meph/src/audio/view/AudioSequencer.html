@@ -11,8 +11,17 @@
                meph-data-max="1"
                meph-data-step="0.01"
                meph-event-change="c$.update"></range>
-    </div>
-    <div class="col-md-8 col-xs-2 col-sm-2"></div>
+    </div> 
+    <div class="col-md-2 col-sm-1 col-xs-1 ">
+        <number descriptiontext="BPM" meph-data-value="c$.beatspermin" labeltext="BPM"
+                meph-event-change="c$.updateBeat"></number>
+    </div> 
+    <div class="col-md-2 col-sm-1 col-xs-1 ">
+        <number descriptiontext="Smallest note" meph-data-value="c$.smallestnote"
+                meph-event-change="c$.updateBeat"
+                 labeltext="Minimum Note"></number>
+    </div> 
+    <div class="col-md-4 col-xs-2 col-sm-2"></div>
     <div class="btn-group">
         <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequence">
             <span class="glyphicon glyphicon-save"></span>
@@ -95,7 +104,7 @@
         <list data-bind='"source": "c$.resources"'>
             <template name="resourcelist_template">
                 <li class="list-group-item">
-                    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.list.parent.viewResource, c$.data.id">
+                    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.list.parent.viewResource, c$.data.id, c$.data.type">
                         <span class="glyphicon glyphicon-folder-open">View</span>
                     </mephbutton>
                     <span data-bind='"innerHTML": "c$.data.name"'></span>

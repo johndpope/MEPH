@@ -151,12 +151,19 @@ MEPH.define('MEPH.audio.Audio', {
      * @return {Promise}
      ***/
     loadByteArray: function (bytearray, options, file, type) {
-        var me = this, toresolve, tofail;
+        var me = this, toresolve, tofail,
+            result = me.getBufferSources().first(function (x) {
+                return x.file === file && x.type === type;
+            });
         var promise = new Promise(function (r, s) {
             toresolve = r;
             tofail = s;
         });
+        if (result) {
 
+            toresolve(result);
+            return promise;
+        }
         var context = me.createContext(options);
 
         context.decodeAudioData(

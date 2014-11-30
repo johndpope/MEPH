@@ -5,6 +5,7 @@
 MEPH.define('MEPH.audio.AudioResources', {
     requires: ['MEPH.audio.Constants',
                 'MEPH.audio.Audio',
+                'MEPH.graph.Graph',
                 'MEPH.audio.music.instrument.SoundFontInstrument',
                 'MEPH.audio.graph.AudioGraphReader'],
     statics: {
@@ -33,7 +34,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         }
     },
     addResources: function (resources) {
-        var me = this;
+        var me = this, promise = Promise.resolve();
 
 
         resources.foreach(function (resource) {
@@ -53,7 +54,38 @@ MEPH.define('MEPH.audio.AudioResources', {
                     soundfontInstrument: soundfontInstrument
                 });
             }
+            else if (resource.file && resource.file.type === "audio/wav") {
+                promise = promise.then(function () {
+                    var audio = new MEPH.audio.Audio();
+                    return audio.loadByteArray(resource.res, null, resource.file.name, resource.file.type).then(function (buffer) {
+                        
+                        var graph = me.createGraph(buffer.id, buffer.file);
+                        MEPH.publish(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, graph);
+
+                    }.bind(me));
+                });
+            }
         });
+
+        return promise;
+    },
+    createGraph: function (id, name) {
+        var graph = new MEPH.graph.Graph(),
+          node,
+          audiobuffer = new MEPH.audio.graph.node.AudioBufferSourceNode();
+
+        node = new MEPH.graph.Node();
+        node.setId(MEPH.GUID());
+        audiobuffer.id = MEPH.GUID();
+        audiobuffer.setNodeInputDefaultValue('source', id)
+        node.appendData(audiobuffer);
+        node.data = audiobuffer;
+        graph.addNode(node);
+        var result = graph.saveGraph();
+        result.id = result.id || MEPH.GUID();
+        result.name = name;
+        audiobuffer.destroy();
+        return result;
     },
     collectProject: function () {
         var me = this,
@@ -151,7 +183,7 @@ MEPH.define('MEPH.audio.AudioResources', {
     },
     getResources: function () {
         var me = this;
-        return me.resources.select().concat(me.soundfonts.select());
+        return me.graphs.select().concat(me.soundfonts.select());
     },
     getResourceById: function (id) {
         var me = this;
