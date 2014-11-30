@@ -78,6 +78,8 @@ MEPH.define('MEPH.audio.Scheduler', {
     play: function () {
         var me = this, played = [], started;
         var lasttime = (me.sequence().duration() || 0) * me.bpm;
+        var sequencetime = (me.sequence().duration() || 0);
+        var items = me.getAudio(0, sequencetime);
 
         me.on('tick', function () {
             var currentTime = MEPH.audio.Audio.GetContext().currentTime;
@@ -85,8 +87,7 @@ MEPH.define('MEPH.audio.Scheduler', {
                 started = currentTime;
                 lasttime += started;
             }
-            var items = me.getAudio(currentTime - started, me.playWindow),
-                audioduration;
+            var audioduration;
             items = items.where(function (t) { return played.indexOf(t) === -1; })
             items.foreach(function (audio) {
                 var time = me.sequence().getAbsoluteTime(audio) * me.bpm;

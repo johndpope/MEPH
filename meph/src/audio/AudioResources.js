@@ -110,7 +110,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         return id.sid + '/' + id.id;
     },
-    getSoundFontAudioInstance: function (info) {
+    getSoundFontAudioInstance: function (info, graphExtensions) {
         var me = this,
             id = me.getSoundFontInstance(info),
             data = me.getSoundFont(info);
@@ -131,7 +131,7 @@ MEPH.define('MEPH.audio.AudioResources', {
                 buffer: buffer
             })
         }
-        return me.getGraphInstance(data.cache[id].graphid);
+        return me.getGraphInstance(data.cache[id].graphid, graphExtensions);
     },
     getSoundFont: function (info) {
         var me = this;

@@ -116,6 +116,7 @@ MEPH.define('MEPH.audio.Audio', {
         audioCtx: null,
         nodes: null,
         sourcebuffer: null,
+        $destination: null,
         title: 'Untitled',
         id: null,
         offlineContext: false
@@ -609,9 +610,9 @@ MEPH.define('MEPH.audio.Audio', {
             return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
         }).foreach(function (node) {
 
-            node.node.onended = function () {
-                me.disconnect();
-            };
+            //node.node.onended = function () {
+            //    me.disconnect();
+            //};
 
             node.node.stop(delay);
         });
@@ -796,8 +797,45 @@ MEPH.define('MEPH.audio.Audio', {
             }
             last = x.node;
         });
-        last.connect(me.createContext(options).destination);
+
+        me.connectToDestination(last, options);
+        // last.connect(me.createContext(options).destination);
         return me;
+    },
+    connectToDestination: function (lastnode, options) {
+        var me = this, destinationNode = me.getDestination();
+        if (destinationNode) {
+            var dNode = destinationNode.getNodeToConnectTo();
+            if (!dNode) {
+                MEPH.Log('Audio.js : No node to connect to.')
+            }
+            lastnode.connect(dNode);
+        }
+        else {
+            var context = me.createContext(options);
+            var dest = context.destination;
+            lastnode.connect(dest);
+        }
+    },
+    getNodeToConnectTo: function () {
+        var me = this;
+        var node = me.nodes.first();
+        if (node) {
+            return node.node;
+        }
+        return null;
+    },
+    getDestination: function () {
+        var me = this;
+        return me.$destination || null;
+    },
+    /**
+     * Sets the destination the Audio object will attach.
+     * @param {MEPH.audio.Audio} destination
+     **/
+    setDestination: function (destination) {
+        var me = this;
+        me.$destination = destination;
     },
     getBufferIndex: function (x) {
         if (x.type === MEPH.audio.Audio.nodeTypes.merger)
