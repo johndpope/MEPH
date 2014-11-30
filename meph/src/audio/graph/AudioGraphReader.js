@@ -520,7 +520,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
 
         return {
             node: node,
-            q: q,
+            Q: q,
             frequency: frequency,
             detune: detune,
             gain: gain,

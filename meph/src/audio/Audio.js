@@ -542,11 +542,12 @@ MEPH.define('MEPH.audio.Audio', {
     },
     panner: function (options) {
         var me = this;
-        var context = me.createContext();
+        var context = me.createContext(),
+            params = me.createParams('valueType', 'coneOuterAngle', 'coneInnerAngle', 'coneOuterGain', 'refDistance', 'maxDistance', 'rolloffFactor', 'panningModel');
 
         me.createNode(options, function () {
             return MEPH.audio.Audio.nodeTypes.panner
-        });
+        }, params);
         return me;
 
     },
@@ -782,9 +783,13 @@ MEPH.define('MEPH.audio.Audio', {
                     if (x.options && x.options[param.name] && typeof x.options[param.name] === 'object') {
                         me.connectTargetToNode(nodes, x, param);
                     }
-                    else if (x.node[param.name] && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
-
-                        x.node[param.name].value = x.options[param.name];
+                    else if (x.node[param.name] !== undefined && x.options && x.options[param.name] !== null && x.options[param.name] !== undefined) {
+                        if (typeof x.node[param.name] === 'object' && x.node[param.name]) {
+                            x.node[param.name].value = x.options[param.name];
+                        }
+                        else {
+                            x.node[param.name] = x.options[param.name];
+                        }
                     }
                     else if (param.alias) {
                         switch (param.type) {
