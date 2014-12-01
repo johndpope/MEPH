@@ -42,10 +42,8 @@ MEPH.define('MEPH.audio.Scheduler', {
         var sequencetime = (me.sequence().duration() || 0);
         var duration = sequencetime * me.bpm;
         var audios = me.getAudio(0, sequencetime);
-        audios.foreach(function (audio) {
-            audio.getAudio().disconnect();
-            audio.getAudio().offlineMode = true;
-        });
+        me.sequence().setMode(true);
+
         if (started === undefined) {
             started = 0;
         }
@@ -80,6 +78,7 @@ MEPH.define('MEPH.audio.Scheduler', {
         var lasttime = (me.sequence().duration() || 0) * me.bpm;
         var sequencetime = (me.sequence().duration() || 0);
         var items = me.getAudio(0, sequencetime);
+        me.sequence().setMode(false);
 
         me.on('tick', function () {
             var currentTime = MEPH.audio.Audio.GetContext().currentTime;

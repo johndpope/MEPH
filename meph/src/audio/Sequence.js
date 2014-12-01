@@ -55,6 +55,26 @@ MEPH.define('MEPH.audio.Sequence', {
         var me = this;
         me.setDefault('soundfont', id);
     },
+    setMode: function (offline) {
+        var me = this, graph = me.getGraph(true);
+        if (graph) {
+            graph.disconnect();
+            graph.offlineMode = offline;
+        }
+
+        if (me.containsSequences) {
+            res = [];
+            me.parts.foreach(function (sequence) {
+                sequence.source.setMode(offline);
+            });
+        }
+        else {
+            me.parts.select(function (x) {
+                x.getAudio().disconnect();
+                x.getAudio().offlineMode = offline;
+            });
+        }
+    },
     getGraph: function (raw) {
         var me = this;
         if (!me.$$graph && me.$graph) {
