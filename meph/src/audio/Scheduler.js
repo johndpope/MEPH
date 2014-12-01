@@ -39,6 +39,7 @@ MEPH.define('MEPH.audio.Scheduler', {
      **/
     render: function () {
         var me = this, started;
+        if (!me.sequence()) return;
         var sequencetime = (me.sequence().duration() || 0);
         var duration = sequencetime * me.bpm;
         var audios = me.getAudio(0, sequencetime);
@@ -75,6 +76,7 @@ MEPH.define('MEPH.audio.Scheduler', {
      ***/
     play: function () {
         var me = this, played = [], started;
+        if (!me.sequence()) return;
         var lasttime = (me.sequence().duration() || 0) * me.bpm;
         var sequencetime = (me.sequence().duration() || 0);
         var items = me.getAudio(0, sequencetime);

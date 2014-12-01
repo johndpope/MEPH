@@ -9605,7 +9605,7 @@ input[type="range"]::-webkit-slider-thumb {
 .dropbox {
   border: 10px dashed red;
   margin: 20px auto;
-  height: 300px;
+  height: 100px;
 }
 
 /* line 9, ../sass/meph-default/controls/view/_misc.scss */

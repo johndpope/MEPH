@@ -3,13 +3,13 @@
         <div role="main">
 
             <!-- Main jumbotron for a primary marketing message or call to action -->
-            <div class="page-header col-md-8">
-                <h1>Music Visualizer!</h1>
+            <div class="page-header col-md-2">
+                <h4>Music Visualizer!</h4>
                 <p>Drop a piece of music into the drop box..</p>
             </div>
 
             <div class="page-header col-md-4">
-                <h1>File Resources</h1>
+                <h4>File Resources</h4>
                 <list meph-data-source="ct$.banks">
                     <template name="file_resources_musicvisualizer">
                         <li class="list-group-item">
@@ -33,20 +33,16 @@
 
             </div>
 
-            <div class="alert alert-warning" role="alert">
-                <strong>Warning!</strong> This is still experimental so it might just blow up.
-            </div>
-
             <div class="page-header col-md-2">
-                <h1>
+                <h4>
                     Drop box
-                </h1>
+                </h4>
                 <dropbox data-events='"filesdropped":"ct$.loadFiles "'></dropbox><!---->
 
 
             </div>
             <div class="page-header col-md-2">
-                <h1>File Resources</h1>
+                <h4>File Resources</h4>
                 <list meph-data-source="ct$.fileResources">
                     <template name="music_visualizer_page">
                         <li class="list-group-item" meph-event-click="ct$.visualizeFile, c$.data.file, c$.data.res | ct$.loadBytes, c$.data.file | v$.drawBytes ">
@@ -59,8 +55,8 @@
                 </list>
 
             </div>
-            <div class="page-header col-md-2">
-                <h1>Controls</h1>
+            <div class="page-header col-md-12">
+                <h4>Controls</h4>
                 <ul class="list-group">
                     <li class="list-group-item">
                         <range descriptiontext="Magnification" 
@@ -80,10 +76,10 @@
                 </ul>
             </div>
 
-            <div class="col-md-6">
-                <h1>
+            <div class="col-md-12">
+                <h4>
                     Visual Selector
-                </h1>
+                </h4>
 
                 <div class="alert alert-info" role="alert">
                     <strong>Time : </strong> <span data-bind='"innerHTML": "ct$.timeScroll"'></span>%

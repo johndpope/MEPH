@@ -127,10 +127,12 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
      ***/
     playSnippet: function (mark) {
         var me = this;
-        
-        var index = me.marks.orderBy(function (x, y) {
+        var tmarks = me.marks.orderBy(function (x, y) {
             return x.position - y.position;
-        }).indexWhere(function (x) {
+        });
+        me.marks.length = 0;
+        me.marks.push.apply(me.marks, tmarks);
+        var index = me.marks.indexWhere(function (x) {
             return x.position === mark.position;
         }).first();
         if (index !== null) {
