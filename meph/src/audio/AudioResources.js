@@ -32,6 +32,11 @@ MEPH.define('MEPH.audio.AudioResources', {
             Audio.GetSourceBuffer().foreach(function (t) { me.resources.push(t); })
             MEPH.publish(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, {});
         }
+
+        MEPH.subscribe(MEPH.audio.Constants.CREATE_GRAPH, function (type, id, name) {
+            var graph = me.createGraph(id, name);
+            MEPH.publish(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, graph);
+        });
     },
     addResources: function (resources) {
         var me = this, promise = Promise.resolve();
@@ -58,7 +63,7 @@ MEPH.define('MEPH.audio.AudioResources', {
                 promise = promise.then(function () {
                     var audio = new MEPH.audio.Audio();
                     return audio.loadByteArray(resource.res, null, resource.file.name, resource.file.type).then(function (buffer) {
-                        
+
                         var graph = me.createGraph(buffer.id, buffer.file);
                         MEPH.publish(MEPH.audio.Constants.AUDIO_GRAPH_SAVED, graph);
 
@@ -197,4 +202,6 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         me.resources.clear();
     }
+}).then(function () {
+    return MEPH.requires('MEPH.audio.graph.node.AudioBufferSourceNode')
 })

@@ -10,6 +10,7 @@
         magnification: 0,
         timeWindow: null,
         visualizedFile: null,
+        visualizedFileType: null,
         banks: null
     },
     initialize: function () {
@@ -40,6 +41,7 @@
     visualizeFile: function (file, res) {
         var me = this;
         me.visualizedFile = file.name;
+        me.visualizedFileType = file.type;
         switch (file.type) {
             case 'audio/wav':
             case 'audio/mp3':
@@ -79,12 +81,12 @@
     },
     createResource: function (name, clip) {
         var audio = new MEPH.audio.Audio();
-        audio.addBufferSource({
+        var buffer = audio.addBufferSource({
             buffer: clip.clip.buffer,
             file: clip.name,
-            type: null
+            type: clip.type
         })
-
+        MEPH.publish(MEPH.audio.Constants.CREATE_GRAPH, buffer.id, clip.name);
     },
     timeWindowCalc: function () {
         var me = this;
@@ -140,6 +142,7 @@
             id: MEPH.GUID(),
             clip: me.getSnippet(),
             name: me.visualizedFile,
+            type: me.visualizedFileType,
             time: time
         });
     },
@@ -171,6 +174,7 @@
                 id: MEPH.GUID(),
                 clip: r.res,
                 name: me.visualizedFile + ' ' + MEPH.GUID().split('').subset(0, 3).join(''),
+                type: me.visualizedFileType,
                 time: r.time
             });
         });

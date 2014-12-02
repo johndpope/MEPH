@@ -3,6 +3,7 @@
     templates: true,
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
+    injections: ['audioResources'],
     requires: ['MEPH.mobile.activity.view.ActivityView',
         'MEPH.file.Dropbox',
         'MEPH.audio.Audio',
