@@ -1,5 +1,6 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "precanvas", "before" : true -->
-<div class="visualizer col-md-6">
+<range descriptiontext="start" meph-data-value="c$.position" meph-event-change="c$.update" meph-data-step="0.000001" meph-data-min="0" meph-data-max="1"></range>
+<div class="visualizer col-md-4">
     <range descriptiontext="Magnification"
            meph-data-value="c$.magnification"
            meph-data-step="0.001"
@@ -7,7 +8,7 @@
            meph-data-min="0.001"
            meph-data-max="1"></range>
 </div>
-<div class="visualizer col-md-6">
+<div class="visualizer col-md-4">
     <range descriptiontext="Time"
            meph-event-change="c$.sourceChanged | c$.update"
            meph-data-value="c$.timeScroll"
@@ -15,7 +16,18 @@
            meph-data-min="0"
            meph-data-max="1"></range>
 </div>
-<range descriptiontext="start" meph-data-value="c$.position" meph-event-change="c$.update" meph-data-step="0.000001" meph-data-min="0" meph-data-max="1"></range>
+<div class="visualizer col-md-3">
+    <range descriptiontext="Pitch shift"
+           meph-data-value="c$.pitchShift"
+           meph-data-step="0.001"
+           meph-data-min="0.1"
+           meph-data-max="2"></range>
+</div>
+<div class="col-md-1">
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.shiftPitch | c$.cancelEvent">
+        <span class="glyphicon glyphicon-filter"></span>
+    </mephbutton>
+</div>
 <div style="display:none">
     <div mephid="markerBtnTemplate" class="btn-group" style="position:absolute; z-index:100">
         <div class="btn btn-danger btn-xs" removebtn>
@@ -57,8 +69,16 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.trimSection | c$.cancelEvent| c$.update">
         <span class="glyphicon glyphicon-resize-horizontal"></span>
     </mephbutton>
+</div>
+<div class="btn-group">
 
-    
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveClip | c$.cancelEvent">
+        <span class="glyphicon glyphicon-save"></span>
+    </mephbutton>
+
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveClips| c$.cancelEvent">
+        <span class="glyphicon glyphicon-th"></span>
+    </mephbutton>
 </div>
 <div class="btn-group">
     <!-- "name": "buttonpanel" -->

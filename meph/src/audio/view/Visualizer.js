@@ -106,30 +106,6 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             me.selectedRange.end = start + width;// ;
         }
     },
-    cutSectionOut: function () {
-        var me = this, pixels = me.width;
-        if (me.selectedRange) {
-            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
-            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
-            if (end - start > 10) {
-                var res = MEPH.audio.Audio.cutOutSection(me.source, start, end, null);
-                me.source.buffer = res.buffer;
-            }
-        }
-    },
-    trimSection: function () {
-        var me = this,
-            pixels = me.width;
-        if (me.selectedRange) {
-            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
-            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
-            console.log('start : ' + start + ' ' + ' end ' + end)
-            if (end - start > 10) {
-                var res = MEPH.audio.Audio.clipBuffer(me.source, start, end, null);
-                me.source.buffer = res.buffer;
-            }
-        }
-    },
     sourceChanged: function (args) {
         var me = this;
         me.draw(args.value);

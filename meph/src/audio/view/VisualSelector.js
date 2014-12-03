@@ -8,7 +8,9 @@
 MEPH.define('MEPH.audio.view.VisualSelector', {
     alias: 'visualselector',
     extend: 'MEPH.audio.view.Visualizer',
-    requires: ['MEPH.input.Range', 'MEPH.util.Renderer'],
+    requires: ['MEPH.input.Range',
+        'MEPH.util.Renderer',
+        'MEPH.signalprocessing.SignalProcessor'],
     templates: true,
     properties: {
         stop: 100,
@@ -23,17 +25,20 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         markercolor: '#d9534f',
         markscolor: '#f0ad4e',
         markerBtns: null,
+        pitchShift: .5,
         smallestStep: 0.0000001,
         renderer: null,
         injectControls: {
             location: 'buttonpanel'
         },
+        $signalProcessor: null,
         markerrenderer: null
     },
     initialize: function () {
         var me = this;
         me.super();
         me.markerBtns = [];
+        me.$signalProcessor = new SignalProcessor();;
         me.on('altered', function (type, args) {
             if (args.path === 'marks') {
                 if (me.marks) {
@@ -73,35 +78,138 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return (position * length) + start;
         }
     },
-    playClip: function () {
-        var me = this,
-            source = me.source,
-            audio = new MEPH.audio.Audio(),
-            magnification = parseFloat(me.magnification),
-            timeScroll = parseFloat(me.timeScroll);
-        var start = timeScroll * source.buffer.buffer.duration;
-        var time = source.buffer.buffer.duration * magnification;
+    shiftPitch: function () {
+        var me = this;
+        var sp = me.$signalProcessor;
 
         if (me.playingClip) {
             me.playingClip.stop();
             return;
         }
+        var buffer = me.getBuffer();
+        var audioresult = me.getSnippet();
+        var inbucket;
+        var outbucket;
+        if (!audioresult) return;
+        debugger
+        var audio = new MEPH.audio.Audio();
+        audio.buffer(audioresult.buffer, { name: 'buffer' })
+            .processor({
+                name: 'proce',
+                process: function (audioProcessingEvent) {
+                    var inputBuffer = audioProcessingEvent.inputBuffer;
+                    var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+                    var d = audioProcessingEvent.outputBuffer.getChannelData(0);
+                    sp.pitchShift(parseFloat(me.pitchShift), inputData.length, inputData.length, 4, me.source.buffer.buffer.sampleRate, inputData, d);
+                }
+            })
+            .complete();
+        var snippet = audio.get({ name: 'buffer' });
+        snippet.first().node.onended = function () {
+            audio.disconnect();
+            delete me.playingClip;
+            delete audio;
+            delete snippet.first().node;
+        }
+        me.playingClip = snippet.first().node;
+        me.playingClip.start();
 
-        var snippet = MEPH.audio.Audio.clip(source, start, Math.min(source.buffer.buffer.duration, time + start));
+    },
+    getSnippet: function () {
+        var me = this,
+           source = me.source,
+           audio = new MEPH.audio.Audio(),
+           magnification = parseFloat(me.magnification),
+           timeScroll = parseFloat(me.timeScroll);
+        if (me.source) {
+            var start = timeScroll * source.buffer.buffer.duration;
+            var time = source.buffer.buffer.duration * magnification;
+
+            var snippet = MEPH.audio.Audio.clip(source, start, Math.min(source.buffer.buffer.duration, time + start));
+            return snippet;
+        }
+        return null;
+    },
+    playClip: function () {
+        var me = this;
+        if (me.playingClip) {
+            me.playingClip.stop();
+            return;
+        }
+
+        var snippet = me.getSnippet();;
 
         if (snippet) {
-            //var audio = new MEPH.audio.Audio();
-            //audio.buffer(snippet.buffer.buffer, { name: 'buffer' }).gain({ name: 'gain', volume: 1 }).complete();
-            //var snippet = audio.get({ name: 'buffer' });
-            //snippet.first().node.onended = function () {
-            //    audio.disconnect();
-            //    delete me.playingClip;
-            //    delete audio;
-            //    delete snippet.first().node;
-            //}
             snippet = me.$playSnippet(snippet);
         }
 
+    },
+    saveClip: function () {
+        var me = this, snippet = me.getSnippet();
+
+        if (!snippet) return;
+        me.markCanvas.dispatchEvent(MEPH.createEvent('saveclip', {
+            snippets: [snippet]
+        }))
+    },
+    saveClips: function () {
+        var me = this, source;
+        if (!me.source) {
+            return null;
+        }
+        source = me.source;
+        var tmarks = me.marks.orderBy(function (x, y) {
+            return x.position - y.position;
+        });
+
+        me.marks.length = 0;
+        me.marks.push.apply(me.marks, tmarks);
+        var res = me.marks.select(function (x, index) {
+            if (index) {
+                var mark = me.marks[index - 1];
+                var end = me.marks[index] ? me.marks[index].position : source.buffer.buffer.length;
+                var snippet = MEPH.audio.Audio.clipBuffer(me.source, mark.position, end);
+                return snippet;
+            }
+            return false;
+        }).where();
+
+        if (res.length)
+            me.markCanvas.dispatchEvent(MEPH.createEvent('saveclip', {
+                snippets: res
+            }))
+    },
+    cutSectionOut: function () {
+        var me = this, pixels = me.width;
+        if (me.selectedRange) {
+            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
+            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
+            if (end - start > 10) {
+                var res = MEPH.audio.Audio.cutOutSection(me.source, start, end, null);
+                me.source.buffer = res.buffer;
+            }
+        }
+    },
+    trimSection: function () {
+        var me = this,
+            pixels = me.width;
+        if (me.selectedRange) {
+            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
+            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
+            console.log('start : ' + start + ' ' + ' end ' + end)
+            if (end - start > 10) {
+                me.marks.removeWhere(function (x) {
+                    return x.position > end || x.position < start;
+                });
+                me.marks.where(function (x) {
+                    return x.position < end && x.position > start;
+                }).foreach(function (mark) {
+                    mark.position -= start;
+                })
+                var res = MEPH.audio.Audio.clipBuffer(me.source, start, end, null);
+                me.source.buffer = res.buffer;
+            }
+        }
     },
     $playSnippet: function (snippet) {
         var me = this;
@@ -242,10 +350,6 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return x.position === mark.position;
         }).first();
         if (index !== null) {
-            me.markCanvas.dispatchEvent(MEPH.createEvent('playsnippet', {
-                start: mark.position,
-                end: me.marks[index + 1] ? me.marks[index + 1].position : 1
-            }));
             var end = me.marks[index + 1] ? me.marks[index + 1].position : source.buffer.buffer.length;
             var snippet = MEPH.audio.Audio.clipBuffer(me.source, mark.position, end);
             me.$playSnippet(snippet)

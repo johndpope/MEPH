@@ -147,26 +147,30 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             .then(function (fileResults) {
                 if (me.$inj && me.$inj.audioResources) {
                     me.$inj.audioResources.addResources(fileResults).then(function () {
-                        me.resources.clear();
-                        me.$inj.audioResources.getResources().foreach(function (t) {
-                            if (t.resource && t.resource.file) {
-                                me.resources.push({
-                                    name: t.resource.file.name,
-                                    id: t.id,
-                                    type: 'font'
-                                });
-                            }
-                            else if (t.name) {
-                                me.resources.push({
-                                    name: t.name,
-                                    id: t.id,
-                                    type: 'graph'
-                                });
-                            }
-                        })
+                        me.updateResources();
                     })
                 }
             })
+    },
+    updateResources: function () {
+        var me = this;
+        me.resources.clear();
+        me.$inj.audioResources.getResources().foreach(function (t) {
+            if (t.resource && t.resource.file) {
+                me.resources.push({
+                    name: t.resource.file.name,
+                    id: t.id,
+                    type: 'font'
+                });
+            }
+            else if (t.name) {
+                me.resources.push({
+                    name: t.name,
+                    id: t.id,
+                    type: 'graph'
+                });
+            }
+        })
     },
     viewResource: function (resource, type) {
         var me = this;
@@ -180,6 +184,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         Style.show(me.resourceloader);
         me.$resourcehidden = false;
+        me.updateResources();
     },
     hideResource: function () {
         var me = this;
@@ -516,7 +521,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         if (me.$inj.audioResources) {
             MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, function () {
-
+                me.updateResources();
             });
 
         }

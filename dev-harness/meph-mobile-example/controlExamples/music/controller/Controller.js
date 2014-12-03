@@ -137,17 +137,22 @@
     },
     saveClipToBank: function () {
         var me = this;
-        var magnification = parseFloat(me.magnification || 100);
-        var timeScroll = parseFloat(me.timeScroll || 0) / 100;
-        var start = timeScroll * me.result.buffer.buffer.duration;
-        var time = Math.round(me.result.buffer.buffer.duration / magnification * 10) / 10;
-        me.banks.push({
-            id: MEPH.GUID(),
-            clip: me.getSnippet(),
-            name: me.visualizedFile,
-            type: me.visualizedFileType,
-            time: time
-        });
+
+        var snippets = MEPH.Array(arguments).last().domEvent.snippets;
+        if (snippets) {
+            snippets.foreach(function (snippet) {
+                if (snippet) {
+                    var time = snippet.buffer.buffer.duration;
+                    me.banks.push({
+                        id: MEPH.GUID(),
+                        clip: snippet,
+                        name: me.visualizedFile,
+                        type: me.visualizedFileType,
+                        time: time
+                    });
+                }
+            })
+        }
     },
     sliceClipToBank: function () {
         var me = this;
