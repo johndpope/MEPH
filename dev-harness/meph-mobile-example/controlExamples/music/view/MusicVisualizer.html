@@ -18,8 +18,11 @@
                                 <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="v$.copySnippet, c$.data.clip | v$.playSnippet | c$.cancelEvent">
                                     <span class="glyphicon glyphicon-play"></span>
                                 </mephbutton>
+                                <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.removeSnippet, c$.data | c$.cancelEvent">
+                                    <span class="glyphicon glyphicon-minus"></span>
+                                </mephbutton>
                                 <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="v$.changeName, c$.data | c$.cancelEvent">
-                                    <span class="glyphicon glyphicon-plus"></span>
+                                    <span class="glyphicon glyphicon-glass"></span>
                                 </mephbutton>
                                 <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.createResource, c$.data.clip , c$.data | c$.cancelEvent">
                                     <span class="glyphicon glyphicon-plus"></span>
@@ -55,7 +58,7 @@
                 </list>
 
             </div>
-            <div class="page-header col-md-12">
+            <!--<div class="page-header col-md-12">
                 <h4>Controls</h4>
                 <ul class="list-group">
                     <li class="list-group-item">
@@ -74,7 +77,7 @@
                         <range descriptiontext="Vertical Offset" labeltext="Vertical Offset" meph-data-value="v$.verticalScroll" meph-data-step="0.01" meph-data-min="-10" meph-data-max="10"></range>
                     </li>
                 </ul>
-            </div>
+            </div>-->
 
             <div class="col-md-12">
                 <h4>
@@ -90,14 +93,11 @@
                                 meph-data-vertical="v$.verticalScroll"
                                 meph-data-marks="ct$.soundFileMarks"
                                 meph-data-height="300"
-                                meph-event-playsnippet="ct$.playSnippet | v$.playSnippet | c$.cancelEvent"
                                 scrollmutiplier="0">
                     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.createSnippets, ct$.soundFileMarks | c$.cancelEvent">
                         <span class="glyphicon glyphicon-ok"></span>
                     </mephbutton>
-                    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.captureSnippet | v$.playSnippet | c$.cancelEvent">
-                        <span class="glyphicon glyphicon-play"></span>
-                    </mephbutton>
+                   
                     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.saveClipToBank| c$.cancelEvent">
                         <span class="glyphicon glyphicon-music"></span>
                     </mephbutton>

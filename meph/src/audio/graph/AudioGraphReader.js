@@ -556,7 +556,7 @@ MEPH.define('MEPH.audio.graph.AudioGraphReader', {
         var me = this;
         var input = me.getNodeInput(node, name),
             value;
-
+        if (!input) return null;
         switch (input.type) {
             case 'Number':
                 value = isNaN(input.defaultValue) ? null : parseFloat(input.defaultValue);

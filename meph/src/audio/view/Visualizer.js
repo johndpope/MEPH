@@ -7,7 +7,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
     alias: 'visualizer',
     templates: true,
     extend: 'MEPH.control.Control',
-    requires: [],
+    requires: ['MEPH.input.Range'],
     properties: {
         /**
          * @property {String} cls
@@ -21,6 +21,8 @@ MEPH.define('MEPH.audio.view.Visualizer', {
 
         width: 300,
         maxsize: 20000,
+        magnification: 1,
+        timeScroll: 0,
         vertical: 0,
         delta: 1,
         scrollMutiplier: 1,
@@ -72,7 +74,6 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             if (!me.canvas) return;
             var HEIGHT = me.height;
             var WIDTH = me.width;
-            var dataArray = me.source;
             var canvasCtx = me.canvas.getContext('2d');
 
             canvasCtx.fillStyle = 'rgb(200, 200, 200)';
@@ -82,9 +83,11 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
 
             canvasCtx.beginPath();
-            if (me.source && me.source.max) {
-                var max = me.source.max(function (x) { return Math.abs(x); });
-                var bufferLength = me.source.length;
+            var source = me.getDataToDraw(me.source, WIDTH);
+            if (source && source.max) {
+                var dataArray = source;
+                var max = source.max(function (x) { return Math.abs(x); });
+                var bufferLength = source.length;
                 var sliceWidth = WIDTH * 1.0 / bufferLength;
                 var x = 0;
 
@@ -111,6 +114,34 @@ MEPH.define('MEPH.audio.view.Visualizer', {
         return new Promise(function (r) {
             rsolve = r;
         });
+    },
+    getBuffer: function () {
+        var me = this, buffer,
+            source = me.source;
+        if (source && source.buffer && source.buffer.buffer) {
+            buffer = source.buffer.buffer.getChannelData(0);
+        }
+        if (buffer) {
+            return buffer;
+        }
+        return null;
+    },
+    getDataToDraw: function (source, pixels) {
+        var me = this,
+            buffer = me.getBuffer();
+
+        if (buffer) {
+            var start = buffer.length * me.timeScroll;
+            var length = (buffer.length * me.magnification);
+            var end = length + start;
+            var skip = length / pixels
+
+            return buffer.skipEveryFromTo(Math.round(skip), Math.round(start), Math.round(end), function (x) {
+                return x;
+            });
+
+        }
+        return [];
     },
     changeWidth: function () {
         var e = MEPH.util.Array.convert(arguments).last().domEvent;

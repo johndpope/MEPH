@@ -56,13 +56,13 @@
             return null;
         }
         var audio = new MEPH.audio.Audio();
-        var magnification = parseFloat(me.magnification || 100);
-        var timeScroll = parseFloat(me.timeScroll || 0) / 100;
+        //var magnification = parseFloat(me.magnification || 100);
+        //var timeScroll = parseFloat(me.timeScroll || 0) / 100;
         if (me.lastSong === songBytes) {
-            var start = timeScroll * me.result.buffer.buffer.duration;
-            var time = me.result.buffer.buffer.duration / magnification;
-            var res = MEPH.audio.Audio.quickAnalysis(me.result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
-            return res.first().data;
+            //var start = timeScroll * me.result.buffer.buffer.duration;
+            //var time = me.result.buffer.buffer.duration / magnification;
+            //var res = MEPH.audio.Audio.quickAnalysis(me.result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
+            return me.lastSong;
         }
         else {
             if (me.lastSong) {
@@ -72,12 +72,15 @@
 
             return audio.loadByteArray(songBytes.res, null, file.name, file.type).then(function (result) {
                 me.result = result;
-                var start = timeScroll * result.buffer.buffer.duration;
-                var time = result.buffer.buffer.duration * magnification;
-                var res = MEPH.audio.Audio.quickAnalysis(result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
-                return res.first().data;
+                me.lastSong = result;
+                //var res = MEPH.audio.Audio.quickAnalysis(result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
+                return result;
             })
         }
+    },
+    removeSnippet: function (data) {
+        var me = this;
+        me.banks.removeWhere(function (x) { return x === data; });
     },
     createResource: function (name, clip) {
         var audio = new MEPH.audio.Audio();

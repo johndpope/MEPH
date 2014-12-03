@@ -51,8 +51,87 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     addMark: function () {
         var me = this,
             relativePosition = me.getCurrentPosition();
-        if (me.marks && !me.marks.some(function (x) { return x.position === relativePosition; })) {
-            me.marks.push({ position: relativePosition, type: me.marktype })
+        var absPosition = me.getAbsoluteMarkPosition(relativePosition, me.magnification, me.timeScroll)
+        if (me.marks && !me.marks.some(function (x) {
+            return x.position === absPosition;
+        })) {
+            me.marks.push({
+                position: absPosition,
+                type: me.marktype
+            })
+        }
+    },
+    getAbsoluteMarkPosition: function (position, magnification, timeOffset) {
+        var result,
+            me = this,
+            pixels = me.width,
+            buffer = me.getBuffer();
+        if (buffer) {
+            var start = buffer.length * me.timeScroll;
+            var length = (buffer.length * me.magnification);
+
+            return (position * length) + start;
+        }
+    },
+    playClip: function () {
+        var me = this,
+            source = me.source,
+            audio = new MEPH.audio.Audio(),
+            magnification = parseFloat(me.magnification),
+            timeScroll = parseFloat(me.timeScroll);
+        var start = timeScroll * source.buffer.buffer.duration;
+        var time = source.buffer.buffer.duration * magnification;
+
+        if (me.playingClip) {
+            me.playingClip.stop();
+            return;
+        }
+
+        var snippet = MEPH.audio.Audio.clip(source, start, Math.min(source.buffer.buffer.duration, time + start));
+
+        if (snippet) {
+            //var audio = new MEPH.audio.Audio();
+            //audio.buffer(snippet.buffer.buffer, { name: 'buffer' }).gain({ name: 'gain', volume: 1 }).complete();
+            //var snippet = audio.get({ name: 'buffer' });
+            //snippet.first().node.onended = function () {
+            //    audio.disconnect();
+            //    delete me.playingClip;
+            //    delete audio;
+            //    delete snippet.first().node;
+            //}
+            snippet = me.$playSnippet(snippet);
+        }
+
+    },
+    $playSnippet: function (snippet) {
+        var me = this;
+        if (snippet) {
+            var audio = new MEPH.audio.Audio();
+            audio.buffer(snippet.buffer.buffer, { name: 'buffer' }).gain({ name: 'gain', volume: 1 }).complete();
+            var snippet = audio.get({ name: 'buffer' });
+            snippet.first().node.onended = function () {
+                audio.disconnect();
+                delete me.playingClip;
+                delete audio;
+                delete snippet.first().node;
+            }
+            me.playingClip = snippet.first().node;
+            me.playingClip.start();
+
+        }
+        return snippet;
+    },
+    getRelativeMarkPosition: function (position, magnification, timeOffset) {
+        var me = this,
+            pixels = me.width,
+            buffer = me.getBuffer();
+        if (buffer) {
+            var start = buffer.length * me.timeScroll;
+            position -= start;
+            var length = (buffer.length * me.magnification);
+            position /= length;
+
+            return (position) * pixels;
         }
     },
     getCurrentPosition: function () {
@@ -79,6 +158,32 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
 
         return (windowStep + a);
     },
+    scanToMark: function (dir) {
+        var me = this, buffer = me.getBuffer();
+        if (buffer) {
+            if (me.$currentMark === undefined) {
+                var mark = me.marks.first();
+                if (mark) {
+                    me.timeScroll = mark.position / buffer.length;
+                    me.$currentMark = 0;
+                }
+            }
+            else {
+                me.$currentMark = (me.$currentMark + parseInt(dir));
+                if (me.$currentMark === me.marks.length) me.$currentMark = -1;
+                if (me.$currentMark < -1) me.$currentMark = me.marks.length - 1;
+                if (me.$currentMark === -1) {
+                    me.timeScroll = 0;
+                    return;
+                }
+                me.$currentMark = me.$currentMark % me.marks.length
+                var position = me.marks[me.$currentMark].position;
+                me.timeScroll = position / buffer.length;
+
+            }
+        }
+    },
+
     updateMarkBtns: function () {
         var me = this;
         if (me.marks) {
@@ -96,7 +201,8 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             me.markerBtns.push.apply(me.markerBtns, newmarksObjects);
 
             me.markerBtns.foreach(function (x) {
-                x.dom.style.left = (x.marker.position * me.width) + 'px';
+                var rel = me.getRelativeMarkPosition(x.marker.position, me.magnification, me.timeScroll);
+                x.dom.style.left = (rel) + 'px';
                 x.dom.style.top = (me.height - me.offsetbtnheight) + 'px';
             })
         }
@@ -139,7 +245,10 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             me.markCanvas.dispatchEvent(MEPH.createEvent('playsnippet', {
                 start: mark.position,
                 end: me.marks[index + 1] ? me.marks[index + 1].position : 1
-            }))
+            }));
+            var end = me.marks[index + 1] ? me.marks[index + 1].position : source.buffer.buffer.length;
+            var snippet = MEPH.audio.Audio.clipBuffer(me.source, mark.position, end);
+            me.$playSnippet(snippet)
         }
     },
     createMarkerBtn: function () {
@@ -156,6 +265,8 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return me.updateMarks()
         }).then(function () {
             return me.updateMarker();
+        }).then(function () {
+            me.draw();
         })
     },
     updateMarks: function () {
@@ -218,14 +329,15 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             me.renderer.clear();
             if (me.marks) {
                 var lines = me.marks.select(function (x) {
+                    var xpos = me.getRelativeMarkPosition(x.position, me.magnification, me.timeScroll);
                     return {
                         shape: MEPH.util.Renderer.shapes.line,
                         end: {
-                            x: x.position * WIDTH,
+                            x: xpos,
                             y: HEIGHT
                         },
                         start: {
-                            x: x.position * WIDTH,
+                            x: xpos,
                             y: 0
                         },
                         strokeStyle: me.markscolor
