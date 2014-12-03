@@ -422,21 +422,7 @@
         })
 
     });
-
-    it('can get a node of type', function () {
-        var reader = new AudioGraphReader();
-        var node = reader.getNodeOfType(MEPH.audio.Sequence.defaultSequenceGraphRecipe, 'MEPH.audio.graph.node.InputNode');
-        expect(node).toBeTruthy();
-    })
-
-    it('can get the nodes connected to the output of the inputnode', function () {
-        var reader = new AudioGraphReader();
-        var node = reader.getNodeOfType(MEPH.audio.Sequence.defaultSequenceGraphRecipe, 'MEPH.audio.graph.node.InputNode');
-
-        var res = reader.getNodesConnectedToOutputsOf(node, MEPH.audio.Sequence.defaultSequenceGraphRecipe);
-
-        expect(res.length).toBe(1);
-    })
+    
 
     it('can get zone to connect to from another node', function () {
         var reader = new AudioGraphReader();
@@ -447,15 +433,4 @@
         expect(zone).toBeTruthy();
     });
 
-
-    it('can combine an audio graphs into larger graphs ', function () {
-        var reader = new AudioGraphReader();
-        reader.setGraph(simpleAudio);
-
-        reader.connectGraph(MEPH.audio.Sequence.defaultSequenceGraphRecipe);
-        
-        var audio = reader.createAudio();
-        var node = audio.nodes.first(function (x) { return x.type === MEPH.audio.Audio.nodeTypes.gain });
-        expect(node).toBeTruthy();
-    })
 });

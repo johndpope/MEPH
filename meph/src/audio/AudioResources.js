@@ -200,7 +200,8 @@ MEPH.define('MEPH.audio.AudioResources', {
     },
     clearResources: function () {
         var me = this;
-        me.resources.clear();
+        me.graphs.clear();
+        me.soundfonts.clear();
     }
 }).then(function () {
     return MEPH.requires('MEPH.audio.graph.node.AudioBufferSourceNode')

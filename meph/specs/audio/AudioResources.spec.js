@@ -9,14 +9,6 @@
         expect(audioresources).toBeTruthy();
     });
 
-    it('can collect audioresources from the audio objects', function () {
-        var audioresources = new MEPH.audio.AudioResources();
-        audioresources.clearResources();
-        MEPH.publish(MEPH.audio.Audio.CHANGED_BUFFER_SOURCE, null, [{}]);
-        expect(audioresources.getResources()).toBeTruthy();
-        expect(audioresources.getResources().length).toBe(1);
-    })
-
     it('can collect everything that needs to save into a string', function () {
         var audioresources = new MEPH.audio.AudioResources();
         var res = audioresources.collectProject();
