@@ -35,6 +35,9 @@
         left: function (dom, left) {
             dom.style.left = parseFloat(left) + 'px';
         },
+        right: function (dom, right) {
+            dom.style.right = parseFloat(right) + 'px';
+        },
         getOffset: function (dom, to) {
             var helper = function (_dom) {
                 var result = { x: _dom.offsetLeft, y: _dom.offsetTop };

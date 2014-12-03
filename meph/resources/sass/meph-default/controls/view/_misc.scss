@@ -88,6 +88,10 @@ $padding-distance: 20px;
     pointer-events: none;
 }
 
+.noresponse {
+    pointer-events: none;
+}
+
 .selectarea.active,
 .activearea.active {
     display: block;

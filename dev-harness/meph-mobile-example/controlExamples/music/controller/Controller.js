@@ -58,25 +58,25 @@
         var audio = new MEPH.audio.Audio();
         //var magnification = parseFloat(me.magnification || 100);
         //var timeScroll = parseFloat(me.timeScroll || 0) / 100;
-        if (me.lastSong === songBytes) {
-            //var start = timeScroll * me.result.buffer.buffer.duration;
-            //var time = me.result.buffer.buffer.duration / magnification;
-            //var res = MEPH.audio.Audio.quickAnalysis(me.result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
-            return me.lastSong;
+        //    if (me.lastSong === songBytes) {
+        //var start = timeScroll * me.result.buffer.buffer.duration;
+        //var time = me.result.buffer.buffer.duration / magnification;
+        //var res = MEPH.audio.Audio.quickAnalysis(me.result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
+        //    return me.lastSong;
+        //  }
+        //else {
+        if (me.lastSong) {
+            me.lastSong = null;
         }
-        else {
-            if (me.lastSong) {
-                me.lastSong = null;
-            }
-            me.lastSong = songBytes;
+        me.lastSong = songBytes;
 
-            return audio.loadByteArray(songBytes.res, null, file.name, file.type).then(function (result) {
-                me.result = result;
-                me.lastSong = result;
-                //var res = MEPH.audio.Audio.quickAnalysis(result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
-                return result;
-            })
-        }
+        return audio.loadByteArray(songBytes.res, null, file.name, file.type).then(function (result) {
+            me.result = result;
+            me.lastSong = result;
+            //var res = MEPH.audio.Audio.quickAnalysis(result, start, Math.min(me.result.buffer.buffer.duration, time + start), 1000);
+            return MEPH.audio.Audio.copy(result);
+        })
+        //}
     },
     removeSnippet: function (data) {
         var me = this;

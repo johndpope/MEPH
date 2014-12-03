@@ -1,6 +1,6 @@
 ﻿<div>
     <!-- "name":"precanvas" -->
-    
+
     <div class="visualizer col-md-12"
          style="position:relative"
          mephid="container"
@@ -8,6 +8,10 @@
          meph-data-height="c$.height"
          data-bind='"scrollLeft" : "c$.scrollleft | c$.calculateLeft"'>
         <!-- "name":"beforecanvas" -->
-        <canvas mephid="canvas" meph-data-height="c$.height" meph-data-width="c$.width"></canvas>
+        <canvas mephid="canvas" meph-data-height="c$.height"
+                meph-event-mousemove="c$.onMouseMove"
+                meph-event-mouseup="c$.onMouseUp"
+                meph-event-mousedown="c$.onMouseDown" meph-data-width="c$.width"></canvas>
+        <div mephid="mousehover" class="noresponse selectarea"></div>
     </div><!-- "name":"canvas" -->
 </div>

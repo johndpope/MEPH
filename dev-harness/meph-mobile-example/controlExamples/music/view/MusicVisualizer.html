@@ -58,37 +58,11 @@
                 </list>
 
             </div>
-            <!--<div class="page-header col-md-12">
-                <h4>Controls</h4>
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <range descriptiontext="Magnification" 
-                               labeltext="Magnification" 
-                               meph-data-value="ct$.magnification" 
-                               meph-event-change="ct$.loadBytes, c$.data.file, ct$.lastSong | v$.drawBytes" 
-                               meph-data-step="0.01" 
-                               meph-data-min="0" 
-                               meph-data-max="1000"></range>
-                    </li>
-                    <li class="list-group-item">
-                        <range descriptiontext="Time Scroll" labeltext="Time Scroll" meph-data-value="ct$.timeScroll" meph-event-change="ct$.loadBytes, c$.data.file, ct$.lastSong | v$.drawBytes" meph-data-step="0.01" meph-data-min="0" meph-data-max="100"></range>
-                    </li>
-                    <li class="list-group-item">
-                        <range descriptiontext="Vertical Offset" labeltext="Vertical Offset" meph-data-value="v$.verticalScroll" meph-data-step="0.01" meph-data-min="-10" meph-data-max="10"></range>
-                    </li>
-                </ul>
-            </div>-->
 
             <div class="col-md-12">
                 <h4>
                     Visual Selector
                 </h4>
-
-                <div class="alert alert-info" role="alert">
-                    <strong>Time : </strong> <span data-bind='"innerHTML": "ct$.timeScroll"'></span>%
-                    <strong>Magnification : </strong> <span data-bind='"innerHTML": "ct$.magnification | ct$.timeWindowCalc"'></span>x
-                    <strong>Time Window : </strong> <span data-bind='"innerHTML": "ct$.timeWindow"'></span>s
-                </div>
                 <visualselector source="v$.data"
                                 meph-data-vertical="v$.verticalScroll"
                                 meph-data-marks="ct$.soundFileMarks"
@@ -107,8 +81,6 @@
                 </visualselector>
             </div>
         </div>
-
-
     </activityview>
 
 </div>

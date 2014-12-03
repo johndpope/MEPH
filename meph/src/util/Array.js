@@ -554,7 +554,7 @@ MEPH.define('MEPH.util.Array', {
                         var collection = this;
 
                         var count = Math.ceil((stop - start) / skip);
-                        var res = this instanceof Float32Array ? new Float32Array(Math.ceil(count)) : [];
+                        var res = this instanceof Float32Array ? new Float32Array(Math.max(0, Math.ceil(count))) : [];
                         skip = Math.abs(skip);
                         var c = 0;
                         func = func || function (x) { return x; };

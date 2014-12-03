@@ -47,13 +47,32 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.scanToMark, 1 | c$.cancelEvent| c$.update">
         <span class="glyphicon glyphicon-arrow-right"></span>
     </mephbutton>
-</div>
 
+
+</div>
+<div class="btn-group">
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.cutSectionOut | c$.cancelEvent| c$.update">
+        <span class="glyphicon glyphicon-remove"></span>
+    </mephbutton>
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.trimSection | c$.cancelEvent| c$.update">
+        <span class="glyphicon glyphicon-resize-horizontal"></span>
+    </mephbutton>
+
+    
+</div>
 <div class="btn-group">
     <!-- "name": "buttonpanel" -->
 </div>
-    <!-- "instruction": true, "name" : "injectop", "close": true -->
-    <!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "beforecanvas", "before" : true -->
-    <canvas mephid="markCanvas" style="position:absolute; top:0; z-index:19;" meph-data-height="c$.height" meph-data-width="c$.width"></canvas>
-    <canvas mephid="markerCanvas" style="position:absolute; top:0; z-index:31;" meph-data-height="c$.height" meph-data-width="c$.width"></canvas>
-    <!-- "instruction": true, "name" : "injectop", "close": true -->
+<!-- "instruction": true, "name" : "injectop", "close": true -->
+<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "beforecanvas", "before" : true -->
+<canvas mephid="markCanvas"
+        class="noresponse"
+        style=" position:absolute; top:0; z-index:19;"
+        meph-data-height="c$.height"
+        meph-data-width="c$.width"></canvas>
+<canvas mephid="markerCanvas"
+        class="noresponse"
+        style="position:absolute; top:0; z-index:31;"
+        meph-data-height="c$.height"
+        meph-data-width="c$.width"></canvas>
+<!-- "instruction": true, "name" : "injectop", "close": true -->

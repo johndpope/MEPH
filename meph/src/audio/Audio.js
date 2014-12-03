@@ -121,6 +121,19 @@ MEPH.define('MEPH.audio.Audio', {
             var audio = new MEPH.audio.Audio();
 
             return audio.copyBuffer(resource, from, to, options);
+        },
+        /**
+         * Creates a new resource with a section gone from a resource.
+         * @param {Object} resource
+         * @param {Number} from
+         * @param {Number} to
+         * @param {Object} options
+         * @param {Object}
+         ***/
+        cutOutSection: function (resource, from, to, options) {
+            var audio = new MEPH.audio.Audio();
+
+            return audio.cutOutSection(resource, from, to, options);
         }
     },
     properties: {
@@ -210,7 +223,6 @@ MEPH.define('MEPH.audio.Audio', {
         var buffer = resource.buffer;
         var rate = buffer.buffer.sampleRate;
         var channels = buffer.channelCount;
-        var frameCount = frame_end - frame_start;
         var duration = (end - start);
         var rate = buffer.buffer.sampleRate;
         var frame_start = Math.round(start * rate);
@@ -218,26 +230,6 @@ MEPH.define('MEPH.audio.Audio', {
         var frameCount = frame_end - frame_start;
         frameCount = Math.round(frameCount);
         return me.copyBuffer(resource, frame_start, frame_end, options);
-        //var audioCtx = me.createContext(options);
-        //var myArrayBuffer = audioCtx.createBuffer(channels, frameCount, audioCtx.sampleRate);
-
-        //// Fill the buffer with white noise;
-        //// just random values between -1.0 and 1.0
-        //for (var channel = 0; channel < channels; channel++) {
-        //    // This gives us the actual array that contains the data
-        //    var nowBuffering = myArrayBuffer.getChannelData(channel);
-        //    var bufferdata = buffer.buffer.getChannelData(channel);
-        //    for (var i = 0; i < frameCount; i++) {
-        //        // Math.random() is in [0; 1.0]
-        //        // audio needs to be in [-1.0; 1.0]
-        //        nowBuffering[i] = bufferdata[i + frame_start];
-        //    }
-        //}
-        //var source = audioCtx.createBufferSource();
-
-        //// set the buffer in the AudioBufferSourceNode
-        //source.buffer = myArrayBuffer;
-        //return { name: MEPH.GUID(), buffer: source, type: '' };
     },
     copyBuffer: function (resource, frame_start, frame_end, options) {
         var me = this;
@@ -269,6 +261,48 @@ MEPH.define('MEPH.audio.Audio', {
         source.buffer = myArrayBuffer;
         return { name: MEPH.GUID(), buffer: source, type: '' };
 
+    },
+    /**
+     * @private
+     **/
+    cutOutSection: function (resource, frame_start, frame_end, options) {
+        var me = this;
+        frame_end = Math.round(frame_end);
+        frame_start = Math.round(frame_start);
+        var buffer = resource.buffer;
+        var rate = buffer.buffer.sampleRate;
+        var channels = buffer.channelCount;
+        var frameCount = frame_end - frame_start;
+        var bufferCount = buffer.buffer.duration * rate;
+        frameCount = Math.round(frameCount);
+        bufferCount -= frameCount;
+        frameCount = bufferCount
+        var audioCtx = me.createContext(options);
+        var myArrayBuffer = audioCtx.createBuffer(channels, frameCount, audioCtx.sampleRate);
+
+        // Fill the buffer with white noise;
+        // just random values between -1.0 and 1.0
+        for (var channel = 0; channel < channels; channel++) {
+            // This gives us the actual array that contains the data
+            var nowBuffering = myArrayBuffer.getChannelData(channel);
+            var bufferdata = buffer.buffer.getChannelData(channel);
+            for (var i = 0; i < frameCount; i++) {
+                // Math.random() is in [0; 1.0]
+                // audio needs to be in [-1.0; 1.0]
+                if (i < frame_start) {
+                    nowBuffering[i] = bufferdata[i];
+                }
+                else {
+
+                    nowBuffering[i] = bufferdata[i + frame_end];
+                }
+            }
+        }
+        var source = audioCtx.createBufferSource();
+
+        // set the buffer in the AudioBufferSourceNode
+        source.buffer = myArrayBuffer;
+        return { name: MEPH.GUID(), buffer: source, type: '' };
     },
     createBuffer: function (channels, frameCount, sampleRate, options) {//2, frameCount, audioCtx.sampleRate
         var me = this;

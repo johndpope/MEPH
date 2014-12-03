@@ -7,7 +7,9 @@ MEPH.define('MEPH.audio.view.Visualizer', {
     alias: 'visualizer',
     templates: true,
     extend: 'MEPH.control.Control',
-    requires: ['MEPH.input.Range'],
+    requires: ['MEPH.input.Range',
+        'MEPH.util.Style',
+        'MEPH.util.Dom'],
     properties: {
         /**
          * @property {String} cls
@@ -48,6 +50,85 @@ MEPH.define('MEPH.audio.view.Visualizer', {
                 });
             }
         })
+    },
+    onMouseDown: function () {
+        var me = this;
+
+        me.targetStart = MEPH.util.Dom.getEventPositions(MEPH.Array(arguments).last().domEvent).first();
+
+        Style.top(me.mousehover, 0);
+        Style.height(me.mousehover, me.height);
+        Style.width(me.mousehover, 0);
+        if (me.mousehover) {
+            me.mousehover.classList.add('active');
+        }
+    },
+    onMouseMove: function () {
+        var me = this, pos;
+        if (me.targetStart) {
+            pos = MEPH.util.Dom.getEventPositions(MEPH.Array(arguments).last().domEvent).first();
+            if (pos) {
+
+                me.targetWidth = pos.x - me.targetStart.x;
+
+                if (me.mousehover) {
+                    if (me.targetWidth > 0) {
+                        Style.left(me.mousehover, me.targetStart.x);
+                        Style.width(me.mousehover, me.targetWidth);
+                    }
+                    else {
+                        Style.left(me.mousehover, me.targetStart.x + me.targetWidth);
+                        Style.width(me.mousehover, me.targetWidth * -1);
+                    }
+                }
+            }
+        }
+    },
+    onMouseUp: function () {
+        var me = this, pos;
+
+        if (me.targetStart) {
+            me.setSelectedRange(me.targetStart.x, me.targetWidth);
+            me.targetStart = null;
+        }
+    },
+    setSelectedRange: function (start, width) {
+        var me = this,
+            buffer = me.getBuffer(),
+            pixels = me.width;
+        if (buffer && me.getAbsoluteMarkPosition) {
+            if (width < 0) {
+                start = start + width;
+                width = width * -1;
+            }
+            me.selectedRange = {};
+            me.selectedRange.start = start
+            me.selectedRange.end = start + width;// ;
+        }
+    },
+    cutSectionOut: function () {
+        var me = this, pixels = me.width;
+        if (me.selectedRange) {
+            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
+            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
+            if (end - start > 10) {
+                var res = MEPH.audio.Audio.cutOutSection(me.source, start, end, null);
+                me.source.buffer = res.buffer;
+            }
+        }
+    },
+    trimSection: function () {
+        var me = this,
+            pixels = me.width;
+        if (me.selectedRange) {
+            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
+            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
+            console.log('start : ' + start + ' ' + ' end ' + end)
+            if (end - start > 10) {
+                var res = MEPH.audio.Audio.clipBuffer(me.source, start, end, null);
+                me.source.buffer = res.buffer;
+            }
+        }
     },
     sourceChanged: function (args) {
         var me = this;
@@ -136,7 +217,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             var end = length + start;
             var skip = length / pixels
 
-            return buffer.skipEveryFromTo(Math.round(skip), Math.round(start), Math.round(end), function (x) {
+            return buffer.skipEveryFromTo(Math.round(skip) || 1, Math.round(start), Math.round(end), function (x) {
                 return x;
             });
 

@@ -177,8 +177,96 @@
                         app.removeSpace();
                     }
                     r();
-                }, 1000)
+                }, 100)
             });
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+    it('can detect mouse down on the canvas ', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom, called,
+                visualizer = results.first().classInstance;
+            ///Assert
+            var drawn;
+
+            visualizer.canvas.dispatchEvent(MEPH.createEvent('mousedown', { offsetX: 1, offsetY: 1 }));
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(visualizer.targetStart).toBeTruthy();
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 100)
+            });
+
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+
+    it('can detect mouse move on the canvas ', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom, called,
+                visualizer = results.first().classInstance;
+            ///Assert
+            var drawn;
+            visualizer.targetStart = { x: 0, y: 0 };
+            visualizer.canvas.dispatchEvent(MEPH.createEvent('mousemove', { offsetX: 1, offsetY: 1 }));
+
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(visualizer.targetWidth).toBe(1);
+
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 100)
+            });
+
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        })
+    });
+
+
+    it('can detect mouse up on the canvas ', function (done) {
+        MEPH.render('MEPH.audio.view.Visualizer', 'visualizer').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+            var dom, called,
+                visualizer = results.first().classInstance;
+            ///Assert
+            var drawn;
+            visualizer.targetStart = { x: 0, y: 0 };
+            visualizer.targetWidth = 1;
+            visualizer.canvas.dispatchEvent(MEPH.createEvent('mouseup', {}));
+
+            return new Promise(function (r) {
+                setTimeout(function () {
+                    expect(visualizer.targetWidth).toBe(1);
+                    expect(visualizer.targetStart).toBe(null);
+                    if (app) {
+                        app.removeSpace();
+                    }
+                    r();
+                }, 100)
+            });
+
         }).catch(function (error) {
             expect(error || new Error('did not render as expected')).caught();
         }).then(function () {
