@@ -59,7 +59,7 @@ MEPH.define('MEPH.audio.AudioResources', {
                     soundfontInstrument: soundfontInstrument
                 });
             }
-            else if (resource.file && resource.file.type === "audio/wav") {
+            else if (resource.file && (resource.file.type === "audio/wav" || resource.file.type === "audio/mp3")) {
                 promise = promise.then(function () {
                     var audio = new MEPH.audio.Audio();
                     return audio.loadByteArray(resource.res, null, resource.file.name, resource.file.type).then(function (buffer) {
@@ -89,6 +89,7 @@ MEPH.define('MEPH.audio.AudioResources', {
         var result = graph.saveGraph();
         result.id = result.id || MEPH.GUID();
         result.name = name;
+        result.file = name;
         audiobuffer.destroy();
         return result;
     },
@@ -115,6 +116,28 @@ MEPH.define('MEPH.audio.AudioResources', {
         });
         me.resources.push.apply(me.resources, newresources);
         MEPH.publish(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, {});
+    },
+    getDuration: function (id) {
+        var me = this;
+        debugger
+        var resource = me.getResourceById(id);
+        if (resource) {
+            if (resource.nodes) {
+
+                var devalue = resource.nodes.first(function (x) {
+                    return x.data.type === "MEPH.audio.graph.node.AudioBufferSourceNode";
+                })
+                if (devalue && devalue.data && devalue.data.nodeInputs) {
+                    devalue = devalue.data.nodeInputs.first(function (x) {
+                        return x.title === 'source';
+                    });
+                    if (devalue) {
+                        var bufferid = devalue.defaultValue;
+                    }
+                }
+            }
+        }
+
     },
     getGraphs: function () {
         var me = this;

@@ -154,23 +154,28 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     },
     updateResources: function () {
         var me = this;
-        me.resources.clear();
-        me.$inj.audioResources.getResources().foreach(function (t) {
-            if (t.resource && t.resource.file) {
-                me.resources.push({
-                    name: t.resource.file.name,
-                    id: t.id,
-                    type: 'font'
-                });
-            }
-            else if (t.name) {
-                me.resources.push({
-                    name: t.name,
-                    id: t.id,
-                    type: 'graph'
-                });
-            }
-        })
+        if (me.$updateTimeout) {
+            clearTimeout(me.$updateTimeout);
+        }
+        me.$updateTimeout = setTimeout(function () {
+            var resources = me.$inj.audioResources.getResources();
+            me.resources = resources.select(function (t) {
+                if (t.resource && t.resource.file) {
+                    return ({
+                        name: t.resource.file.name,
+                        id: t.id,
+                        type: 'font'
+                    });
+                }
+                else if (t.name) {
+                    return ({
+                        name: t.name,
+                        id: t.id,
+                        type: 'graph'
+                    });
+                }
+            })
+        }, 1000)
     },
     viewResource: function (resource, type) {
         var me = this;
@@ -453,7 +458,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 }
                 else if (item && typeof item.source === 'string') {
                     if (item.duration === null) {
-                        return me.singleUnit;
+                        var audio = item.getAudio();
+                        var res;
+                        if (audio.getSourceDuration)
+                            res = audio.getSourceDuration();
+                        if (res) {
+                            try {
+                                res = res * (parseFloat(me.beatspermin) / 60) * me.smallestnote;
+                            } catch (e) { res = 0; }
+                        }
+                        return me.singleUnit;//res || 
                     }
                     result = item.duration;
                 }

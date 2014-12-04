@@ -84,7 +84,7 @@ MEPH.define('MEPH.audio.Audio', {
                     var peaks,
                         initialThresold = 0.9,
                         thresold = initialThresold,
-                        minThresold = 0.3,
+                        minThresold = 0.1,
                         minPeaks = 30;
 
                     do {
@@ -466,10 +466,20 @@ MEPH.define('MEPH.audio.Audio', {
      * Sets the duration to be played.
      **/
     duration: function (time) {
+        var me = this;
         if (time !== undefined) {
             this.$duration = time;
         }
         return this.$duration;
+    },
+    getSourceDuration: function () {
+        var me = this;
+        var duration = me.nodes.where(function (x) {
+            return x.type === MEPH.audio.Audio.nodeTypes.buffer;
+        }).maximum(function (node) {
+            return node.buffer.duration;
+        })
+        return duration || 0;
     },
     getBufferSources: function () {
         var me = this, Audio = MEPH.audio.Audio;
@@ -1026,7 +1036,11 @@ MEPH.define('MEPH.audio.Audio', {
     getNodeToConnectTo: function () {
         var me = this;
         var node = me.nodes.first();
+
         if (node) {
+            if (!me.completed) {
+                me.complete();
+            }
             return node.node;
         }
         return null;

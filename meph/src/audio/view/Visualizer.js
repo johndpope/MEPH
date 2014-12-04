@@ -145,7 +145,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             var source = me.getDataToDraw(me.source, WIDTH);
             if (source && source.max) {
                 var dataArray = source;
-                var max = source.max(function (x) { return Math.abs(x); });
+                var max = 1;// source.max(function (x) { return Math.abs(x); });
                 var bufferLength = source.length;
                 var sliceWidth = WIDTH * 1.0 / bufferLength;
                 var x = 0;

@@ -53,7 +53,10 @@
 <!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "canvas", "before" : true -->
 <div class="btn-group">
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addMark | c$.cancelEvent">
-        <span class="glyphicon glyphicon-plus"></span>
+        <span class="glyphicon glyphicon-tag"></span>
+    </mephbutton>
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addSelectionAsMarks | c$.cancelEvent">
+        <span class="glyphicon glyphicon-tags"></span>
     </mephbutton>
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.playClip | c$.cancelEvent">
         <span class="glyphicon glyphicon-play"></span>

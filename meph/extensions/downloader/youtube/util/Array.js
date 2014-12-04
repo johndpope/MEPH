@@ -78,6 +78,25 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.maximum) {
+                Object.defineProperty(array, 'maximum', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var result = null;
+                        var _result = null;
+                        var collection = this;
+                        for (var i = 0 ; i < collection.length; i++) {
+                            if (result == null || func(collection[i]) > result) {
+                                result = func(collection[i]);
+                                _result = collection[i];
+                            }
+                        }
+                        return result;
+                    }
+                });
+            }
             if (!array.intersection) {
                 Object.defineProperty(array, 'intersection', {
                     enumerable: false,

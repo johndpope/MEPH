@@ -14,11 +14,11 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioSelect', {
     extend: 'MEPH.audio.graph.node.controls.AudioControl',
     enterValue: function () {
         //var me = this;
-        var me = this, source = (me.source || []).select(function (x) {
+        var me = this, source = (me.source || []).where().select(function (x) {
             if (typeof x === 'object') {
                 return {
-                    title: (x[me.titlekey] || x.title).substring(0, 30),
-                    value: x[me.valuekey] || x.value
+                    title: (x ? x[me.titlekey] || x.title : 'untitled').substring(0, 30),
+                    value: (x ? x[me.valuekey] || x.value : null)
                 }
             }
             else {

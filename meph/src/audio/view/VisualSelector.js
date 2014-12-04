@@ -66,6 +66,31 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             })
         }
     },
+    addSelectionAsMarks: function () {
+        var me = this, pixels = me.width;
+
+        if (me.selectedRange) {
+            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels);
+            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels);
+
+            if (me.marks && !me.marks.some(function (x) {
+           return x.position === start;
+            })) {
+                me.marks.push({
+                    position: start,
+                    type: me.marktype
+                })
+            }
+            if (me.marks && !me.marks.some(function (x) {
+          return x.position === end;
+            })) {
+                me.marks.push({
+                    position: end,
+                    type: me.marktype
+                })
+            }
+        }
+    },
     getAbsoluteMarkPosition: function (position, magnification, timeOffset) {
         var result,
             me = this,

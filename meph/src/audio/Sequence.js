@@ -283,7 +283,7 @@ MEPH.define('MEPH.audio.Sequence', {
                 relativeTimeOffset: timeOffset || 0,
                 duration: duration,
                 getAudio: function () {
-                    if (typeof this.source === 'string') {
+                    if (typeof this.source === 'string' && this.audioSource) {
                         this.audioSource.duration(this.duration);
                         return this.audioSource;
                     }
