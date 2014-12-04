@@ -159,7 +159,7 @@
     var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
 
     it('can play a buffer source ', function (done) {
-        var audio = new MEPH.audio.Audio(); 
+        var audio = new MEPH.audio.Audio();
         audio.load(audiofile, audiofiletyp).then(function (resource) {
             audio.buffer(resource.buffer).complete();
 
@@ -173,6 +173,39 @@
         });
     });
 
+    it('can detect pitch', function () {
+        var frameCount = 44100;
+        var audio = new MEPH.audio.Audio();
+        var audioCtx = audio.createContext();
+        var myArrayBuffer = audioCtx.createBuffer(2, frameCount/2, frameCount);
+        for (var channel = 0 ; channel < 2 ; channel++) {
+            var buf = myArrayBuffer.getChannelData(channel);
+            for (var i = 0; i < frameCount / 2; i++) {
+                buf[i] = Math.sin(i / frameCount * 420);
+            }
+        }
+        
+
+        var res = MEPH.audio.Audio.updatePitch(myArrayBuffer.getChannelData(0), frameCount);
+        
+        expect(res).toBeTruthy();
+    });
+
+    it('can detect pitch', function (done) {
+        var audio = new MEPH.audio.Audio();
+
+        audio.load('../specs/data/C4.mp3', 'mp3').then(function (resource) {
+            expect(resource.buffer.buffer).toBeTruthy();
+            
+            var res = MEPH.audio.Audio.updatePitch(resource.buffer.buffer.getChannelData(0), resource.buffer.buffer.sampleRate);
+            
+            expect(res).toBeTruthy();
+
+        }).then(function () {
+            expect((new MEPH.audio.Audio()).getBufferSources().length).toBeTruthy();
+            done();
+        });
+    })
 
     it('can detect the bpm ', function (done) {
         var audio = new MEPH.audio.Audio();
@@ -181,7 +214,7 @@
             return MEPH.audio.Audio.bpm(resource.buffer).then(function (res) {
 
                 expect(res).toBeTruthy();
-                debugger
+
             })
         }).catch(function (e) {
             expect(e).caught();
