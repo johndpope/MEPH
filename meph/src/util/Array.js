@@ -717,6 +717,7 @@ MEPH.define('MEPH.util.Array', {
                     value: function (func) {
                         var result = 0;
                         var collection = this;
+                        func = func || function (x) { return x; }
                         for (var i = 0; i < collection.length ; i++) {
                             result += func(collection[i], i);
                         }

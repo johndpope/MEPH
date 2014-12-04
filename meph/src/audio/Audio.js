@@ -67,6 +67,116 @@ MEPH.define('MEPH.audio.Audio', {
             return audio.copyToBuffer(resource, 0, resource.buffer.buffer.duration, options);
 
         },
+        bpm: function (buffer) {
+            return new Promise(function (r) {
+                var audio = new MEPH.audio.Audio();
+                var context = MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(1, buffer.buffer.length, buffer.buffer.sampleRate);;
+                audio.buffer(buffer.buffer, { name: 'buffer' }).biquadFilter({ type: 'lowpass' }).complete({
+                    channels: 1,
+                    length: buffer.buffer.length,
+                    sampleRate: buffer.buffer.sampleRate
+                });
+                var oncompleted = function (e) {
+
+                    // Filtered buffer!
+                    var filteredBuffer = e.renderedBuffer;
+
+                    var peaks,
+                        initialThresold = 0.9,
+                        thresold = initialThresold,
+                        minThresold = 0.3,
+                        minPeaks = 30;
+
+                    do {
+                        peaks = MEPH.audio.Audio.getPeaksAtThreshold(e.renderedBuffer.getChannelData(0), thresold);
+                        thresold -= 0.05;
+                    } while (peaks.length < minPeaks && thresold >= minThresold);
+
+
+                    var intervals = MEPH.audio.Audio.countIntervalsBetweenNearbyPeaks(peaks);
+
+                    var groups = MEPH.audio.Audio.groupNeighborsByTempo(intervals, filteredBuffer.sampleRate);
+
+                    context.removeEventListener(oncompleted);
+                    r(groups.where(function (x) {
+                        return !isNaN(x.tempo);
+                    }).orderBy(function (x, y) {
+                        return y.count - x.count;
+                    }));
+                }
+
+                var node = audio.get({ name: 'buffer' }).first();
+                node.node.start(context.currentTime);
+
+                context.startRendering();
+                context.addEventListener('complete', oncompleted);
+            });
+
+        },
+        // https://github.com/JMPerez/beats-audio-api/blob/gh-pages/script.js
+        // Function used to return a histogram of peak intervals
+        countIntervalsBetweenNearbyPeaks: function (peaks) {
+            var intervalCounts = [];
+            peaks.foreach(function (peak, index) {
+                for (var i = 0; i < 10; i++) {
+                    var interval = peaks[index + i] - peak;
+                    var foundInterval = intervalCounts.some(function (intervalCount) {
+                        if (intervalCount.interval === interval)
+                            return intervalCount.count++;
+                    });
+                    if (!foundInterval) {
+                        intervalCounts.push({
+                            interval: interval,
+                            count: 1
+                        });
+                    }
+                }
+            });
+            return intervalCounts;
+        },
+        // https://github.com/JMPerez/beats-audio-api/blob/gh-pages/script.js
+        // Function used to return a histogram of tempo candidates.
+        groupNeighborsByTempo: function (intervalCounts, sampleRate) {
+            var tempoCounts = [];
+            intervalCounts.foreach(function (intervalCount, i) {
+                if (intervalCount.interval !== 0) {
+                    // Convert an interval to tempo
+                    var theoreticalTempo = 60 / (intervalCount.interval / sampleRate);
+
+                    // Adjust the tempo to fit within the 90-180 BPM range
+                    while (theoreticalTempo < 90) theoreticalTempo *= 2;
+                    while (theoreticalTempo > 180) theoreticalTempo /= 2;
+
+                    theoreticalTempo = Math.round(theoreticalTempo);
+                    var foundTempo = tempoCounts.some(function (tempoCount) {
+                        if (tempoCount.tempo === theoreticalTempo)
+                            return tempoCount.count += intervalCount.count;
+                    });
+                    if (!foundTempo) {
+                        tempoCounts.push({
+                            tempo: theoreticalTempo,
+                            count: intervalCount.count
+                        });
+                    }
+                }
+            });
+            return tempoCounts;
+        },
+        // https://github.com/JMPerez/beats-audio-api/blob/gh-pages/script.js
+        // Function to identify peaks
+        getPeaksAtThreshold: function (data, threshold) {
+            var peaksArray = [];
+            var length = data.length;
+            for (var i = 0; i < length;) {
+                if (data[i] > threshold) {
+                    peaksArray.push(i);
+                    // Skip forward ~ 1/4s to get past this peak.
+                    i += 10000;
+                }
+                i++;
+            }
+            return peaksArray;
+        },
         analyze: function (audiofile, audiofiletyp, resolution) {
             var audio = new MEPH.audio.Audio(),
                 func = function (result) {
@@ -413,7 +523,9 @@ MEPH.define('MEPH.audio.Audio', {
         var me = this;
         if (options || me.offlineMode) {
             me.offlineMode = true;
-            var audioCtx = MEPH.audio.Audio.OfflineAudioContext || me.offlineAudioCtx || new (window.OfflineAudioContext)(options.channels || 32, options.length || 10000, options.sampleRate || 44100);
+            options = options || {};
+            var audioCtx = MEPH.audio.Audio.OfflineAudioContext || me.offlineAudioCtx ||
+                new (window.OfflineAudioContext)(options.channels || 32, options.length || 10000, options.sampleRate || 44100);
             if (options) {
                 audioCtx.addEventListener('complete', options.oncomplete);
             }

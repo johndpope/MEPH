@@ -159,8 +159,7 @@
     var audiofile = '../specs/data/The_Creek.mp3', audiofiletyp = 'mp3';
 
     it('can play a buffer source ', function (done) {
-        var audio = new MEPH.audio.Audio();
-
+        var audio = new MEPH.audio.Audio(); 
         audio.load(audiofile, audiofiletyp).then(function (resource) {
             audio.buffer(resource.buffer).complete();
 
@@ -172,6 +171,21 @@
 
             }, 2000)
         });
+    });
+
+
+    it('can detect the bpm ', function (done) {
+        var audio = new MEPH.audio.Audio();
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            return MEPH.audio.Audio.bpm(resource.buffer).then(function (res) {
+
+                expect(res).toBeTruthy();
+                debugger
+            })
+        }).catch(function (e) {
+            expect(e).caught();
+        }).then(done);
     });
 
     it('can serialize a audiobuffer object to a string', function () {

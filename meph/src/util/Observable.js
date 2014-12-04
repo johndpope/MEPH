@@ -66,7 +66,7 @@ MEPH.define('MEPH.util.Observable', {
             });
         },
         canObserve: function (object) {
-            return ![AudioBuffer, AudioContext, ArrayBuffer].some(function (x) { return object instanceof x; });
+            return ![AudioBuffer, AudioContext, ArrayBuffer, AudioBufferSourceNode].some(function (x) { return object instanceof x; });
         },
         /**
          * Makes the passed object observable.

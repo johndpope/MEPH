@@ -91,7 +91,6 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         var inbucket;
         var outbucket;
         if (!audioresult) return;
-        debugger
         var audio = new MEPH.audio.Audio();
         audio.buffer(audioresult.buffer, { name: 'buffer' })
             .processor({
@@ -313,7 +312,22 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                 x.dom.style.left = (rel) + 'px';
                 x.dom.style.top = (me.height - me.offsetbtnheight) + 'px';
             })
+            //
         }
+    },
+    getBufferSampleRate: function () {
+        var me = this, buffer = me.getBuffer();
+        if (buffer)
+            return me.source.buffer.buffer.sampleRate;
+        return null;
+    },
+    getBufferLength: function () {
+        var me = this, buffer = me.getBuffer();
+
+        if (buffer) {
+            return buffer.length;
+        }
+        return null;
     },
     createNewMarkerBtns: function (newmarks) {
         var me = this;
@@ -371,7 +385,28 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return me.updateMarker();
         }).then(function () {
             me.draw();
-        })
+        });
+    },
+    updateBpm: function () {
+        var me = this;
+        if (me.source) {
+            MEPH.audio.Audio.bpm(me.source.buffer).then(function (res) {
+                if (res && res.length) {
+                    var bpm = res.subset(0, 4)
+                        .orderBy(function (x, y) {
+                            return y.count - x.count;
+                        })
+                        .select(function (x, index) {
+                            return 'Tempo :' + x.tempo + '(Score:' + x.count + ')  ';
+                        }).join('|');
+                    setTimeout(function () {
+                        me.calculatedBpm = bpm;
+                    }, 10)
+                }
+            }).catch(function (e) {
+                MEPH.Log(e);
+            });
+        }
     },
     updateMarks: function () {
         var me = this;

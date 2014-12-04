@@ -20,6 +20,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
         baseCls: 'visualizer col-md-3',
 
         height: 200,
+        calculatedBpm: '',
 
         width: 300,
         maxsize: 20000,
@@ -109,6 +110,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
     sourceChanged: function (args) {
         var me = this;
         me.draw(args.value);
+
     },
     calculateLeft: function (args) {
 

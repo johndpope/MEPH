@@ -27,6 +27,13 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.shiftPitch | c$.cancelEvent">
         <span class="glyphicon glyphicon-filter"></span>
     </mephbutton>
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.updateBpm | c$.cancelEvent">
+        <span class="glyphicon glyphicon-bold"></span>
+    </mephbutton>
+</div>
+<div class="col-md-12">
+    <span>BPM:</span>
+    <span data-bind='"innerHTML":"c$.calculatedBpm"'></span>
 </div>
 <div style="display:none">
     <div mephid="markerBtnTemplate" class="btn-group" style="position:absolute; z-index:100">
