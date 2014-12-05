@@ -8,7 +8,7 @@
            meph-data-min="0.001"
            meph-data-max="1"></range>
 </div>
-<div class="visualizer col-md-4">
+<div class="visualizer col-md-2">
     <range descriptiontext="Time"
            meph-event-change="c$.sourceChanged | c$.update"
            meph-data-value="c$.timeScroll"
@@ -16,20 +16,57 @@
            meph-data-min="0"
            meph-data-max="1"></range>
 </div>
-<div class="visualizer col-md-3">
+<div class="visualizer col-md-1">
     <range descriptiontext="Pitch shift"
            meph-data-value="c$.pitchShift"
            meph-data-step="0.001"
            meph-data-min="0.1"
            meph-data-max="2"></range>
 </div>
+<div class="visualizer col-md-1">
+    <span data-bind='"innerHTML":"c$.silenceThreshold"'></span>
+    <range descriptiontext="Silence threshold"
+           meph-data-value="c$.silenceThreshold"
+           meph-data-step="0.0001"
+           meph-data-min="0.0001"
+           meph-data-max="1"></range>
+</div>
+<div class="visualizer col-md-1">
+    <span data-bind='"innerHTML":"c$.silenceTimeThreshold"'></span>
+    <range descriptiontext="Silence time threshold"
+           meph-data-value="c$.silenceTimeThreshold"
+           meph-data-step="1"
+           meph-data-min="10"
+           meph-data-max="10000"></range>
+</div>
+<div class="visualizer col-md-1">
+    <span data-bind='"innerHTML":"c$.silenceTimeSticky"'></span>
+    <range descriptiontext="Silence time stickiness"
+           meph-data-value="c$.silenceTimeSticky"
+           meph-data-step="1"
+           meph-data-min="1"
+           meph-data-max="1000"></range>
+</div>
+
+<div class="visualizer col-md-1">
+    <h3 data-bind='"innerHTML":"c$.detectedPitch.note"'></h3>
+    <h4 data-bind='"innerHTML":"c$.detectedPitch.pitch"'></h4>
+    <h6 data-bind='"innerHTML":"c$.detectedPitch.detune"'></h6>
+</div>
 <div class="col-md-1">
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.shiftPitch | c$.cancelEvent">
-        <span class="glyphicon glyphicon-filter"></span>
+        <span title="Play pitch shifted" class="glyphicon glyphicon-filter"></span>
     </mephbutton>
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.updateBpm | c$.cancelEvent">
-        <span class="glyphicon glyphicon-bold"></span>
+        <span title="Detect BPM" class="glyphicon glyphicon-bold"></span>
     </mephbutton>
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.detectPitch | c$.cancelEvent">
+        <span title="Detect Pitch" class="glyphicon glyphicon-camera"></span>
+    </mephbutton>
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.detectSilence | c$.cancelEvent">
+        <span title="Detect Silent Areas" class="glyphicon glyphicon-headphones"></span>
+    </mephbutton>
+
 </div>
 <div class="col-md-12">
     <span>BPM:</span>
@@ -105,4 +142,9 @@
         style="position:absolute; top:0; z-index:31;"
         meph-data-height="c$.height"
         meph-data-width="c$.width"></canvas>
+<div meph-data-width="c$.width"
+     style=" position:absolute; z-index:19;"
+     mephid="silenceThresholdDiv"
+     class="noresponse infoarea"
+     meph-data-height="c$.silenceThresholdHeight"></div>
 <!-- "instruction": true, "name" : "injectop", "close": true -->

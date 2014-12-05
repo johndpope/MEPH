@@ -92,6 +92,11 @@ $padding-distance: 20px;
     pointer-events: none;
 }
 
+.infoarea {
+    background-color: rgba(186, 204, 93, 0.5);
+    border: dotted 1px rgba(186, 204, 93, 0.2);
+}
+
 .selectarea.active,
 .activearea.active {
     display: block;

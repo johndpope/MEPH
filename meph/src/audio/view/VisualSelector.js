@@ -27,10 +27,14 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         markerBtns: null,
         pitchShift: .5,
         smallestStep: 0.0000001,
+        silenceThreshold: 0,
+        silenceTimeSticky: 0,
+        silenceTimeThreshold: 0,
         renderer: null,
         injectControls: {
             location: 'buttonpanel'
         },
+        detectedPitch: null,
         $signalProcessor: null,
         markerrenderer: null
     },
@@ -39,6 +43,8 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         me.super();
         me.markerBtns = [];
         me.$signalProcessor = new SignalProcessor();;
+
+        Observable.defineDependentProperty('silenceThresholdHeight', me, ['silenceThreshold'], me.calculateSilenceThreholdHeight.bind(me));
         me.on('altered', function (type, args) {
             if (args.path === 'marks') {
                 if (me.marks) {
@@ -53,6 +59,16 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }
         });
     },
+    calculateSilenceThreholdHeight: function () {
+        var me = this,
+            height = me.height || 0,
+            st = me.silenceThreshold || 0, stheight = height * st;
+
+        Style.top(me.silenceThresholdDiv, (height / 2) - (stheight / 2));
+        Style.height(me.silenceThresholdDiv, stheight);
+        Style.width(me.silenceThresholdDiv, me.width);
+        return stheight;
+    },
     addMark: function () {
         var me = this,
             relativePosition = me.getCurrentPosition();
@@ -65,6 +81,96 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                 type: me.marktype
             })
         }
+    },
+    detectPitch: function () {
+        var me = this, clip = me.getSelectedClip();
+        if (clip) {
+            var res = MEPH.audio.Audio.updatePitch(clip.buffer.buffer.getChannelData(0), me.source.buffer.buffer.sampleRate);
+            me.detectedPitch = res;
+        }
+    },
+    getSelectedClip: function () {
+        var me = this,
+            startstop = me.getStartEndPosition();
+        if (startstop) {
+            var start = startstop.start;
+            var end = startstop.end;
+            if (me.source) {
+                var clip = me.getClip(me.source, start, end);
+                return clip;
+            }
+        }
+        return null;
+    },
+    getStartEndPosition: function () {
+        var me = this,
+         pixels = me.width;
+        if (me.selectedRange) {
+            var start = me.getAbsoluteMarkPosition(me.selectedRange.start / pixels) / me.source.buffer.buffer.sampleRate;
+            var end = me.getAbsoluteMarkPosition((me.selectedRange.end) / pixels) / me.source.buffer.buffer.sampleRate;
+            return {
+                start: start,
+                end: end
+            }
+        }
+        return null;
+    },
+    detectSilence: function () {
+        var me = this,
+            startend = me.getStartEndPosition(),
+            clip = me.getSelectedClip();
+
+        if (clip) {
+            var sampleRate = me.source.buffer.buffer.sampleRate;
+            var res = MEPH.audio.Audio.detectSilence(clip.buffer.buffer.getChannelData(0), parseFloat(me.silenceThreshold), parseFloat(me.silenceTimeThreshold),
+                parseFloat(me.silenceTimeSticky));
+            me.renderAreasOfInterest('silence', res.select(function (x) {
+                return {
+                    start: x.start + startend.start * sampleRate,
+                    end: x.end + startend.start * sampleRate
+                }
+            }));
+        }
+    },
+    renderAreasOfInterest: function (type, areas) {
+        var me = this,
+            container = me.container,
+            interestAreas = me.$areasOfInterest || [];
+        debugger
+
+        var newareas = areas.select(function (x) {
+            var left = me.getRelativeMarkPosition(x.start);
+            var right = me.getRelativeMarkPosition(x.end);
+            if (right - left < 5) {
+                return null;
+            }
+            var area = interestAreas.unshift(),
+                div;
+
+            if (area) {
+                div = area.div;
+            }
+
+            div = div || document.createElement('div');
+            Style.height(div, me.height);
+            Style.absolute(div);
+            Style.top(div, 0);
+            div.classList.add('infoarea');
+            if (div.parentNode !== container)
+                container.appendChild(div);
+            Style.left(div, left);
+            Style.width(div, right - left);
+            return {
+                div: div,
+                start: x.start,
+                end: x.end
+            }
+        }).where();
+        interestAreas.foreach(function (t) {
+            t.div.parentNode.removeChild(t.div);
+        })
+
+        me.$areasOfInterest = newareas;
     },
     addSelectionAsMarks: function () {
         var me = this, pixels = me.width;
@@ -148,11 +254,14 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         if (me.source) {
             var start = timeScroll * source.buffer.buffer.duration;
             var time = source.buffer.buffer.duration * magnification;
-
-            var snippet = MEPH.audio.Audio.clip(source, start, Math.min(source.buffer.buffer.duration, time + start));
+            var snippet = me.getClip(source, start, start + time);
             return snippet;
         }
         return null;
+    },
+    getClip: function (source, start, stop) {
+        var snippet = MEPH.audio.Audio.clip(source, start, Math.min(source.buffer.buffer.duration, stop));
+        return snippet;
     },
     playClip: function () {
         var me = this;

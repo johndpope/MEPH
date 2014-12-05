@@ -53,6 +53,9 @@
         backgroundColor: function (dom, color) {
             dom.style.backgroundColor = color;
         },
+        absolute: function(dom){
+            Style.position(dom, 'absolute');
+        },
         position: function (dom, position) {
             dom.style.position = position;
         },

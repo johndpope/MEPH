@@ -177,28 +177,70 @@
         var frameCount = 44100;
         var audio = new MEPH.audio.Audio();
         var audioCtx = audio.createContext();
-        var myArrayBuffer = audioCtx.createBuffer(2, frameCount/2, frameCount);
+        var myArrayBuffer = audioCtx.createBuffer(2, frameCount / 2, frameCount);
         for (var channel = 0 ; channel < 2 ; channel++) {
             var buf = myArrayBuffer.getChannelData(channel);
             for (var i = 0; i < frameCount / 2; i++) {
                 buf[i] = Math.sin(i / frameCount * 420);
             }
         }
-        
+
 
         var res = MEPH.audio.Audio.updatePitch(myArrayBuffer.getChannelData(0), frameCount);
-        
+
         expect(res).toBeTruthy();
     });
+
+    it('can detect silence', function () {
+        var frameCount = 44100;
+        var audio = new MEPH.audio.Audio();
+        var audioCtx = audio.createContext();
+        var myArrayBuffer = audioCtx.createBuffer(2, frameCount, frameCount);
+        for (var channel = 0 ; channel < 2 ; channel++) {
+            var buf = myArrayBuffer.getChannelData(channel);
+            for (var i = 0; i < frameCount ; i++) {
+                if (i > frameCount / 2 && i < (frameCount / 2 + (frameCount / 8)))
+                    buf[i] = Math.sin(i / frameCount * 420);
+            }
+        }
+
+
+        var buff = myArrayBuffer.getChannelData(0);
+        var res = MEPH.audio.Audio.detectSilence(buff);
+
+        expect(res).toBeTruthy();
+        expect(res.length).toBe(2);
+    })
+
+    it('can detect silence (with level considered silent)', function () {
+        var frameCount = 44100;
+        var audio = new MEPH.audio.Audio();
+        var audioCtx = audio.createContext();
+        var myArrayBuffer = audioCtx.createBuffer(2, frameCount, frameCount);
+        for (var channel = 0 ; channel < 2 ; channel++) {
+            var buf = myArrayBuffer.getChannelData(channel);
+            for (var i = 0; i < frameCount ; i++) {
+                if (i > frameCount / 2 && i < (frameCount / 2 + (frameCount / 8)))
+                    buf[i] = Math.sin(i / frameCount * 420);
+            }
+        }
+
+
+        var buff = myArrayBuffer.getChannelData(0);
+        var res = MEPH.audio.Audio.detectSilence(buff, .001, 1000);
+        
+        expect(res).toBeTruthy();
+        expect(res.length).toBeTruthy();
+    })
 
     it('can detect pitch', function (done) {
         var audio = new MEPH.audio.Audio();
 
         audio.load('../specs/data/C4.mp3', 'mp3').then(function (resource) {
             expect(resource.buffer.buffer).toBeTruthy();
-            
+
             var res = MEPH.audio.Audio.updatePitch(resource.buffer.buffer.getChannelData(0), resource.buffer.buffer.sampleRate);
-            
+
             expect(res).toBeTruthy();
 
         }).then(function () {
@@ -306,7 +348,7 @@
 
             var result = audio.copyToBuffer(resource, 50, 50.1, {});
 
-            audio.buffer(result.buffer).complete({
+            audio.buffer(result.buffer).clearContext().complete({
                 length: 2,
                 numOfChannels: resource.buffer.channelCount,
                 sampleRate: resource.buffer.buffer.sampleRate,

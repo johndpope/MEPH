@@ -82,7 +82,7 @@ MEPH.define('MEPH.audio.Audio', {
             return Math.floor(1200 * Math.log(frequency / AAudio.frequencyFromNoteNumber(note)) / Math.log(2));
         },
         autoCorrelate: function (buf, sampleRate) {
-            
+
             var SIZE = buf.length;
             var MIN_SAMPLES = 0;  // will be initialized when AudioContext is created.
             var MAX_SAMPLES = Math.floor(SIZE / 2);
@@ -189,6 +189,96 @@ MEPH.define('MEPH.audio.Audio', {
             });
 
         },
+        detectSilence: function (buf, silenceLevel, fuzzyarea, jump) {
+            var AAudio = MEPH.audio.Audio,
+                result = [],
+                currentFuzzyArea = 0,
+                currentArea;
+            jump = jump || 1;
+            fuzzyarea = fuzzyarea || 10;
+            silenceLevel = silenceLevel || 0;
+
+            var sections = Math.ceil(buf.length / fuzzyarea);
+            [].interpolate(0, sections, function (sectionIndex) {
+
+                var subset = buf.subset(sectionIndex * fuzzyarea, (sectionIndex + 1) * fuzzyarea);
+                var m = subset.maximum(function (x) { return Math.abs(x); });
+                var last = result.last();
+                if (silenceLevel >= (m)) {
+
+                    if (!last) {
+                        result.push({
+                            section: sectionIndex,
+                            start: sectionIndex
+                        });
+                    }
+                    else {
+                        if (last.section >= sectionIndex - jump && last.end === undefined) { // If its the next section 
+                            //combine them in to a single.
+                            last.section = sectionIndex;
+
+                        }
+                        else {
+                            result.push({
+                                section: sectionIndex,
+                                start: sectionIndex
+                            });
+                        }
+                    }
+                }
+                else {
+                    if (last && last.end === undefined) {
+                        last.end = sectionIndex - 1;
+                    }
+                }
+            })
+            return result.select(function (x) {
+                return {
+                    start: x.start * fuzzyarea,
+                    end: (x.end + 1) * fuzzyarea
+                }
+            });
+        },
+        /**
+        detectSilence: function (buf, silenceLevel, fuzzyarea) {
+            var AAudio = MEPH.audio.Audio,
+                result = [],
+                currentFuzzyArea = 0,
+                currentArea;
+        
+            fuzzyarea = fuzzyarea || 10;
+            silenceLevel = silenceLevel || 0;
+        
+            for (var i = 0 ; i < buf.length ; i++) {
+                if (Math.abs(buf[i]) <= silenceLevel) {
+                    if (!currentArea) {
+                        currentArea = {
+                            start: i
+                        }
+                    }
+                    currentFuzzyArea = 0;
+                }
+                else {
+                    if (currentArea && currentFuzzyArea >= fuzzyarea) {
+                        currentArea.end = i;
+                        result.push(currentArea);
+                        currentArea = null;
+                        currentFuzzyArea = 0;
+                    }
+                    else if (currentArea) {
+                        currentFuzzyArea++;
+                    }
+                }
+            }
+            if (currentArea) {
+                currentArea.end = i - 1;
+                result.push(currentArea);
+            }
+            return result;
+        },
+        **/
+
+
         updatePitch: function (buf, sampleRate) {
             var AAudio = MEPH.audio.Audio,
                 pitch;
@@ -204,7 +294,7 @@ MEPH.define('MEPH.audio.Audio', {
                 var notestr = noteStrings[note % 12];
                 var detune = AAudio.centsOffFromPitch(pitch, note);
 
-                result.pitch = pitch;
+                result.pitch = Math.round(pitch * 100) / 100;
                 result.note = notestr;
 
                 if (detune == 0) {
@@ -634,6 +724,14 @@ MEPH.define('MEPH.audio.Audio', {
         }
         return null;
     },
+    clearContext: function () {
+        var me = this;
+        me.audioCtx = null;
+        me.offlineAudioCtx = null;
+        MEPH.audio.Audio.OfflineAudioContext = null;
+        MEPH.audio.Audio.AudioContext = null;
+        return me;
+    },
     createContext: function (options) {
         var me = this;
         if (options || me.offlineMode) {
@@ -914,7 +1012,7 @@ MEPH.define('MEPH.audio.Audio', {
             return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
         }).foreach(function (node) {
             if (node.node.played) {
-                
+
             }
             node.node.start(delay);
             node.node.played = true;
