@@ -191,6 +191,27 @@
         expect(res).toBeTruthy();
     });
 
+    it('can detect pitches ', function () {
+        var frameCount = 44100;
+        var audio = new MEPH.audio.Audio();
+        var audioCtx = audio.createContext();
+        var myArrayBuffer = audioCtx.createBuffer(2, frameCount, frameCount);
+        for (var channel = 0 ; channel < 2 ; channel++) {
+            var buf = myArrayBuffer.getChannelData(channel);
+            for (var i = 0; i < frameCount  ; i++) {
+                if (i > frameCount / 2)
+                    buf[i] = Math.sin(i / frameCount * 440 * Math.PI);
+                else
+                    buf[i] = Math.sin(i / frameCount * 1320 * Math.PI);
+            }
+        }
+
+
+        var res = MEPH.audio.Audio.detectPitches(myArrayBuffer.getChannelData(0), frameCount, 1000);
+        
+        expect(res).toBeTruthy();
+    })
+
     it('can detect silence', function () {
         var frameCount = 44100;
         var audio = new MEPH.audio.Audio();
@@ -228,10 +249,12 @@
 
         var buff = myArrayBuffer.getChannelData(0);
         var res = MEPH.audio.Audio.detectSilence(buff, .001, 1000);
-        
+
         expect(res).toBeTruthy();
         expect(res.length).toBeTruthy();
-    })
+    });
+
+
 
     it('can detect pitch', function (done) {
         var audio = new MEPH.audio.Audio();

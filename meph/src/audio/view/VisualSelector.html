@@ -8,7 +8,7 @@
            meph-data-min="0.001"
            meph-data-max="1"></range>
 </div>
-<div class="visualizer col-md-2">
+<div class="visualizer col-md-1">
     <range descriptiontext="Time"
            meph-event-change="c$.sourceChanged | c$.update"
            meph-data-value="c$.timeScroll"
@@ -23,6 +23,15 @@
            meph-data-min="0.1"
            meph-data-max="2"></range>
 </div>
+<div class="visualizer col-md-1">
+    <span data-bind='"innerHTML":"c$.pitchWindowSize"'></span>
+    <range descriptiontext="Pitch window size"
+           meph-data-value="c$.pitchWindowSize"
+           meph-data-step="1000"
+           meph-data-min="1000"
+           meph-data-max="10000"></range>
+</div>
+
 <div class="visualizer col-md-1">
     <span data-bind='"innerHTML":"c$.silenceThreshold"'></span>
     <range descriptiontext="Silence threshold"
@@ -65,6 +74,9 @@
     </mephbutton>
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.detectSilence | c$.cancelEvent">
         <span title="Detect Silent Areas" class="glyphicon glyphicon-headphones"></span>
+    </mephbutton>
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.detectPitches | c$.cancelEvent">
+        <span title="Detect Silent Areas" class="glyphicon glyphicon-music"></span>
     </mephbutton>
 
 </div>

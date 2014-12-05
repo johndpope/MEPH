@@ -189,11 +189,15 @@ MEPH.define('MEPH.audio.Audio', {
             });
 
         },
+        /**
+         * Detects silence in a ArrayBuffer
+         * @param {Number} silenceLevel
+         * @param {Number} fuzzyarea
+         * @param {Number} jump
+         * @return {Array}
+         ***/
         detectSilence: function (buf, silenceLevel, fuzzyarea, jump) {
-            var AAudio = MEPH.audio.Audio,
-                result = [],
-                currentFuzzyArea = 0,
-                currentArea;
+            var result = [];
             jump = jump || 1;
             fuzzyarea = fuzzyarea || 10;
             silenceLevel = silenceLevel || 0;
@@ -239,46 +243,68 @@ MEPH.define('MEPH.audio.Audio', {
                 }
             });
         },
+
         /**
-        detectSilence: function (buf, silenceLevel, fuzzyarea) {
+         * Detects pitches in a ArrayBuffer
+         * @param {Number} sampleRate
+         * @param {Number} fuzzyarea
+         * @param {Number} jump
+         * @return {Array}
+         ***/
+        detectPitches: function (buf, sampleRate, fuzzyarea, jump) {
             var AAudio = MEPH.audio.Audio,
-                result = [],
-                currentFuzzyArea = 0,
-                currentArea;
-        
-            fuzzyarea = fuzzyarea || 10;
-            silenceLevel = silenceLevel || 0;
-        
-            for (var i = 0 ; i < buf.length ; i++) {
-                if (Math.abs(buf[i]) <= silenceLevel) {
-                    if (!currentArea) {
-                        currentArea = {
-                            start: i
+                result = [];
+            jump = jump || 1;
+            fuzzyarea = fuzzyarea || buf.length / 2;
+
+            var sections = Math.ceil(buf.length / fuzzyarea);
+            [].interpolate(0, sections, function (sectionIndex) {
+
+                var subset = buf.subset(sectionIndex * fuzzyarea, (sectionIndex + 1) * fuzzyarea);
+                var m = AAudio.updatePitch(subset, sampleRate);
+                //subset.maximum(function (x) { return Math.abs(x); });
+                var last = result.last();
+                if (m) {
+
+                    if (!last) {
+                        result.push({
+                            section: sectionIndex,
+                            start: sectionIndex,
+                            key: m
+                        });
+                    }
+                    else {
+                        if (last.key.note === m.note && last.section >= sectionIndex - jump && last.end === undefined) { // If its the next section 
+                            //combine them in to a single.
+                            last.section = sectionIndex;
+
+                        }
+                        else {
+                            if (last.key.note !== m.note && last.end === undefined) {
+                                last.end = sectionIndex - 1;
+                            }
+                            result.push({
+                                section: sectionIndex,
+                                start: sectionIndex,
+                                key: m
+                            });
                         }
                     }
-                    currentFuzzyArea = 0;
                 }
                 else {
-                    if (currentArea && currentFuzzyArea >= fuzzyarea) {
-                        currentArea.end = i;
-                        result.push(currentArea);
-                        currentArea = null;
-                        currentFuzzyArea = 0;
-                    }
-                    else if (currentArea) {
-                        currentFuzzyArea++;
+                    if (last && last.end === undefined) {
+                        last.end = sectionIndex - 1;
                     }
                 }
-            }
-            if (currentArea) {
-                currentArea.end = i - 1;
-                result.push(currentArea);
-            }
-            return result;
+            })
+            return result.select(function (x) {
+                return {
+                    start: x.start * fuzzyarea,
+                    end: (x.end + 1) * fuzzyarea,
+                    key: x.key
+                }
+            });
         },
-        **/
-
-
         updatePitch: function (buf, sampleRate) {
             var AAudio = MEPH.audio.Audio,
                 pitch;

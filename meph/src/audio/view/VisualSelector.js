@@ -26,6 +26,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         markscolor: '#f0ad4e',
         markerBtns: null,
         pitchShift: .5,
+        pitchWindowSize: 1000,
         smallestStep: 0.0000001,
         silenceThreshold: 0,
         silenceTimeSticky: 0,
@@ -115,6 +116,17 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         }
         return null;
     },
+    detectPitches: function () {
+        var me = this,
+            startend = me.getStartEndPosition(),
+            clip = me.getSelectedClip();
+        if (clip) {
+            var sampleRate = me.source.buffer.buffer.sampleRate;
+            debugger
+
+            var res = MEPH.audio.Audio.detectPitches(clip.buffer.buffer.getChannelData(0), sampleRate, parseInt(me.pitchWindowSize));
+        }
+    },
     detectSilence: function () {
         var me = this,
             startend = me.getStartEndPosition(),
@@ -135,9 +147,13 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     renderAreasOfInterest: function (type, areas) {
         var me = this,
             container = me.container,
-            interestAreas = me.$areasOfInterest || [];
-        debugger
-
+            interestAreas = (me.$areasOfInterest || []).where(function (x) {
+                if (type === undefined) return true;
+                return x.type === type;
+            });
+        if (areas === undefined) {
+            areas = (me.$areasOfInterest || []).select();
+        }
         var newareas = areas.select(function (x) {
             var left = me.getRelativeMarkPosition(x.start);
             var right = me.getRelativeMarkPosition(x.end);
@@ -156,6 +172,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             Style.absolute(div);
             Style.top(div, 0);
             div.classList.add('infoarea');
+            div.classList.add('noresponse');
             if (div.parentNode !== container)
                 container.appendChild(div);
             Style.left(div, left);
@@ -163,6 +180,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return {
                 div: div,
                 start: x.start,
+                type: type || x.type,
                 end: x.end
             }
         }).where();
@@ -519,6 +537,8 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return me.updateMarker();
         }).then(function () {
             me.draw();
+        }).then(function () {
+            me.renderAreasOfInterest();
         });
     },
     updateBpm: function () {
