@@ -22,6 +22,7 @@ MEPH.define('MEPH.audio.Audio', {
             waveShaper: 'waveShaper',
             analyser: 'analyser',
             splitter: 'splitter',
+            processor: 'processor',
             merger: 'merger',
             periodicWave: 'periodicWave',
             panner: 'panner',
@@ -868,7 +869,12 @@ MEPH.define('MEPH.audio.Audio', {
         // Create a ScriptProcessorNode with a bufferSize of 4096 and a single input and output channel
         var scriptNode = context.createScriptProcessor(options.size || 1024, 1, 1);
 
-        var nodecontext = { options: options || null, node: scriptNode };
+        var nodecontext = {
+            options: options || null,
+            node: scriptNode,
+            processor: options.process,
+            type: MEPH.audio.Audio.nodeTypes.processor
+        };
         me.nodes.push(nodecontext);
         nodecontext.data = [];
         // Give the node a function to process audio events
@@ -1035,12 +1041,21 @@ MEPH.define('MEPH.audio.Audio', {
         var me = this;
         delay = delay || 0;
         me.nodes.where(function (x) {
-            return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
+            return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer
+            || x.type === MEPH.audio.Audio.nodeTypes.processor;
         }).foreach(function (node) {
             if (node.node.played) {
 
             }
-            node.node.start(delay);
+            if (node.type === MEPH.audio.Audio.nodeTypes.processor) {
+                if (node.processor.context)
+                    node.processor.context(me.getContext());
+
+                if (node.processor.start)
+                    node.processor.start(delay);
+            }
+            if (node.node.start)
+                node.node.start(delay);
             node.node.played = true;
         })
     },
@@ -1048,14 +1063,17 @@ MEPH.define('MEPH.audio.Audio', {
         var me = this;
         delay = delay || 0;
         me.nodes.where(function (x) {
-            return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer;
+            return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer
+            || x.type === MEPH.audio.Audio.nodeTypes.processor;
         }).foreach(function (node) {
+            if (node.processor.stop)
+                node.processor.stop(delay, function () {
+                    me.disconnect();
+                });
 
-            //node.node.onended = function () {
-            //    me.disconnect();
-            //};
+            if (node.node.stop)
+                node.node.stop(delay);
 
-            node.node.stop(delay);
         });
     },
     disconnect: function () {

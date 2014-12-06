@@ -143,6 +143,15 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         return me.graphs.select();
     },
+    getFontGraphInstance: function (process, graphextension) {
+        var me = this;
+        var audio = new MEPH.audio.Audio();
+        audio.processor({
+            size: 1024,
+            process: process
+        });
+        return audio;
+    },
     getGraphInstance: function (id, graphextension) {
         var me = this,
             graphRecipe = me.getGraphs().first(function (x) { return x.id === id; });
@@ -175,23 +184,27 @@ MEPH.define('MEPH.audio.AudioResources', {
             id = me.getSoundFontInstance(info),
             data = me.getSoundFont(info);
         data.cache = data.cache || {};
-        if (!data.cache[id]) {
+        //if (!data.cache[id]) {
 
-            var buffer = { buffer: data.soundfontInstrument.note(info.id, 30) };
-            var bufferid = MEPH.GUID();
-            var graph = data.soundfontInstrument.createNoteGraph(bufferid, data.resource.file.name)
-            data.cache[id] = {
-                graphid: graph.id
-            }
-            me.graphs.push(graph);
-            var audio = new MEPH.audio.Audio();
-            audio.addBufferSource({
-                sid: info.sid,
-                id: bufferid,
-                buffer: buffer
-            })
+        //var buffer = { buffer: data.soundfontInstrument.note(info.id, 30) };
+        var bufferid = MEPH.GUID();
+        //var graph = data.soundfontInstrument.createNoteGraph(bufferid, data.resource.file.name)
+        var processornode = data.soundfontInstrument.nodeprocessor(info.id, 30, true);
+        data.cache[id] = {
+            graphid: bufferid,
+            sid: info.sid,
+            id: bufferid,
+            process: processornode
         }
-        return me.getGraphInstance(data.cache[id].graphid, graphExtensions);
+        //me.graphs.push(graph);
+        //var audio = new MEPH.audio.Audio();
+        //audio.addBufferSource({
+        //    sid: info.sid,
+        //    id: bufferid,
+        //    buffer: buffer
+        //})
+        //}
+        return me.getFontGraphInstance(data.cache[id].process, graphExtensions);
     },
     getSoundFont: function (info) {
         var me = this;

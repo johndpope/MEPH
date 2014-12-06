@@ -211,7 +211,7 @@
 
                 soundfont.samplerate(44100);
 
-                var process = soundfont.node(63, 100);
+                var process = soundfont.nodeprocessor(63, 100);
                 audio.processor({
                     size: 1024,
                     process: process
@@ -236,7 +236,7 @@
 
                 soundfont.samplerate(44100);
 
-                var process = soundfont.node(63, 100, true);
+                var process = soundfont.nodeprocessor(63, 100, true);
                 audio.processor({
                     size: 1024,
                     process: process
@@ -245,7 +245,7 @@
                     setTimeout(function () {
                         audio.disconnect();
                         r();
-                    }, 10000);
+                    }, 2000);
                 });
             }).catch(function (e) {
                 expect(e).caught();

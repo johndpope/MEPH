@@ -164,7 +164,7 @@
         return myArrayBuffer;
     },
 
-    node: function (key, velocity, percussion) {
+    nodeprocessor: function (key, velocity, percussion) {
         var me = this;
         var notesample = me.selectPreset().notesample(key, velocity),
             decoder = me.decoder(notesample),
@@ -183,11 +183,27 @@
 
         var currenttime = 0;
         var complete = false;
-        return function (audioProcessingEvent) {
+        var context = undefined;
+        var playing = false;
+        var stopcallback = undefined;
+
+        var playtime = undefined;
+        var res = function (audioProcessingEvent) {
             var output = audioProcessingEvent.outputBuffer;
             var finaltarget = [].interpolate(0, audioProcessingEvent.outputBuffer.numberOfChannels, function (channel) {
                 return output.getChannelData(channel);
             })
+            if (playtime === undefined) {
+                return;
+            }
+            if (playtime <= audioProcessingEvent.playbackTime && !playing) {
+                playing = true;
+                currenttime = 0;
+            }
+            if (stoptime !== undefined && stoptime <= audioProcessingEvent.playbackTime && playing) {
+                if (stopcallback) stopcallback();
+                return;
+            }
             //if (complete) {
             //    return;
             //}
@@ -201,21 +217,34 @@
                     currenttime++;
                     var startPosition = currenttime + startPos / 2;
                     startPosition = (startPosition << 1);
-                    if (endPos < startPosition && percussion) {
-                        complete = true;
+
+                    var bytes = decoder._decoder._bytes;
+                    bytes.position = startPosition;
+                    if (endPos <= startPosition) {
                         finaltarget[i][sample] = 0;
-                        return;
                     }
                     else {
-                        var bytes = decoder._decoder._bytes;
-                        bytes.position = startPosition;
                         var amplitude = bytes._dataview.getInt16(bytes.position, bytes.endian) * 3.051850947600e-05;
                         finaltarget[i][sample] = amplitude;// Math.random() - .5; //decodedtarget[currenttime];
                     }
                 }
             }
-
         }
+        res = res.bind(me);;
+        res.context = function (cont) {
+            context = cont;
+        }
+        res.start = function (delay) {
+            playtime = delay;
+            playing = false;
+            currenttime = 0;
+        }
+        res.stop = function (delay, callback) {
+            stoptime = delay;
+            stopcallback = callback;
+            currenttime = endPos;
+        }
+        return res;
     },
     createNoteGraph: function (id, name) {
 
