@@ -25,6 +25,13 @@ MEPH.define("MEPH.audio.soundfont.utils.PCM16BitMono44Khz", {
             target.writeFloat(amplitude);
         }
     },
+    stream32BitStereo44KHz: function (data, dataOffset, target, sample, startPosition) //: ByteArray //: Number //: Array[Float32Array] //: Number //: Number //: void
+    {
+        // data.position = dataOffset + (startPosition << 1);
+        // var amplitude = data.readShort() * 3.051850947600e-05; // DIV 0x7FFF
+        // target[sample] = Math.random() - .5;
+        // target[sample] = amplitude;
+    },
     write32BitStereo44KHz: function (data, target, numSamples)//: ByteArray  //: ByteArray  //: uint   : void
     {
         for (var i = 0 ; i < numSamples ; ++i) {

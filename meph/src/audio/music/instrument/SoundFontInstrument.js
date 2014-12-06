@@ -164,6 +164,59 @@
         return myArrayBuffer;
     },
 
+    node: function (key, velocity, percussion) {
+        var me = this;
+        var notesample = me.selectPreset().notesample(key, velocity),
+            decoder = me.decoder(notesample),
+            endPos = notesample.getEnd(),
+            startPos = notesample.getStart();
+
+        var startloop = notesample.getLoopStart() / 2,
+            endloop = notesample.getLoopEnd() / 2,
+            sampleraite = me.samplerate(),
+            start = startPos / 2,
+                end = endPos / 2;
+        startloop = startloop - start;
+        endloop = endloop - start;
+
+        decoder.setup(sampleraite);
+
+        var currenttime = 0;
+        var complete = false;
+        return function (audioProcessingEvent) {
+            var output = audioProcessingEvent.outputBuffer;
+            var finaltarget = [].interpolate(0, audioProcessingEvent.outputBuffer.numberOfChannels, function (channel) {
+                return output.getChannelData(channel);
+            })
+            //if (complete) {
+            //    return;
+            //}
+            var duration = finaltarget[0].length;
+            var length = finaltarget.length;
+            for (var i = length ; i--;) {
+                for (var sample = 0; sample < duration; sample++) {
+                    if (currenttime >= endloop && !percussion) {
+                        currenttime = startloop;
+                    }
+                    currenttime++;
+                    var startPosition = currenttime + startPos / 2;
+                    startPosition = (startPosition << 1);
+                    if (endPos < startPosition && percussion) {
+                        complete = true;
+                        finaltarget[i][sample] = 0;
+                        return;
+                    }
+                    else {
+                        var bytes = decoder._decoder._bytes;
+                        bytes.position = startPosition;
+                        var amplitude = bytes._dataview.getInt16(bytes.position, bytes.endian) * 3.051850947600e-05;
+                        finaltarget[i][sample] = amplitude;// Math.random() - .5; //decodedtarget[currenttime];
+                    }
+                }
+            }
+
+        }
+    },
     createNoteGraph: function (id, name) {
 
         var graph = new MEPH.graph.Graph(),

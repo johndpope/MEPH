@@ -650,6 +650,42 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
+            if (!array.closest) {
+                Object.defineProperty(array, 'closest', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (val, func) {
+                        var result = null;
+                        var resdiff = null;
+                        var collection = this;
+                        func = func || function (x) { return x; }
+                        for (var i = 0 ; i < collection.length; i++) {
+                            var x = collection[i];
+                            var dif;
+                            if (Math.abs(val) > Math.abs(x)) {
+                                dif = Math.abs(val) - Math.abs(x)
+                            }
+                            else {
+                                dif = Math.abs(x) - Math.abs(val)
+                            }
+                            if (result === null) {
+                                resdiff = dif;
+                                result = i;
+                            }
+                            else if (resdiff === 0) {
+                                return i;
+                            }
+                            else if (resdiff > dif) {
+                                resdiff = dif;
+                                result = i;
+                            }
+                        }
+                        return result
+                    }
+                })
+            }
+
             if (!array.nth) {
                 Object.defineProperty(array, 'nth', {
                     enumerable: false,

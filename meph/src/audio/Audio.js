@@ -866,7 +866,7 @@ MEPH.define('MEPH.audio.Audio', {
             throw new Error('Processor requires a process function.')
         }
         // Create a ScriptProcessorNode with a bufferSize of 4096 and a single input and output channel
-        var scriptNode = context.createScriptProcessor(1024, 1, 1);
+        var scriptNode = context.createScriptProcessor(options.size || 1024, 1, 1);
 
         var nodecontext = { options: options || null, node: scriptNode };
         me.nodes.push(nodecontext);

@@ -57,6 +57,25 @@ MEPH.define("MEPH.audio.soundfont.utils.PCMDecoder", {
         return length;
     },
 
+    /**
+     * Decodes audio from format into Float32Array sound properties (stereo,float,44100Hz)
+     * 
+     * @return The number of samples has been read
+     */
+    stream: function (target, pos, startPosition)//:Array[Float32Array]  //:Number  //:Number = -1.0  //: Number
+    {
+        //var length;
+        //if (startPosition >= this.getNumSamples())
+        //    return 0.0;
+        //if (startPosition  > this.getNumSamples()) {
+        //    length = this.getNumSamples() - startPosition;
+        //}
+
+        //this._strategy.stream32BitStereo44KHz(this._bytes, this.getDataOffset(), target, pos, startPosition);
+
+        //return length;
+    },
+
     getSupported: function ()//: Boolean
     {
         return null != this._strategy;

@@ -193,9 +193,60 @@
 
                 soundfont.samplerate(44100);
                 var chunks = soundfont.sampleChunks();
-                
+
 
                 expect(chunks.length).toBeTruthy(135);
+            }).catch(function (e) {
+                expect(e).caught();
+            }).then(done);
+        });
+
+        it('can create sound processor node ', function (done) {
+            var soundfont = new MEPH.audio.music.instrument.SoundFontInstrument();
+            var audio = new MEPH.audio.Audio();
+            soundfont.setFontFile('MEPH.audio.music.instrument.trumpet.EnglishHorn');
+            soundfont.ready().then(function () {
+                return soundfont.prepare()
+            }).then(function (x) {
+
+                soundfont.samplerate(44100);
+
+                var process = soundfont.node(63, 100);
+                audio.processor({
+                    size: 1024,
+                    process: process
+                }).complete();
+                return new Promise(function (r) {
+                    setTimeout(function () {
+                        audio.disconnect();
+                        r();
+                    }, 10000);
+                });
+            }).catch(function (e) {
+                expect(e).caught();
+            }).then(done);
+        });
+        it('can create sound processor node with no loop ', function (done) {
+            var soundfont = new MEPH.audio.music.instrument.SoundFontInstrument();
+            var audio = new MEPH.audio.Audio();
+            soundfont.setFontFile('MEPH.audio.music.instrument.trumpet.EnglishHorn');
+            soundfont.ready().then(function () {
+                return soundfont.prepare()
+            }).then(function (x) {
+
+                soundfont.samplerate(44100);
+
+                var process = soundfont.node(63, 100, true);
+                audio.processor({
+                    size: 1024,
+                    process: process
+                }).complete();
+                return new Promise(function (r) {
+                    setTimeout(function () {
+                        audio.disconnect();
+                        r();
+                    }, 10000);
+                });
             }).catch(function (e) {
                 expect(e).caught();
             }).then(done);
