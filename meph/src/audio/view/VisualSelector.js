@@ -122,9 +122,16 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             clip = me.getSelectedClip();
         if (clip) {
             var sampleRate = me.source.buffer.buffer.sampleRate;
-            debugger
+            
 
             var res = MEPH.audio.Audio.detectPitches(clip.buffer.buffer.getChannelData(0), sampleRate, parseInt(me.pitchWindowSize));
+            me.renderAreasOfInterest('pitches', res.select(function (x) {
+                return {
+                    start: x.start + startend.start * sampleRate,
+                    key: x.key,
+                    end: x.end + startend.start * sampleRate
+                }
+            }));
         }
     },
     detectSilence: function () {
@@ -173,6 +180,11 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             Style.top(div, 0);
             div.classList.add('infoarea');
             div.classList.add('noresponse');
+            if (type === 'pitches') {
+                var h3 = document.createElement('h3');
+                h3.innerHTML = x.key.note;
+                div.appendChild(h3);
+            }
             if (div.parentNode !== container)
                 container.appendChild(div);
             Style.left(div, left);

@@ -32,6 +32,21 @@
         expect(res.length).toBe(64);
     });
 
+    it('can take the fft and find the most common frequency', function () {
+
+        var sp = new SignalProcessor();
+        var length = 8192 ;
+        var sampleRate = 44100;
+        var input = new Float32Array(length);
+        input.foreach(function (x, index) {
+            input[index] = Math.sin(index / sampleRate * 261.626 * Math.PI);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
+        });
+        // This kinda works, but only for a single frequency.
+        var freq1 = sp.frequency(input, sampleRate, 2, 5);
+        
+
+    })
+
     it('can calculate the amplitude and phase from a FFT result.', function () {
 
         var sp = new SignalProcessor();
@@ -162,7 +177,7 @@
         }
         return resource;
     }
-    
+
     it('test: play , normally silent', function (done) {
         var sp = new SignalProcessor(),
             len = Math.pow(2, 15),
@@ -200,7 +215,7 @@
             done();
         }, 1000)
     })
-    
+
     it('can slice a signal into windowed chunks and return an array of ffts.', function () {
         var sp = new SignalProcessor(),
             len = 1024;
@@ -217,7 +232,7 @@
 
     });
 
-    
+
     it('can generate a seriers of Xs[K] windows ', function () {
         var sp = new SignalProcessor();
         var windows = sp.generateWindows(32, 64);

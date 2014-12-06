@@ -203,6 +203,41 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }
         return hasoutput;
     },
+    frequency: function (input, sampleRate, stretch, deci) {
+        var nyquist = sampleRate / 2;
+        stretch = stretch || 2;
+        var me = this;
+        var length = input.length;
+        var fftsize = length / 2;
+        var bin = nyquist / fftsize;
+        var res = me.fft(input);
+        res = res.subset(0, res.length / 2);
+        res = res.select(function (x) { return Math.abs(x); })
+        var decminated = [].interpolate(1, deci || 5, function (x) {
+            return res.skipEvery(x);
+        });
+        var len = decminated.last().length;
+        var res = [].interpolate(0, len, function (x) {
+            return decminated.summation(function (t, current, i) {
+                if (i)
+                    return t[x * (decminated.length - (i + 1))] * (current);
+                return t[x];
+            })
+        })
+        var maxima = me.detectMaxima(res, stretch);
+        return maxima.select(function (bbin) {
+
+            var freq = bbin / length * sampleRate;
+            return freq;
+        }).where(function (x) { return x < sampleRate });
+        //var max = res.maximum(function (x) { return Math.abs(x); });
+        //var bbin = res.indexWhere(function (x) { return Math.abs(x) === max; }).first();
+        //if (bbin > length) {
+        //    bbin = (length * 2) - bbin
+        //}
+        //var freq = bbin * (nyquist / fftsize);
+        //return freq;
+    },
     ShortTimeFourierTransform: function (fftBuffer, fftFrameSize, sign) {
         var wr, wi, arg, temp;
         var tr, ti, ur, ui;
