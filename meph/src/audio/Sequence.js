@@ -71,6 +71,7 @@ MEPH.define('MEPH.audio.Sequence', {
         else {
             me.parts.select(function (x) {
                 x.getAudio().disconnect();
+                x.getAudio().clearContext();
                 x.getAudio().offlineMode = offline;
             });
         }

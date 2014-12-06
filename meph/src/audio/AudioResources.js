@@ -146,7 +146,7 @@ MEPH.define('MEPH.audio.AudioResources', {
     getFontGraphInstance: function (process, graphextension) {
         var me = this;
         var audio = new MEPH.audio.Audio();
-        audio.processor({
+        audio.oscillator().processor({
             size: 1024,
             process: process
         });

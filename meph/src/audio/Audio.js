@@ -9,7 +9,7 @@ MEPH.define('MEPH.audio.Audio', {
          * Audio context.
          */
         audioCtx: null,
-
+        OfflineMode: false,
         sourcebuffer: null,
         CHANGED_BUFFER_SOURCE: 'CHANGED_BUFFER_SOURCE',
         nodeTypes: {
@@ -755,13 +755,13 @@ MEPH.define('MEPH.audio.Audio', {
         var me = this;
         me.audioCtx = null;
         me.offlineAudioCtx = null;
-        MEPH.audio.Audio.OfflineAudioContext = null;
-        MEPH.audio.Audio.AudioContext = null;
+        //MEPH.audio.Audio.OfflineAudioContext = null;
+        //MEPH.audio.Audio.AudioContext = null;
         return me;
     },
     createContext: function (options) {
         var me = this;
-        if (options || me.offlineMode) {
+        if (options || me.offlineMode || MEPH.audio.Audio.OfflineMode) {
             me.offlineMode = true;
             options = options || {};
             var audioCtx = MEPH.audio.Audio.OfflineAudioContext || me.offlineAudioCtx ||
@@ -867,18 +867,18 @@ MEPH.define('MEPH.audio.Audio', {
             throw new Error('Processor requires a process function.')
         }
         // Create a ScriptProcessorNode with a bufferSize of 4096 and a single input and output channel
-        var scriptNode = context.createScriptProcessor(options.size || 1024, 1, 1);
+        //        var scriptNode = context.createScriptProcessor(options.size || 1024, 1, 1);
 
         var nodecontext = {
             options: options || null,
-            node: scriptNode,
+            //   node: scriptNode,
             processor: options.process,
             type: MEPH.audio.Audio.nodeTypes.processor
         };
         me.nodes.push(nodecontext);
         nodecontext.data = [];
         // Give the node a function to process audio events
-        scriptNode.onaudioprocess = options.process;
+        //    scriptNode.onaudioprocess = options.process;
 
         return me;
     },
@@ -1049,7 +1049,7 @@ MEPH.define('MEPH.audio.Audio', {
             }
             if (node.type === MEPH.audio.Audio.nodeTypes.processor) {
                 if (node.processor.context)
-                    node.processor.context(me.getContext());
+                    node.processor.context(me.createContext());
 
                 if (node.processor.start)
                     node.processor.start(delay);
@@ -1066,7 +1066,7 @@ MEPH.define('MEPH.audio.Audio', {
             return x.type === MEPH.audio.Audio.nodeTypes.oscillator || x.type === MEPH.audio.Audio.nodeTypes.buffer
             || x.type === MEPH.audio.Audio.nodeTypes.processor;
         }).foreach(function (node) {
-            if (node.processor.stop)
+            if (node && node.processor && node.processor.stop)
                 node.processor.stop(delay, function () {
                     me.disconnect();
                 });
@@ -1152,6 +1152,11 @@ MEPH.define('MEPH.audio.Audio', {
                 return bs;
             case A.nodeTypes.bufferSource:
                 return me.createContext(options).createBufferSource();
+            case A.nodeTypes.processor:
+                var context = me.createContext(options)
+                var res = context.createScriptProcessor(nodeoptions.size || 1024, 1, 1);
+                res.onaudioprocess = nodeoptions.process;
+                return res;
             default:
                 throw new Error('unhandled case: createAudioNode. : ' + type)
 

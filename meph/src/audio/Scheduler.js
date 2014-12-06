@@ -42,15 +42,16 @@ MEPH.define('MEPH.audio.Scheduler', {
         if (!me.sequence()) return;
         var sequencetime = (me.sequence().duration() || 0);
         var duration = sequencetime * me.bpm;
-        var audios = me.getAudio(0, sequencetime);
+        var samplerate = 48000,
+            audioduration;
         me.sequence().setMode(true);
+        MEPH.audio.Audio.OfflineMode = true;
+        MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(2, samplerate * duration, samplerate);
+        var audios = me.getAudio(0, sequencetime);
 
         if (started === undefined) {
             started = 0;
         }
-        var samplerate = MEPH.audio.Audio.GetContext().sampleRate,
-            audioduration;
-        MEPH.audio.Audio.OfflineAudioContext = new OfflineAudioContext(2, samplerate * duration, samplerate);
         audios.foreach(function (audio) {
             var time = me.sequence().getAbsoluteTime(audio) * me.bpm;
 
@@ -77,6 +78,7 @@ MEPH.define('MEPH.audio.Scheduler', {
     play: function () {
         var me = this, played = [], started;
         if (!me.sequence()) return;
+        MEPH.audio.Audio.OfflineMode = false;
         var lasttime = (me.sequence().duration() || 0) * me.bpm;
         var sequencetime = (me.sequence().duration() || 0);
         var items = me.getAudio(0, sequencetime);

@@ -196,6 +196,9 @@
             if (playtime === undefined) {
                 return;
             }
+            if (context && context.currentTime) {
+
+            }
             if (playtime <= audioProcessingEvent.playbackTime && !playing) {
                 playing = true;
                 currenttime = 0;
