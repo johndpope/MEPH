@@ -186,8 +186,10 @@
         var context = undefined;
         var playing = false;
         var stopcallback = undefined;
-
+        var offlinemode = false;
         var playtime = undefined;
+        var processTimeCounter = 0;
+        var closureid = MEPH.GUID();
         var res = function (audioProcessingEvent) {
             var output = audioProcessingEvent.outputBuffer;
             var finaltarget = [].interpolate(0, audioProcessingEvent.outputBuffer.numberOfChannels, function (channel) {
@@ -196,28 +198,42 @@
             if (playtime === undefined) {
                 return;
             }
-            if (context && context.currentTime) {
-
+            var obl = audioProcessingEvent.outputBuffer.length;
+            var sr = audioProcessingEvent.outputBuffer.sampleRate;
+            if (offlinemode) {
+                processTimeCounter += obl;
+                if (offlinemode && playtime > (processTimeCounter / sr)) {
+                    return;
+                }
             }
-            if (playtime <= audioProcessingEvent.playbackTime && !playing) {
+            console.log('playback time : ' + audioProcessingEvent.playbackTime);
+            var startsample = 0;
+            if (!offlinemode && (playtime <= audioProcessingEvent.playbackTime && !playing) ||
+                (offlinemode && playtime <= (processTimeCounter / sr) && !playing)) {
                 playing = true;
+                if (offlinemode) {
+                    var psr = Math.round(playtime * sr);
+                    startsample = obl - (processTimeCounter - psr);
+                }
                 currenttime = 0;
+                if (closureid) { }
             }
-            if (stoptime !== undefined && stoptime <= audioProcessingEvent.playbackTime && playing) {
+            if ((!offlinemode && (stoptime !== undefined && stoptime <= audioProcessingEvent.playbackTime && playing)) ||
+                (offlinemode && (stoptime !== undefined && stoptime <= (processTimeCounter / sr) && playing))) {
                 if (stopcallback) stopcallback();
                 return;
             }
+
             //if (complete) {
             //    return;
             //}
-            var duration = finaltarget[0].length;
+            var duration = obl;
             var length = finaltarget.length;
             for (var i = length ; i--;) {
-                for (var sample = 0; sample < duration; sample++) {
+                for (var sample = startsample ; sample < duration; sample++) {
                     if (currenttime >= endloop && !percussion) {
                         currenttime = startloop;
                     }
-                    currenttime++;
                     var startPosition = currenttime + startPos / 2;
                     startPosition = (startPosition << 1);
 
@@ -230,17 +246,20 @@
                         var amplitude = bytes._dataview.getInt16(bytes.position, bytes.endian) * 3.051850947600e-05;
                         finaltarget[i][sample] = amplitude;// Math.random() - .5; //decodedtarget[currenttime];
                     }
+                    currenttime++;
                 }
             }
         }
         res = res.bind(me);;
-        res.context = function (cont) {
+        res.context = function (cont, offline) {
             context = cont;
+            offlinemode = offline;
         }
         res.start = function (delay) {
             playtime = delay;
             playing = false;
             currenttime = 0;
+            processTimeCounter = 0;
         }
         res.stop = function (delay, callback) {
             stoptime = delay;

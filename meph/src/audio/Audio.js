@@ -1049,7 +1049,7 @@ MEPH.define('MEPH.audio.Audio', {
             }
             if (node.type === MEPH.audio.Audio.nodeTypes.processor) {
                 if (node.processor.context)
-                    node.processor.context(me.createContext());
+                    node.processor.context(me.createContext(), MEPH.audio.Audio.OfflineMode);
 
                 if (node.processor.start)
                     node.processor.start(delay);
