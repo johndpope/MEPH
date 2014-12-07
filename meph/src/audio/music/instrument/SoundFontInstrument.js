@@ -206,7 +206,6 @@
                     return;
                 }
             }
-            console.log('playback time : ' + audioProcessingEvent.playbackTime);
             var startsample = 0;
             if (!offlinemode && (playtime <= audioProcessingEvent.playbackTime && !playing) ||
                 (offlinemode && playtime <= (processTimeCounter / sr) && !playing)) {

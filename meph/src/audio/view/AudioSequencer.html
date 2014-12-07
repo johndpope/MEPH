@@ -11,16 +11,16 @@
                meph-data-max="1"
                meph-data-step="0.01"
                meph-event-change="c$.update"></range>
-    </div> 
+    </div>
     <div class="col-md-2 col-sm-1 col-xs-1 ">
         <number descriptiontext="BPM" meph-data-value="c$.beatspermin" labeltext="BPM"
                 meph-event-change="c$.updateBeat"></number>
-    </div> 
+    </div>
     <div class="col-md-2 col-sm-1 col-xs-1 ">
         <number descriptiontext="Smallest note" meph-data-value="c$.smallestnote"
                 meph-event-change="c$.updateBeat"
-                 labeltext="Minimum Note"></number>
-    </div> 
+                labeltext="Minimum Note"></number>
+    </div>
     <div class="col-md-4 col-xs-2 col-sm-2"></div>
     <div class="btn-group">
         <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequence">
@@ -61,7 +61,14 @@
                   meph-data-value="c$.selectedScale"
                   meph-data-labelfield="name"
                   meph-data-valuefield="id"></dropdown>
-
+        <div class="col-md-12">
+            <div class="col-md-6">
+                <span data-bind='"innerHTML":"c$.firstMidiNote | c$.toNote"'></span>
+            </div>
+            <div class="col-md-6">
+                <span data-bind='"innerHTML":"c$.lastMidiNote | c$.toNote"'></span>
+            </div>
+        </div>
         <number descriptiontext="First midi note included" meph-data-value="c$.firstMidiNote" labeltext="Start"></number>
         <number descriptiontext="Last midi note included" meph-data-value="c$.lastMidiNote" labeltext="End"></number>
 
@@ -82,6 +89,10 @@
             <mephbutton type="button" class="btn btn-primary btn-xs"
                         meph-event-click="c$.addToSelection,c$.selectedSoundFontValue">
                 <span class="glyphicon glyphicon-plus"></span>
+            </mephbutton>
+            <mephbutton type="button" class="btn btn-primary btn-xs"
+                        meph-event-click="c$.addAllChunks">
+                <span class="glyphicon glyphicon-star"></span>
             </mephbutton>
         </div>
     </div>

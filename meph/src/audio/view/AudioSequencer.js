@@ -250,12 +250,25 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.currentSoundFontSelection.push(t);
         })
     },
+    toNote: function (d) {
+
+        var note = Notes.convertToNote(d)
+        return note;
+    },
     addToSelection: function (chunkid) {
         var me = this;
         var info = me.selectedSoundFontChunks.first(function (x) { return x.id.toString() === chunkid; })
         if (info) {
             me.currentSoundFontSelection.push(info);
         }
+    },
+    addAllChunks: function () {
+        var me = this;
+        me.currentSoundFontSelection.clear();
+        me.selectedSoundFontChunks.foreach(function (x) {
+            x.selected = true;
+            me.currentSoundFontSelection.push(x);
+        });
     },
     addToSequence: function () {
         var me = this;
@@ -447,6 +460,31 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
             }
         }
+        me.color = {
+            'function': function (item) {
+                var result = '#ff0000';
+                if (item && (item.source instanceof MEPH.audio.Audio || item.source instanceof MEPH.audio.Sequence)) {
+                    var duration = me.sequence.getDuration(item)
+                    result = me.getColorForDuration(duration);
+                }
+                else if (item && typeof item.source === 'string') {
+                    if (item.duration === null) {
+                        var audio = item.getAudio();
+                        var res;
+                        if (audio.getSourceDuration)
+                            res = audio.getSourceDuration();
+                        if (res) {
+                            try {
+                                res = res * (parseFloat(me.beatspermin) / 60) * me.smallestnote;
+                            } catch (e) { res = 0; }
+                        }
+                        return me.getColorForDuration(me.singleUnit);
+                    }
+                    result = me.getColorForDuration(item.duration);
+                }
+                return result;
+            }
+        }
         me.length = {
             'function': function (item) {
                 var result;
@@ -486,6 +524,33 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             'function': function (item) {
                 return item.time % me.smallestnote === 0 ? (item.time / me.smallestnote) + " " : null;
             }
+        }
+    },
+    getColorForDuration: function(duration){
+        duration = parseFloat(duration);
+        if (isNaN(duration)) {
+            duration = 0;
+        }
+        if (duration >= 32) {
+            return '#dabfff';
+        }
+        else if (duration >= 16) {
+            return '#907ad6';
+        }
+        else if (duration >= 8) {
+            return '#4f518c';
+        }
+        else if (duration >= 4) {
+            return '#2c2a4a';
+        }
+        else if (duration >= 2) {
+            return '#7fdeff';
+        }
+        else if (duration >= 1) {
+            return '#204442';
+        }
+        else if (duration >= -1) {
+            return '#7956f';
         }
     },
     scaleValue: function (value) {

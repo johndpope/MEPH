@@ -288,6 +288,7 @@ MEPH.define('MEPH.table.Sequencer', {
             x: pos.x + xoffset,
             y: pos.y,
             width: width,
+            fillStyle: me.color && me.color.function ? me.color.function(sequenceItem) : '#ff0000',
             height: height,
             column: column,
             row: lane

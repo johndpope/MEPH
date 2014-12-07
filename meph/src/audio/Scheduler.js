@@ -32,7 +32,9 @@ MEPH.define('MEPH.audio.Scheduler', {
         return me.orderedSequence.where(function (x) {
             return x.absoluteTime * me.bpm >= from &&
                 x.absoluteTime * me.bpm <= (duration * me.bpm + from)
-        })
+        }).orderBy(function (x, y) {
+            return x.absoluteTime - y.absoluteTime;
+        });
     },
     /**
      * Renderse the sequence.
