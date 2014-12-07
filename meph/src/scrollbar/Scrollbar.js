@@ -74,6 +74,17 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
             me.handleoffset = handleoffset;
         });
 
+        me.bar.addEventListener('click', function (e) {
+
+            if (e.srcElement !== me.bar) return;
+            var position = MEPH.util.Dom.getEventPositions(e).first();
+            me.position = me.horizontal ? position.x : position.y;
+            var barposition = me.getBarPosition();
+            var barsize = me.barSize();
+            me.setBarPosition(me.position);
+            me.scrollbarposition = me.getBarPosition() / (me.barSize() - me.handleSize());
+        });
+
         document.body.addEventListener('mousemove', function (e) {
             if (me.state === me.dragging) {
                 var position = MEPH.util.Dom.getScreenEventPositions(e).first();
@@ -84,12 +95,13 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
                 //me.scrollbarposition = part1 - (me.handleSize() / me.barSize()) * ((1 - part1));
             }
         });
-
-        document.body.addEventListener('mouseup', function (e) {
+        var enddrag = function (e) {
             me.state = null;
             me.start_position = null;
             me.scrollbarposition = me._scrollbarposition
-        });
+        };
+        document.body.addEventListener('mouseup', enddrag);
+        //        document.body.addEventListener('mouseout', enddrag);
     },
     handleSize: function () {
         var me = this;

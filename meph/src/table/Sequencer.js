@@ -117,6 +117,13 @@ MEPH.define('MEPH.table.Sequencer', {
         var me = this;
         me.updateCells();
     },
+    drawSingleDataItem: function (itemtodraw) {
+        var me = this;
+        var singleinstruction = me.getInstructionsFor(itemtodraw);
+        if (singleinstruction) {
+            me.rendererContent.draw(singleinstruction);
+        }
+    },
     getMainContentInstructions: function (visibleCellData) {
         var me = this;
         var result = me.getItemsInCellSpace(visibleCellData).concatFluent(function (x) {

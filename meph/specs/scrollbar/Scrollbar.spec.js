@@ -104,6 +104,54 @@
         });
     });
 
+    it('on mouse click on the bar , the position will shift in that direction half', function (done) {
+        MEPH.render('MEPH.scrollbar.Scrollbar', 'scrollbar').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom, called,
+                scrollbar = results.first().classInstance;
+            ///Assert
+            dom = scrollbar.getDomTemplate()[0];
+            scrollbar.setBarPosition = function () {
+                called = true;
+            }
+            scrollbar.bar.dispatchEvent(MEPH.createEvent('click', { offsetX: 4, offsetY: 4 }));
+            expect(called).toBe(true)
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
+    it('bar doesnt react to clicks on the handle', function (done) {
+        MEPH.render('MEPH.scrollbar.Scrollbar', 'scrollbar').then(function (r) {
+            var results = r.res;
+            var app = r.app;
+
+            var dom, called,
+                scrollbar = results.first().classInstance;
+            ///Assert
+            dom = scrollbar.getDomTemplate()[0];
+            scrollbar.setBarPosition = function () {
+                called = true;
+            }
+            scrollbar.handle.dispatchEvent(MEPH.createEvent('click', { offsetX: 4, offsetY: 4 }));
+            expect(called).toBe(undefined)
+            if (app) {
+                app.removeSpace();
+            }
+        }).catch(function (error) {
+            expect(error || new Error('did not render as expected')).caught();
+        }).then(function () {
+            done();
+        });
+    });
+
     it('horizontal scrollbar will have a height, .', function (done) {
         MEPH.render('MEPH.scrollbar.Scrollbar', 'scrollbar').then(function (r) {
             var results = r.res;

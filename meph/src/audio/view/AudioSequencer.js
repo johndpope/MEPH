@@ -385,7 +385,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         }
     },
     setupHeaders: function () {
-        var me = this, columns = 500, rows = 88;
+        var me = this, columns = 2000, rows = 88;
         me.leftheadersource = [].interpolate(0, rows, function (x) {
             return MEPH.util.Observable.observable({
                 lane: x,
@@ -718,7 +718,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (sequence) {
             sequence.source.add(null, me.unscaleValue(column));
             me.translateToSource(me.sequence);
-            me.update();
+            var itemtodraw = sequence.source.parts.last();
+            me.drawSingleDataItem(itemtodraw);
+            // me.leftContentRenderer.draw(headerInstructions);
+            //me.update();
         }
     },
     removeSequence: function () {
@@ -748,7 +751,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             //    res.duration(me.getDuration(key))
             //}
             me.translateToSource(me.sequence);
-            me.update();
+            var itemtodraw = sequence.source.parts.last();
+            me.drawSingleDataItem(itemtodraw);
+            //   me.update();
         }
     },
     getDuration: function (key) {
