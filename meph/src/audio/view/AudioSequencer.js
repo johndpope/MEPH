@@ -526,7 +526,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             }
         }
     },
-    getColorForDuration: function(duration){
+    getColorForDuration: function (duration) {
         duration = parseFloat(duration);
         if (isNaN(duration)) {
             duration = 0;
@@ -635,7 +635,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                     }
                 }], el, function () {
                     var val = sequences.first(function (x) { return x.id === value; })
-                    me.openSequence(val.id);
+                    if (val)
+                        me.openSequence(val.id);
                     resolve();
                 });
             }
@@ -764,6 +765,14 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 return 2;
             case '6':
                 return 1;
+            case '0':
+                return 64;
+            case '9':
+                return 32;
+            case '8':
+                return 24;
+            case '7':
+                return 20;
             default: return 1;
         }
     },
