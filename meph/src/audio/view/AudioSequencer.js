@@ -720,8 +720,6 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.translateToSource(me.sequence);
             var itemtodraw = sequence.source.parts.last();
             me.drawSingleDataItem(itemtodraw);
-            // me.leftContentRenderer.draw(headerInstructions);
-            //me.update();
         }
     },
     removeSequence: function () {

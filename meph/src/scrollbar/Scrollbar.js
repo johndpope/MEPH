@@ -91,8 +91,6 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
                 me.position = me.horizontal ? position.x : position.y;
                 me.setBarPosition(me.position - me.start_position);
                 me._scrollbarposition = me.getBarPosition() / (me.barSize() - me.handleSize());
-                //var part1 = ((me.getBarPosition() + me.handleSize()) / me.barSize());
-                //me.scrollbarposition = part1 - (me.handleSize() / me.barSize()) * ((1 - part1));
             }
         });
         var enddrag = function (e) {
@@ -101,7 +99,6 @@ MEPH.define('MEPH.scrollbar.Scrollbar', {
             me.scrollbarposition = me._scrollbarposition
         };
         document.body.addEventListener('mouseup', enddrag);
-        //        document.body.addEventListener('mouseout', enddrag);
     },
     handleSize: function () {
         var me = this;
