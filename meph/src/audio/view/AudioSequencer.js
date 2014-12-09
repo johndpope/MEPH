@@ -53,7 +53,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         beatspermin: null,
         selectedSoundFontChunks: null,
         resources: null,
-        scales: null
+        scales: null,
+        triadTypes: null
     },
     initialize: function () {
         var me = this;
@@ -119,12 +120,29 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         document.body.appendChild(me.soundfontlistholder);
         document.body.appendChild(me.audiographholder);
         document.body.appendChild(me.resourceloader);
+        document.body.appendChild(me.shortcutconfigpanel)
 
         me.hideSoundFontList();
         me.hideParts(me.audiographholder, me.hideGraph.bind(me));
         me.hideParts(me.soundfontlistholder, me.hideSoundFontList.bind(me));
         me.hideParts(me.resourceloader, me.hideResource.bind(me));
-
+        me.hideParts(me.shortcutconfigpanel, me.hideShortCutConfigPanel.bind(me));
+        me.triadTypes = [{ text: "", triad: [] },
+                { text: "major", triad: ["0", "4", "7"] },
+                { text: "minor", triad: ["0", "3", "7"] },
+                { text: "dim", triad: ["0", "3", "6"] },
+                { text: "aug", triad: ["0", "4", "8"] },
+                { text: "sus4", triad: ["0", "5", "7"] },
+                { text: "sus2", triad: ["0", "2", "7"] },
+                { text: "flat2nd", triad: ["0", "1", "7"] },
+                { text: "sharp4th", triad: ["0", "6", "7"] }];
+        me.triadExtensions = [{ text: "", ext: [] },
+                        { text: "Maj 7th", ext: ["b"] },
+                        { text: "Dom 7th", ext: ["a"] },
+                        { text: "Maj 9th", ext: ["b", "12"] },
+                        { text: "Dom 9th", ext: ["a", "12"] },
+                        { text: "Maj 11th", ext: ["b", "12", "15"] },
+                        { text: "Dom 11th", ext: ["a", "12", "15"] }];
     },
     hideParts: function (part, hidefunc) {
         var me = this;
@@ -196,6 +214,17 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         if (me.$resourcehidden) { return; }
         Style.hide(me.resourceloader);
         me.$resourcehidden = true;
+    },
+    showShortCutConfigPanel: function () {
+        var me = this;
+        Style.show(me.shortcutconfigpanel);
+        me.$shotcutConfigPanelHidden = false;
+    },
+    hideShortCutConfigPanel: function () {
+        var me = this;
+        if (me.$shotcutConfigPanelHidden) { return; }
+        Style.hide(me.shortcutconfigpanel);
+        me.$shotcutConfigPanelHidden = true;
     },
     hideSoundFontList: function () {
         var me = this;

@@ -41,7 +41,10 @@
     </div>
     <div class="btn-group">
         <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.openResources">
-            <span class="glyphicon glyphicon-ok-sign">&nbsp; Resource</span>
+            <span class="glyphicon glyphicon-ok-sign"></span><span>Resource</span>
+        </mephbutton>
+        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.showShortCutConfigPanel">
+            <span class="glyphicon glyphicon-ok-sign"></span><span>Shortcuts</span>
         </mephbutton>
     </div>
 </div>
@@ -122,6 +125,32 @@
                 </li>
             </template>
         </list>
+    </div>
+</div>
+<div mephid="shortcutconfigpanel" class="resourceloaderholder">
+    <div class="col-md-1">
+        <ul class="list-group">
+            <li class="list-group-item">
+                Chord Shortcuts
+            </li>
+        </ul>
+    </div>
+    <div class="col-md-11">
+        <div mephid="chordshortcuts">
+            <div class="col-md-6">
+                <dropdown meph-data-source="c$.triadTypes"
+                          descriptiontext="maj,min,aug,..."
+                          meph-data-value="c$.selectedTriadType"
+                          meph-data-labelfield="name"
+                          meph-data-valuefield="id"></dropdown>
+
+                <dropdown meph-data-source="c$.triadExtensions"
+                          descriptiontext="7th,9th,..."
+                          meph-data-value="c$.selectedTriadExtensionType"
+                          meph-data-labelfield="name"
+                          meph-data-valuefield="id"></dropdown>
+            </div>
+        </div>
     </div>
 </div>
 <!-- "instruction": true, "name" : "injectop", "close": true -->
