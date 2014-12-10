@@ -50,4 +50,9 @@
         var res = Notes.convertToNote(60);
         expect(res).toBe('C/5');
     })
+
+    it('can create an array of midi notes ', function () {
+        var result = Notes.midiNotes(39, [1, 3, 5, 7]);
+        expect(result[3]).toBe(46)
+    });
 });

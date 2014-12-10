@@ -150,6 +150,12 @@
         expect(sequence.$defaultRefId).toBe('id');
     });
 
+    it('a sequence has a midi  note ', function () {
+        var sequence = new MEPH.audio.Sequence();
+        sequence.midiNote(12);
+        expect(sequence.midiNote()).toBe(12);
+    })
+
     it('can get a sequences graph', function () {
         var sequence = new MEPH.audio.Sequence();
 

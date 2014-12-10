@@ -59,7 +59,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         selectedShortCutKey: null,
         chordShortCuts: null,
         selectedTriadExtensionType: null,
-        triadTypes: null
+        triadTypes: null,
+        currentChord: null
     },
     initialize: function () {
         var me = this;
@@ -92,6 +93,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             var name = prompt("Save As : ", "");
             MEPH.publish(MEPH.Constants.REQUEST_BLOB_SAVE, result, name + '.wav')
         });
+
         MEPH.subscribe('removekey', function (type, key) {
             me.commands.removeWhere(function (x) {
                 return x.key === key;
@@ -99,7 +101,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.chordShortCuts.removeWhere(function (x) {
                 return x.key === key;
             })
-        })
+        });
+
         MEPH.subscribe(MEPH.audio.Constants.VIEW_RESOURCE, function (type, resource, resourceType) {
             if (me.$inj.audioResources) {
                 var resource = me.$inj.audioResources.getResourceById(resource);
@@ -170,9 +173,10 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this,
             keys = 'abcdefghijklmnopqrstuvwxyz,./;[]'.split('');
         keys = keys.where(function (x) {
-            return me.commands.first(function (t) {
+            var res = me.commands.first(function (t) {
                 return t.key === x;
-            }) === null;
+            });
+            return res === null;
         }).select(function (x) {
             return {
                 text: x
@@ -296,6 +300,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         scale = me.selectedScale;
         me.currentSoundFontSelection.clear();
+
         if (scale === 'none' || !scale) {
             selection = [].interpolate(parseInt(me.firstMidiNote), parseInt(me.lastMidiNote) + 1, function (x) {
                 return x;
@@ -308,6 +313,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             return {
                 name: Notes.convertToNote(x),
                 id: x,
+                midi: x,
                 selected: true,
                 sid: me.selectedSoundFontId
             }
@@ -347,6 +353,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 sid: x.sid,
                 id: x.id
             });
+            if (x.midi) {
+                sequence.midiNote(x.midi);
+            }
         });
         me.currentSoundFontSelection.clear();
     },
@@ -413,13 +422,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 key: me.selectedShortCutKey
             };
         if (me.selectedShortCutKey) {
+            me.setCommand(data.key, data.key + ' : shortcut set current chord', me.setCurrentChord.bind(me, data));
             me.chordShortCuts.push(data);
-            me.setCommand(data.key, data.key + ' : shortcut set current chord', me.setCurrentChord.bind(me, data))
+            me.selectedShortCutKey = null;
+            me.selectedTriadExtensionType = null;
+            me.selectedTriadType = null;
         }
     },
-    setCurrentChord: function(data){
+    setCurrentChord: function (data) {
         var me = this;
-
+        me.currentChord = data;
     },
     removeShortCut: function (key) {
         MEPH.publish('removekey', key);
@@ -498,6 +510,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.setRemoveKey('x');
         me.setSequenceGraphMod('m');
         me.setPlayButton('p');
+        me.setClearCurrentChord('q');
         me.updateAvailableShortCutKeys();
     },
     translateToSource: function (sequence) {
@@ -598,7 +611,21 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 return me.scaleValue(result);
             }
         }
+        me.delete = {
+            'function': function (items) {
 
+                if (items) {
+                    items.foreach(function (item) {
+                        var parent = me.sequence.getParent(item);
+                        if (parent) {
+                            parent.source.remove(item);
+                        }
+                    });
+                    me.translateToSource(me.sequence);
+                    me.update();
+                }
+            }
+        }
         me.rowheader = {
             'function': function (item) {
 
@@ -792,6 +819,27 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.update();
         return sequence;
     },
+    getCurrentChord: function () {
+        var me = this, triad;
+        if (me.currentChord) {
+            var triad = me.triadTypes.first(function (x) {
+                return x.text === me.currentChord.triad;
+            });
+            var triadExt = me.triadExtensions.first(function (x) {
+                return x.text === me.currentChord.triadExt;
+            })
+            if (triad && triadExt) {
+                return triad.triad.concat(triadExt.ext);
+            }
+            else if (triad) {
+                return triad.triad.select();
+            }
+            else if (triadExt) {
+                return triadExt.ext.select();
+            }
+        }
+        return null;
+    },
     /**
      * Adds a sequence/audio source to the row at the cell.
      **/
@@ -802,11 +850,29 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             column = location.column;
         sequence = me.getSequenceItem(row);
         if (sequence) {
-            sequence.source.add(null, me.unscaleValue(column));
-            me.translateToSource(me.sequence);
-            var itemtodraw = sequence.source.parts.last();
-            me.drawSingleDataItem(itemtodraw);
+            var currentChord = me.getCurrentChord();
+            var midiNote = sequence.source.midiNote();
+            if (currentChord && midiNote !== null && midiNote !== undefined) {
+                me.addChordSequence(currentChord, midiNote, column);
+            }
+            else {
+                sequence.source.add(null, me.unscaleValue(column));
+                me.translateToSource(me.sequence);
+                var itemtodraw = sequence.source.parts.last();
+                me.drawSingleDataItem(itemtodraw);
+            }
         }
+    },
+    getSequenceNotes: function (notes) {
+        var me = this,
+            sequence = me.sequence,
+            items = sequence.items();
+        var sequenceNotes = notes.select(function (t) {
+            return items.first(function (x) {
+                return x.source.midiNote() === t;
+            });
+        });
+        return sequenceNotes;
     },
     removeSequence: function () {
         var me = this,
@@ -830,15 +896,37 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             column = location.column;
         sequence = me.getSequenceItem(row);
         if (sequence) {
-            var res = sequence.source.add(null, me.unscaleValue(column), me.getDuration(key));
-            //if (res instanceof MEPH.audio.Audio) {
-            //    res.duration(me.getDuration(key))
-            //}
-            me.translateToSource(me.sequence);
-            var itemtodraw = sequence.source.parts.last();
-            me.drawSingleDataItem(itemtodraw);
-            //   me.update();
+            var currentChord = me.getCurrentChord();
+            var midiNote = sequence.source.midiNote();
+            if (currentChord && midiNote !== null && midiNote !== undefined) {
+                me.addChordSequence(currentChord, midiNote, column, key);
+            }
+            else {
+                var res = sequence.source.add(null, me.unscaleValue(column), me.getDuration(key));
+                me.translateToSource(me.sequence);
+                var itemtodraw = sequence.source.parts.last();
+                me.drawSingleDataItem(itemtodraw);
+            }
         }
+    },
+    addChordSequence: function (currentChord, midiNote, column, key) {
+        var me = this;
+        if (currentChord && midiNote !== null && midiNote !== undefined) {
+            var notes = Notes.midiNotes(midiNote, currentChord);
+            var sequences = me.getSequenceNotes(notes).where();
+            itemtodraw = sequences.concatFluent(function (sequence) {
+                sequence.source.add(null, me.unscaleValue(column), key ? me.getDuration(key) : null);
+                var itemtodraw = sequence.source.parts.last();
+                return itemtodraw;
+            });
+            me.drawSingleDataItem(itemtodraw)
+            me.translateToSource(me.sequence);
+        }
+    },
+    removeSelectedSequences: function (itemstoremove) {
+        var me = this;
+
+        me.deleteSelected();
     },
     getDuration: function (key) {
         switch (key) {
@@ -939,6 +1027,12 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     setSequenceGraphMod: function (key) {
         var me = this;
         me.setCommand(key, 'sequencegraphmod', me.showGraphForSequence.bind(me));
+    },
+    setClearCurrentChord: function (key) {
+        var me = this;
+        me.setCommand(key, 'clearurrentchord', function () {
+            me.currentChord = null;
+        });
     },
     setRemoveKey: function (key) {
         var me = this;

@@ -46,7 +46,8 @@
             return scalelib;
         },
         convertToNote: function (note) {
-            var key = note % 12, foundkey;
+            var key = note % 12,
+                foundkey;
             var Notes = MEPH.audio.music.theory.Notes;
             for (var i in Notes.library) {
                 if (Notes.library[i] === key) {
@@ -59,7 +60,7 @@
         convertToMidi: function (note) {
             var Notes = MEPH.audio.music.theory.Notes;
             var res = note.split('').where(function (x) { return isNaN(x); }).join('');
-            var key = Notes.library[(res.split('')[0] + (res.split('')[0] === 'b' ? Notes.flat : ''))];
+            var key = Notes.library[(res.split('')[0] + (res.split('')[1] === 'b' ? Notes.flat : ''))];
 
             var octave = parseInt(note.split('').where(function (x) { return !isNaN(x); }).first());
             return octave * 12 + key;
@@ -105,6 +106,11 @@
                 throw 'key not found';
             }
             return key + addition;
+        },
+        midiNotes: function (bias, steps) {
+            return steps.select(function (x) {
+                return bias + parseInt(x, 12);
+            });
         },
         getOptions: function (note) {
             var Notes = MEPH.audio.music.theory.Notes;

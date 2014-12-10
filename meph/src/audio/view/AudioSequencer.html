@@ -21,31 +21,39 @@
                 meph-event-change="c$.updateBeat"
                 labeltext="Minimum Note"></number>
     </div>
-    <div class="col-md-4 col-xs-2 col-sm-2"></div>
-    <div class="btn-group">
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequence">
-            <span class="glyphicon glyphicon-save"></span>
-        </mephbutton>
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.newSequence">
-            <span class="glyphicon glyphicon-plus"></span>
-        </mephbutton>
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.openSavedSequence | c$.update">
-            <span class="glyphicon glyphicon-open"></span>
-        </mephbutton>
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.loadGrandPiano| c$.update">
-            <span class="glyphicon glyphicon-tasks"></span>
-        </mephbutton>
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequenceAsWave">
-            <span class="glyphicon glyphicon-floppy-disk"></span>
-        </mephbutton>
-    </div>
-    <div class="btn-group">
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.openResources">
-            <span class="glyphicon glyphicon-ok-sign"></span><span>Resource</span>
-        </mephbutton>
-        <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.showShortCutConfigPanel">
-            <span class="glyphicon glyphicon-ok-sign"></span><span>Shortcuts</span>
-        </mephbutton>
+    <div class="col-md-4 col-xs-2 col-sm-2">
+        <div class="btn-group">
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequence">
+                <span class="glyphicon glyphicon-save"></span>
+            </mephbutton>
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.newSequence">
+                <span class="glyphicon glyphicon-plus"></span>
+            </mephbutton>
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.openSavedSequence | c$.update">
+                <span class="glyphicon glyphicon-open"></span>
+            </mephbutton>
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.loadGrandPiano| c$.update">
+                <span class="glyphicon glyphicon-tasks"></span>
+            </mephbutton>
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveSequenceAsWave">
+                <span class="glyphicon glyphicon-floppy-disk"></span>
+            </mephbutton>
+        </div>
+        <div class="btn-group">
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.openResources">
+                <span class="glyphicon glyphicon-ok-sign"></span><span>Resource</span>
+            </mephbutton>
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.showShortCutConfigPanel">
+                <span class="glyphicon glyphicon-ok-sign"></span><span>Shortcuts</span>
+            </mephbutton>
+        </div>
+        <div class="btn-group">
+
+            <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.removeSelectedSequences">
+                <span class="glyphicon glyphicon-minus"></span>
+            </mephbutton>
+        </div>
+
     </div>
 </div>
 <div mephid="audiographholder" class="audiographholder">

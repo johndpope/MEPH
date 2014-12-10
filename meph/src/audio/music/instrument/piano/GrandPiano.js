@@ -23,6 +23,7 @@ MEPH.define('MEPH.audio.music.instrument.piano.GrandPiano', {
             var name = resource.file;
             var notegraph = me.createPianoNoteGraph(resource.id, name);
             keysequence.setDefaultGraph(notegraph.id);
+            keysequence.midiNote(MEPH.audio.music.theory.Notes.convertToMidi(x.key));
             var prefix = 'MEPH.audio.music.instrument.piano.mp3.';
             prefix = MEPH.getClassPath(prefix)
             keysequence.title = name.split(prefix).last().split('.mp3').first();

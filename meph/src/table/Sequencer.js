@@ -157,6 +157,20 @@ MEPH.define('MEPH.table.Sequencer', {
         var me = this;
         return me.getItemInSpace(cellData, me.leftheadersource, 'left');
     },
+    deleteSelected: function () {
+        var me = this;
+
+        if (me.selectedrange && me.selectedrange.end && me.selectedrange.start) {
+            var items = me.getItemInSpace({
+                row: me.selectedrange.start.row,
+                visibleRows: me.selectedrange.end.row - me.selectedrange.start.row,
+                column: me.selectedrange.start.column,
+                visibleColumns: me.selectedrange.end.column - me.selectedrange.start.column
+            }, me.source);
+            if (me.delete && me.delete.function)
+                me.delete.function(items);
+        }
+    },
     getItemInSpace: function (cellData, source, header) {
         var result = [],
             time, lane, endtime,
@@ -223,13 +237,16 @@ MEPH.define('MEPH.table.Sequencer', {
      * @param {Object} sequenceItem
      *
      */
-    getInstructionsFor: function (sequenceItem) {
+    getInstructionsFor: function (sequenceItems) {
         var me = this,
             metrics;
-        metrics = me.getItemMetrics(sequenceItem);
-        metrics.shape = MEPH.util.Renderer.shapes.rectangle;
-        metrics.radius = me.radius;
-        return [metrics];
+        sequenceItems = Array.isArray(sequenceItems) ? sequenceItems : [sequenceItems];
+        return sequenceItems.select(function (sequenceItem) {
+            metrics = me.getItemMetrics(sequenceItem);
+            metrics.shape = MEPH.util.Renderer.shapes.rectangle;
+            metrics.radius = me.radius;
+            return metrics;
+        })
     },
     getInstructionsForLeft: function (sequenceItem) {
         var me = this,

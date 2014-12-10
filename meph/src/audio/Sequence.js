@@ -26,6 +26,7 @@ MEPH.define('MEPH.audio.Sequence', {
         parts: null,
         title: null,
         id: null,
+        $midinote: null,
         containsSequences: false
     },
     initialize: function (args) {
@@ -123,6 +124,13 @@ MEPH.define('MEPH.audio.Sequence', {
             }
         }
         return result;
+    },
+    midiNote: function (midinote) {
+        var me = this;
+        if (midinote !== undefined) {
+            me.$midinote = parseFloat(midinote);
+        }
+        return me.$midinote;
     },
     /**
      * Returns the instance used by the sequence.

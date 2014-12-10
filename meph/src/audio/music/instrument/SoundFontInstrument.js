@@ -3,7 +3,6 @@
     alternateNames: ['SoundFontInstrument'],
     requires: ['MEPH.audio.soundfont.SoundFontParser',
         'MEPH.audio.Audio',
-       // 'MEPH.audio.graph.node.AudioBufferSourceNode',
         'MEPH.graph.Node',
         'MEPH.audio.soundfont.chunks.data.operators.OperatorFactory',
         'MEPH.audio.Constants',

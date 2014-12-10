@@ -208,7 +208,7 @@
 
 
         var res = MEPH.audio.Audio.detectPitches(myArrayBuffer.getChannelData(0), frameCount, 1000);
-        
+
         expect(res).toBeTruthy();
     })
 
@@ -370,7 +370,8 @@
         audio.load(audiofile, audiofiletyp, {}).then(function (resource) {
 
             var result = audio.copyToBuffer(resource, 50, 50.1, {});
-
+            MEPH.audio.Audio.OfflineMode = true;
+            MEPH.audio.Audio.OfflineAudioContext = new (window.OfflineAudioContext)(32, 10000, 44100)
             audio.buffer(result.buffer).clearContext().complete({
                 length: 2,
                 numOfChannels: resource.buffer.channelCount,
@@ -384,7 +385,8 @@
 
             // start the source playing
             result.buffer.start();
-            audio.getContext().startRendering();
+            MEPH.audio.Audio.OfflineAudioContext.startRendering();
+            MEPH.audio.Audio.OfflineMode = false;
         });
     });
 

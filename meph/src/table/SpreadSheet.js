@@ -1077,7 +1077,7 @@ MEPH.define('MEPH.table.SpreadSheet', {
         var me = this;
         if (me.state === MEPH.table.SpreadSheet.states.Selecting) {
             var selectedstartrow = me.getSelectedStartRow(me.selecting);
-            me.selectedrange = me.selecting;
+            me.selectedrange = MEPH.clone(me.selecting);
             if (me.selected) {
                 me.selected.clear();
                 if (selectedstartrow) {
