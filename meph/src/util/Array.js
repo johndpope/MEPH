@@ -609,6 +609,29 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
+            if (!array.mostcommon) {
+                Object.defineProperty(array, 'mostcommon', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this;
+                        var res = collection.groupBy(func);
+                        var most;
+
+                        for (var i in res) {
+                            if (most === undefined) {
+                                most = i;
+                            }
+                            else if (res[most].length < res[i].length) {
+                                most = i;
+                            }
+                        }
+                        return most
+                    }
+                })
+            }
+
             if (!array.second) {
                 Object.defineProperty(array, 'second', {
                     enumerable: false,

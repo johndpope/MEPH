@@ -120,28 +120,35 @@ Promise.resolve().then(function () {
                     toresolve = resolve;
                     tofail = fail;
                 });
+
+                constraints = constraints || {
+                    audio: true,
+                    video: true
+                };
+
                 if (MEPH.util.Dom.usermedia) {
                     toresolve(MEPH.util.Dom.usermedia);
                 }
-                // Normalize the various vendor prefixed versions of getUserMedia.
-                navigator.getUserMedia = (navigator.getUserMedia ||
-                                          navigator.webkitGetUserMedia ||
-                                          navigator.mozGetUserMedia ||
-                                          navigator.msGetUserMedia);
-                if (navigator.getUserMedia) {
-                    navigator.getUserMedia(constraints,
-                        function (stream) {
-                            MEPH.util.Dom.usermedia = stream;
-                            toresolve(stream);
-                        },
-                        function (error) {
-                            tofail(error);
-                        });
-                }
                 else {
-                    tofail(new Error('Browser does not support user media'));
+                    // Normalize the various vendor prefixed versions of getUserMedia.
+                    navigator.getUserMedia = (navigator.getUserMedia ||
+                                              navigator.webkitGetUserMedia ||
+                                              navigator.mozGetUserMedia ||
+                                              navigator.msGetUserMedia);
+                    if (navigator.getUserMedia) {
+                        navigator.getUserMedia(constraints,
+                            function (stream) {
+                                MEPH.util.Dom.usermedia = stream;
+                                toresolve(stream);
+                            },
+                            function (error) {
+                                tofail(error);
+                            });
+                    }
+                    else {
+                        tofail(new Error('Browser does not support user media'));
+                    }
                 }
-
                 return result;
             },
             supportsUserMedia: function () {

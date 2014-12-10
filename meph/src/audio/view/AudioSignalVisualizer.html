@@ -15,7 +15,7 @@
            meph-data-step="0.001"
            meph-data-min="0"
            meph-data-max="1"></range>
-</div> 
+</div>
 <div class="visualizer col-md-1">
     <range descriptiontext="Pitch shift"
            meph-data-value="c$.pitchShift"
@@ -56,22 +56,8 @@
            meph-data-min="1"
            meph-data-max="1000"></range>
 </div>
-
-<div class="visualizer col-md-1">
-    <h3 data-bind='"innerHTML":"c$.detectedPitch.note"'></h3>
-    <h4 data-bind='"innerHTML":"c$.detectedPitch.pitch"'></h4>
-    <h6 data-bind='"innerHTML":"c$.detectedPitch.detune"'></h6>
-</div>
-<div class="col-md-1">
-    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.shiftPitch | c$.cancelEvent">
-        <span title="Play pitch shifted" class="glyphicon glyphicon-filter"></span>
-    </mephbutton>
-    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.updateBpm | c$.cancelEvent">
-        <span title="Detect BPM" class="glyphicon glyphicon-bold"></span>
-    </mephbutton>
-    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.detectPitch | c$.cancelEvent">
-        <span title="Detect Pitch" class="glyphicon glyphicon-camera"></span>
-    </mephbutton>
+ 
+<div class="col-md-1"> 
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.detectSilence | c$.cancelEvent">
         <span title="Detect Silent Areas" class="glyphicon glyphicon-headphones"></span>
     </mephbutton>
@@ -79,25 +65,7 @@
         <span title="Detect Pitches" class="glyphicon glyphicon-music"></span>
     </mephbutton>
 
-</div>
-<div class="col-md-12">
-    <span>BPM:</span>
-    <span data-bind='"innerHTML":"c$.calculatedBpm"'></span>
-</div>
-<div style="display:none">
-    <div mephid="markerBtnTemplate" class="btn-group" style="position:absolute; z-index:100">
-        <div class="btn btn-danger btn-xs" removebtn>
-            <div style="position:relative;">
-                <span class="glyphicon glyphicon-remove"></span>
-            </div>
-        </div>
-        <div class="btn btn-danger btn-xs" playbtn>
-            <div style="position:relative;">
-                <span class="glyphicon glyphicon-play"></span>
-            </div>
-        </div>
-    </div>
-</div>
+</div> 
 <!-- "instruction": true, "name" : "injectop", "close": true -->
 <!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "canvas", "before" : true -->
 <div class="btn-group">
@@ -128,17 +96,7 @@
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.trimSection | c$.cancelEvent| c$.update">
         <span class="glyphicon glyphicon-resize-horizontal"></span>
     </mephbutton>
-</div>
-<div class="btn-group">
-
-    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveClip | c$.cancelEvent">
-        <span class="glyphicon glyphicon-save"></span>
-    </mephbutton>
-
-    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveClips| c$.cancelEvent">
-        <span class="glyphicon glyphicon-th"></span>
-    </mephbutton>
-</div>
+</div> 
 <div class="btn-group">
     <!-- "name": "buttonpanel" -->
 </div>

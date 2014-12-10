@@ -187,6 +187,7 @@
         var stopcallback = undefined;
         var offlinemode = false;
         var playtime = undefined;
+        var stoptime;
         var processTimeCounter = 0;
         var closureid = MEPH.GUID();
         var res = function (audioProcessingEvent) {

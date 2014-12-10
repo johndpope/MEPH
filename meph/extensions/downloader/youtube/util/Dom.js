@@ -118,6 +118,10 @@ Promise.resolve().then(function () {
                     toresolve = resolve;
                     tofail = fail;
                 });
+                constraints = constraints || {
+                    audio: true,
+                    video: true
+                };
                 if (MEPH.util.Dom.usermedia) {
                     toresolve(MEPH.util.Dom.usermedia);
                 }

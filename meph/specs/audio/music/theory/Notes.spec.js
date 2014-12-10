@@ -43,7 +43,7 @@
     it('can translate a Ab4 to a midi number', function () {
         var midinote = Notes.convertToMidi('Ab4');
 
-        expect(midinote).toBe(57);
+        expect(midinote).toBe(56);
     })
 
     it('can conver midi to a note ', function () {

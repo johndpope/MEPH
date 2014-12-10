@@ -140,11 +140,24 @@
         <ul class="list-group">
             <li class="list-group-item">
                 Chord Shortcuts
+                <mephbutton type="button" 
+                            class="btn btn-primary btn-xs" 
+                            meph-event-click="c$.hideWhistlin | c$.showShortCuts | c$.cancelEvent">
+                    <span class="glyphicon glyphicon-folder-open"></span>
+                </mephbutton>
+            </li>
+            <li class="list-group-item">
+                Whistlin' Listenin'
+                <mephbutton type="button" 
+                            class="btn btn-primary btn-xs" 
+                            meph-event-click="c$.hideShortCuts | c$.showWhistlin | c$.cancelEvent">
+                    <span class="glyphicon glyphicon-folder-open"></span>
+                </mephbutton>
             </li>
         </ul>
     </div>
     <div class="col-md-11">
-        <div mephid="chordshortcuts">
+        <div mephid="chordshortcuts" style="display:none;">
             <div class="col-md-2">
                 <dropdown meph-data-source="c$.triadTypes"
                           descriptiontext="maj,min,aug,..."
@@ -185,6 +198,29 @@
                         </li>
                     </template>
                 </list>
+            </div>
+        </div>
+        <div mephid="whistlinlistenin" style="display:none;">
+            <div class="col-md-1">
+                <span data-bind='"innerHTML" : "c$.timeLength"'></span>
+                <range value="c$.timeLength"
+                       labeltext="Time length"
+                       meph-data-min="0.00"
+                       meph-data-max="10"
+                       meph-data-step="0.01"></range>
+
+                <mephbutton type="button"
+                            class="btn btn-primary btn-xs"
+                            meph-event-click="c$.recordWhistle">
+                    <span class="glyphicon glyphicon-record"></span><span>Record Whistle</span>
+                </mephbutton>
+            </div>
+            <div class="col-md-11">
+
+                <audiosignalvisualizer source="c$.whistleBuffer"
+                                       meph-data-height="500"
+                                       scrollmutiplier="0">
+                </audiosignalvisualizer>
             </div>
         </div>
     </div>

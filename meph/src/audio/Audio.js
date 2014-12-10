@@ -19,6 +19,7 @@ MEPH.define('MEPH.audio.Audio', {
             delay: 'delay',
             audioElement: 'audioElement',
             dynamicsCompressor: 'dynamicsCompressor',
+            mediastream: 'mediastream',
             waveShaper: 'waveShaper',
             analyser: 'analyser',
             splitter: 'splitter',
@@ -886,11 +887,33 @@ MEPH.define('MEPH.audio.Audio', {
      * Creates an oscillator node
      **/
     oscillator: function (options) {
-        var me = this, params = me.createK().concat(me.createA('frequency', 'detune')).concat(me.createS('type'));
+        var me = this,
+            params = me.createK().concat(me.createA('frequency', 'detune')).concat(me.createS('type'));
         options = options || {};
         options.noinputs = true;
         me.createNode(options, function () {
             return MEPH.audio.Audio.nodeTypes.oscillator;
+        }, params)
+        return me;
+    },
+    mediastream: function (options) {
+        var me = this,
+            params = [];
+
+        options = options || {};
+        if (!options.stream) {
+            MEPH.util.Dom.getUserMedia({
+                audio: true
+            }).then(function (stream) {
+                options.stream = stream;
+            }).then(function () {
+                if (options.callback)
+                    options.callback(options.stream);
+            })
+        }
+
+        me.createNode(options, function () {
+            return MEPH.audio.Audio.nodeTypes.mediastream;
         }, params)
         return me;
     },
@@ -1152,6 +1175,9 @@ MEPH.define('MEPH.audio.Audio', {
                 return bs;
             case A.nodeTypes.bufferSource:
                 return me.createContext(options).createBufferSource();
+            case A.nodeTypes.mediastream:
+                var node = me.createContext(options).createMediaStreamSource(nodeoptions.stream);
+                return node;
             case A.nodeTypes.processor:
                 var context = me.createContext(options)
                 var res = context.createScriptProcessor(nodeoptions.size || 1024, 1, 1);

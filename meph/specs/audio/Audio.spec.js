@@ -603,4 +603,45 @@
         var krateParam = params.first(function (x) { return x.type === 'plainNumber' });
         expect(krateParam).toBeTruthy();
     });
+
+    it('can create a mediastream node', function (done) {
+        var audio = new Audio();
+
+        audio.mediastream({
+            callback: function () {
+                done();
+            }
+        });
+    });
+
+    it('can create a mediastream node', function (done) {
+        var audio = new Audio();
+        MEPH.audio.Audio.OfflineMode = true;
+        MEPH.audio.Audio.OfflineAudioContext = new (window.OfflineAudioContext)(32, 5 * 44100, 44100)
+
+        audio.mediastream({
+            callback: function (stream) {
+                var video = document.createElement('video');
+                document.body.appendChild(video);
+                video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;;
+                video.autoPlay = true;
+                video.onloadedmetadata = function (e) {
+                    video.play();
+                    video.muted = 'true';
+                    MEPH.audio.Audio.OfflineAudioContext.startRendering();
+                    
+                };
+                audio.complete({
+                    oncomplete: function (res) {
+
+                        
+                        audio.disconnect();
+                        done();
+                    },
+                });
+
+            }
+        })
+
+    })
 });

@@ -14,6 +14,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         'MEPH.audio.music.theory.Notes',
         'MEPH.audio.AudioResources',
         'MEPH.input.Text',
+        'MEPH.audio.view.AudioSignalVisualizer',
         'MEPH.audio.Sequence',
         'MEPH.util.FileReader',
         'MEPH.audio.graph.AudioGraph',
@@ -60,6 +61,8 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         chordShortCuts: null,
         selectedTriadExtensionType: null,
         triadTypes: null,
+        timeLength: null,
+        whistleBuffer: null,
         currentChord: null
     },
     initialize: function () {
@@ -142,6 +145,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
 
         me.hideSoundFontList();
         me.hideParts(me.audiographholder, me.hideGraph.bind(me));
+        me.hideParts(me.whistlinlistenin, me.hideWhistlin.bind(me));
         me.hideParts(me.soundfontlistholder, me.hideSoundFontList.bind(me));
         me.hideParts(me.resourceloader, me.hideResource.bind(me));
         me.hideParts(me.shortcutconfigpanel, me.hideShortCutConfigPanel.bind(me));
@@ -168,6 +172,22 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             me.updateAvailableShortCutKeys();
         })
         me.updateAvailableShortCutKeys();
+    },
+    hideWhistlin: function () {
+        var me = this;
+        Style.hide(me.whistlinlistenin);
+    },
+    showShortCuts: function () {
+        var me = this;
+        Style.show(me.chordshortcuts);
+    },
+    hideShortCuts: function () {
+        var me = this;
+        Style.hide(me.chordshortcuts);
+    },
+    showWhistlin: function () {
+        var me = this;
+        Style.show(me.whistlinlistenin);
     },
     updateAvailableShortCutKeys: function () {
         var me = this,
@@ -1047,5 +1067,53 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     //////////////// Sequencer Rendering///
     rowDrawInstruction: function () {
         return null;
+    },
+    recordWhistle: function () {
+        var me = this;
+        if (!me.$whistleRecorder && parseFloat(me.timeLength)) {
+            me.$whistleRecorder = new MEPH.audio.Audio();
+            me.$whistleRecorder.mediastream({
+                callback: function (stream) {
+                    var video = document.createElement('video');
+                    document.body.appendChild(video);
+                    video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;;
+                    video.autoPlay = true;
+                    video.onloadedmetadata = function (e) {
+                        video.play();
+
+                        var audioCtx = me.$whistleRecorder.createContext();
+                        var frameCount = Math.ceil(parseFloat(me.timeLength) * audioCtx.sampleRate);
+                        var myArrayBuffer = audioCtx.createBuffer(2, frameCount, audioCtx.sampleRate);
+                        var c = 0;
+                        me.$whistleRecorder.processor({
+                            process: function (audioProcessingEvent) {
+
+                                var inputBuffer = audioProcessingEvent.inputBuffer;
+                                var length = audioProcessingEvent.inputBuffer.numberOfChannels;
+                                var duration = inputBuffer.length;
+                                var channeldata;
+                                var data;
+                                for (var i = length ; i--;) {
+                                    channeldata = inputBuffer.getChannelData(i);
+                                    data = myArrayBuffer.getChannelData(i);
+                                    for (var sample = 0; sample < duration; sample++) {
+                                        data[sample + c] = channeldata[sample];
+                                    }
+                                }
+                                c += duration;
+                                if (frameCount < c) {
+                                    me.$whistleRecorder.disconnect();
+                                    me.$whistleRecorder = null;
+                                    var b = audioCtx.createBufferSource();
+                                    b.buffer = myArrayBuffer;
+                                    me.whistleBuffer = { buffer: b };
+                                }
+                            }
+
+                        }).complete();
+                    };
+                }
+            })
+        }
     }
 });
