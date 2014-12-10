@@ -137,18 +137,46 @@
     </div>
     <div class="col-md-11">
         <div mephid="chordshortcuts">
-            <div class="col-md-6">
+            <div class="col-md-2">
                 <dropdown meph-data-source="c$.triadTypes"
                           descriptiontext="maj,min,aug,..."
                           meph-data-value="c$.selectedTriadType"
                           meph-data-labelfield="name"
-                          meph-data-valuefield="id"></dropdown>
+                          meph-data-valuefield="text"></dropdown>
 
                 <dropdown meph-data-source="c$.triadExtensions"
                           descriptiontext="7th,9th,..."
                           meph-data-value="c$.selectedTriadExtensionType"
-                          meph-data-labelfield="name"
-                          meph-data-valuefield="id"></dropdown>
+                          meph-data-labelfield="text"
+                          meph-data-valuefield="text"></dropdown>
+
+                <dropdown meph-data-source="c$.availableShortCutKeys"
+                          descriptiontext="short cut key"
+                          meph-data-value="c$.selectedShortCutKey"
+                          meph-data-labelfield="text"
+                          meph-data-valuefield="text"></dropdown>
+                <mephbutton type="button"
+                            class="btn btn-primary btn-xs"
+                            meph-event-click="c$.addShortcut">
+                    <span class="glyphicon glyphicon-plus"></span><span>Add Shortcut</span>
+                </mephbutton>
+            </div>
+            <div class="col-md-3">
+                <list data-bind='"source": "c$.chordShortCuts"'>
+                    <template name="chordShortCuts_template">
+                        <li class="list-group-item">
+                            Triad: <span data-bind='"innerHTML": "c$.data.triad"'></span>
+                            <span data-bind='"innerHTML": "c$.data.triadExt"'></span>
+                            <span>Key</span>
+                            <span data-bind='"innerHTML": "c$.data.key"'></span>
+                            <mephbutton type="button"
+                                        class="btn btn-primary btn-xs"
+                                        meph-event-click="c$.list.parent.removeShortCut, c$.data.key">
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </mephbutton>
+                        </li>
+                    </template>
+                </list>
             </div>
         </div>
     </div>

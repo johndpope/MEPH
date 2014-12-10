@@ -54,6 +54,11 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         selectedSoundFontChunks: null,
         resources: null,
         scales: null,
+        triadExtensions: null,
+        availableShortCutKeys: null,
+        selectedShortCutKey: null,
+        chordShortCuts: null,
+        selectedTriadExtensionType: null,
         triadTypes: null
     },
     initialize: function () {
@@ -76,6 +81,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             if (args.property === 'beatspermin') {
                 me.updateBeat();
             }
+            if (args.property === 'commands' || args.property === 'chordShortCuts') {
+                me.updateAvailableShortCutKeys();
+            }
         });
         me.setupHeaders();
 
@@ -84,7 +92,14 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
             var name = prompt("Save As : ", "");
             MEPH.publish(MEPH.Constants.REQUEST_BLOB_SAVE, result, name + '.wav')
         });
-
+        MEPH.subscribe('removekey', function (type, key) {
+            me.commands.removeWhere(function (x) {
+                return x.key === key;
+            });
+            me.chordShortCuts.removeWhere(function (x) {
+                return x.key === key;
+            })
+        })
         MEPH.subscribe(MEPH.audio.Constants.VIEW_RESOURCE, function (type, resource, resourceType) {
             if (me.$inj.audioResources) {
                 var resource = me.$inj.audioResources.getResourceById(resource);
@@ -127,15 +142,16 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.hideParts(me.soundfontlistholder, me.hideSoundFontList.bind(me));
         me.hideParts(me.resourceloader, me.hideResource.bind(me));
         me.hideParts(me.shortcutconfigpanel, me.hideShortCutConfigPanel.bind(me));
-        me.triadTypes = [{ text: "", triad: [] },
-                { text: "major", triad: ["0", "4", "7"] },
-                { text: "minor", triad: ["0", "3", "7"] },
-                { text: "dim", triad: ["0", "3", "6"] },
-                { text: "aug", triad: ["0", "4", "8"] },
-                { text: "sus4", triad: ["0", "5", "7"] },
-                { text: "sus2", triad: ["0", "2", "7"] },
-                { text: "flat2nd", triad: ["0", "1", "7"] },
-                { text: "sharp4th", triad: ["0", "6", "7"] }];
+        me.triadTypes = [{ name: '', text: "", triad: [] },
+                { name: 'Major', text: "major", triad: ["0", "4", "7"] },
+                { name: 'Minor', text: "minor", triad: ["0", "3", "7"] },
+                { name: 'Dim', text: "dim", triad: ["0", "3", "6"] },
+                { name: 'Aug', text: "aug", triad: ["0", "4", "8"] },
+                { name: 'Sus4', text: "sus4", triad: ["0", "5", "7"] },
+                { name: 'Sus2', text: "sus2", triad: ["0", "2", "7"] },
+                { name: 'Flat2nd', text: "flat2nd", triad: ["0", "1", "7"] },
+                { name: 'Sharp4th', text: "sharp4th", triad: ["0", "6", "7"] }];
+
         me.triadExtensions = [{ text: "", ext: [] },
                         { text: "Maj 7th", ext: ["b"] },
                         { text: "Dom 7th", ext: ["a"] },
@@ -143,6 +159,27 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                         { text: "Dom 9th", ext: ["a", "12"] },
                         { text: "Maj 11th", ext: ["b", "12", "15"] },
                         { text: "Dom 11th", ext: ["a", "12", "15"] }];
+
+        me.chordShortCuts = MEPH.util.Observable.observable([]);
+        me.chordShortCuts.on('changed', function () {
+            me.updateAvailableShortCutKeys();
+        })
+        me.updateAvailableShortCutKeys();
+    },
+    updateAvailableShortCutKeys: function () {
+        var me = this,
+            keys = 'abcdefghijklmnopqrstuvwxyz,./;[]'.split('');
+        keys = keys.where(function (x) {
+            return me.commands.first(function (t) {
+                return t.key === x;
+            }) === null;
+        }).select(function (x) {
+            return {
+                text: x
+            }
+        });
+
+        me.availableShortCutKeys = keys;
     },
     hideParts: function (part, hidefunc) {
         var me = this;
@@ -368,6 +405,25 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         var me = this;
         me.updateBeat();
     },
+    addShortcut: function () {
+        var me = this,
+            data = {
+                triad: me.selectedTriadType,
+                triadExt: me.selectedTriadExtensionType,
+                key: me.selectedShortCutKey
+            };
+        if (me.selectedShortCutKey) {
+            me.chordShortCuts.push(data);
+            me.setCommand(data.key, data.key + ' : shortcut set current chord', me.setCurrentChord.bind(me, data))
+        }
+    },
+    setCurrentChord: function(data){
+        var me = this;
+
+    },
+    removeShortCut: function (key) {
+        MEPH.publish('removekey', key);
+    },
     /**
      * Save sequence.
      **/
@@ -442,6 +498,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.setRemoveKey('x');
         me.setSequenceGraphMod('m');
         me.setPlayButton('p');
+        me.updateAvailableShortCutKeys();
     },
     translateToSource: function (sequence) {
         var me = this;
