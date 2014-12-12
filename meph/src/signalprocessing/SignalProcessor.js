@@ -203,40 +203,96 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }
         return hasoutput;
     },
-    frequency: function (input, sampleRate, stretch, deci) {
-        var nyquist = sampleRate / 2;
-        stretch = stretch || 2;
+    guessfrequencies: function (input, sampleRate, windowsize, binsize, step) {
+        var me = this;
+        var steps = Math.ceil(input.length / windowsize);
+        var frequencies = [].interpolate(0, steps, function (t) {
+
+            var _input = input.subset(windowsize * t, (windowsize * (t + 1)));
+
+            var freq = me.guessfrequency(_input, sampleRate, binsize, step);
+            return freq
+        });
+
+        return frequencies;
+    },
+    getNotes: function (input, sampleRate, windowsize, binsize, step) {
+        var me = this, frequencies = me.guessfrequencies(input, sampleRate, windowsize, binsize, step);
+
+        return frequencies.select(function (x) {
+            return me.noteFromFrequency(x);
+        })
+    },
+    noteFromPitch: function (frequency) {
+        var noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+        return Math.round(noteNum) + 69;
+    },
+    noteFromFrequency: function (frequency) {
+        var me = this, note = me.noteFromPitch(frequency);
+        var noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        return noteStrings[note % 12];
+    },
+    guessfrequency: function (input, sampleRate, binsize, windowStep) {
+        var me = this;
+        var res = me.frequency(input, sampleRate, binsize, windowStep);
+        if (res.length > 2) {
+            // remove maximum
+            var max = res.maximum(function (x) {
+                return Math.abs(x);
+            });
+            var bbin = res.indexWhere(function (x) {
+                return Math.abs(x) === max;
+            }).first();
+            res.splice(bbin, 1);
+
+            // remove minimum
+            var max = res.maximum(function (x) {
+                return -Math.abs(x);
+            });
+            var bbin = res.indexWhere(function (x) {
+                return -Math.abs(x) === max;
+            }).first();
+            res.splice(bbin, 1);
+        }
+        var averagefreque = res.summation(function (x, r) { return x + r }) / res.length;
+
+        return averagefreque;
+    },
+    frequency: function (input, sampleRate, binsize, windowStep) {
         var me = this;
         var length = input.length;
         var fftsize = length / 2;
-        var bin = nyquist / fftsize;
-        var res = me.fft(input);
-        res = res.subset(0, res.length / 2);
-        res = res.select(function (x) { return Math.abs(x); })
-        var decminated = [].interpolate(1, deci || 5, function (x) {
-            return res.skipEvery(x);
-        });
-        var len = decminated.last().length;
-        var res = [].interpolate(0, len, function (x) {
-            return decminated.summation(function (t, current, i) {
-                if (i)
-                    return t[x * (decminated.length - (i + 1))] * (current);
-                return t[x];
-            })
-        })
-        var maxima = me.detectMaxima(res, stretch);
-        return maxima.select(function (bbin) {
+        binsize = binsize || 1024;
+        windowStep = windowStep || (binsize / 2);
 
-            var freq = bbin / length * sampleRate;
-            return freq;
-        }).where(function (x) { return x < sampleRate });
-        //var max = res.maximum(function (x) { return Math.abs(x); });
-        //var bbin = res.indexWhere(function (x) { return Math.abs(x) === max; }).first();
-        //if (bbin > length) {
-        //    bbin = (length * 2) - bbin
-        //}
-        //var freq = bbin * (nyquist / fftsize);
-        //return freq;
+        var steps = input.length / windowStep;
+        var frequencies = [].interpolate(0, steps, function (t) {
+            var _input = input.subset(windowStep * t, (windowStep * (t)) + binsize);
+            if (_input.length < binsize) {
+                _input = [].interpolate(0, binsize, function (x) {
+                    return _input[x] || 0;
+                })
+            }
+            var frequency = me._frequency(_input, sampleRate);
+            return frequency;
+        });
+
+
+        return frequencies;
+    },
+    _frequency: function (input, sampleRate) {
+        var me = this;
+        var res = me.fft(input);
+        //res = res.skipEvery(2);
+        var max = res.maximum(function (x) {
+            return Math.abs(x);
+        });
+        var bbin = res.indexWhere(function (x) {
+            return Math.abs(x) === max;
+        }).first();
+        var fs = sampleRate / input.length * bbin;
+        return fs;
     },
     ShortTimeFourierTransform: function (fftBuffer, fftFrameSize, sign) {
         var wr, wi, arg, temp;
@@ -284,6 +340,77 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }
     },
     /**
+     * Performs a sfft.
+     * @param {Array} array
+     * @param {Array} $window
+     * @param {Number} N
+     * FFT Size
+     * @param {Number} H
+     * hop size returns
+     * @return {Array}
+     **/
+    sfft: function (array, $window, N, H) {
+        H = Math.ceil(H || 0);
+        var me = this;
+        if (H <= 0) {
+            throw new Error('Hop size is smaller than or equal to 0.');
+        }
+        var M = $window.length;
+        var hM1 = Math.floor((M + 1) / 2);
+        var hM2 = Math.floor(M / 2);
+        var pin = 0;
+        var pend = array.length - M;
+        var total = $window.summation(function (x, r) { return x + r });
+        $window = $window.select(function (x) { return x / total; });
+        var result = [];
+
+        while (pin <= pend) {
+            //analysis
+            var x1 = array.subset(pin, pin + M);
+            var resX1 = me.dfft(x1, $window);
+
+            result.push(resX1);
+            pin += H;
+        }
+
+        return result;
+    },
+    /**
+     * Performs  the inverse sfft
+     * @param {Array} frames
+     * @param {Number} M
+     * The window size.
+     * @param {Number} H
+     * The Hop size
+     **/
+    isfft: function (frames, M, H) {
+        var me = this;
+        var pin = 0;
+        var result = new Float32Array(frames.length * H);
+        frames.foreach(function (frame, i) {
+            var y1 = me.idfft(frame, M).skipEvery(2);
+            y1.foreach(function (y, i) {
+                result[pin + i] += y * H;
+            });
+            pin += H;
+        });
+        return result;
+    },
+    idfft: function (array, M) {
+        var me = this;
+
+        return me.ifft(array);
+    },
+    dfft: function (array, $window) {
+        var me = this, warray;
+
+        warray = array.select(function (x, i) {
+            return x * $window[i];
+        });
+
+        return me.fft(warray);
+    },
+    /**
      * Performs a fast fourier transform(FFT).
      * @param {Array} array
      * @param {Number} outputOffset
@@ -306,7 +433,8 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         fft.complex(type === 'complex' ? array.length / 2 : array.length, false);
         fft.process(output, outputOffset, outputStride, array, inputOffset, inputStride, type)
         return output;
-    },/**
+    },
+    /**
      * Performs an inverse fast fourier transform(FFT).
      * @param {Array} array
      * @param {Number} outputOffset
@@ -724,7 +852,8 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * @param {String} type , complex or real
      **/
     stretch: function (signal, stretch, overlap, width, type) {
-        var len = signal.length, me = this;
+        var len = signal.length,
+            me = this;
         overlap = overlap === null ? .5 : overlap;
         var windowWidth = width || me.windowWidth(signal.length);
 

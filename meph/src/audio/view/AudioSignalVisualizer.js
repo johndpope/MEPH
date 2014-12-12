@@ -121,10 +121,11 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
         var me = this,
             startend = me.getStartEndPosition(),
             clip = me.getSelectedClip();
+        me.clearAreasOfInterest();
         if (clip) {
             var sampleRate = me.source.buffer.buffer.sampleRate;
             if (me.$detectedSilence) {
-                
+
                 var res = me.$detectedSilence.select(function (x, index) {
                     if (index) {
                         return {
@@ -142,10 +143,13 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
                     }
                 });
 
-                var pitches = res.where(function (x) { return x.length > 1000; }).select(function (x) {
+                var pitches = res.where(function (x) { return x.length > 4000; }).select(function (x) {
                     var $clip = me.getClip(clip, x.start / sampleRate, (x.start + x.length) / sampleRate);
                     var res = MEPH.audio.Audio.detectPitches($clip.buffer.buffer.getChannelData(0), sampleRate, parseInt(me.pitchWindowSize));
-                    var note = res.select(function (x) { return x.key.note }).mostcommon(function (x) { return x; });
+                    var sp = new SignalProcessor();
+                    res = sp.getNotes($clip.buffer.buffer.getChannelData(0), sampleRate, 4000, 4096 * 2, 512);
+                    //var note = res.select(function (x) { return x.key.note }).mostcommon(function (x) { return x; });
+                    var note = res.select(function (x) { return x }).mostcommon(function (x) { return x; });
                     return {
                         start: x.start + startend.start * sampleRate,
                         end: x.end + startend.start * sampleRate,
@@ -172,7 +176,7 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
         var me = this,
             startend = me.getStartEndPosition(),
             clip = me.getSelectedClip();
-
+        me.clearAreasOfInterest();
         if (clip) {
             var sampleRate = me.source.buffer.buffer.sampleRate;
             var res = MEPH.audio.Audio.detectSilence(clip.buffer.buffer.getChannelData(0), parseFloat(me.silenceThreshold), parseFloat(me.silenceTimeThreshold),
@@ -186,6 +190,15 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
             }));
         }
     },
+    clearAreasOfInterest: function () {
+        var me = this, area;
+
+        areas = (me.$areasOfInterest || []).select();
+        areas.foreach(function (t) {
+            t.div.parentNode.removeChild(t.div);
+        })
+        me.$areasOfInterest = [];
+    },
     renderAreasOfInterest: function (type, areas) {
         var me = this,
             container = me.container,
@@ -195,6 +208,7 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
             });
         if (areas === undefined) {
             areas = (me.$areasOfInterest || []).select();
+
         }
         var newareas = areas.select(function (x) {
             var left = me.getRelativeMarkPosition(x.start);

@@ -1078,6 +1078,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                     document.body.appendChild(video);
                     video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;;
                     video.autoPlay = true;
+                    video.muted = true;
                     video.onloadedmetadata = function (e) {
                         video.play();
 

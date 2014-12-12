@@ -35,17 +35,96 @@
     it('can take the fft and find the most common frequency', function () {
 
         var sp = new SignalProcessor();
-        var length = 8192 ;
+        var length = 22100;
         var sampleRate = 44100;
         var input = new Float32Array(length);
         input.foreach(function (x, index) {
             input[index] = Math.sin(index / sampleRate * 261.626 * Math.PI);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
         });
-        // This kinda works, but only for a single frequency.
-        var freq1 = sp.frequency(input, sampleRate, 2, 5);
-        
 
+        // This kinda works, but only for a single frequency.
+        var freq1 = sp.frequency(input, sampleRate, 2048);
+
+        var input = new Float32Array(length);
+        input.foreach(function (x, index) {
+            input[index] = Math.sin(index / sampleRate * 461.626 * Math.PI);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
+        });
+
+        var freq2 = sp.frequency(input, sampleRate, 2048);
     })
+
+    it('can take a guess at the frequency', function () {
+
+        var sp = new SignalProcessor();
+        var length = 22100;
+        var sampleRate = 44100;
+        var input = new Float32Array(length);
+        input.foreach(function (x, index) {
+            input[index] = Math.sin(index / sampleRate * 261.626 * Math.PI * 2);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
+        });
+        // This kinda works, but only for a single frequency.
+        var freq1 = sp.guessfrequency(input, sampleRate, 2048);
+
+        var freq2 = sp.guessfrequency(input, sampleRate, 1024);
+
+        var freq3 = sp.guessfrequency(input, sampleRate, 512);
+
+        var freq4 = sp.guessfrequency(input, sampleRate, 4096);
+
+        var freq5 = sp.guessfrequency(input, sampleRate, 4096 * 2);
+
+        var freq6 = sp.guessfrequency(input, sampleRate, 4096 * 2 * 2);
+
+        var freq7 = sp.guessfrequency(input, sampleRate, 4096 * 2 * 2 * 2);
+    });
+
+    it('can guess frequencies over time ', function () {
+        var sp = new SignalProcessor();
+        var length = 50000;
+        var sampleRate = 44100;
+        var input = new Float32Array(length);
+        input.foreach(function (x, index) {
+            if (index > length / 2)
+                input[index] = Math.sin(index / sampleRate * 261.626 * Math.PI);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
+            else
+                input[index] = Math.sin(index / sampleRate * 698.5 * Math.PI);
+        });
+
+        var frequencies = sp.guessfrequencies(input, sampleRate, 8000, 4096, 256);
+    })
+
+
+    it('can guess notes over time ', function () {
+        var sp = new SignalProcessor();
+        var length = 50000;
+        var sampleRate = 44100;
+        var input = new Float32Array(length);
+        input.foreach(function (x, index) {
+            if (index > length / 2)
+                input[index] = Math.sin(index / sampleRate * 261.626 * Math.PI);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
+            else
+                input[index] = Math.sin(index / sampleRate * 698.46 * Math.PI);
+        });
+
+        var frequencies = sp.getNotes(input, sampleRate, 8000, 4096, 256);
+    })
+
+    it('can guess notes over time ', function () {
+        var sp = new SignalProcessor();
+        var length = 50000;
+        var sampleRate = 44100;
+        var input = new Float32Array(length);
+        input.foreach(function (x, index) {
+            if (index > length / 2)
+                input[index] = Math.sin(index / sampleRate * 311.13 * Math.PI);// * Math.sin(index / sampleRate * 698.5 * Math.PI);
+            else
+                input[index] = Math.sin(index / sampleRate * 659.25 * Math.PI);
+        });
+
+        var frequencies = sp.getNotes(input, sampleRate, 8000, 4096, 256);
+    })
+
+
 
     it('can calculate the amplitude and phase from a FFT result.', function () {
 
@@ -181,22 +260,23 @@
     it('test: play , normally silent', function (done) {
         var sp = new SignalProcessor(),
             len = Math.pow(2, 15),
+            sampleRate = 44100,
             stretch = 2.5,
             input = (new Float32Array(len)).select(function (x, i) {
-                return Math.sin(i * Math.PI / 8);
+                return Math.sin(x / sampleRate * 261.626 * Math.PI);
             });
 
-        sp.windowing(MEPH.math.Util.window.Rectangle);
+        sp.windowing(MEPH.math.Util.window.Hamming);
 
 
-        var result = sp.stretch(input, stretch, 0).skipEvery(2);
+        var result = sp.stretch(input, stretch, 0.5).skipEvery(2);
         var resource = {
             buffer: {
                 buffer: {
                     getChannelData: function () {
                         return result;
                     },
-                    sampleRate: len
+                    sampleRate: sampleRate
                 },
                 channelCount: 1
             }
@@ -204,10 +284,11 @@
 
         var audio = new MEPH.audio.Audio();
 
-        var audioresult = audio.copyToBuffer(resource, 0, stretch);
+        var audioresult = audio.copyToBuffer(resource, 0, len / sampleRate);
 
-        audio.buffer(audioresult.buffer).complete();
+        audio.buffer(audioresult.buffer, { name: 'buffer' }).complete();
 
+        audio.get({ name: 'buffer' }).first().buffer.start();
         // start the source playing
         //audioresult.buffer.start();
         setTimeout(function () {
@@ -433,5 +514,126 @@
             done();
         });;
 
+    });
+    var getResource = function (result, sampleRate) {
+        sampleRate = sampleRate || 44100
+        var resource = {
+            buffer: {
+                buffer: {
+                    getChannelData: function () {
+                        return result;
+                    },
+                    sampleRate: sampleRate
+                },
+                channelCount: 1
+            }
+        };
+        return resource;
+    }
+
+    it('it can do fft to ifft ', function (done) {
+        var sp = new SignalProcessor(),
+            len = 2048 * 2 * 2 * 2 * 2,
+            sampleRate = 44100;
+
+        var input = (new Float32Array(len)).select(function (i, x) {
+            return .4 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+
+        var res = sp.fft(input);
+
+        var shouldbelikeoriginal = sp.ifft(res);
+
+        var audio = new MEPH.audio.Audio();
+
+        var audioresult = audio.copyToBuffer(getResource(input, sampleRate), 0, len / sampleRate);
+
+        audio.buffer(audioresult.buffer, { name: 'buffer' }).complete();
+        audio.playbuffer();
+        setTimeout(function () {
+            var audio = new MEPH.audio.Audio();
+
+            var audioresult = audio.copyToBuffer(getResource(shouldbelikeoriginal.skipEvery(2), sampleRate), 0, len / sampleRate);
+
+            audio.buffer(audioresult.buffer, { name: 'buffer' }).complete();
+            //audioresult.buffer.start();
+            audio.playbuffer();
+
+        }, 5000)
+        setTimeout(function () {
+            done();
+        }, 10000);
+
+    });
+
+    it('if H is less than zero an error is thrown', function () {
+        var thrown, sp = new SignalProcessor();
+        try {
+            sp.sfft(null, null, null, null, 0)
+        } catch (e) {
+            thrown = true;
+        }
+        expect(thrown).toBeTruthy();
+    })
+
+    it('can do a sfft ', function () {
+        var len = 2048 * 2 * 2 * 2 * 2 * 2 * 2 * 2,
+            w = 512,
+            sampleRate = 44100;
+
+        var input = (new Float32Array(len)).select(function (i, x) {
+            return .4 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+
+        var sp = new SignalProcessor();
+
+        var res = sp.sfft(input, [].interpolate(0, w, function (x) {
+            return MEPH.math.Util.window.Hamming(x, w);
+        }), 1024, w / 2);
+
+        expect(res).toBeTruthy();;
+        expect(res.length).toBeTruthy();
+    });
+
+
+    it('can do a isfft', function (done) {
+        var len = 2048 * 2 * 2 * 2 * 2 * 2 * 2 * 2,
+           w = 512,
+           sampleRate = 44100;
+
+        var input = (new Float32Array(len)).select(function (i, x) {
+            return .4 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+
+        var audio = new MEPH.audio.Audio();
+
+        var audioresult = audio.copyToBuffer(getResource(input, sampleRate), 0, len / sampleRate);
+
+        audio.buffer(audioresult.buffer, { name: 'buffer' }).complete();
+        audio.playbuffer();
+
+        var sp = new SignalProcessor();
+
+
+        var res = sp.sfft(input, [].interpolate(0, w, function (x) {
+            return MEPH.math.Util.window.Hamming(x, w);
+        }), 1024, w / 2);
+
+        var shouldbelikeoriginal = sp.isfft(res, 1024, w / 2);
+        setTimeout(function () {
+            var audio = new MEPH.audio.Audio();
+
+            var audioresult = audio.copyToBuffer(getResource(shouldbelikeoriginal, sampleRate), 0, len / sampleRate);
+
+            audio.buffer(audioresult.buffer, { name: 'buffer' }).complete();
+
+            audio.playbuffer();
+
+        }, 5000)
+        setTimeout(function () {
+            done()
+        }, 10000)
+        expect(res).toBeTruthy();;
+        expect(res.length).toBeTruthy();
     });
 });
