@@ -8,7 +8,7 @@
  *
  */
 MEPH.define('MEPH.math.Vector', {
-    alternateNames: 'Vector',
+    alternateNames: '$Vector',
     requires: ['MEPH.math.J3DIVector3'],
     statics: {
         Id: 0,
@@ -16,15 +16,15 @@ MEPH.define('MEPH.math.Vector', {
 
         Create: function (obj) {
             if (obj instanceof J3DIVector3) {
-                return new Vector(obj[0], obj[1], obj[2]);
+                return new MEPH.math.Vector(obj[0], obj[1], obj[2]);
             }
             else if (Array.isArray(obj)) {
-                return new Vector(obj);
+                return new MEPH.math.Vector(obj);
             }
-            return new Vector(obj.x, obj.y, obj.z);
+            return new MEPH.math.Vector(obj.x, obj.y, obj.z);
         },
         ZeroVector: function (dim) {
-            return new Vector([].interpolate(0, dim || 4, function () { return 0; }));
+            return new MEPH.math.Vector([].interpolate(0, dim || 4, function () { return 0; }));
         },
         /**
          * Linear Interpolation between to numbers.
@@ -42,17 +42,17 @@ MEPH.define('MEPH.math.Vector', {
          * @param {Number} percentage
          **/
         Lerp: function (vect1, vect2, percentage) {
-            return Vector.Lerp2D(vect1, vect2, percentage);
+            return MEPH.math.Vector.Lerp2D(vect1, vect2, percentage);
         },
         Lerp2D: function (vect1, vect2, percentage) {
             if (vect1.dimensions() === vect2.dimensions()) {
-                var res = new Vector(vect1.vector.select(function (x, index) {
-                    return Vector.lerp(vect1.getIndex(index), vect2.getIndex(index), percentage)
+                var res = new MEPH.math.Vector(vect1.vector.select(function (x, index) {
+                    return MEPH.math.Vector.lerp(vect1.getIndex(index), vect2.getIndex(index), percentage)
                 }));
                 return res;
             }
             throw new Error('Vectors must have the same dimensions');
-            //return new Vector(Vector.Lerp(vect1._x, vect2._x, percentage), Vector.Lerp(vect1._y, vect2._y, percentage))
+            //return new MEPH.math.Vector(Vector.Lerp(vect1._x, vect2._x, percentage), Vector.Lerp(vect1._y, vect2._y, percentage))
         },
         Lerp3D: function (vect1, vect2, percentage) {
             return Vector.Lerp2D(vect1, vect2, percentage);
@@ -142,7 +142,7 @@ MEPH.define('MEPH.math.Vector', {
      * @returns {MEPH.math.Vector}
      */
     copy: function () {
-        return new Vector(this.vector);
+        return new MEPH.math.Vector(this.vector);
     },
 
     /**
@@ -179,7 +179,7 @@ MEPH.define('MEPH.math.Vector', {
         if (that.dimensions() === dim) {
             var index = dim;
             if (dim === 2) {
-                return new Vector([this.getIndex(0) * that.getIndex(1) - this.getIndex(1) * that.getIndex(0)]);
+                return new MEPH.math.Vector([this.getIndex(0) * that.getIndex(1) - this.getIndex(1) * that.getIndex(0)]);
             }
             var result = [].interpolate(0, dim, function (i) {
 
@@ -201,7 +201,7 @@ MEPH.define('MEPH.math.Vector', {
                 var res = (u2 * v3) - (u3 * v2);
                 return res;
             });
-            return new Vector(result);
+            return new MEPH.math.Vector(result);
         }
         else {
             throw new Error('MEPH.math.Vector: cross product requires same dimensions');
@@ -231,7 +231,7 @@ MEPH.define('MEPH.math.Vector', {
      * @param {MEPH.math.Vector} that
      */
     add: function (that) {
-        return new Vector(this.vector.select(function (x, index) {
+        return new MEPH.math.Vector(this.vector.select(function (x, index) {
             return x + that.getIndex(index);
         }));
     },
@@ -244,7 +244,7 @@ MEPH.define('MEPH.math.Vector', {
      * @param {MEPH.math.Vector} that
      */
     subtract: function (that) {
-        return new Vector(this.vector.select(function (x, index) {
+        return new MEPH.math.Vector(this.vector.select(function (x, index) {
             return x - that.getIndex(index);
         }));
     },
@@ -258,10 +258,10 @@ MEPH.define('MEPH.math.Vector', {
     },
 
     mapdivide: function (that) {
-        return new Vector(this._x / that._x, this._y / that._y);
+        return new MEPH.math.Vector(this._x / that._x, this._y / that._y);
     },
     mapmultiply: function (that) {
-        return new Vector(this._x * that._x, this._y * that._y);
+        return new MEPH.math.Vector(this._x * that._x, this._y * that._y);
     },
     square: function () {
         return this._x * this._x + this._y * this._y;
@@ -272,7 +272,7 @@ MEPH.define('MEPH.math.Vector', {
      **/
     multiply: function (scalar) {
         var me = this;
-        return new Vector([].interpolate(0, this.dimensions(), function (x) {
+        return new MEPH.math.Vector([].interpolate(0, this.dimensions(), function (x) {
             return me.getIndex(x) * scalar;
         }));
     },
@@ -288,9 +288,9 @@ MEPH.define('MEPH.math.Vector', {
     divide: function (scalar) {
         var me = this;
         if (scalar == 0) {
-            return new Vector([].interpolate(0, this.dimensions(), function (x) { return 0; }));
+            return new MEPH.math.Vector([].interpolate(0, this.dimensions(), function (x) { return 0; }));
         }
-        return new Vector([].interpolate(0, this.dimensions(), function (x) {
+        return new MEPH.math.Vector([].interpolate(0, this.dimensions(), function (x) {
             return me.getIndex(x) / scalar;
         }));
     },
@@ -300,7 +300,7 @@ MEPH.define('MEPH.math.Vector', {
         return this;
     },
     perp: function () {
-        return new Vector(-this._y, this._x);
+        return new MEPH.math.Vector(-this._y, this._x);
     },
     perpendicular: function (that) {
         return this.subtract(this.project(that));
@@ -327,7 +327,7 @@ MEPH.define('MEPH.math.Vector', {
         return this._x + "," + this._y;
     },
     fromPoints: function (p1, p2) {
-        return new Vector2D(
+        return new MEPH.math.Vector2D(
         p2.x - p1.x,
         p2.y - p1.y);
     },
@@ -344,17 +344,17 @@ MEPH.define('MEPH.math.Vector', {
         var sa = Math.sin(angle);
         var rx = this.x * ca - this.y * sa;
         var ry = this.x * sa + this.y * ca;
-        return new Vector(rx, ry);
+        return new MEPH.math.Vector(rx, ry);
     },
     /**
      * Creates a radom vector.
      * @return {MEPH.math.Vector}
      **/
     random: function () {
-        return new Vector(2 * (Math.random() - .5), 2 * (Math.random() - .5));
+        return new MEPH.math.Vector(2 * (Math.random() - .5), 2 * (Math.random() - .5));
     }
 }).then(function () {
 
     $v2 = Vector;
-    Vector.Zero = new Vector(0, 0, 0);
+    Vector.Zero = new MEPH.math.Vector(0, 0, 0);
 });

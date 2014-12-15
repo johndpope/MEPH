@@ -604,7 +604,7 @@
         expect(krateParam).toBeTruthy();
     });
 
-    it('can create a mediastream node', function (done) {
+    xit('can create a mediastream node', function (done) {
         var audio = new Audio();
 
         audio.mediastream({
@@ -614,7 +614,7 @@
         });
     });
 
-    it('can create a mediastream node', function (done) {
+    xit('can create a mediastream node', function (done) {
         var audio = new Audio();
         MEPH.audio.Audio.OfflineMode = true;
         MEPH.audio.Audio.OfflineAudioContext = new (window.OfflineAudioContext)(32, 5 * 44100, 44100)
@@ -629,12 +629,12 @@
                     video.play();
                     video.muted = 'true';
                     MEPH.audio.Audio.OfflineAudioContext.startRendering();
-                    
+
                 };
                 audio.complete({
                     oncomplete: function (res) {
 
-                        
+
                         audio.disconnect();
                         done();
                     },

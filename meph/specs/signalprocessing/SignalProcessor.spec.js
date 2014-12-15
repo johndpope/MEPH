@@ -53,7 +53,7 @@
         var freq2 = sp.frequency(input, sampleRate, 2048);
     })
 
-    it('can take a guess at the frequency', function () {
+    xit('can take a guess at the frequency', function () {
 
         var sp = new SignalProcessor();
         var length = 22100;
@@ -597,7 +597,7 @@
 
 
     it('can do a isfft', function (done) {
-        var len = 2048 * 2 * 2 * 2 * 2 * 2 * 2 * 2,
+        var len = 2048 * 2 * 2 * 2 * 2 * 2,
            w = 512,
            sampleRate = 44100;
 
@@ -636,4 +636,111 @@
         expect(res).toBeTruthy();;
         expect(res.length).toBeTruthy();
     });
+
+    it('can do peak detection ', function () {
+        var signal = [].interpolate(0, 10, function (x) {
+            if (x === 3) {
+                return .4;
+            }
+            return .1;
+        });
+        var sp = new SignalProcessor();
+
+        var locs = sp.peakDetection(signal, 0);
+
+        expect(locs).toBeTruthy();
+        expect(locs.length).toBe(1);
+    });
+
+    it('can do peak interpolation ', function () {
+        var signal = [].interpolate(0, 10, function (x) { if (x === 3) { return .4; } return .1; });
+        var sp = new SignalProcessor();
+        var res = sp.peakInterp(signal, signal, [3]);
+
+        expect(res).toBeTruthy();
+        expect(res.locations).toBeTruthy();
+        expect(res.phases).toBeTruthy();
+        expect(res.magnitudes.length).toBe(1);
+    });
+
+    it(' can take a dft of a signal', function () {
+        var len = 2048,
+        w = 512,
+        N = 1024,
+        sampleRate = 44100;
+
+        var input = (new Float32Array(len)).select(function (i, x) {
+            return .99 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+        var aw = [].interpolate(0, w, function (x) {
+            return MEPH.math.Util.window.Hamming(x, w);
+        });
+        var sp = new SignalProcessor();
+
+        var res = sp.dftAnal(input, aw, N);
+
+        expect(res).toBeTruthy();
+
+        expect(res.pX).toBeTruthy();
+        expect(res.mX).toBeTruthy();
+
+        expect(res.pX.length).toBe(N);
+        expect(res.mX.length).toBe(N);
+    });
+
+    it('can take the idft of a signal ', function () {
+        var len = 2048,
+       w = 512,
+       N = 1024,
+       sampleRate = 44100;
+
+        var input = (new Float32Array(len)).select(function (i, x) {
+            return .99 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+        var aw = [].interpolate(0, w, function (x) {
+            return MEPH.math.Util.window.Hamming(x, w);
+        });
+        var sp = new SignalProcessor();
+
+        var res = sp.dftAnal(input, aw, N);
+
+        var likeorgsign = sp.dftSynth(res, w);
+
+    });
+
+    it('can do sineTracking', function () {
+        var sp = new SignalProcessor();
+        var ipfreq = [].interpolate(0, 10, function (x) { return x; });
+        var ipmag = [].interpolate(0, 10, function (x) { return x; });
+        var ipphase = [].interpolate(0, 10, function (x) { return x; });
+        var tfreq = [];
+        var freqDevOffset = 20;
+        var freqDevSlope = .01;
+
+        var obj = sp.sineTracking(ipfreq, ipmag, ipphase, tfreq, freqDevOffset, freqDevSlope);
+        obj = sp.sineTracking(ipfreq, ipmag, ipphase, obj.tfreq, freqDevOffset, freqDevSlope);
+        expect(obj).toBeTruthy();
+        expect(obj.tfreq).toBeTruthy();
+        expect(obj.tmag).toBeTruthy();
+        expect(obj.tphase).toBeTruthy();
+    });
+
+    it('can do a sinusoidal model analysis', function () {
+
+        var sampleRate = 44100;
+        var len = 2032;
+        var w = 256;
+        var N = 1024;
+        var H = 256;
+        var t = 40;
+        var aw = [].interpolate(0, w, function (x) {
+            return MEPH.math.Util.window.Hamming(x, w);
+        });
+        var signal = (new Float32Array(len)).select(function (i, x) {
+            return .4 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+        var sp = new SignalProcessor();
+
+        sp.sineModelAnal(signal, sampleRate, aw, N, H)
+    })
 });

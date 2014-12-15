@@ -80,7 +80,7 @@
         var h1 = res.subset(0, 5);
         var h2 = res.subset(5).reverse();
         expect(h1.all(function (x, y) {
-            return x === h2[y]; 
+            return x === h2[y];
         })).toBeTruthy();
     });
 
@@ -102,4 +102,25 @@
         expect(polar.radius).toBe(1);
         expect(polar.theta).toBe(0);
     });
+
+    it('can generate a sinc ', function () {
+        var res = MEPH.math.Util.sinc([].interpolate(0, 10, function (x) {
+            return Math.sin(x);
+        }), 10);
+
+        expect(res.length).toBeTruthy();
+    });
+
+    it('can generate a blackmanharris lobe ', function () {
+        var fftsize = 1024;
+        
+        var bhl = MEPH.math.Util.window.getBhLobe([].interpolate(0, 10, function (x) {
+            return Math.sin(x);;
+        }), fftsize);
+
+        expect(bhl.length).toBe(10);
+        expect(bhl.all(function (t) {
+            return !isNaN(t);
+        })).toBeTruthy();
+    })
 });

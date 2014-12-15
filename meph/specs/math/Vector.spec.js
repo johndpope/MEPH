@@ -180,7 +180,7 @@
         MEPH.requires('MEPH.math.Vector').then(function () {
             var v1 = new MEPH.math.Vector([1, 0, -2]);
             var v2 = new MEPH.math.Vector([1, 2, 3]);
-            expect(v1.cross(v2).equals(new Vector([4, -5, 2]))).theTruth('The cross was incorrect');
+            expect(v1.cross(v2).equals(new MEPH.math.Vector([4, -5, 2]))).theTruth('The cross was incorrect');
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {
@@ -192,7 +192,7 @@
         MEPH.requires('MEPH.math.Vector').then(function () {
             var v1 = new MEPH.math.Vector([1, 0]);
             var v2 = new MEPH.math.Vector([1, 2]);
-            expect(v1.cross(v2).equals(new Vector([2]))).theTruth('The cross was incorrect');
+            expect(v1.cross(v2).equals(new MEPH.math.Vector([2]))).theTruth('The cross was incorrect');
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {
@@ -214,8 +214,8 @@
         MEPH.requires('MEPH.math.Vector').then(function () {
             var v1 = new MEPH.math.Vector([1, 1, 0]);
             var v2 = new MEPH.math.Vector([0, 0, 0]);
-            var v3 = Vector.Lerp(v1, v2, .5);
-            expect(v3.equals(new Vector([.5, .5, 0]))).theTruth('The unit was incorrect');
+            var v3 = MEPH.math.Vector.Lerp(v1, v2, .5);
+            expect(v3.equals(new MEPH.math.Vector([.5, .5, 0]))).theTruth('The unit was incorrect');
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {

@@ -455,6 +455,12 @@ MEPH.define('MEPH.audio.Audio', {
 
             return audio.copyBuffer(resource, from, to, options);
         },
+        stretch: function (resource, by) {
+            var audio = new MEPH.audio.Audio();
+            var stretch = Math.round(resource.buffer.buffer.sampleRate * by);
+            var intermediate = audio.copyBuffer(resource, 0, 0, null, stretch);
+            return audio.copyBuffer(intermediate, 0, 0, null, resource.buffer.buffer.sampleRate);
+        },
         /**
          * Creates a new resource with a section gone from a resource.
          * @param {Object} resource
@@ -564,17 +570,17 @@ MEPH.define('MEPH.audio.Audio', {
         frameCount = Math.round(frameCount);
         return me.copyBuffer(resource, frame_start, frame_end, options);
     },
-    copyBuffer: function (resource, frame_start, frame_end, options) {
+    copyBuffer: function (resource, frame_start, frame_end, options, sampleRate) {
         var me = this;
-        frame_end = Math.round(frame_end);
-        frame_start = Math.round(frame_start);
+        frame_end = Math.round(frame_end) || resource.buffer.buffer.length;
+        frame_start = Math.round(frame_start) || 0;
         var buffer = resource.buffer;
         var rate = buffer.buffer.sampleRate;
         var channels = buffer.channelCount;
         var frameCount = frame_end - frame_start;
         frameCount = Math.round(frameCount);
         var audioCtx = me.createContext(options);
-        var myArrayBuffer = audioCtx.createBuffer(channels, frameCount, audioCtx.sampleRate);
+        var myArrayBuffer = audioCtx.createBuffer(channels, frameCount, Math.min(192000, Math.max(3000, sampleRate || audioCtx.sampleRate)));
 
         // Fill the buffer with white noise;
         // just random values between -1.0 and 1.0
@@ -794,7 +800,7 @@ MEPH.define('MEPH.audio.Audio', {
     },
     buffer: function (buffer, options) {
         var me = this;
-        options = options || {};
+        options = options || { name: 'buffer' };
 
         if (!buffer && options.source) {
             var res = MEPH.audio.Audio.$sourcebuffer.first(function (x) { return x.id === options.source; })
@@ -1242,6 +1248,12 @@ MEPH.define('MEPH.audio.Audio', {
             }
         });
         return nodes;
+    },
+    playbuffer: function () {
+        var audio = this, node;
+        node = audio.get({ name: 'buffer' }).first()
+        if (node)
+            node.node.start();
     },
     complete: function (options) {
         var me = this, last, targetnode,

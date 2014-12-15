@@ -25,7 +25,7 @@
 
         var res = MEPH.tween.Calculator.BezierCubic(p1, p2, p3, p4, 0);
 
-        expect(res.equals(Vector.ZeroVector(2))).toBeTruthy();
+        expect(res.equals(MEPH.math.Vector.ZeroVector(2))).toBeTruthy();
     });
 
     it('can calculator a bezier cubic curve', function () {
@@ -36,7 +36,7 @@
 
         var res = MEPH.tween.Calculator.BezierCubic(p1, p2, p3, p4, 1);
 
-        expect(res.equals(new Vector([1, 1]))).toBeTruthy();
+        expect(res.equals(new MEPH.math.Vector([1, 1]))).toBeTruthy();
     });
 
     it('can calculate a linear set', function () {
@@ -45,7 +45,7 @@
 
         var res = MEPH.tween.Calculator.Linear(p1, p2, 1);
 
-        expect(res.equals(new Vector([1, 1]))).toBeTruthy();
+        expect(res.equals(new MEPH.math.Vector([1, 1]))).toBeTruthy();
     });
 
     it('can calculate a linear set', function () {
@@ -54,7 +54,7 @@
 
         var res = MEPH.tween.Calculator.Linear(p1, p2, 0);
 
-        expect(res.equals(new Vector([0, 0]))).toBeTruthy();
+        expect(res.equals(new MEPH.math.Vector([0, 0]))).toBeTruthy();
     });
 
     it('can calculate a linear set', function () {
@@ -63,7 +63,7 @@
 
         var res = MEPH.tween.Calculator.Linear(p1, p2, .5);
 
-        expect(res.equals(new Vector([0.5, 0.5]))).toBeTruthy();
+        expect(res.equals(new MEPH.math.Vector([0.5, 0.5]))).toBeTruthy();
     });
 
     it('can set the tween data', function () {

@@ -18,6 +18,24 @@ MEPH.define('MEPH.math.Util', {
                 y: radius * Math.sin(theta)
             }
         },
+        /**
+         * Generate the main lobe of a sinc function (Dirichlet kernel)
+         * @param {Array} x 
+         * Array of indices to compute.
+         * @param {Number} N
+         * Size of FFT to simulate.
+         * @return {Array} 
+         * Samples of the main lobe of a sinc function
+         ***/
+        sinc: function (x, N) {
+            return [].interpolate(0, N, function (t) {
+                var res = Math.sin(N * x[t] / 2) / Math.sin(x[t] / 2);
+                if (isNaN(res)) {
+                    return N;
+                }
+                return res;
+            });
+        },
         sec: function (num) {
             return 1 / Math.cos(num);
         },
@@ -94,6 +112,35 @@ MEPH.define('MEPH.math.Util', {
             return result;
         },
         window: {
+            /**
+             * Generates the main lobe of a Blackman-Harris window
+             * @param {Array} x
+             * Bin positions to compute.
+             * @param {Number} fftsize
+             * @return {Array}
+             * Main lob as spectrum of a Blackman-Harris window
+             ***/
+            getBhLobe: function (x, fftsize) {
+                var N = fftsize || 512;
+                var f = x.select(function (t) {
+                    return t * Math.PI * 2 / N;
+                });
+                var df = Math.PI * 2 / N;
+                var y = [].interpolate(0, x.length, function () {
+                    return 0;
+                });
+
+                var consts = [0.35875, 0.48829, 0.14128, 0.01168];
+                [].interpolate(0, consts.length, function (t) {
+                    var sincs1 = MEPH.math.Util.sinc(f.select(function (ft) { return ft - df * t }), N);
+                    var sincs2 = MEPH.math.Util.sinc(f.select(function (ft) { return ft + df * t; }), N);
+                    y = y.select(function (y, y0) {
+                        return y + (consts[t] / 2 * sincs1[y0]) + sincs2[y0];
+                    });
+                });
+                y = y.select(function (t) { return t / N / consts[0]; });
+                return y;
+            },
             /**
              * http://en.wikipedia.org/wiki/Window_function#Spectral_analysis
              * Triangular windows are given by: w(n)=1 - \left|\frac{n-\frac{N-1}{2}}{\frac{L}{2}}\right|,

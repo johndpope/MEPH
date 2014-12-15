@@ -16,12 +16,12 @@ MEPH.define('MEPH.tween.Calculator', {
             var t2 = 3 * Math.pow(1 - t, 2) * Math.pow(t, 2);
             var t3 = Math.pow(t, 3);
 
-            var res = new Vector([t0 * P1.x + t1 * P2.x + t2 * P3.x + t3 * P4.x,
+            var res = new MEPH.math.Vector([t0 * P1.x + t1 * P2.x + t2 * P3.x + t3 * P4.x,
                 t0 * P1.y + t1 * P2.y + t2 * P3.y + t3 * P4.y]);
             return res;
         },
         Linear: function (p1, p2, t) {
-            var vect = Vector.Lerp2D(p1, p2, t);
+            var vect = MEPH.math.Vector.Lerp2D(p1, p2, t);
             return vect;
         }
     },

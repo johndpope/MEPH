@@ -85,7 +85,7 @@
             var quaternion1 = new MEPH.math.Quaternion([1, 2, 3, 4]);
             var quaternion2 = new MEPH.math.Quaternion([1, 2, 3, 4]);
             var res = quaternion1.multiply(quaternion2);
-            expect(res.equals(new Vector([-28, 4, 6, 8]))).toBeTruthy();
+            expect(res.equals(new MEPH.math.Vector([-28, 4, 6, 8]))).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -98,7 +98,7 @@
             var quaternion1 = new MEPH.math.Quaternion([1, 2, 3, 4]);
             var quaternion2 = new MEPH.math.Quaternion([1, 2, 3, 4]);
             var res = quaternion1.add(quaternion2);
-            expect(res.equals(new Vector([2, 4, 6, 8]))).toBeTruthy();
+            expect(res.equals(new MEPH.math.Vector([2, 4, 6, 8]))).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -111,7 +111,7 @@
 
             var vector = quaternion1.conjugate();
 
-            expect(vector.equals(new Vector([1, -2, -3, -4]))).theTruth('the wrong quaternion was created');
+            expect(vector.equals(new MEPH.math.Vector([1, -2, -3, -4]))).theTruth('the wrong quaternion was created');
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -125,7 +125,7 @@
 
             var res = quaternion1.qaddition(new Quaternion([1, 2, 3, 4]));
 
-            expect(res.equals(new Vector([2, 4, 6, 8]))).theTruth('the wrong quaternion was created');
+            expect(res.equals(new MEPH.math.Vector([2, 4, 6, 8]))).theTruth('the wrong quaternion was created');
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -138,7 +138,7 @@
 
             var res = quaternion1.qmultiply(new Quaternion([2, 1, 2, 3]));
 
-            expect(res.equals(new Vector([11, 9, 1, 7]))).theTruth('the wrong quaternion was created');
+            expect(res.equals(new MEPH.math.Vector([11, 9, 1, 7]))).theTruth('the wrong quaternion was created');
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -175,7 +175,7 @@
         MEPH.requires('MEPH.math.Quaternion').then(function () {
             var quaternion1 = new Quaternion([2, 0, 0, 0]);
 
-            expect(quaternion1.unit().equals(new Vector([1, 0, 0, 0]))).theTruth('the wrong quaternion was created');
+            expect(quaternion1.unit().equals(new MEPH.math.Vector([1, 0, 0, 0]))).theTruth('the wrong quaternion was created');
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -187,7 +187,7 @@
         MEPH.requires('MEPH.math.Quaternion').then(function () {
             var quaternion1 = new Quaternion([2, 0, 0, 0]);
 
-            expect(quaternion1.reciprocal().equals(new Vector([2 / 4, 0, 0, 0]))).theTruth('the wrong quaternion was created');
+            expect(quaternion1.reciprocal().equals(new MEPH.math.Vector([2 / 4, 0, 0, 0]))).theTruth('the wrong quaternion was created');
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {
@@ -214,11 +214,11 @@
     it('Quaternion rotate', function (done) {
         MEPH.requires('MEPH.math.Quaternion').then(function () {
             var q1 = new Quaternion([0, 1, 2, 3]);
-            var axis = new Vector([1, 1, 1]);
+            var axis = new MEPH.math.Vector([1, 1, 1]);
             var angle = Math.PI * 2 / 3;
             var res = q1.rotate(axis, angle)
 
-            expect(res.distance(new Vector([0, 3, 1, 2])) < .0001).theTruth('the wrong quaternion was created');
+            expect(res.distance(new MEPH.math.Vector([0, 3, 1, 2])) < .0001).theTruth('the wrong quaternion was created');
         }).catch(function () {
             expect(new Error('something went wrong while creating a quaternion')).caught();
         }).then(function (x) {

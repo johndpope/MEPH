@@ -41,7 +41,7 @@
         MEPH.requires('MEPH.math.Matrix').then(function () {
             var m = new Matrix(3, 4);
             m.set([].interpolate(0, 12, function (x) { return x; }));
-            expect(m.row(1).equals(new Vector([4, 5, 6, 7]))).toBeTruthy();
+            expect(m.row(1).equals(new MEPH.math.Vector([4, 5, 6, 7]))).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {
@@ -53,7 +53,7 @@
         MEPH.requires('MEPH.math.Matrix').then(function () {
             var m = new Matrix(3, 4);
             m.set([].interpolate(0, 12, function (x) { return x; }));
-            expect(m.column(1).equals(new Vector([1, 5, 9]))).toBeTruthy();
+            expect(m.column(1).equals(new MEPH.math.Vector([1, 5, 9]))).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {
@@ -64,7 +64,7 @@
     it('create a matrix row wise ', function (done) {
         MEPH.requires('MEPH.math.Matrix').then(function () {
             var m = new Matrix();
-            m.addRow(new Vector([0, 1, 2, 3]));
+            m.addRow(new MEPH.math.Vector([0, 1, 2, 3]));
             expect(m.rows === 1).toBeTruthy();
             expect(m.columns === 4).toBeTruthy();
             expect(m.get(0, 1) === 1).toBeTruthy();
@@ -78,8 +78,8 @@
     it('create a matrix row wise ', function (done) {
         MEPH.requires('MEPH.math.Matrix').then(function () {
             var m = new Matrix();
-            m.addRow(new Vector([0, 1, 2, 3]));
-            m.addRow(new Vector([0, 3, 2, 3]));
+            m.addRow(new MEPH.math.Vector([0, 1, 2, 3]));
+            m.addRow(new MEPH.math.Vector([0, 3, 2, 3]));
             expect(m.rows === 2).toBeTruthy();
             expect(m.columns === 4).toBeTruthy();
             expect(m.get(0, 1) === 1).toBeTruthy();
@@ -205,7 +205,7 @@
             console.log(m2.printMatrix());
             m2.reduceColumn(0);
             console.log(m2.printMatrix());
-            expect(m2.column(0).equals(new Vector([1, 0, 0, 0]))).toBeTruthy();
+            expect(m2.column(0).equals(new MEPH.math.Vector([1, 0, 0, 0]))).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {
@@ -224,7 +224,7 @@
             console.log(m2.printMatrix());
             m2.reduceColumn(1);
             console.log(m2.printMatrix());
-            expect(m2.column(0).equals(new Vector([1, 0, 0, 0]))).toBeTruthy();
+            expect(m2.column(0).equals(new MEPH.math.Vector([1, 0, 0, 0]))).toBeTruthy();
         }).catch(function () {
             expect(new Error('something went wrong while creating a list')).caught();
         }).then(function (x) {

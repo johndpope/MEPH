@@ -91,6 +91,17 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
+            if (!array.zeroes) {
+                Object.defineProperty(array, 'zeroes', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (count) {
+                        return [].interpolate(0, count, function () { return 0; })
+                    }
+                });
+            }
+
             if (!array.maximum) {
                 Object.defineProperty(array, 'maximum', {
                     enumerable: false,
@@ -302,6 +313,24 @@ MEPH.define('MEPH.util.Array', {
                             rest = collection.slice((to || from) + 1 || collection.length);
                         collection.length = from < 0 ? collection.length + from : from;
                         return collection.push.apply(collection, rest);
+                    }
+                });
+            }
+
+            if (!array.removeIndices) {
+                //removeIndices
+                Object.defineProperty(array, 'removeIndices', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (indices) {
+                        indices = indices.orderBy(function (x, y) { return x - y; });
+                        var collection = this;
+                        indices.foreach(function (index) {
+                            collection.splice(index, 1);
+                        });
+
+                        return collection;
                     }
                 });
             }

@@ -32,6 +32,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         silenceTimeSticky: 0,
         silenceTimeThreshold: 0,
         renderer: null,
+        stretchValue: 1,
         injectControls: {
             location: 'buttonpanel'
         },
@@ -122,7 +123,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             clip = me.getSelectedClip();
         if (clip) {
             var sampleRate = me.source.buffer.buffer.sampleRate;
-            
+
 
             var res = MEPH.audio.Audio.detectPitches(clip.buffer.buffer.getChannelData(0), sampleRate, parseInt(me.pitchWindowSize));
             me.renderAreasOfInterest('pitches', res.select(function (x) {
@@ -614,6 +615,14 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         return new Promise(function (r) {
             rsolve = r;
         });
+    },
+    stectchClip: function () {
+        var me = this,
+            source = me.source,
+            stretchvalue = parseFloat(me.stretchValue) || 1;
+        if (source) {
+            me.source = MEPH.audio.Audio.stretch(source, stretchvalue);
+        }
     },
     render: function () {
         var me = this;

@@ -1,6 +1,6 @@
 ﻿<!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "precanvas", "before" : true -->
 <range descriptiontext="start" meph-data-value="c$.position" meph-event-change="c$.update" meph-data-step="0.000001" meph-data-min="0" meph-data-max="1"></range>
-<div class="visualizer col-md-3">
+<div class="visualizer col-md-2">
     <range descriptiontext="Magnification"
            meph-data-value="c$.magnification"
            meph-data-step="0.001"
@@ -9,13 +9,25 @@
            meph-data-max="1"></range>
 </div>
 <div class="visualizer col-md-1">
+    <span data-bind='"innerHTML":"c$.stretchValue"'>1</span>
+    <range descriptiontext="Stretch value"
+           meph-data-value="c$.stretchValue"
+           meph-data-step="0.001"
+           meph-data-min="0.5"
+           meph-data-max="2"></range>
+
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.stectchClip | c$.update">
+        <span class="glyphicon glyphicon-th"></span>
+    </mephbutton>
+</div>
+<div class="visualizer col-md-1">
     <range descriptiontext="Time"
            meph-event-change="c$.sourceChanged | c$.update"
            meph-data-value="c$.timeScroll"
            meph-data-step="0.001"
            meph-data-min="0"
            meph-data-max="1"></range>
-</div> 
+</div>
 <div class="visualizer col-md-1">
     <range descriptiontext="Pitch shift"
            meph-data-value="c$.pitchShift"
