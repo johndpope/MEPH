@@ -1108,10 +1108,10 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      **/
     peakDetection: function (mX, t) {
         var thresh = mX.subset(1, mX.length - 1).indexWhere(function (x) {
-            return x > t;
+            return Math.abs(x) > Math.abs(t);
         });
         var next_minor = mX.subset(1, mX.length - 1).indexWhere(function (x, i) {
-            return x > mX[i] && x > mX[i + 2];
+            return Math.abs(x) > Math.abs(mX[i]) && Math.abs(x) > Math.abs(mX[i + 2]);
         }).select(function (x) { return x + 1 });
         var ploc = next_minor.where(function (t) {
             return thresh.some(function (x) { return x === t; })
@@ -1173,7 +1173,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * @param {Number} freqDevSlope
      * Slop increase of minimum frequency deviation.
      ****/
-    sineModelAnal: function (x, fs, w, N, H, t, maxnSines, minSineDur, freqDevOffset, freqDevSlope) {
+    sineModelAnal: function (x, fs, w, N, H, threshold, maxnSines, minSineDur, freqDevOffset, freqDevSlope) {
         maxnSines = maxnSines || 100;
         minSineDur = minSineDur || .01;
         freqDevOffset = freqDevOffset || 20;
@@ -1183,26 +1183,230 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             throw new Error('Minimum duration of sine tracks smaller than 0');
         var hM1 = Math.floor((w.length + 1) / 2);
         var hM2 = Math.floor((w.length / 2));
-        x = x.concat([].zeroes(hM2));
-        x = [].zeroes(hM2).concat(x);
+
+        var newx = new Float32Array(x.length + hM2 + hM1);
+        x.foreach(function (t, i) {
+            newx[i + hM2] = t;
+        });
+        x = newx;
+
         var pin = hM1;
         var pend = x.length - hM1;
         var wt = w.summation(function (t, r) { return t + r; });
         w = w.select(function (t) { return t / wt; });
         var tfreq = [];
+        threshold = Math.pow(10, -threshold / 20);
 
+        var xtfreq, xtmag, xtphase;
         while (pin < pend) {
             var x1 = x.subset(pin - hM1, pin + hM2, function (t) { return t; });
             var mpRex = me.dftAnal(x1, w, N);
-            var ploc = me.peakDetection(mpRex.mX, t);
+            var ploc = me.peakDetection(mpRex.mX.subset(0, N / 2), threshold);
             var pmag = ploc.select(function (x) { return mpRex.mX[x]; });
-            var ips = me.peakInterp(mpRex.mX, mpRex.pX, ploc);
+            var ips = me.peakInterp(mpRex.mX.subset(0, N / 2), mpRex.pX, ploc);
             var iploc = ips.locations;
             var ipmags = ips.magnitudes;
             var ipphases = ips.phases;;
 
             var ipfreq = iploc.select(function (x) { return fs * x / N; });
+
+            var tres = me.sineTracking(ipfreq, ipmags, ipphases, tfreq, freqDevOffset, freqDevSlope);
+            tfreq = tres.tfreq;
+            var tmag = tres.tmag;
+            var tphase = tres.tphase;
+
+            tfreq = tfreq.subset(0, maxnSines);
+            tmag = tmag.subset(0, maxnSines);
+            tphase = tphase.subset(0, maxnSines);
+            var jtfreq = [].zeroes(maxnSines);
+            var jtmag = [].zeroes(maxnSines);
+            var jtphase = [].zeroes(maxnSines);
+
+            tfreq.foreach(function (x, i) {
+                jtfreq[i] = x;
+            });
+
+            tmag.foreach(function (x, i) {
+                jtmag[i] = x;
+            });
+
+            tphase.foreach(function (x, i) {
+                jtphase[i] = x;
+            });
+
+            if (pin === hM1) {
+                xtfreq = [jtfreq.select()];
+                xtmag = [jtmag.select()];
+                xtphase = [jtphase.select()];
+            }
+            else {
+                xtfreq.push(jtfreq.select());
+                xtmag.push(jtmag.select());
+                xtphase.push(jtphase.select());
+            }
+            pin += H;
         }
+        xtfreq = me.cleaningSineTracks(xtfreq, 3);//Math.round(fs * minSineDur / H));
+
+        return {
+            tfreq: xtfreq,
+            tmag: xtmag,
+            tphase: xtphase
+        }
+    },
+    /**
+     * Synthesis of a sound using the sinusoidal model
+     * @param {Array} tfreq
+     * Frequencies
+     * @param {Array} tmag
+     * Magnitudes
+     * @param {Array} tphase
+     * Phases of sinusoids
+     * @param {Number} N
+     * synthesis FFT size
+     * @param {Number} H
+     * Hope size
+     * @param {Number} sampling rate
+     * @param {Nubmer} w
+     * @return {Float32Array}
+     **/
+    sineModelSynth: function (tfreq, tmag, tphase, N, H, fs, w) {
+        var me = this;
+        var hN = N / 2;
+        var L = tfreq.length;
+        var pout = 0;
+        var ysize = H * (L + 3);
+        var y = new Float32Array(ysize);
+        var sw = [].zeroes(N);
+        var ow = MEPH.math.Util.window.Triang(null, H * 2);
+
+        ow.foreach(function (t, i) {
+            sw[hN - H + i] = t;
+        });
+
+        var bh = [].interpolate(0, N, function (n) {
+            return MEPH.math.Util.window.BlackmanHarris(n, N);
+        });
+        var bhs = bh.summation(function (t, r) { return t + r; });
+        bh = bh.select(function (t) { return t / bhs; });
+
+        [].interpolate(hN - H, hN + H, function (t) {
+            sw[t] = sw[t] / bh[t];
+        });
+
+        var lastytfreq = tfreq[0].select();
+
+        var ytphase = [].interpolate(0, lastytfreq.length, function (t) {
+            return 2 * Math.PI * Math.random();
+        });
+
+        [].interpolate(0, L, function (l) {
+            if (tphase.length) {
+                ytphase = tphase[l].select();
+            }
+            else {
+                ytphase = ytphase.select(function (i) {
+                    return ytphase[i] + (Math.PI * (lastytfreq[i] + tfreq[l][i]) / fs) * H;
+                });
+            }
+
+            var Y = me.genSpecSines(tfreq[l], tmag[l], ytphase, N, fs);
+
+            lastytfreq = tfreq[l].select();
+
+            ytphase = ytphase.select(function (x) { return x % (2 * Math.PI); });
+
+            var yw = me.dftSynth(Y, w);
+
+            [].interpolate(pout, pout + N, function (x, i) {
+                y[x] += sw[i] * yw[i];
+            });
+
+            pout += H;
+        });
+
+        debugger;
+
+        y = y.subset(hN, y.length - hN);
+        return y;
+    },
+
+    /**
+     * Delete short fragments of a collection of sinusoidal tracks
+     * @param {Array} tfreq
+     * Frequency of tracks
+     * @param {Number} minTrackLength
+     * Minimum duration of tracks in number of frames
+     * @returns {Array} 
+     * Ouputs frequency of tracks.
+     ****/
+    cleaningSineTracks: function (tfreq, minTrackLength) {
+        minTrackLength = minTrackLength || 3;
+        if (tfreq.length === 0) {
+            return tfreq;
+        }
+        var nFrames = tfreq.length;
+        var nTracks = tfreq[0].length;
+        var beginnings = [].interpolate(0, nTracks, function (t) {
+            return [].interpolate(0, nFrames, function (j) {
+                if (tfreq[j][t]) {
+                    if (j === 0) {
+                        return {
+                            track: t,
+                            frame: j
+                        }
+                    }
+                    else if (j > 0 && tfreq[j - 1][t] === 0) {
+                        return {
+                            track: t,
+                            frame: j
+                        }
+                    }
+                }
+            }).where();
+        }).concatFluent(function (x) {
+            return x;
+        });
+
+        var ends = [].interpolate(0, nTracks, function (t) {
+            return [].interpolate(0, nFrames, function (j) {
+                if (tfreq[j][t]) {
+                    if (j === nFrames - 1) {
+                        return {
+                            track: t,
+                            frame: j
+                        }
+                    }
+                    else if (tfreq[j + 1][t] === 0) {
+                        return {
+                            track: t,
+                            frame: j
+                        }
+                    }
+                }
+            }).where();
+        }).concatFluent(function (x) {
+            return x;
+        });
+
+        beginnings.foreach(function (x) {
+            var end = ends.first(function (t) {
+                return t.track === x.track && t.frame > x.frame;
+            });
+            if (end) {
+                x.end = end.frame;
+                x.length = end.frame - x.frame;
+            }
+        });
+
+        var toremove = beginnings.where(function (x) { return x.length < minTrackLength; });
+
+        toremove.foreach(function (x) {
+            [].interpolate(x.frame, x.end + 1, function (t) {
+                tfreq[t][x.track] = 0;
+            })
+        })
+        return tfreq;
     },
     /**
      * Tracking sinusoids from one frame to the next
@@ -1235,15 +1439,17 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             tfreqn = [].zeroes(tfreq.length),
             tmagn = [].zeroes(tfreq.length),
             tphasen = [].zeroes(tfreq.length),
-            pindexes = tfreq.indexWhere(function (x) { return x && x.length; }),
+            pindexes = pfreq.indexWhere(function (x) {
+                return x //&& x.length;
+            }),
             incomingTracks = [].interpolate(0, tfreq.length, function (x) {
                 return x;
             }),
             newTracks = [].interpolate(0, tfreq.length, function () {
                 return -1;
             }),
-            magOrder = pindexes.orderBy(function (x, y) {
-                return pmag[y] - pmag[x];
+            magOrder = pindexes.argsort(function (x, y) {
+                return Math.abs(pmag[y]) - Math.abs(pmag[x]);
             }),
             pfreqt = pfreq.select(),
             pmagt = pmag.select(),
@@ -1252,10 +1458,12 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         if (incomingTracks.length > 0) {
             magOrder.foreach(function (i) {
                 if (incomingTracks.length) {
-                    var track = incomingTracks.closest(pfreqt[i], function (index) {
-                        return tfreq[incomingTracks[index]].last();
+                    var track = incomingTracks.closestAbs(pfreqt[i], function (index) {
+                        var tf = tfreq[incomingTracks[index]]
+                        return tf;
                     });
-                    var freqDistance = Math.abs(pfreq[i] - tfreq[incomingTracks[track]].last());
+
+                    var freqDistance = Math.abs(Math.abs(pfreq[i]) - Math.abs(tfreq[incomingTracks[track]]));
                     if (freqDistance < (freqDevOffset + freqDevSlope * pfreq[i])) {
                         newTracks[incomingTracks[track]] = i;
                         incomingTracks.splice(track, 1);
@@ -1263,10 +1471,14 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
                 }
             })
         }
+
         var indext = newTracks.indexWhere(function (x) { return x !== -1; });
 
         if (indext.length > 0) {
-            var indexp = indext.select(function (x) { return newTracks[x]; });
+            var indexp = indext.select(function (x) {
+                return newTracks[x];
+            });
+
             indexp.foreach(function (i, index) {
                 tfreqn[indext[index]] = pfreqt[i];
                 tmagn[indext[index]] = pmagt[i];
@@ -1276,9 +1488,11 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             pmagt.removeIndices(indexp);
             pphaset.removeIndices(indexp);
         }
-
+        // create new tracks from non used peaks
         var emptyt = tfreq.indexWhere(function (x) { return x === 0; });
-        var peaksleft = pmag.orderBy(function (x, y) { return y - x; });
+        var peaksleft = pmagt.argsort(function (x, y) {
+            return Math.abs(y) - Math.abs(x);
+        });
         if (peaksleft.length > 0 && emptyt.length >= peaksleft.length) {
             peaksleft.foreach(function (pl, index) {
                 tfreqn[emptyt[index]] = pfreqt[pl];
@@ -1288,15 +1502,15 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }
         else if (peaksleft.length > 0 && emptyt.length < peaksleft.length) {
             emptyt.foreach(function (ei, index) {
-                tfreqn[ei] = pfreqt[peaksleft[index]];
-                tmagn[ei] = pmagt[peaksleft[index]];
-                tphasen[ei] = pphaset[peaksleft[index]];
+                tfreqn[ei] = [pfreqt[peaksleft[index]]];
+                tmagn[ei] = [pmagt[peaksleft[index]]];
+                tphasen[ei] = [pphaset[peaksleft[index]]];
             });
 
             [].interpolate(emptyt.length, peaksleft.length, function (t) {
-                tfreqn.push([pfreqt[peaksleft[t]]]);
-                tmagn.push([pmagt[peaksleft[t]]]);
-                tphasen.push([pphaset[peaksleft[t]]]);
+                tfreqn.push(pfreqt[peaksleft[t]]);
+                tmagn.push(pmagt[peaksleft[t]]);
+                tphasen.push(pphaset[peaksleft[t]]);
             });
         }
 
@@ -1376,6 +1590,32 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
 
         return result;
     },
+    //*iploc, *ipmag, *ipphase, int n_peaks, double *real, double*imag, int size_spec
+    genSpecSines2: function (ipfreq, ipmag, ipphase, N, fs) {
+        var me = this;
+
+        var Yreal = [].zeroes(N);
+        var Yimg = [].zeroes(N);
+        var hN = N / 2;
+        debugger
+        [].interpolate(0, ipfreq.length, function (i) {
+            var loc = N * ipfreq[i] / fs;
+            if (loc !== 0 && loc <= hN - 1) {
+                var binremainder = Math.round(loc) - loc;
+                var lb = [].interpolate(binremainder - 4, binremainder + 5, function (x) { return x; });
+                var lmag = me.genBhLobe(lb).select(function (res) { return res * ipmag[i]; });
+                var b = [].interpolate(Math.round(loc) - 4, Math.round(loc) + 5);
+                [].interpolate(0, 9, function (m) {
+                    if (b[m] < 0) {
+                        Yreal[-b[m]] += lmag[m]
+                    }
+                })
+            }
+        });
+    },
+    genBhLobe: function (array, N) {
+        return MEPH.math.Util.getBhLobe(array, N);
+    },
     /**
      * Generates a spectrum from a series of sine values.
      * @param {Array} ipfreq
@@ -1388,10 +1628,33 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * Size of complex spectrum to generate
      * @param {Number} fs
      * Frequency sampling.
-     * @return {Array}
+     * @return {Object}
      **/
-    //*iploc, *ipmag, *ipphase, int n_peaks, double *real, double*imag, int size_spec
     genSpecSines: function (ipfreq, ipmag, ipphase, N, fs) {
+        var me = this;
+        var Yreal = new Float32Array(N);
+        var Yimg = new Float32Array(N);
+        var hN = N / 2;
+        var iploc = ipfreq.select(function (x) {
+            var loc = N * x / fs;
+            return loc;
+        }).where().where(function (x) {
+            return x <= hN - 1
+        });
+
+
+
+        me.$getSpecSines(iploc, ipmag, ipphase, iploc.length, Yreal, Yimg, N);
+
+        var Y = Yreal.select(function (t, i) {
+            return [t, Yimg[i]];
+        }).concatFluent(function (x) { return x; });
+
+
+        return {
+            mX: Yreal,
+            pX: Yimg
+        };
     },
     $getSpecSines: function (iploc, ipmag, ipphase, n_peaks, real, imag, size_spec) {
         var ii = 0,
@@ -1413,7 +1676,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             ploc_int = Math.floor(loc + 0.5);
 
             if ((loc >= 5) && (loc < size_spec_half - 4)) {
-                mag = pow(10, (ipmag[ii] / 20.0));
+                mag = ipmag[ii];
 
                 for (jj = -4; jj < 5; jj++) {
                     real[ploc_int + jj] += mag * bh_92_1001[Math.floor((bin_remainder + jj) * 100) + BH_SIZE_BY2] * cos(ipphase[ii]);
@@ -1421,7 +1684,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
                 }
             }
             else if ((loc > 0) && (loc < 5)) {
-                mag = pow(10, (ipmag[ii] / 20.0));
+                mag = ipmag[ii];
 
                 for (jj = -4; jj < 5; jj++) {
 
@@ -1440,7 +1703,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
                 }
             }
             else if ((loc >= size_spec_half - 4) && (loc < size_spec_half - 1)) {
-                mag = pow(10, (ipmag[ii] / 20.0));
+                mag = ipmag[ii];
 
                 for (jj = -4; jj < 5; jj++) {
                     if (ploc_int + jj > size_spec_half) {

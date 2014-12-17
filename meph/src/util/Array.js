@@ -70,6 +70,26 @@ MEPH.define('MEPH.util.Array', {
                         return collection.sort(func);
                     }
                 });
+            };
+
+            if (!array.argsort) {
+                Object.defineProperty(array, 'argsort', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function (func) {
+                        var collection = this.select(function (x) {
+                            return { d: x };
+                        });
+                        var sorted = collection.sort(function (x, y) {
+                            return func(d.x, d.y);
+                        });
+
+                        return sorted.select(function (t) {
+                            return collection.indexOf(t);
+                        })
+                    }
+                });
             }
 
             if (!array.maxSelection) {
@@ -324,7 +344,7 @@ MEPH.define('MEPH.util.Array', {
                     writable: true,
                     configurable: true,
                     value: function (indices) {
-                        indices = indices.orderBy(function (x, y) { return x - y; });
+                        indices = indices.orderBy(function (x, y) { return y - x; });
                         var collection = this;
                         indices.foreach(function (index) {
                             collection.splice(index, 1);
@@ -614,7 +634,7 @@ MEPH.define('MEPH.util.Array', {
                                 collection[i - start] = (func(i));
                             }
                             else
-                                collection.push(func(i));
+                                collection.push(func(i, i - start));
                         }
                         return collection;
                     }
@@ -702,8 +722,8 @@ MEPH.define('MEPH.util.Array', {
                 });
             }
 
-            if (!array.closest) {
-                Object.defineProperty(array, 'closest', {
+            if (!array.closestAbs) {
+                Object.defineProperty(array, 'closestAbs', {
                     enumerable: false,
                     writable: true,
                     configurable: true,
@@ -713,7 +733,7 @@ MEPH.define('MEPH.util.Array', {
                         var collection = this;
                         func = func || function (x) { return x; }
                         for (var i = 0 ; i < collection.length; i++) {
-                            var x = collection[i];
+                            var x = func(collection[i]);
                             var dif;
                             if (Math.abs(val) > Math.abs(x)) {
                                 dif = Math.abs(val) - Math.abs(x)
@@ -725,7 +745,8 @@ MEPH.define('MEPH.util.Array', {
                                 resdiff = dif;
                                 result = i;
                             }
-                            else if (resdiff === 0) {
+
+                            if (resdiff === 0) {
                                 return i;
                             }
                             else if (resdiff > dif) {

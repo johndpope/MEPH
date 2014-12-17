@@ -152,6 +152,66 @@ MEPH.define('MEPH.math.Util', {
                 var v = 1 - Math.abs(((index - ((end - 1) / 2)) / (L / 2)));
                 return v;
             },
+            Triang: function (n, N) {
+                var sym = true;
+                if (N < 1)
+                    return [];
+                if (N === 1) {
+                    return [1];
+                }
+                var odd = N % 2;
+                if (!sym && !odd) {
+                    N += 1;
+                }
+                var ns = [].interpolate(1, Math.floor((N + 1) / 2) + 1, function (t) {
+                    return t;
+                });
+                var w;
+                if (N % 2 === 0) {
+                    w = ns.select(function (t) {
+                        return (t * 2 - 1) / N;
+                    });
+                    w = w.select().concat(w.select().reverse());
+                }
+                else {
+                    w = ns.select(function (t) {
+                        return (2 * t) / (N + 1);
+                    });
+
+                    w = w.concat(w.reverse());
+                }
+                return w;
+                //    if M < 1:
+                //        return np.array([])
+                //    if M == 1:
+                //        return np.ones(1, 'd')
+                //    odd = M % 2
+                //    if not sym and not odd:
+                //        M = M + 1
+                //    n = np.arange(1, (M + 1) // 2 + 1)
+                //    if M % 2 == 0:
+                //    w = (2 * n - 1.0) / M
+                //    w = np.r_[w, w[::-1]]
+                //else:
+                //        w = 2 * n / (M + 1.0)
+                //    w = np.r_[w, w[-2::-1]]
+
+                //    if not sym and not odd:
+                //        w = w[:-1]
+                //    return w
+            },
+            Rect: function (n, N) {
+                var t = Math.abs(n / N);
+                if (t > 0.5) {
+                    return 0;
+                }
+                else if (t === .5) {
+                    return .5
+                }
+                else if (t < .5) {
+                    return 1;
+                }
+            },
             Rectangle: function (index, end) {
                 return 1;
             },
@@ -168,7 +228,19 @@ MEPH.define('MEPH.math.Util', {
                 var a0 = (1 - a) / 2;
                 var a1 = .5;
                 var a2 = a / 2;
-                return a0 - (a1 * Math.cos((2 * Math.PI * n) / (N - 1))) + (a2 * Math.cos((4 * Math.PI * n) / (N - 1)));
+                return a0 -
+                        (a1 * Math.cos((2 * Math.PI * n) / (N - 1))) +
+                        (a2 * Math.cos((4 * Math.PI * n) / (N - 1)));
+            },
+            BlackmanHarris: function (n, N) {
+                var a0 = 0.35875;
+                var a1 = 0.48829;
+                var a2 = 0.14128;
+                var a3 = 0.01168;
+                return a0 -
+                        (a1 * Math.cos((2 * Math.PI * n) / (N - 1))) +
+                        (a2 * Math.cos((4 * Math.PI * n) / (N - 1))) +
+                        (a3 * Math.cos((6 * Math.PI * n) / (N - 1)));
             }
         }
     }

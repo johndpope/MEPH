@@ -732,7 +732,7 @@
         var w = 256;
         var N = 1024;
         var H = 256;
-        var t = 40;
+        var t = 30;
         var aw = [].interpolate(0, w, function (x) {
             return MEPH.math.Util.window.Hamming(x, w);
         });
@@ -741,6 +741,39 @@
         });
         var sp = new SignalProcessor();
 
-        sp.sineModelAnal(signal, sampleRate, aw, N, H)
-    })
+        var res = sp.sineModelAnal(signal, sampleRate, aw, N, H, t);
+
+        expect(res).toBeTruthy();
+        expect(res.tfreq).toBeTruthy();
+        expect(res.tmag).toBeTruthy();
+        expect(res.tphase).toBeTruthy();
+
+    });
+
+    it('can do a sinusoidal model synthesis', function () {
+
+        var sampleRate = 44100;
+        var len = 2032;
+        var w = 512;
+        var N = 1024;
+        var H = 256;
+        var t = 30;
+        var aw = [].interpolate(0, w, function (x) {
+            return MEPH.math.Util.window.Hamming(x, w);
+        });
+        var signal = (new Float32Array(len)).select(function (i, x) {
+            return .4 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+        });
+        var sp = new SignalProcessor();
+
+        var res = sp.sineModelAnal(signal, sampleRate, aw, N, H, t);
+
+        expect(res).toBeTruthy();
+        expect(res.tfreq).toBeTruthy();
+        expect(res.tmag).toBeTruthy();
+        expect(res.tphase).toBeTruthy();
+
+        var Y = sp.sineModelSynth(res.tfreq, res.tmag, res.tphase, N, H, sampleRate, w);
+
+    });
 });
