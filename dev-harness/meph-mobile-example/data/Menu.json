@@ -11,6 +11,13 @@
                     "path": "/buttons/IconButton"
                 },
                 {
+                    "viewId": "SIG_PROCESS",
+                    "description": "Signal Processing",
+                    "iconType": "launch",
+                    "itemType": "launch",
+                    "path": "signal/processing"
+                },
+                {
                     "viewId": "MEPH009",
                     "description": "Communication",
                     "iconType": "launch",

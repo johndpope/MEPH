@@ -355,6 +355,6 @@ MEPH.define('MEPH.math.Vector', {
     }
 }).then(function () {
 
-    $v2 = Vector;
-    Vector.Zero = new MEPH.math.Vector(0, 0, 0);
+    $v2 = MEPH.math.Vector;
+    MEPH.math.Vector.Zero = new MEPH.math.Vector(0, 0, 0);
 });

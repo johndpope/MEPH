@@ -145,7 +145,8 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             var source = me.getDataToDraw(me.source, WIDTH);
             if (source && source.max) {
                 var dataArray = source;
-                var max = 1;// source.max(function (x) { return Math.abs(x); });
+                var max = source.max(function (x) { return Math.abs(x); }) || 1;
+                max = Math.abs(max * 1.1);
                 var bufferLength = source.length;
                 var sliceWidth = WIDTH * 1.0 / bufferLength;
                 var x = 0;
@@ -199,6 +200,9 @@ MEPH.define('MEPH.audio.view.Visualizer', {
                 return x;
             });
 
+        }
+        else if (source && Array.isArray(source) || source instanceof Float32Array) {
+            return source;
         }
         return [];
     },

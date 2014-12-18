@@ -82,7 +82,7 @@ MEPH.define('MEPH.util.Array', {
                             return { d: x };
                         });
                         var sorted = collection.sort(function (x, y) {
-                            return func(d.x, d.y);
+                            return func(x.d, y.d);
                         });
 
                         return sorted.select(function (t) {
@@ -621,7 +621,39 @@ MEPH.define('MEPH.util.Array', {
                     }
                 });
             }
-
+            if (!array.normalize) {
+                Object.defineProperty(array, 'normalize', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function () {
+                        var w = this;
+                        var wt = w.summation(function (r, t) { return r + t; });
+                        w = w.select(function (t) { return t / wt; });
+                        return w;
+                    }
+                })
+            }
+            if (!array.fftshift) {
+                Object.defineProperty(array, 'fftshift', {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: function () {
+                        var collection = this;
+                        var res = MEPHArray.$create(collection, collection.length);
+                        var half = Math.floor((collection.length + 1) / 2);
+                        var half2 = Math.floor(collection.length / 2);
+                        for (var i = 0 ; i < half; i++) {
+                            res[i] = collection[i + half2];
+                        }
+                        for (var i = 0 ; i < half2 ; i++) {
+                            res[i + half] = collection[i];
+                        }
+                        return res;
+                    }
+                })
+            }
             if (!array.interpolate) {
                 Object.defineProperty(array, 'interpolate', {
                     enumerable: false,
@@ -629,6 +661,7 @@ MEPH.define('MEPH.util.Array', {
                     configurable: true,
                     value: function (start, stop, func) {
                         var collection = this;
+                        func = func || function (x) { return x; };
                         for (var i = start; i < stop ; i++) {
                             if (collection instanceof Float32Array) {
                                 collection[i - start] = (func(i));

@@ -131,11 +131,11 @@ MEPH.define('MEPH.math.Util', {
                 });
 
                 var consts = [0.35875, 0.48829, 0.14128, 0.01168];
-                [].interpolate(0, consts.length, function (t) {
-                    var sincs1 = MEPH.math.Util.sinc(f.select(function (ft) { return ft - df * t }), N);
-                    var sincs2 = MEPH.math.Util.sinc(f.select(function (ft) { return ft + df * t; }), N);
+                [].interpolate(0, consts.length, function (m) {
+                    var sincs1 = MEPH.math.Util.sinc(f.select(function (ft) { return ft - df * m }), N);
+                    var sincs2 = MEPH.math.Util.sinc(f.select(function (ft) { return ft + df * m; }), N);
                     y = y.select(function (y, y0) {
-                        return y + (consts[t] / 2 * sincs1[y0]) + sincs2[y0];
+                        return y + (consts[m] / 2) * (sincs1[y0] + sincs2[y0]);
                     });
                 });
                 y = y.select(function (t) { return t / N / consts[0]; });
@@ -168,8 +168,8 @@ MEPH.define('MEPH.math.Util', {
                 });
                 var w;
                 if (N % 2 === 0) {
-                    w = ns.select(function (t) {
-                        return (t * 2 - 1) / N;
+                    w = ns.select(function (n) {
+                        return ((n * 2) - 1) / N;
                     });
                     w = w.select().concat(w.select().reverse());
                 }
@@ -178,27 +178,9 @@ MEPH.define('MEPH.math.Util', {
                         return (2 * t) / (N + 1);
                     });
 
-                    w = w.concat(w.reverse());
+                    w = w.select().concat(w.select().reverse());
                 }
                 return w;
-                //    if M < 1:
-                //        return np.array([])
-                //    if M == 1:
-                //        return np.ones(1, 'd')
-                //    odd = M % 2
-                //    if not sym and not odd:
-                //        M = M + 1
-                //    n = np.arange(1, (M + 1) // 2 + 1)
-                //    if M % 2 == 0:
-                //    w = (2 * n - 1.0) / M
-                //    w = np.r_[w, w[::-1]]
-                //else:
-                //        w = 2 * n / (M + 1.0)
-                //    w = np.r_[w, w[-2::-1]]
-
-                //    if not sym and not odd:
-                //        w = w[:-1]
-                //    return w
             },
             Rect: function (n, N) {
                 var t = Math.abs(n / N);
@@ -224,10 +206,10 @@ MEPH.define('MEPH.math.Util', {
             Hamming: function (n, N) {
                 return MEPH.math.Util.window.Hann(.54, .46, n, N);
             },
-            Blackman: function (a, n, N) {
-                var a0 = (1 - a) / 2;
+            Blackman: function (n, N) {
+                var a0 = 0.42;
                 var a1 = .5;
-                var a2 = a / 2;
+                var a2 = 0.08;
                 return a0 -
                         (a1 * Math.cos((2 * Math.PI * n) / (N - 1))) +
                         (a2 * Math.cos((4 * Math.PI * n) / (N - 1)));

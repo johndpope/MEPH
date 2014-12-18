@@ -13,6 +13,11 @@
             "path": "/list/List"
         },
         {
+            "viewId": "SIG_PROCESS",
+            "view": "MEPHControls.music.view.SignalProcessing",
+            "path": "/sig/process"
+        },
+        {
             "viewId": "MEPH0102",
             "view": "MEPHControls.music.view.MusicVisualizer",
             "controller": "MEPHControls.music.controller.Controller",

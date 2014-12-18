@@ -665,7 +665,7 @@
 
     it(' can take a dft of a signal', function () {
         var len = 2048,
-        w = 512,
+        w = 501,
         N = 1024,
         sampleRate = 44100;
 
@@ -690,7 +690,7 @@
 
     it('can take the idft of a signal ', function () {
         var len = 2048,
-       w = 512,
+       w = 1024,
        N = 1024,
        sampleRate = 44100;
 
@@ -704,8 +704,12 @@
 
         var res = sp.dftAnal(input, aw, N);
 
-        var likeorgsign = sp.dftSynth(res, w);
+        var synthed = sp.dftSynth(res, w);
 
+        var normed = aw.normalize();
+        var likeorged = synthed.select(function (x, i) { return x / normed[i]; });
+
+        expect(Math.abs(likeorged[0] - input[0]) < .0001).toBeTruthy();
     });
 
     it('can do sineTracking', function () {
@@ -714,8 +718,8 @@
         var ipmag = [].interpolate(0, 10, function (x) { return x; });
         var ipphase = [].interpolate(0, 10, function (x) { return x; });
         var tfreq = [];
-        var freqDevOffset = 20;
-        var freqDevSlope = .01;
+        var freqDevOffset;
+        var freqDevSlope;
 
         var obj = sp.sineTracking(ipfreq, ipmag, ipphase, tfreq, freqDevOffset, freqDevSlope);
         obj = sp.sineTracking(ipfreq, ipmag, ipphase, obj.tfreq, freqDevOffset, freqDevSlope);
@@ -753,27 +757,46 @@
     it('can do a sinusoidal model synthesis', function () {
 
         var sampleRate = 44100;
-        var len = 2032;
-        var w = 512;
-        var N = 1024;
-        var H = 256;
-        var t = 30;
-        var aw = [].interpolate(0, w, function (x) {
-            return MEPH.math.Util.window.Hamming(x, w);
+        var len = sampleRate * 2;
+        var N = 4096;
+        var Ns = 4096;
+        var M = 2048;
+        var H = Math.floor(Ns / 4);
+        var t = -45;
+        var fs = sampleRate;
+        var w = [].interpolate(0, M, function (x) {
+            return MEPH.math.Util.window.Blackman(x, M);
         });
         var signal = (new Float32Array(len)).select(function (i, x) {
-            return .4 * Math.cos((x / sampleRate) * 2 * 311.13 * Math.PI);
+            return .9 * Math.cos((x / fs) * 2 * 440 * Math.PI);
         });
         var sp = new SignalProcessor();
 
-        var res = sp.sineModelAnal(signal, sampleRate, aw, N, H, t);
+        var res = sp.sineModelAnal(signal, fs, w, N, H, t);
 
-        expect(res).toBeTruthy();
-        expect(res.tfreq).toBeTruthy();
-        expect(res.tmag).toBeTruthy();
-        expect(res.tphase).toBeTruthy();
+        var Y = sp.sineModelSynth(res.tfreq, res.tmag, res.tphase, Ns, H, fs);
 
-        var Y = sp.sineModelSynth(res.tfreq, res.tmag, res.tphase, N, H, sampleRate, w);
+        setTimeout(function () {
+            var audio = new MEPH.audio.Audio();
+
+            var audioresult = audio.copyToBuffer(getResource(signal, sampleRate), 0, len / sampleRate);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            audio.playbuffer();
+
+        }, 10)
+
+        setTimeout(function () {
+            var audio = new MEPH.audio.Audio();
+
+            var audioresult = audio.copyToBuffer(getResource(Y, sampleRate), 0, len / sampleRate);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            audio.playbuffer();
+
+        }, 2000)
 
     });
 });
