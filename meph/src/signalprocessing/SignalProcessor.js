@@ -1502,9 +1502,8 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         var bh = [].interpolate(0, N, function (n) {
             return MEPH.math.Util.window.BlackmanHarris(n, N);
         });
-        var bhs = bh.summation(function (t, r) { return t + r; });
-        bh = bh.select(function (t) { return t / bhs; });
 
+        bh.normalize();
 
         [].interpolate(hN - H, hN + H, function (t) {
             sw[t] = sw[t] / bh[t];

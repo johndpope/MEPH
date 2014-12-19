@@ -30,6 +30,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
         delta: 1,
         scrollMutiplier: 1,
         scrollleft: 0,
+        maxlevel: null,
 
         /**
          * @property {Array} source
@@ -145,7 +146,7 @@ MEPH.define('MEPH.audio.view.Visualizer', {
             var source = me.getDataToDraw(me.source, WIDTH);
             if (source && source.max) {
                 var dataArray = source;
-                var max = source.max(function (x) { return Math.abs(x); }) || 1;
+                var max = me.maxlevel ? parseFloat(me.maxlevel) : source.max(function (x) { return Math.abs(x); }) || 1;
                 max = Math.abs(max * 1.1);
                 var bufferLength = source.length;
                 var sliceWidth = WIDTH * 1.0 / bufferLength;

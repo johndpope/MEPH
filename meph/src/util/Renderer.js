@@ -61,7 +61,7 @@ MEPH.define('MEPH.util.Renderer', {
             var me = this,
                 canvas = me.getCanvas(),
                 context = me.getContext();
-            context.clearRect(0, 0, canvas.width, canvas.height)
+            context.clearRect(0, 0, canvas.width, canvas.height);
         }
         catch (e) {
             return false;

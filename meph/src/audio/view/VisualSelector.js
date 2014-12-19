@@ -21,10 +21,15 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         min: null,
         marks: null,
         offsetbtnheight: 19,
+        offsetstretchvertical: 4,
         marktype: 'default',
+        stretchtype: 'stretchtype',
         markercolor: '#d9534f',
         markscolor: '#f0ad4e',
         markerBtns: null,
+        stretchControls: null,
+        stretchcolor: '#f2f233',
+        stretchmarks: null,
         pitchShift: .5,
         pitchWindowSize: 1000,
         smallestStep: 0.0000001,
@@ -44,16 +49,22 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         var me = this;
         me.super();
         me.markerBtns = [];
+        me.stretchControls = [];
         me.$signalProcessor = new SignalProcessor();;
 
         Observable.defineDependentProperty('silenceThresholdHeight', me, ['silenceThreshold'], me.calculateSilenceThreholdHeight.bind(me));
         me.on('altered', function (type, args) {
             if (args.path === 'marks') {
                 if (me.marks) {
-                    me.marks.on('changed', me.update.bind(me));
+                    me.marks.onIf('changed', me.update.bind(me));
                 }
                 me.update();
-
+            }
+            if (args.path === 'stretchmarks') {
+                if (me.stretchmarks) {
+                    me.stretchmarks.onIf('changed', me.update.bind(me));
+                }
+                me.update();
             }
 
             if (args.path === 'vertical' || args.path === 'scrollMutiplier' || args.path === 'scrollleft') {
@@ -74,13 +85,28 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     addMark: function () {
         var me = this,
             relativePosition = me.getCurrentPosition();
-        var absPosition = me.getAbsoluteMarkPosition(relativePosition, me.magnification, me.timeScroll)
+        var absPosition = me.getAbsoluteMarkPosition(relativePosition);
         if (me.marks && !me.marks.some(function (x) {
             return x.position === absPosition;
         })) {
             me.marks.push({
                 position: absPosition,
                 type: me.marktype
+            })
+        }
+    },
+    addStretchMark: function () {
+        var me = this,
+            relativePosition = me.getCurrentPosition();
+        var absPosition = me.getAbsoluteMarkPosition(relativePosition);
+        if (me.stretchmarks && !me.stretchmarks.some(function (x) {
+            return x.position === absPosition || (x.position < absPosition && x.targetposition > absPosition);
+        })) {
+            me.stretchmarks.push({
+                position: absPosition,
+                targetposition: 0,
+                stretch: 0,
+                type: me.stretchtype
             })
         }
     },
@@ -228,7 +254,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }
         }
     },
-    getAbsoluteMarkPosition: function (position, magnification, timeOffset) {
+    getAbsoluteMarkPosition: function (position) {
         var result,
             me = this,
             pixels = me.width,
@@ -393,7 +419,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         }
         return snippet;
     },
-    getRelativeMarkPosition: function (position, magnification, timeOffset) {
+    getRelativeMarkPosition: function (position) {
         var me = this,
             pixels = me.width,
             buffer = me.getBuffer();
@@ -455,7 +481,28 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }
         }
     },
+    updateStretchControls: function () {
+        var me = this;
+        if (me.stretchmarks) {
+            var removed = me.stretchControls.removeWhere(function (btnObject) {
+                return !me.stretchmarks.some(function (x) { return x === btnObject.marker; });
+            });
+            removed.foreach(function (control) {
+                if (control.destroy) {
+                    control.destroy();
+                }
+            });
+            var newmarks = me.stretchmarks.where(function (x) {
+                return !me.stretchControls.some(function (t) { return t.marker === x; })
+            });
 
+            var newmarkObjects = me.createNewStretchMarkerControls(newmarks);
+            me.stretchControls.push.apply(me.stretchControls, newmarkObjects);
+            me.stretchControls.foreach(function (x) {
+                me.positionStretchControls(x);
+            });
+        }
+    },
     updateMarkBtns: function () {
         var me = this;
         if (me.marks) {
@@ -494,6 +541,99 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         }
         return null;
     },
+
+    createNewStretchMarkerControls: function (stretchmarks) {
+        var me = this;
+        return stretchmarks.select(function (x, index) {
+            var stretchtemplate = me.createStretchMark();
+            var anchorbtn = stretchtemplate.querySelector('[anchorbtn]');
+            var targetbtn = stretchtemplate.querySelector('[targetbtn]');
+            var stretchselect = stretchtemplate.querySelector('[stretchselect]');
+            var stretchcontrol = stretchtemplate.querySelector('[stretchcontrol]');
+            var stretchvalue = stretchtemplate.querySelector('[stretchvalue]');
+            var control = {
+                marker: x,
+                dom: stretchtemplate,
+                targetbtn: targetbtn,
+                anchorbtn: anchorbtn,
+                destroy: function () {
+                }
+            }
+            stretchvalue.innerHTML = Math.round(100 * parseFloat(control.marker.stretch)) / 100;
+            me.don('mouseover', stretchtemplate, function () {
+                Style.show(stretchcontrol);
+            });
+            me.don('mouseout', stretchtemplate, function () {
+                Style.hide(stretchcontrol);
+            });
+            me.don('change', stretchselect, function (control) {
+                stretchvalue.innerHTML = Math.round(100 * parseFloat(stretchselect.value)) / 100;
+                control.marker.stretch = parseFloat(stretchselect.value);
+                me.update();
+            }.bind(me, control));
+            me.don('click', anchorbtn, function (x) {
+                me.toggleStretchMarkerDrag(x, 'dom');
+            }.bind(me, control));
+
+            me.don('click', targetbtn, function (x) {
+                me.toggleStretchMarkerDrag(x, 'targetbtn');
+            }.bind(me, control));
+
+
+            return control;
+        })
+    },
+    toggleStretchMarkerDrag: function (x, target) {
+        var me = this;
+        if (!me.stretchdrag) {
+            me.stretchdrag = {
+                marker: x.marker,
+                target: target,
+                callback: function () {
+                    me.positionStretchControls(x);
+                    me.update()
+                }
+            }
+        }
+        else {
+            me.stretchdrag = false;
+        }
+    },
+    onMouseMove: function () {
+        var me = this, pos;
+        if (me.stretchdrag) {
+            pos = MEPH.util.Dom.getEventPositions(MEPH.Array(arguments).last().domEvent).first();
+            if (pos) {
+                pos.x += -50;
+                var abspos = me.getAbsoluteMarkPosition(pos.x / me.width);
+                switch (me.stretchdrag.target) {
+                    case 'targetbtn':
+                        me.stretchdrag.marker.targetposition = abspos - me.stretchdrag.marker.position;
+                        break;
+                    default:
+                        me.stretchdrag.marker.position = abspos;
+                        break;
+
+                }
+                me.stretchdrag.callback();
+            }
+        }
+        else {
+            me.super();
+        }
+    },
+    positionStretchControls: function (control) {
+        var me = this;
+        var rel = me.getRelativeMarkPosition(control.marker.position);
+
+        var targetrel = me.getRelativeMarkPosition(control.marker.position + control.marker.targetposition);
+
+        control.dom.style.left = (rel) + 'px';
+        control.dom.style.top = (me.offsetstretchvertical) + 'px';
+        Style.top(control.targetbtn, (0));
+        Style.left(control.targetbtn, (targetrel - rel));
+    },
+
     createNewMarkerBtns: function (newmarks) {
         var me = this;
         return newmarks.select(function (x, index) {
@@ -529,7 +669,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             return x.position === mark.position;
         }).first();
         if (index !== null) {
-            var end = me.marks[index + 1] ? me.marks[index + 1].position : source.buffer.buffer.length;
+            var end = me.marks[index + 1] ? me.marks[index + 1].position : me.source.buffer.buffer.length;
             var snippet = MEPH.audio.Audio.clipBuffer(me.source, mark.position, end);
             me.$playSnippet(snippet)
         }
@@ -540,14 +680,23 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         me.markerCanvas.parentNode.appendChild(clone);
         return clone;
     },
+    createStretchMark: function () {
+        var me = this;
+        var clone = me.stretchMarkTemplate.cloneNode(true);
+        me.stretcherCanvas.parentNode.appendChild(clone);
+        return clone;
+    },
     update: function () {
         var me = this;
         return Promise.resolve().then(function () {
             me.updateMarkBtns();
+            me.updateStretchControls();
         }).then(function () {
             return me.updateMarks()
         }).then(function () {
             return me.updateMarker();
+        }).then(function () {
+            return me.updateStretcher();
         }).then(function () {
             me.draw();
         }).then(function () {
@@ -581,6 +730,63 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
 
         return me.render();
     },
+    updateStretcher: function () {
+        var me = this;
+        if (me.stretcherFrame)
+            cancelAnimationFrame(me.stretcherFrame);
+        if (me.stretcherrenderer) {
+            me.stretcherrenderer.clear();
+        }
+        me.stretcherFrame = requestAnimationFrame(function () {
+            me.stretcherFrame = null;
+            var HEIGHT = me.height;
+            var WIDTH = me.width;
+            if (!me.stretcherrenderer) {
+                me.stretcherrenderer = new MEPH.util.Renderer();
+                me.stretcherrenderer.setCanvas(me.stretcherCanvas);
+            }
+
+            me.stretcherrenderer.clear();
+            if (me.stretchmarks) {
+                var lines = me.stretchmarks.concatFluent(function (x) {
+                    var xpos = me.getRelativeMarkPosition(x.position);
+                    var xtpos = me.getRelativeMarkPosition(x.position + x.targetposition);
+                    var diffx = x.targetposition;
+                    var targetxpos = me.getRelativeMarkPosition(x.position + diffx * (x.stretch || 1));
+
+                    return [{
+                        shape: MEPH.util.Renderer.shapes.line,
+                        end: {
+                            x: targetxpos,
+                            y: HEIGHT / 2
+                        },
+                        start: {
+                            x: xtpos,
+                            y: me.offsetstretchvertical
+                        },
+                        strokeStyle: me.markscolor
+                    }, {// 
+                        shape: MEPH.util.Renderer.shapes.line,
+                        end: {
+                            x: xpos,
+                            y: HEIGHT / 2
+                        },
+                        start: {
+                            x: xpos,
+                            y: me.offsetstretchvertical
+                        },
+                        strokeStyle: me.markscolor
+                    }]
+                });
+                me.renderer.draw(lines);
+            }
+            rsolve();
+        });
+        var rsolve;
+        return new Promise(function (r) {
+            rsolve = r;
+        });
+    },
     updateMarker: function () {
         var me = this;
         if (me.markerFrame)
@@ -588,7 +794,6 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         me.markerFrame = requestAnimationFrame(function () {
             var HEIGHT = me.height;
             var WIDTH = me.width;
-            var dataArray = me.source;
             me.markerFrame = null;
 
             if (!me.markerrenderer) {

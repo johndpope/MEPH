@@ -109,6 +109,22 @@
             </div>
         </div>
     </div>
+    <div mephid="stretchMarkTemplate" style="position:absolute; z-index:100; background-color:rgba(240, 173, 78, 0.52);">
+        <div class="btn  btn-warning btn-xs" style="position:relative;" tabindex="0" anchorbtn>
+            <div>
+                <span class="glyphicon glyphicon-chevron-right"></span>
+            </div>
+        </div>
+        <div class="btn  btn-warning btn-xs" style="position:relative;" tabindex="0" targetbtn>
+            <div>
+                <span class="glyphicon glyphicon-chevron-left"></span>
+            </div>
+        </div>
+        <div style="display:none;" stretchcontrol>
+            <input type="range" min="-2" max="2" step=".01" class="form-control" stretchselect></input>
+            <span stretchvalue></span>
+        </div>
+    </div>
 </div>
 <!-- "instruction": true, "name" : "injectop", "close": true -->
 <!-- "instruction": true, "name" : "injectop", "operation" : "inject" , "position" : "canvas", "before" : true -->
@@ -118,6 +134,9 @@
     </mephbutton>
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.addSelectionAsMarks | c$.cancelEvent">
         <span class="glyphicon glyphicon-tags"></span>
+    </mephbutton>
+    <mephbutton type="button" class="btn btn-info btn-xs" meph-event-click="c$.addStretchMark | c$.cancelEvent">
+        <span class="glyphicon glyphicon-resize-full"></span>
     </mephbutton>
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.playClip | c$.cancelEvent">
         <span class="glyphicon glyphicon-play"></span>
@@ -164,6 +183,11 @@
 <canvas mephid="markerCanvas"
         class="noresponse"
         style="position:absolute; top:0; z-index:31;"
+        meph-data-height="c$.height"
+        meph-data-width="c$.width"></canvas>
+<canvas mephid="stretcherCanvas"
+        class="noresponse"
+        style="position:absolute; top:0; z-index:30;"
         meph-data-height="c$.height"
         meph-data-width="c$.width"></canvas>
 <div meph-data-width="c$.width"

@@ -11,7 +11,8 @@
         timeWindow: null,
         visualizedFile: null,
         visualizedFileType: null,
-        banks: null
+        banks: null,
+        stretchMarks: null
     },
     initialize: function () {
         var me = this;
@@ -19,6 +20,7 @@
         ///meph-event-change="ct$.loadBytes, ct$.lastSong | v$.drawBytes"
         var source = [];
         MEPH.util.Observable.observable(source)
+        me.stretchMarks = MEPH.util.Observable.observable([]);
         me.soundFileMarks = MEPH.util.Observable.observable([])
         me.banks = MEPH.util.Observable.observable([])
         me.fileResources = source;

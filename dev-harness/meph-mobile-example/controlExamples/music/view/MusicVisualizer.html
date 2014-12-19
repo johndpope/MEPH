@@ -64,15 +64,17 @@
                     Visual Selector
                 </h4>
                 <visualselector source="v$.data"
+                                meph-data-maxlevel="1"
                                 meph-data-vertical="v$.verticalScroll"
                                 meph-data-marks="ct$.soundFileMarks"
+                                meph-data-stretchmarks="ct$.stretchMarks"
                                 meph-event-saveclip="ct$.saveClipToBank"
                                 meph-data-height="300"
                                 scrollmutiplier="0">
                     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="ct$.createSnippets, ct$.soundFileMarks | c$.cancelEvent">
                         <span class="glyphicon glyphicon-ok"></span>
                     </mephbutton>
-                     
+
                 </visualselector>
             </div>
         </div>
