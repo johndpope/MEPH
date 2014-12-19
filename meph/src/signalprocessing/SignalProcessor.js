@@ -1439,6 +1439,47 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
             tmag: ysmag
         }
     },
+    /**
+     * Frequency scaling of sinusoidal tracks.
+     * @param {Array} sfreq
+     * @param {Array} freqScaling
+     * @return {Array}
+     ***/
+    sineFreqScaling: function (sfreq, freqScaling) {
+        var me = this;
+        if (!freqScaling.length) {
+            throw new Error('Frequency scaling array does any elements.');
+        }
+        var L = sfreq.length; //frames
+        var maxInTime = freqScaling.maximum(function (x) { return x.start; });
+        var maxOutTime = freqScaling.maximum(function (x) { return x.scale; });
+        var outL = (L) * maxOutTime / maxInTime;
+        var inFrames = freqScaling.select(function (x) { return x.start * (L - 1) / maxInTime; });
+        var outFrames = freqScaling.select(function (x) { return x.scale * (L - 1) / maxOutTime; });
+        var freqScalingEnv = function (frames) {
+            var tweendata = [{
+                x: inFrames.select(function (x) { return x / (L - 1); }),
+                y: outFrames.select(function (x) { return x / (L - 1); })
+            }]
+            var calculator = new MEPH.tween.Calculator();
+            calculator.setData(tweendata);
+            return frames.select(function (x) {
+                var result = calculator.get(x / (outL - 1));
+                return result;
+            });
+        };
+        var freqScaling = freqScalingEnv([].interpolate(0, outL));
+        var ysfreq = [];
+
+        freqScaling.foreach(function (ii, index) {
+            var res = sfreq[index].select(function (x) {
+                return x + x * ii;
+            });
+            ysfreq.push(res);
+        });
+
+        return ysfreq;
+    },
     sineModel: function (x, fs, w, N, t, fftsize) {
         var me = this;
         var hM1 = Math.floor((w.length + 1) / 2);

@@ -880,4 +880,56 @@
         }, 2000)
 
     });
+
+    it('can do a sinusoidal freq shift model synthesis', function () {
+
+        var sampleRate = 44100;
+        var len = sampleRate * 2;
+        var N = 4096;
+        var Ns = 4096;
+        var M = 2048;
+        var H = Math.floor(Ns / 4);
+        var t = -45;
+        var fs = sampleRate;
+        var w = [].interpolate(0, M, function (x) {
+            return MEPH.math.Util.window.Blackman(x, M);
+        });
+        var signal = (new Float32Array(len)).select(function (i, x) {
+            return .9 * Math.cos((x / fs) * 2 * 440 * Math.PI);
+        });
+        var sp = new SignalProcessor();
+
+        var res = sp.sineModelAnal(signal, fs, w, N, H, t);
+        var tfreq = sp.sineFreqScaling(res.tfreq, [{
+            start: 0, scale: 0
+        }, {
+            start: .5, scale: -.5
+        }, {
+            start: 1, scale: 1
+        }]);
+        var Y = sp.sineModelSynth(tfreq, res.tmag, [], Ns, H, fs);
+
+        setTimeout(function () {
+            var audio = new MEPH.audio.Audio();
+
+            var audioresult = audio.copyToBuffer(getResource(signal, sampleRate), 0, len / sampleRate);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            audio.playbuffer();
+
+        }, 10)
+
+        setTimeout(function () {
+            var audio = new MEPH.audio.Audio();
+
+            var audioresult = audio.copyToBuffer(getResource(Y, sampleRate), 0, Y.length / sampleRate);
+
+            audio.buffer(audioresult.buffer).complete();
+
+            audio.playbuffer();
+
+        }, 2000)
+
+    });
 });
