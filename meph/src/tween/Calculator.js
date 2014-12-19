@@ -49,12 +49,15 @@ MEPH.define('MEPH.tween.Calculator', {
                 throw new Error('not in defined range: Calculator.js')
         }
         index--;
-        var segment = path.segments.first(function (x) {
+        var segment = path.segments ? path.segments.first(function (x) {
             return x.segment === index;
-        });
+        }) : null;
         var p1 = new Vector([path.x.nth(index + 1), path.y.nth(index + 1)]);
         var p2 = new Vector([path.x.nth(index + 2), path.y.nth(index + 2)]);
-        var t0 = t - path.x.nth(index + 1);
+        var t0 = t < path.x.nth(index + 1) ? t - path.x.nth(index + 1) : t;
+        var tn = path.x.nth(index + 2);
+        if (tn)
+            t0 = t0 / tn;
         if (segment) {
             //If cubic
             var p3 = new Vector([segment.startpos.x, segment.startpos.y]);
@@ -64,6 +67,7 @@ MEPH.define('MEPH.tween.Calculator', {
         }
         else {
             var res = MEPH.tween.Calculator.Linear(p1, p2, t0);
+
             return res.y;
         }
     }

@@ -4,7 +4,11 @@
  * Signal processing library.
  **/
 MEPH.define('MEPH.signalprocessing.SignalProcessor', {
-    requires: ['MEPH.math.FFT', 'MEPH.math.Util', 'MEPH.util.Vector', 'MEPH.math.Vector'],
+    requires: ['MEPH.math.FFT',
+        'MEPH.math.Util',
+        'MEPH.util.Vector',
+        'MEPH.math.Vector',
+        'MEPH.tween.Calculator'],
     statics: {
         MAX_FRAME_LENGTH: 16000,//        private static int 
         maximumWindow: 1024,
@@ -1358,7 +1362,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
                 ytphase = tphase[l].select();
             }
             else {
-                ytphase = ytphase.select(function (i) {
+                ytphase = ytphase.select(function (c, i) {
                     return ytphase[i] + (Math.PI * (lastytfreq[i] + tfreq[l][i]) / fs) * H;
                 });
             }
@@ -1388,7 +1392,53 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         y = y.subset(hN, y.length - hN);
         return y;
     },
+    /**
+     * Time scaling of sinusoidal tracks
+     * @param {Array} sfreq
+     * @param {Array} smag
+     * @param {Array} timeScaling
+     * @return {Object} 
+     *          {
+     *            tfreq: [],
+     *            tmag: []
+     *          }
+     ***/
+    sineTimeScaling: function (sfreq, smag, timeScaling) {
+        if (!timeScaling.length) {
+            throw new Error('Time scaling array does any elements.');
+        }
+        var L = sfreq.length; //frames
+        var maxInTime = timeScaling.maximum(function (x) { return x.start; });
+        var maxOutTime = timeScaling.maximum(function (x) { return x.scale; });
+        var outL = (L) * maxOutTime / maxInTime;
+        var inFrames = timeScaling.select(function (x) { return x.start * (L - 1) / maxInTime; });
+        var outFrames = timeScaling.select(function (x) { return x.scale * (L - 1) / maxOutTime; });
+        var timeScalingEnv = function (frames) {
+            var tweendata = [{
+                x: inFrames.select(function (x) { return x / (L - 1); }),
+                y: outFrames.select(function (x) { return x / (L - 1); })
+            }]
+            var calculator = new MEPH.tween.Calculator();
+            calculator.setData(tweendata);
+            return frames.select(function (x) {
+                var result = calculator.get(x / (outL - 1));
+                return result * (L - 1);
+            });
+        };
+        var indexes = timeScalingEnv([].interpolate(0, outL));
+        var ysfreq = [sfreq[Math.round(indexes[0])]];
+        var ysmag = [smag[Math.round(indexes[0])]];
 
+        indexes.subset(1).foreach(function (ii) {
+            ysfreq.push(sfreq[Math.round(ii)]);
+            ysmag.push(smag[Math.round(ii)]);
+        })
+
+        return {
+            tfreq: ysfreq,
+            tmag: ysmag
+        }
+    },
     sineModel: function (x, fs, w, N, t, fftsize) {
         var me = this;
         var hM1 = Math.floor((w.length + 1) / 2);
@@ -1899,4 +1949,4 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
     MEPH.signalprocessing.SignalProcessor.BH_SIZE = 1001;
     MEPH.signalprocessing.SignalProcessor.BH_SIZE_BY2 = 501;
     MEPH.signalprocessing.SignalProcessor.MFACTOR = 100;
-})
+});

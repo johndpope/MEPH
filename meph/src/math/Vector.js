@@ -26,6 +26,19 @@ MEPH.define('MEPH.math.Vector', {
         ZeroVector: function (dim) {
             return new MEPH.math.Vector([].interpolate(0, dim || 4, function () { return 0; }));
         },
+        Slope: function (p1, p2) {
+
+            var p21 = p2.subtract(p1)
+            return p21.y / p21.x;
+        },
+        Line: function (p1, p2) {
+            var slope = MEPH.math.Vector.Slope(p1, p2); 
+            return {
+                p1: new MEPH.math.Vector(0, 0),
+                p2: new MEPH.math.Vector(1, slope)
+            }
+        },
+
         /**
          * Linear Interpolation between to numbers.
          * @param {Number} thrustAmount

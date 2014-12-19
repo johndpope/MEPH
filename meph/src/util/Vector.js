@@ -48,6 +48,18 @@ MEPH.define('MEPH.util.Vector', {
         Lerp3D: function (vect1, vect2, percentage) {
             return new MEPH.util.Vector(MEPH.util.Vector.Lerp(vect1._x, vect2._x, percentage), MEPH.util.Vector.Lerp(vect1._y, vect2._y, percentage), MEPH.util.Vector.Lerp(vect1._z, vect2._z, percentage))
         },
+        Slope: function (p1, p2) {
+
+            var p21 = p2.subtract(p1)
+            return p21.y / p21.x;
+        },
+        Line: function (p1, p2) {
+            var slope = MEPH.math.Vector.Slope(p1, p2);
+            return {
+                p1: new MEPH.math.Vector(0, 0),
+                p2: new MEPH.math.Vector(1, slope)
+            }
+        },
         Zero: function () {
             return new MEPH.util.Vector(0, 0, 0)
         },

@@ -47,7 +47,7 @@
             return MEPH.math.Util.window.Hamming(x, M);
         });
         var signal = (new Float32Array(len)).select(function (i, x) {
-            return 1* Math.sin((x / fs) * 2 * 440 * Math.PI);
+            return .5 * Math.sin((x / fs) * 2 * 490 * Math.PI) + .5 * Math.sin((x / fs) * 2 * 440 * Math.PI);
         });
 
         var sp = me.sp;
