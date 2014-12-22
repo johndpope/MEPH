@@ -45,6 +45,9 @@ MEPH.define('MEPH.util.Renderer', {
                 case MEPH.util.Renderer.shapes.canvas:
                     me.drawCanvas(options);
                     break;
+                case MEPH.util.Renderer.shapes.polygon:
+                    me.drawPolygon(options);
+                    break;
                 case MEPH.util.Renderer.shapes.none:
                     break;
                 default:
@@ -88,6 +91,19 @@ MEPH.define('MEPH.util.Renderer', {
         context.roundRect(options.x, options.y, options.width, options.height, options.radius || 0, options.fill || false, options.stroke || false);
 
     },
+    drawPolygon: function (options) {
+        var me = this,
+            context = me.getContext();
+        context.strokeStyle = options.strokeStyle;
+        me.setFillStyle(options, context);
+        context.beginPath();
+        context.moveTo(options.lt.x, options.lt.y);
+        context.lineTo(options.rt.x, options.rt.y);
+        context.lineTo(options.rb.x, options.rb.y);
+        context.lineTo(options.lb.x, options.lb.y);
+        context.closePath();
+        context.fill();
+    },
     drawLine: function (options) {
         var me = this,
             context = me.getContext();
@@ -113,7 +129,6 @@ MEPH.define('MEPH.util.Renderer', {
         var g = MEPH.util.Vector.Lerp2D(point, point2, .75).rotate(-.13);
         context.beginPath();
         context.strokeStyle = options.strokeStyle;
-        //context.fillStyle = options.fillStyle;
         me.setFillStyle(options, context);
         context.moveTo(options.start.x, options.start.y);
         context.lineWidth = options.lineWidth;
@@ -199,6 +214,7 @@ MEPH.define('MEPH.util.Renderer', {
             text: 'text',
             line: 'line',
             canvas: 'canvas',
+            polygon: 'polygon',
             none: 'none'
         },
         defaultShapeOptions: {

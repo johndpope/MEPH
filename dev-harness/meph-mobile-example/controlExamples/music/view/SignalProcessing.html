@@ -10,6 +10,14 @@
                 <span class="glyphicon glyphicon-glass">DFT Analysis A(440 Hz)</span>
             </mephbutton>
         </div>
+        <div class="col-md-6">
+            <h4>DFT</h4>
+            <dropbox data-events='"filesdropped":"v$.loadFiles "'></dropbox><!---->
+        </div>
+        <div class="col-md-6">
+            <h4>Analysis</h4>
+            <dropbox data-events='"filesdropped":"v$.loadFilesAnal "'></dropbox><!---->
+        </div>
         <div class="col-md-12">
             <div class="col-md-1">
                 <span data-bind='"innerHTML":"v$.N"'>1</span>
@@ -34,6 +42,27 @@
                        meph-data-step="64"
                        meph-data-min="256"
                        meph-data-max="16384"></range>
+            </div>
+            <div class="col-md-3">
+                <span data-bind='"innerHTML":"v$.T"'>1</span>
+                <range descriptiontext=Threshold"
+                       meph-data-value="v$.T"
+                       meph-data-step="1"
+                       meph-data-min="0"
+                       meph-data-max="250"></range>
+
+            </div>
+            <div class="col-md-3">
+                <span data-bind='"innerHTML":"v$.startTime"'>1</span>
+                <range descriptiontext="Start time"
+                       meph-data-value="v$.startTime"
+                       meph-data-step="0.1"
+                       meph-data-min="0"
+                       meph-data-max="250"></range>
+
+            </div>
+            <div class="col-md-1">
+                <span data-bind='"innerHTML":"v$.state"'>1</span>
             </div>
         </div>
         <div class="col-md-12">

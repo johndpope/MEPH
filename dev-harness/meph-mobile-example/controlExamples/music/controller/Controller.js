@@ -1,6 +1,10 @@
 ﻿MEPH.define('MEPHControls.music.controller.Controller', {
     extend: 'MEPH.controller.Controller',
-    requires: ['MEPH.util.FileReader', 'MEPH.audio.Audio', 'MEPH.util.Observable'],
+    requires: [
+        'MEPH.util.FileReader',
+        'MEPH.audio.Audio',
+        'MEPH.util.Observable'
+    ],
     properties: {
         fileResources: null,
         soundFileMarks: null,

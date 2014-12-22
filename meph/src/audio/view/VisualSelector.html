@@ -9,6 +9,15 @@
            meph-data-max="1"></range>
 </div>
 <div class="visualizer col-md-1">
+    <dropdown meph-data-source="c$.beats"
+              labeltext="BPM"
+              meph-event-change="c$.update"
+              descriptiontext="Beats per minute"
+              meph-data-value="c$.beatsPerMin"
+              meph-data-labelfield="name"
+              meph-data-valuefield="value"></dropdown>
+</div>
+<div class="visualizer col-md-1">
     <span data-bind='"innerHTML":"c$.stretchValue"'>1</span>
     <range descriptiontext="Stretch value"
            meph-data-value="c$.stretchValue"
@@ -109,7 +118,7 @@
             </div>
         </div>
     </div>
-    <div mephid="stretchMarkTemplate" style="position:absolute; z-index:100; background-color:rgba(240, 173, 78, 0.52);">
+    <div mephid="stretchMarkTemplate" style="padding:3px; position:absolute; z-index:100; background-color:rgba(240, 173, 78, 0.52);">
         <div class="btn  btn-warning btn-xs" style="position:relative;" tabindex="0" anchorbtn>
             <div>
                 <span class="glyphicon glyphicon-chevron-right"></span>
@@ -121,8 +130,24 @@
             </div>
         </div>
         <div style="display:none;" stretchcontrol>
-            <input type="range" min="-2" max="2" step=".01" class="form-control" stretchselect></input>
+            <input type="range" min="0.01" max="5" step=".01" class="form-control" stretchselect></input>
             <span stretchvalue></span>
+            <select stretchbeattarget></select>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary btn-xs" removebtn>
+                    <span class="glyphicon glyphicon-minus"></span>
+                </button>
+                <button type="button" class="btn btn-primary btn-xs" addanchormarker>
+                    <span class="glyphicon glyphicon-hand-right"></span>
+                </button>
+                <button type="button" class="btn btn-primary btn-xs" addtargetmarker>
+                    <span class="glyphicon glyphicon-hand-left"></span>
+                </button>
+                <button type="button" class="btn btn-primary btn-xs" stretchandplay>
+                    <span class="glyphicon glyphicon-play"></span>
+                </button>
+                
+            </div>
         </div>
     </div>
 </div>
@@ -168,6 +193,12 @@
 
     <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.saveClips| c$.cancelEvent">
         <span class="glyphicon glyphicon-th"></span>
+    </mephbutton>
+</div>
+<div class="btn-group">
+    <mephbutton type="button" class="btn btn-primary btn-xs" meph-event-click="c$.createStretchPointFlow | c$.cancelEvent">
+        <span class="glyphicon glyphicon-pencil"></span>
+        <span data-bind='"innerHTML":"c$.stretchFlowState"'></span>
     </mephbutton>
 </div>
 <div class="btn-group">

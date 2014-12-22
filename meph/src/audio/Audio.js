@@ -793,6 +793,10 @@ MEPH.define('MEPH.audio.Audio', {
         var me = this;
         return me.currentContext;
     },
+    getAudioContext: function () {
+        var me = this;
+        return me.audioCtx;
+    },
     buffersource: function (options) {
         var me = this;
         var context = me.createContext(options);

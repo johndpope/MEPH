@@ -1,4 +1,5 @@
-﻿/*global MEPH*/
+﻿/// <reference path="../RecorderWorker.js" />
+/*global MEPH*/
 
 /**
 * @class
@@ -10,6 +11,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     extend: 'MEPH.audio.view.Visualizer',
     requires: ['MEPH.input.Range',
         'MEPH.util.Renderer',
+        'MEPH.input.Dropdown',
         'MEPH.signalprocessing.SignalProcessor'],
     templates: true,
     properties: {
@@ -22,14 +24,19 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         marks: null,
         offsetbtnheight: 19,
         offsetstretchvertical: 4,
+        stretchlinewidth: 3,
         marktype: 'default',
         stretchtype: 'stretchtype',
         markercolor: '#d9534f',
         markscolor: '#f0ad4e',
+        markscolorbg: 'rgba(45, 64, 114, 0.5)',
         markerBtns: null,
         stretchControls: null,
         stretchcolor: '#f2f233',
         stretchmarks: null,
+        stretchFlowState: '',
+        beats: null,
+        beatsPerMin: null,
         pitchShift: .5,
         pitchWindowSize: 1000,
         smallestStep: 0.0000001,
@@ -72,6 +79,17 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }
         });
     },
+    onLoaded: function () {
+        var me = this;
+        me.beats = MEPH.util.Observable.observable([].interpolate(35, 170, function (x) {
+            return {
+                name: x,
+                value: x
+            };
+        }));
+        me.beatsPerMin = 72;
+        me.stretchFlowState = 'Start';
+    },
     calculateSilenceThreholdHeight: function () {
         var me = this,
             height = me.height || 0,
@@ -86,11 +104,17 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         var me = this,
             relativePosition = me.getCurrentPosition();
         var absPosition = me.getAbsoluteMarkPosition(relativePosition);
+        me.$addMark(absPosition);
+
+    },
+    $addMark: function (pos) {
+        var me = this;
+
         if (me.marks && !me.marks.some(function (x) {
-            return x.position === absPosition;
+             return x.position === pos;
         })) {
             me.marks.push({
-                position: absPosition,
+                position: pos,
                 type: me.marktype
             })
         }
@@ -102,13 +126,17 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         if (me.stretchmarks && !me.stretchmarks.some(function (x) {
             return x.position === absPosition || (x.position < absPosition && x.targetposition > absPosition);
         })) {
-            me.stretchmarks.push({
-                position: absPosition,
-                targetposition: 0,
-                stretch: 0,
-                type: me.stretchtype
-            })
+            me.$addStretchMark(absPosition)
         }
+    },
+    $addStretchMark: function (position, targetposition) {
+        var me = this;
+        me.stretchmarks.push({
+            position: position,
+            targetposition: targetposition || 0,
+            stretch: 0,
+            type: me.stretchtype
+        })
     },
     detectPitch: function () {
         var me = this, clip = me.getSelectedClip();
@@ -306,15 +334,22 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         var me = this,
            source = me.source,
            audio = new MEPH.audio.Audio(),
-           magnification = parseFloat(me.magnification),
-           timeScroll = parseFloat(me.timeScroll);
+           magnification = parseFloat(me.magnification);
         if (me.source) {
-            var start = timeScroll * source.buffer.buffer.duration;
+            var start = me.getSnippetStart();
             var time = source.buffer.buffer.duration * magnification;
             var snippet = me.getClip(source, start, start + time);
             return snippet;
         }
         return null;
+    },
+    getSnippetStart: function () {
+        var me = this, source = me.source,
+           magnification = parseFloat(me.magnification),
+           timeScroll = parseFloat(me.timeScroll);
+
+        var start = timeScroll * source.buffer.buffer.duration;
+        return start;
     },
     getClip: function (source, start, stop) {
         var snippet = MEPH.audio.Audio.clip(source, start, Math.min(source.buffer.buffer.duration, stop));
@@ -409,12 +444,16 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             var snippet = audio.get({ name: 'buffer' });
             snippet.first().node.onended = function () {
                 audio.disconnect();
+                me.clipEnded = me.getCurrentTime();
+                delete me.getCurrentTime;
                 delete me.playingClip;
                 delete audio;
                 delete snippet.first().node;
             }
             me.playingClip = snippet.first().node;
+            me.getCurrentTime = function () { return audio.getAudioContext().currentTime; }
             me.playingClip.start();
+            me.startedTime = audio.getAudioContext().currentTime;
 
         }
         return snippet;
@@ -541,7 +580,40 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         }
         return null;
     },
+    createStretchPointFlow: function () {
+        var me = this;
 
+        if (!me.stretchPointFlowState) {
+            me.stretchFlowState = 'Mark Start';
+            me.playClip();
+            me.stretchPointFlowState = {
+                state: true,
+                started: me.getCurrentTime()
+            }
+        }
+        else if (me.stretchPointFlowState.state && me.getCurrentTime) {
+            me.stretchPointFlowState.start = me.getCurrentTime();
+            me.stretchPointFlowState.state = false;
+            me.stretchFlowState = 'Mark End';
+        }
+        else if (!me.stretchPointFlowState.state) {
+            if (me.getCurrentTime) {
+                me.stretchPointFlowState.end = me.getCurrentTime();
+            }
+            else me.stretchPointFlowState.end = me.clipEnded;
+            var samplerate = me.getBufferSampleRate();
+            var start = me.getSnippetStart() + samplerate * (me.stretchPointFlowState.start - me.stretchPointFlowState.started);
+            var end = me.getSnippetStart() + samplerate * (me.stretchPointFlowState.end - me.stretchPointFlowState.started);
+
+            if (me.playingClip) {
+                me.playingClip.stop();
+            }
+            me.$addStretchMark(start, end - start);
+            me.stretchFlowState = '';
+            me.stretchPointFlowState = null;
+        }
+
+    },
     createNewStretchMarkerControls: function (stretchmarks) {
         var me = this;
         return stretchmarks.select(function (x, index) {
@@ -551,6 +623,39 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             var stretchselect = stretchtemplate.querySelector('[stretchselect]');
             var stretchcontrol = stretchtemplate.querySelector('[stretchcontrol]');
             var stretchvalue = stretchtemplate.querySelector('[stretchvalue]');
+            var removebtn = stretchtemplate.querySelector('[removebtn]');
+            var stretchbeattarget = stretchtemplate.querySelector('[stretchbeattarget]');
+            var addanchormarker = stretchtemplate.querySelector('[addanchormarker]');
+            var addtargetmarker = stretchtemplate.querySelector('[addtargetmarker]');
+            var stretchandplay = stretchtemplate.querySelector('[stretchandplay]');
+            var notes = [{
+                name: 'Sixteenth note', value: .25
+            }, {
+                name: 'Eighth note', value: .5
+            }, {
+                name: 'Quarter note', value: 1
+            }, {
+                name: 'Half note', value: 2
+            }, {
+                name: 'Whole note', value: 4
+            }, {
+                name: '2 Whole', value: 8
+            }, {
+                name: '4 Whole', value: 16
+            }, {
+                name: '8 Whole', value: 32
+            }, {
+                name: '16 Whole', value: 64
+            }, {
+                name: '32 Whole', value: 128
+            }, {
+                name: '64 Whole', value: 256
+            }];
+
+            notes.foreach(function (note) {
+                MEPH.util.Dom.addOption(note.name, note.value, stretchbeattarget);
+            });
+
             var control = {
                 marker: x,
                 dom: stretchtemplate,
@@ -560,6 +665,81 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                 }
             }
             stretchvalue.innerHTML = Math.round(100 * parseFloat(control.marker.stretch)) / 100;
+            me.don('change', stretchbeattarget, function (control) {
+                var val = parseFloat(stretchbeattarget.value);
+                var bpm = parseFloat(me.beatsPerMin);
+                if (bpm && me.source && me.source.buffer) {
+                    var samplerate = me.source.buffer.buffer.sampleRate;
+                    var desiredwidth = bpm / 60 * val * samplerate;
+                    var stretch = desiredwidth / control.marker.targetposition;
+                    control.marker.stretch = stretch;
+                    me.update();
+                }
+            }.bind(me, control));
+            me.don('click', stretchandplay, function (control) {
+                debugger
+                var sp = me.$signalProcessor;
+                var sampleRate = me.getBufferSampleRate();
+                var len = sampleRate * 2;
+                var N = 4096;
+                var Ns = 4096;
+                var M = 2048;
+                var H = Math.floor(Ns / 4);
+                var t = -45;
+                var fs = sampleRate;
+                var w = [].interpolate(0, M, function (x) {
+                    return MEPH.math.Util.window.Blackman(x, M);
+                });
+
+                var snippet = MEPH.audio.Audio.clipBuffer(me.source, control.marker.position, control.marker.position + control.marker.targetposition);
+                var signal = snippet.buffer.buffer.getChannelData(0);
+
+                var res = sp.sineModelAnal(signal, fs, w, N, H, t);
+                var sres = sp.sineTimeScaling(res.tfreq,
+                   res.tmag, [{
+                       start: 0, scale: 0
+                   }, {
+                       start: .3, scale: 1
+                   }, {
+                       start: 1, scale: 2
+                   }]);
+                var getResource = function (result) {
+                    var resource = {
+                        buffer: {
+                            buffer: {
+                                getChannelData: function () {
+                                    return result;
+                                },
+                                sampleRate: sampleRate
+                            },
+                            channelCount: 1
+                        }
+                    };
+                    return resource;
+                }
+
+                var Y = sp.sineModelSynth(sres.tfreq, sres.tmag, [], Ns, H, fs);
+                var audio = new MEPH.audio.Audio();
+
+                var audioresult = audio.copyToBuffer(getResource(Y, sampleRate), 0, Y.length / sampleRate);
+
+                audio.buffer(audioresult.buffer).complete();
+
+                audio.playbuffer();
+            }.bind(me, control));
+            me.don('click', addanchormarker, function (control) {
+                me.$addMark(control.marker.position);
+            }.bind(me, control));
+
+            me.don('click', addtargetmarker, function (control) {
+                me.$addMark(control.marker.position + control.marker.targetposition);
+            }.bind(me, control));
+
+            me.don('click', removebtn, function (control) {
+                me.stretchmarks.removeWhere(function (x) { return x === control.marker })
+                stretchtemplate.parentNode.removeChild(stretchtemplate);
+                me.update();
+            }.bind(me, control))
             me.don('mouseover', stretchtemplate, function () {
                 Style.show(stretchcontrol);
             });
@@ -755,7 +935,27 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                     var targetxpos = me.getRelativeMarkPosition(x.position + diffx * (x.stretch || 1));
 
                     return [{
+                        shape: MEPH.util.Renderer.shapes.polygon,
+                        lb: {
+                            x: xpos,
+                            y: HEIGHT / 2
+                        },
+                        rb: {
+                            x: targetxpos,
+                            y: HEIGHT / 2
+                        },
+                        rt: {
+                            x: xtpos,
+                            y: me.offsetstretchvertical
+                        },
+                        lt: {
+                            x: xpos,
+                            y: me.offsetstretchvertical
+                        },
+                        fillStyle: me.markscolorbg
+                    }, {
                         shape: MEPH.util.Renderer.shapes.line,
+                        lineWidth: me.stretchlinewidth,
                         end: {
                             x: targetxpos,
                             y: HEIGHT / 2
@@ -767,6 +967,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                         strokeStyle: me.markscolor
                     }, {// 
                         shape: MEPH.util.Renderer.shapes.line,
+                        lineWidth: me.stretchlinewidth,
                         end: {
                             x: xpos,
                             y: HEIGHT / 2

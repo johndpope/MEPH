@@ -5,9 +5,13 @@
     mixins: ['MEPH.mobile.mixins.Activity'],
     requires: [
         'MEPH.signalprocessing.SignalProcessor',
+        'MEPH.file.Dropbox',
+        'MEPH.audio.Audio',
+        'MEPH.util.FileReader',
         'MEPH.audio.view.Visualizer',
         'MEPH.audio.view.VisualSelector'],
     properties: {
+        fileResources: null,
         name: null,
         data: null,
         verticalScroll: 0,
@@ -15,7 +19,9 @@
         Ns: 4096,
         M: 2048,
         H: 1024,
-        T: -45,
+        T: 45,
+        state: '',
+        startTime: null,
         fs: 44100,
         freqdata: null,
         magdata: null,
@@ -24,6 +30,8 @@
     },
     initialize: function () {
         var me = this;
+
+        me.fileResources = [];
         me.callParent.apply(me, arguments);
         me.on('load', me.onLoaded.bind(me));
     },
@@ -33,20 +41,84 @@
         var sp = new SignalProcessor();
         me.sp = sp;
     },
-    processAFrame: function () {
+    loadFiles: function () {
+        var me = this;
+        var args = MEPH.util.Array.convert(arguments);
+        var evntArgs = args.last();
+
+        var files = args.last();
+        me.state = 'Loading files';
+        return FileReader.readFileList(files.domEvent.files, { readas: 'ArrayBuffer' }).then(function (res) {
+            res.foreach(function (t) {
+                me.fileResources.push(t);
+            })
+            me.state = 'Loaded file(s)';
+        }).then(function () {
+            var audio = new MEPH.audio.Audio();
+            var resource = me.fileResources.last();
+
+            return audio.loadByteArray(resource.res, null, resource.file.name, resource.file.type).then(function (result) {
+                resource.buffer = result;
+                return resource;
+            }).then(function (resource) {
+
+                me.state = 'Processing file';
+                me.processAFrame(resource.buffer.buffer.buffer.getChannelData(0));
+            })
+        }).catch(function (e) {
+            console.log(e);
+        }).then(function () {
+
+            me.state = 'Processing file complete';
+        })
+    },
+    loadFilesAnal: function () {
+        var me = this;
+        var args = MEPH.util.Array.convert(arguments);
+        var evntArgs = args.last();
+
+        var files = args.last();
+        me.state = 'Loading files';
+        return FileReader.readFileList(files.domEvent.files, { readas: 'ArrayBuffer' }).then(function (res) {
+            res.foreach(function (t) {
+                me.fileResources.push(t);
+            })
+            me.state = 'Loaded file(s)';
+        }).then(function () {
+            var audio = new MEPH.audio.Audio();
+            var resource = me.fileResources.last();
+
+            return audio.loadByteArray(resource.res, null, resource.file.name, resource.file.type).then(function (result) {
+                resource.buffer = result;
+                return resource;
+            }).then(function (resource) {
+
+                me.state = 'Processing file';
+                me.processA(resource.buffer.buffer.buffer.getChannelData(0));
+            })
+        }).catch(function (e) {
+            console.log(e);
+        }).then(function () {
+
+            me.state = 'Processing file complete';
+        })
+    },
+    processAFrame: function (signal) {
         var me = this;
         var sampleRate = 44100;
         var len = sampleRate * 2;
-        var N = me.N;
-        var Ns = me.Ns;
-        var M = me.M;
+        var N = parseFloat(me.N);
+        var Ns = parseFloat(me.Ns);
+        var M = parseFloat(me.M);
         var H = Math.floor(Ns / 4);
-        var t = -me.T;
+        var startTime = me.startTime || 0;;
+        var t = -parseFloat(me.T);
         var fs = sampleRate;
         var w = [].interpolate(0, M, function (x) {
             return MEPH.math.Util.window.Hamming(x, M);
         });
-        var signal = (new Float32Array(len)).select(function (i, x) {
+        var offset = (startTime * sampleRate);
+        signal = signal ? signal.subset(0 + offset, len + offset) : (new Float32Array(len)).select(function (i, x) {
             return .5 * Math.sin((x / fs) * 2 * 490 * Math.PI) + .5 * Math.sin((x / fs) * 2 * 440 * Math.PI);
         });
 
@@ -70,7 +142,7 @@
         }).subset(0, me.samples);
         me.freqdata = signal.subset(0, 4000);
     },
-    processA: function () {
+    processA: function (signal) {
         var me = this;
         var sampleRate = 44100;
         var len = sampleRate * 2;
@@ -83,8 +155,10 @@
         var w = [].interpolate(0, M, function (x) {
             return MEPH.math.Util.window.Blackman(x, M);
         });
-        var signal = (new Float32Array(len)).select(function (i, x) {
-            return .9 * Math.cos((x / fs) * 2 * 440 * Math.PI);
+        var startTime = me.startTime || 0;;
+        var offset = (startTime * sampleRate);
+        signal = signal ? signal.subset(0 + offset, len + offset) : (new Float32Array(len)).select(function (i, x) {
+            return .5 * Math.sin((x / fs) * 2 * 490 * Math.PI) + .5 * Math.sin((x / fs) * 2 * 440 * Math.PI);
         });
 
         var sp = me.sp;

@@ -1161,10 +1161,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }).select(function (x) { return x + 1 });
         var ploc = next_minor.where(function (t) {
             return thresh.some(function (x) { return x === t; })
-        })
-        //.select(function (x) {
-        //            return x + 1;
-        //        });
+        });
         return ploc;
     },
     toDb: function (val) {
@@ -1185,7 +1182,6 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
     peakInterp: function (mX, pX, ploc) {
         var me = this;
         var iplocs = ploc.select(function (loc, index) {
-
             var val = (mX[loc]);
             var lval = (mX[loc - 1]);
             var rval = (mX[loc + 1]);
@@ -1230,10 +1226,10 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
      * Slop increase of minimum frequency deviation.
      ****/
     sineModelAnal: function (x, fs, w, N, H, threshold, maxnSines, minSineDur, freqDevOffset, freqDevSlope) {
-        maxnSines = maxnSines || 100;
-        minSineDur = minSineDur || .01;
+        maxnSines = maxnSines || 811;
+        minSineDur = minSineDur || .001;
         freqDevOffset = freqDevOffset || 20;
-        freqDevSlope = freqDevSlope || 0.01;
+        freqDevSlope = freqDevSlope || 0.3;
         var me = this;
         if (minSineDur < 0)
             throw new Error('Minimum duration of sine tracks smaller than 0');
@@ -1700,9 +1696,9 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }
         else if (peaksleft.length > 0 && emptyt.length < peaksleft.length) {
             emptyt.foreach(function (ei, index) {
-                tfreqn[ei] = [pfreqt[peaksleft[index]]];
-                tmagn[ei] = [pmagt[peaksleft[index]]];
-                tphasen[ei] = [pphaset[peaksleft[index]]];
+                tfreqn[ei] = pfreqt[peaksleft[index]];
+                tmagn[ei] = pmagt[peaksleft[index]];
+                tphasen[ei] = pphaset[peaksleft[index]];
             });
 
             [].interpolate(emptyt.length, peaksleft.length, function (t) {
