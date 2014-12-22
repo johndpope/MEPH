@@ -23,6 +23,6 @@ MEPH.define("MEPH.audio.soundfont.chunks.data.operators.RangeOperator", {
 
     getValues: function ()//:Range
     {
-        return new Range(this.type, this.getLow(), this.high);
+        return new MEPH.audio.soundfont.chunks.data.Range(this.type, this.getLow(), this.high);
     }
 });

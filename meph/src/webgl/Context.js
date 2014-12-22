@@ -122,7 +122,7 @@ MEPH.define('MEPH.webgl.Context', {
     can: function (option) {
         var me = this;
         switch (option) {
-            case Context.renderFloatingPointTextures:
+            case MEPH.webgl.Context.renderFloatingPointTextures:
                 return me.canRenderFloatingPointTextures();
         }
     },

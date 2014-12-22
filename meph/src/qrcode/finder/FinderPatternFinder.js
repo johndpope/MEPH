@@ -409,7 +409,7 @@ MEPH.define('MEPH.qrcode.finder.FinderPatternFinder', {
         var patternInfo = me.selectBestPatterns();
         qrcode.orderBestPatterns(patternInfo);
 
-        return new FinderPatternInfo(patternInfo);
+        return new MEPH.qrcode.finder.FinderPatternInfo(patternInfo);
     },
     initialize: function (qrcode) {
         var me = this;

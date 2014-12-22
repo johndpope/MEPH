@@ -19,8 +19,8 @@ MEPH.define("MEPH.audio.soundfont.utils.NoteSampleDecoder", {
             if (decoder) {
                 var pcmStrategy = new PCM8BitMono44Khz(null, samplerate);//:IPCMIOStrategy 
             } else
-                var pcmStrategy = new PCM16BitMono44Khz(null, samplerate);//:IPCMIOStrategy 
-            this._decoder = new PCMDecoder(this.noteSample.sample.bytes, pcmStrategy);
+                var pcmStrategy = new MEPH.audio.soundfont.utils.PCM8BitMono44Khz(null, samplerate);//:IPCMIOStrategy 
+            this._decoder = new MEPH.audio.soundfont.utils.PCMDecoder(this.noteSample.sample.bytes, pcmStrategy);
         }
     },
     extract: function (target, length, startPosition, samplerate, decoder)//:ByteArray  //:Number  //:Number  //:Number
@@ -33,8 +33,8 @@ MEPH.define("MEPH.audio.soundfont.utils.NoteSampleDecoder", {
             if (decoder) {
                 var pcmStrategy = new PCM8BitMono44Khz(null, samplerate);//:IPCMIOStrategy 
             } else
-                var pcmStrategy = new PCM16BitMono44Khz(null, samplerate);//:IPCMIOStrategy 
-            this._decoder = new PCMDecoder(this.noteSample.sample.bytes, pcmStrategy);
+                var pcmStrategy = new MEPH.audio.soundfont.utils.PCM8BitMono44Khz(null, samplerate);//:IPCMIOStrategy 
+            this._decoder = new MEPH.audio.soundfont.utils.PCMDecoder(this.noteSample.sample.bytes, pcmStrategy);
         }
         // Tonfall's PCM16BitMono44Khz strategy deals in samples of 16 bits. 
         // NoteSample's start, loopStart, end &

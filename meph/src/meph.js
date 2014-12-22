@@ -1711,9 +1711,10 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     var getDefinedClass = meph.getDefinedClass;
     var privateVariablePrefix = ' $ ';
     (function () {
-        var initializing = false, fnTest = /xyz/.test(function () {
-            xyz;
-        }) ? /\b_super\b/ : /.*/;
+        var initializing = false,
+            fnTest = /xyz/.test(function () {
+                xyz;
+            }) ? /\b_super\b/ : /.*/;
 
         // The base Class implementation (does nothing)
         this.Class = function () {
@@ -1812,61 +1813,80 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                     var _addsuper = typeof prop[name] === "function" &&
                     typeof _super[name] === "function";
                     // 'script.soundfont.chunks.SoundFontChunk'
-                    prototype[name] = (function (name, fn, requires, addsuper, _extends) {
-                        return function () {
-                            var t = 1;
-                            var temp = {};
-                            var longtemp = {};
-                            var tempclassnames = requires.slice().concat(_extends.slice()).concat(type.slice());
-                            if (addsuper) {
-                                var tmp = this.callParent;
-                                // Add a new ._super() method that is the same method
-                                // but on the super-class
-                                this.callParent = _super[name];
-                                var theargs = arguments;
-                                this.super = function () {
-                                    _super[name].apply(this, theargs);
+                    var nooverrides = false;
+                    if (!_addsuper) {
 
-                                }
-                            }
-                            //for (var i = 0; i < tempclassnames.length; i++) {
-                            MEPH.Array(tempclassnames).foreach(function (t, i) {
-                                var c = getDefinedClass(tempclassnames[i]);
-                                var namespaceSplit = tempclassnames[i].split(".");
-                                var cname = namespaceSplit[namespaceSplit.length - 1];
-                                temp[cname] = window[cname];
-                                longtemp[tempclassnames[i]] = window[tempclassnames[i]];
-                                window[cname] = c;
-                                window[tempclassnames[i]] = c; // longtemp[tempclassnames[i]] =
-                            });
-                            try {
-                                var ret = fn.apply(this, arguments);
-                            }
-                            catch (ee) {
-                                var error = ee;
-                                if (!(ee instanceof Error)) {
-                                    ee = new Error(ee);
-                                }
-                                if (meph.DebugMode) {
-                                    console.log(ee.stack);
-                                }
-                                throw error;
-                            }
-                            finally {
-                                for (var i in temp) {
-                                    window[i] = temp[i];
-                                }
-                                for (var i in longtemp) {
-                                    window[i] = longtemp[i];
-                                }
-                                if (addsuper) {
-                                    this.callParent = tmp;
-                                }
+                        if ((prop.requires || []).all(function (x) {
 
-                            }
-                            return ret;
+                            //    var re = new RegExp("\b" + x.split('.').last() + "\b/ : /.*");
+                            //    var $fnTest = /xyz/.test(function () {
+                            //        xyz;
+                            //}) ? re : /.*/;
+                            return new RegExp(x.split('.').last()).test(prop[name])
+                        })) {
+                            nooverrides = true;
                         }
-                    })(name, prop[name], prop.requires || [], _addsuper, prop['extend'] || []);
+                    }
+                    if (!nooverrides) {
+                        prototype[name] = (function (name, fn, requires, addsuper, _extends) {
+                            return function () {
+                                var t = 1;
+                                var temp = {};
+                                var longtemp = {};
+                                var tempclassnames = requires.slice().concat(_extends.slice()).concat(type.slice());
+                                if (addsuper) {
+                                    var tmp = this.callParent;
+                                    // Add a new ._super() method that is the same method
+                                    // but on the super-class
+                                    this.callParent = _super[name];
+                                    var theargs = arguments;
+                                    this.super = function () {
+                                        _super[name].apply(this, theargs);
+
+                                    }
+                                }
+                                //for (var i = 0; i < tempclassnames.length; i++) {
+                                MEPH.Array(tempclassnames).foreach(function (t, i) {
+                                    var c = getDefinedClass(tempclassnames[i]);
+                                    var namespaceSplit = tempclassnames[i].split(".");
+                                    var cname = namespaceSplit[namespaceSplit.length - 1];
+                                    temp[cname] = window[cname];
+                                    longtemp[tempclassnames[i]] = window[tempclassnames[i]];
+                                    window[cname] = c;
+                                    window[tempclassnames[i]] = c; // longtemp[tempclassnames[i]] =
+                                });
+                                try {
+                                    var ret = fn.apply(this, arguments);
+                                }
+                                catch (ee) {
+                                    var error = ee;
+                                    if (!(ee instanceof Error)) {
+                                        ee = new Error(ee);
+                                    }
+                                    if (meph.DebugMode) {
+                                        console.log(ee.stack);
+                                    }
+                                    throw error;
+                                }
+                                finally {
+                                    for (var i in temp) {
+                                        window[i] = temp[i];
+                                    }
+                                    for (var i in longtemp) {
+                                        window[i] = longtemp[i];
+                                    }
+                                    if (addsuper) {
+                                        this.callParent = tmp;
+                                    }
+
+                                }
+                                return ret;
+                            }
+                        })(name, prop[name], prop.requires || [], _addsuper, prop['extend'] || []);
+                    }
+                    else {
+                        prototype[name] = prop[name];
+                    }
                 }
             }
             if (prop.templates) {

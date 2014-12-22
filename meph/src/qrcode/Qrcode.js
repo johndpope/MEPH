@@ -201,7 +201,7 @@ MEPH.define('MEPH.qrcode.Qrcode', {
 
         //var finderPatternInfo = new FinderPatternFinder().findFinderPattern(image);
 
-        var detector = new Detector(image, me);
+        var detector = new MEPH.qrcode.detector.Detector(image, me);
 
         var qRCodeMatrix = detector.detect();
 

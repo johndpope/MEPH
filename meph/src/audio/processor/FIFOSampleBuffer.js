@@ -4,6 +4,7 @@
 MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
     statics: {
     },
+    extend: 'MEPH.audio.processor.FIFOSamplePipe',
     properties: {
         sizeInBytes: 0,// reasonable initial value
         buffer: null,
@@ -46,7 +47,7 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
     ptrBegin: function () {
         var me = this;
         me.assert(me.buffer);
-        return me.buffer + me.bufferPos * me.channels;
+        return me.bufferPos * me.channels;//me.buffer + 
     },
 
 
@@ -65,7 +66,7 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
     ptrEnd: function (slackCapacity) {
         var me = this;
         me.ensureCapacity(me.samplesInBuffer + slackCapacity);
-        return me.buffer + me.samplesInBuffer * me.channels;
+        return me.samplesInBuffer * me.channels;//me.buffer + 
     },
 
     // if output location pointer 'bufferPos' isn't zero, 'rewinds' the buffer and
@@ -74,22 +75,36 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
     rewind: function () {
         var me = this;
         if (me.buffer && me.bufferPos) {
+            
             //memmove(buffer, ptrBegin(), sizeof(SAMPLETYPE) * channels * samplesInBuffer);
             var newbuffer = new Float32Array(me.buffer.length);
-            me.buffer.subset(me.ptrBegin()).foreach(function (x, index) {
-                newbuffer[index] = x;
-            })
-            me.buffer = newbuffer;
+            var ptr = me.ptrBegin();
+            [].interpolate(ptr, ptr + me.samplesInBuffer * me.channels, function (t, i) {
+                newbuffer[i] = me.buffer[t];
+            });
+            [].interpolate(0, me.buffer.length, function (t) {
+                if (t <= newbuffer.length) {
+                    me.buffer[t] = newbuffer[t];
+                }
+                else {
+                    me.buffer[t] = 0;
+                }
+            });
             me.bufferPos = 0;
         }
     },
 
     // Adds 'numSamples' pcs of samples from the 'samples' memory position to 
     // the sample buffer.
-    putSamples: function (samples, nSamples) {
+    putSamples: function (samples, nSamples, offset) {
+        offset = offset || 0;
         var me = this;
-        if (Array.isArray(samples)) {
-            me.memcpy(me.ptrEnd(nSamples), samples, nSamples * me.channels);
+        if (samples instanceof MEPH.audio.processor.FIFOSamplePipe) {
+            me.memcpy(me.ptrEnd(nSamples), samples, nSamples * me.channels, offset);
+            me.samplesInBuffer += nSamples;
+        }
+        else if (samples instanceof Float32Array) {
+            me.memcpy(me.ptrEnd(nSamples), samples, nSamples * me.channels, offset);
             me.samplesInBuffer += nSamples;
         }
         else {
@@ -103,13 +118,19 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
         me.ensureCapacity(req);
         me.samplesInBuffer += nSamples;
     },
-    memcpy: function (endIndx, samples, count) {
+    memcpy: function (endIndx, samples, count, offset) {
         var me = this;
-        [].interpolate(endIndx, count, function (t, i) {
-            me.buffer[i] = t;
+        offset = offset || 0;
+        [].interpolate(endIndx, endIndx + count, function (t, i) {
+            var s = samples instanceof Float32Array ? samples[i + offset] : samples.get(i + offset);
+            if (me.buffer instanceof Float32Array) {
+                me.buffer[t] = s;
+            }
+            else {
+                me.buffer.set(t, s);
+            }
         });
     },
-
     // Ensures that the buffer has enought capacity, i.e. space for _at least_
     // 'capacityRequirement' number of samples. The buffer is grown in steps of
     // 4 kilobytes to eliminate the need for frequently growing up the buffer,
@@ -123,9 +144,10 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
             // enlarge the buffer in 4kbyte steps (round up to next 4k boundary)
             var temp = new Float32Array(capacityRequirement);
             if (me.samplesInBuffer) {
-                me.buffer.foreach(function (t, i) {
-                    temp[i] = t;
-                })
+                var ptr = me.ptrBegin();
+                [].interpolate(ptr, me.samplesInBuffer + ptr, function (t, i) {
+                    temp[i] = me.buffer[t];
+                });
             }
             me.buffer = temp;
             me.bufferPos = 0;
@@ -139,7 +161,7 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
     // Returns the current buffer capacity in terms of samples
     getCapacity: function () {
         var me = this;
-        return me.sizeInBytes / me.channels;
+        return !me.buffer ? 0 : (me.buffer.length) / me.channels;
         //return me.buffer.length;
     },
 
@@ -152,14 +174,32 @@ MEPH.define('MEPH.audio.processor.FIFOSampleBuffer', {
     // are less than 'numsample' samples in the buffer, returns all available.
     //
     // Returns number of samples copied.
-    receiveSamples: function (output, maxSamples) {
+    receiveSamples: function (output, maxSamples, index) {
         var num;
         var me = this;
+        if (typeof output === 'number') {
+            return me.$receiveSamples(output);
 
+        }
         num = (maxSamples > me.samplesInBuffer) ? me.samplesInBuffer : maxSamples;
 
-        me.memcpy(me.ptrBegin(), output, channels * num);
+        // me.memcpy(me.ptrBegin(), output, me.channels * num);
+        // memcpy(output, ptrBegin(), channels * sizeof(SAMPLETYPE) * num);
+        me.copymemout(me.ptrBegin(), output, me.channels * num, index)
         return me.$receiveSamples(num);
+    },
+    copymemout: function (endIndx, samples, count, offset) {
+        var me = this;
+        offset = offset || 0;
+        [].interpolate(endIndx, endIndx + count, function (t, i) {
+            var s = me.buffer instanceof Float32Array ? me.buffer[i] : me.buffer.get(i);
+            if (samples instanceof Float32Array) {
+                samples[t + offset] = s;
+            }
+            else {
+                samples.set(t + offset, s);
+            }
+        });
     },
 
     // Removes samples from the beginning of the sample buffer without copying them

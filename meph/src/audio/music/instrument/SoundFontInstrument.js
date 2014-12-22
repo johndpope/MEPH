@@ -338,13 +338,6 @@
             //data_0_255[i + (j * data.length)] = Math.max(.01 * data_0_255[i], ((data.length - i) / data.length) * data_0_255[i]);
         }
         return data_0_255;
-    },
-    selectPreset: function (preset) {
-        var me = this,
-            soundfont = me.getSoundFont(), presetIds = soundfont.getPresetIds();
-
-        soundfont.selectPreset(preset || presetIds.first() || 0);
-        return me;
     },
     /**
      * Gets a note sample with the key and velocity.
@@ -358,6 +351,18 @@
         velocity = velocity || 100;
         var notesample = soundfont.getNoteSample(keyNum, velocity);
         return notesample;
+    },
+    selectPreset: function (preset) {
+        var me = this,
+            soundfont = me.getSoundFont(),
+            presetIds = soundfont.getPresetIds();
+
+        preset = preset || presetIds.first() || 0;
+        if (preset !== null) {
+            soundfont.selectPreset(preset);
+        }
+
+        return me;
     },
     prepare: function (name) {
         var me = this;

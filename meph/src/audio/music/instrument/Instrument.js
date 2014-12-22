@@ -21,7 +21,7 @@ MEPH.define('MEPH.audio.music.instrument.Instrument', {
         var me = this,
             toload = me.getResourcesToLoad();
         return Promise.all(toload.select(function (x) {
-            var audio = new Audio();
+            var audio = new MEPH.audio.Audio();
             me.$audios.push(audio);
             me.$resources.push({
                 file: x.file,

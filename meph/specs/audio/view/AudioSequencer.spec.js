@@ -26,7 +26,7 @@
 
     });
 
-    it('can render an audiosequencer', function () {
+    it('can render an audiosequencer', function (done) {
         MEPH.render('MEPH.audio.view.AudioSequencer', 'audiosequencer').then(function (r) {
             var results = r.res;
             var app = r.app;

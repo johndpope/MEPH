@@ -114,6 +114,8 @@
                         'audio/graph/AudioGraphReader.spec.js',
                         'audio/processor/FIFOSampleBuffer.spec.js',
                         'audio/processor/RateTransposer.spec.js',
+                        'audio/processor/TDStretch.spec.js',
+                        'audio/processor/SoundProcessor.spec.js',
                         'audio/music/instrument/Instrument.spec.js',
                         'audio/music/instrument/piano/GrandPiano.spec.js',
                         'audio/music/instrument/trumpet/Trumpet.spec.js',

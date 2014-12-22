@@ -53,7 +53,7 @@ MEPH.define('MEPH.qrcode.BitMatrixParser', {
             formatInfoBits = me.copyBit(8, j, formatInfoBits);
         }
 
-        me.parsedFormatInfo = FormatInformation.decodeFormatInformation(formatInfoBits);
+        me.parsedFormatInfo = MEPH.qrcode.FormatInformation.decodeFormatInformation(formatInfoBits);
         if (me.parsedFormatInfo != null) {
             return me.parsedFormatInfo;
         }
@@ -69,7 +69,7 @@ MEPH.define('MEPH.qrcode.BitMatrixParser', {
             formatInfoBits = me.copyBit(8, j, formatInfoBits);
         }
 
-        me.parsedFormatInfo = FormatInformation.decodeFormatInformation(formatInfoBits);
+        me.parsedFormatInfo = MEPH.qrcode.FormatInformation.decodeFormatInformation(formatInfoBits);
         if (me.parsedFormatInfo != null) {
             return me.parsedFormatInfo;
         }
@@ -85,7 +85,7 @@ MEPH.define('MEPH.qrcode.BitMatrixParser', {
 
         var provisionalVersion = (dimension - 17) >> 2;
         if (provisionalVersion <= 6) {
-            return Version.getVersionForNumber(provisionalVersion);
+            return MEPH.qrcode.version.Version.getVersionForNumber(provisionalVersion);
         }
 
         // Read top-right version info: 3 wide by 6 tall
@@ -97,7 +97,7 @@ MEPH.define('MEPH.qrcode.BitMatrixParser', {
             }
         }
 
-        me.parsedVersion = Version.decodeVersionInformation(versionBits);
+        me.parsedVersion = MEPH.qrcode.version.Version.decodeVersionInformation(versionBits);
         if (me.parsedVersion != null && me.parsedVersion.DimensionForVersion == dimension) {
             return me.parsedVersion;
         }
@@ -110,7 +110,7 @@ MEPH.define('MEPH.qrcode.BitMatrixParser', {
             }
         }
 
-        me.parsedVersion = Version.decodeVersionInformation(versionBits);
+        me.parsedVersion = MEPH.qrcode.version.Version.decodeVersionInformation(versionBits);
         if (me.parsedVersion != null && me.parsedVersion.DimensionForVersion == dimension) {
             return me.parsedVersion;
         }
@@ -135,7 +135,7 @@ MEPH.define('MEPH.qrcode.BitMatrixParser', {
 
         // Get the data mask for the format used in this QR Code. This will exclude
         // some bits from reading as we wind through the bit matrix.
-        var dataMask = DataMask.forReference(formatInfo.DataMask);
+        var dataMask = MEPH.qrcode.DataMask.forReference(formatInfo.DataMask);
         var dimension = me.bitMatrix.Dimension;
         dataMask.unmaskBitMatrix(me.bitMatrix, dimension);
 

@@ -50,7 +50,7 @@ MEPH.define('MEPH.button.Button', {
     },
     getButtonDom: function () {
         var me = this;
-        return me.getDomTemplate().first(function (x) { return x.nodeType === Dom.elementType; });
+        return me.getDomTemplate().first(function (x) { return x.nodeType === MEPH.util.Dom.elementType; });
     },
     fireButtonClicked: function (type, evnt) {
         var me = this,

@@ -102,8 +102,8 @@ MEPH.define('MEPH.audio.effects.AAFilter', {
         // Set coefficients. Use divide factor 14 => divide result by 2^14 = 16384
         me.pFIR.setCoefficients(coeffs, length, 14);
     },
-    evaluate: function (dest, src, numSamples, numChannels, index) {
+    evaluate: function (dest, src, numSamples, numChannels, destIndx, srcIndx) {
         var me = this;
-        return me.pFIR.evaluate(dest, src, numSamples, numChannels, index);
+        return me.pFIR.evaluate(dest, src, numSamples, numChannels, destIndx, srcIndx);
     }
 });

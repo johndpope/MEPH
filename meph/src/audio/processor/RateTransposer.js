@@ -2,30 +2,42 @@
  * @class MEPH.audio.processor.RateTransposer 
  **/
 MEPH.define('MEPH.audio.processor.RateTransposer', {
+    extend: 'MEPH.audio.processor.FIFOProcessor',
     requires: ['MEPH.audio.effects.AAFilter', 'MEPH.audio.processor.FIFOSampleBuffer'],
     statics: {
     },
     properties: {
         numChannels: 1,
-        bUserAAFilter: true,
+        bUseAAFilter: true,
+        fSlopeCount: 0,
         tempBuffer: null,
         fRate: 0,
+        sPrevSampleR: 0,
+        sPrevSampleL: 0,
         storeBuffer: null,//dont know if this should be here
         pAAFilter: null
     },
     initialize: function (outputBuffer) {
         var me = this;
-        me.storeBuffer = new MEPH.audio.processor.FIFOSampleBuffer(32);
-        me.tempBuffer = new MEPH.audio.processor.FIFOSampleBuffer(32);
-        me.outputBuffer = outputBuffer;
+        me.storeBuffer = new MEPH.audio.processor.FIFOSampleBuffer(1);
+        me.tempBuffer = new MEPH.audio.processor.FIFOSampleBuffer(1);
         me.pAAFilter = new MEPH.audio.effects.AAFilter(32);
+        me.super();
+    },
+    getOutput: function () {
+        var me = this;
+        return me.outputBuffer || me.output;
+    },
+    getStore: function () {
+        var me = this;
+        return me.storeBuffer;
     },
     enableAAFilter: function (newMode) {
         var me = this;
-        me.bUserAAFilter = newMode;
+        me.bUseAAFilter = newMode;
     },
     isAAFilterEnabled: function () {
-        return this.bUserAAFilter;
+        return this.bUseAAFilter;
     },
     getAAFilter: function () {
         var me = this;
@@ -38,16 +50,16 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
             fCutoff = .5 / newRate;
         }
         else {
-            fCutoff - .5 * newRate;
+            fCutoff = .5 * newRate;
         }
         var filter = me.getAAFilter();
         filter.setCutoffFreq(fCutoff);
     },
-    putSamples: function (samples, nSamples) {
+    putSamples: function (samples, nSamples, samplesIndex) {
         var me = this;
-        me.processSamples(samples, nSamples);
+        me.processSamples(samples, nSamples, samplesIndex);
     },
-    upsample: function (src, nSamples) {
+    upsample: function (src, nSamples, srcIndex) {
         var count, sizeTemp, num;
         var storeBuffer = me.storeBuffer;
         var outputBuffer = me.outputBuffer;
@@ -59,26 +71,27 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
         sizeTemp = Math.floor(nSamples / fRate + 16.0);
 
         // Transpose the samples, store the result into the end of "storeBuffer"
-        count = me.transpose(storeBuffer, src, nSamples, (sizeTemp));
+        count = me.transpose(storeBuffer, src, nSamples, storeBuffer.ptrEnd(sizeTemp), srcIndex);
         storeBuffer.putSamples(count);
 
         // Apply the anti-alias filter to samples in "store output", output the
         // result to "dest"
         num = storeBuffer.numSamples();
-        count = me.pAAFilter.evaluate(outputBuffer, storeBuffer, num, me.numChannels, outputBuffer.ptrEnd(num));
+        count = me.pAAFilter.evaluate(outputBuffer, storeBuffer, num, me.numChannels, outputBuffer.ptrEnd(num), storeBuffer.ptrBegin());
         outputBuffer.putSamples(count);
 
         // Remove the processed samples from "storeBuffer"
         storeBuffer.receiveSamples(count);
     },
-    downsample: function (src, nSamples) {
+    downsample: function (src, nSamples, srcIndex) {
 
         // Transposes down the sample rate, causing the observed playback 'rate' of the
         // sound to increase
 
         var count, sizeTemp;
         var me = this,
-            outputBuffer = me.outputBuffer,
+            numChannels = me.numChannels,
+            outputBuffer = me.getOutput(),
             tempBuffer = me.tempBuffer,
             storeBuffer = me.storeBuffer;
 
@@ -87,7 +100,7 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
         // over the lover frequencies), then transpose.
 
         // Add the new samples to the end of the storeBuffer
-        storeBuffer.putSamples(src, nSamples);
+        storeBuffer.putSamples(src, nSamples, srcIndex);
 
         // Anti-alias filter the samples to prevent folding and output the filtered 
         // data to tempBuffer. Note : because of the FIR filter length, the
@@ -95,8 +108,7 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
         me.assert(tempBuffer.isEmpty());
         sizeTemp = storeBuffer.numSamples();
 
-        count = me.pAAFilter.evaluate(me.tempBuffer,
-            storeBuffer, sizeTemp, numChannels, me.tempBuffer.ptrEnd(sizeTemp));
+        count = me.pAAFilter.evaluate(tempBuffer, storeBuffer, sizeTemp, numChannels, me.tempBuffer.ptrEnd(sizeTemp), storeBuffer.ptrBegin());
 
         if (count == 0) return;
 
@@ -104,57 +116,62 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
         storeBuffer.receiveSamples(count);
 
         // Transpose the samples (+16 is to reserve some slack in the destination buffer)
-        sizeTemp = Math.floor(nSamples / fRate + 16.0);
-        count = me.transpose(outputBuffer, tempBuffer.ptrBegin(), count, outputBuffer.ptrEnd(sizeTemp));
+        sizeTemp = Math.floor(nSamples / me.fRate + 16.0);
+        count = me.transpose(outputBuffer, tempBuffer, count, outputBuffer.ptrEnd(sizeTemp), tempBuffer.ptrBegin());
         outputBuffer.putSamples(count);
     },
     // Transposes sample rate by applying anti-alias filter to prevent folding. 
     // Returns amount of samples returned in the "dest" buffer.
     // The maximum amount of samples that can be returned at a time is set by
     // the 'set_returnBuffer_size' function.
-    processSamples: function (src, nSamples) {
+    processSamples: function (src, nSamples, srcIndex) {
         var count;
         var sizeReq;
-
+        var me = this;
         if (nSamples == 0) return;
-        me.assert(pAAFilter);
+        me.assert(me.pAAFilter);
 
         // If anti-alias filter is turned off, simply transpose without applying
         // the filter
-        if (me.bUseAAFilter == FALSE) {
-            sizeReq = Math.floor(nSamples / fRate + 1.0);
-            count = me.transpose(me.outputBuffer, src, nSamples, me.outputBuffer.ptrEnd(sizeReq));
+        if (me.bUseAAFilter == false) {
+            sizeReq = Math.floor(nSamples / me.fRate + 1.0);
+            count = me.transpose(me.outputBuffer, src, nSamples, me.outputBuffer.ptrEnd(sizeReq), srcIndex);
             outputBuffer.putSamples(count);
             return;
         }
 
         // Transpose with anti-alias filter
-        if (fRate < 1.0) {
-            me.upsample(src, nSamples);
+        if (me.fRate < 1.0) {
+            me.upsample(src, nSamples, srcIndex);
         }
         else {
-            me.downsample(src, nSamples);
+            me.downsample(src, nSamples, srcIndex);
         }
     },
     // Transposes the sample rate of the given samples using linear interpolation. 
     // Returns the number of samples returned in the "dest" buffer
-    transpose: function (dest, src, nSamples) {
+    transpose: function (dest, src, nSamples, destOffset, srcOffset) {
         var me = this;
         if (me.numChannels == 2) {
             throw new Error('Does not support stereo');
         }
         else {
-            return me.transposeMono(dest, src, nSamples);
+            return me.transposeMono(dest, src, nSamples, destOffset, srcOffset);
+        }
+    },
+    assert: function (val) {
+        if (!val) {
+            throw new Error('not true')
         }
     },
     // Sets the number of channels, 1 = mono, 2 = stereo
     setChannels: function (nChannels) {
         var me = this;
         me.assert(nChannels > 0);
-        if (numChannels == nChannels) return;
+        if (me.numChannels == nChannels) return;
 
         me.assert(nChannels == 1 || nChannels == 2);
-        numChannels = nChannels;
+        me.numChannels = nChannels;
 
         me.storeBuffer.setChannels(numChannels);
         me.tempBuffer.setChannels(numChannels);
@@ -186,7 +203,7 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
     // Transposes the sample rate of the given samples using linear interpolation. 
     // 'Mono' version of the routine. Returns the number of samples returned in 
     // the "dest" buffer
-    transposeMono: function (dest, src, nSamples) {
+    transposeMono: function (dest, src, nSamples, destOffset, srcOffset) {
         var i, used;
         var me = this;
         used = 0;
@@ -194,7 +211,7 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
 
         // Process the last sample saved from the previous call first...
         while (me.fSlopeCount <= 1.0) {
-            dest[i] = ((1.0 - me.fSlopeCount) * me.sPrevSampleL + me.fSlopeCount * src[0]);
+            dest.set(destOffset + i, ((1.0 - me.fSlopeCount) * me.sPrevSampleL + me.fSlopeCount * src.get(srcOffset + 0)));
             i++;
             me.fSlopeCount += me.fRate;
         }
@@ -210,14 +227,14 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
                     }
                 }
                 if (!nottrue) {
-                    dest[i] = ((1.0 - me.fSlopeCount) * src[used] + me.fSlopeCount * src[used + 1]);
+                    dest.set(destOffset + i, ((1.0 - me.fSlopeCount) * src.get(srcOffset + used) + me.fSlopeCount * src.get(srcOffset + used + 1)));
                     i++;
                     me.fSlopeCount += me.fRate;
                 }
             }
         }
         // Store the last sample for the next round
-        me.sPrevSampleL = src[nSamples - 1];
+        me.sPrevSampleL = src.get(srcOffset + nSamples - 1);
 
         return i;
     }

@@ -364,7 +364,7 @@
                 }
             }
 
-            InstanceObject.instify(obj);
+            MEPH.synchronization.util.InstanceObject.instify(obj);
 
             if (options.synctarget) {
                 obj.instanceObj(null, options.synctarget);
@@ -447,7 +447,7 @@
         MEPH.Events(obj);
         obj.onIf('created', function (type, options) {
             if (me.isObject(options.value)) {
-                InstanceObject.instify(options.value);
+                MEPH.synchronization.util.InstanceObject.instify(options.value);
             }
             if (Array.isArray(options.value)) {
                 options.arrayid = options.value.jsyncId();

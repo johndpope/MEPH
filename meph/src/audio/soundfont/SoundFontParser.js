@@ -15,9 +15,9 @@ MEPH.define("MEPH.audio.soundfont.SoundFontParser", {
     },
     parse: function (data)//:ByteArray //:SoundFont
     {
-        var bytes = new SFByteArray(data);//:SFByteArray 
-        var soundFontChunk = new SoundFontChunk(bytes);//:SoundFontChunk 
-        var soundFont = new SoundFont(soundFontChunk);//:SoundFont 
+        var bytes = new MEPH.audio.soundfont.utils.SFByteArray(data);//:SFByteArray 
+        var soundFontChunk = new MEPH.audio.soundfont.chunks.SoundFontChunk(bytes);//:SoundFontChunk 
+        var soundFont = new MEPH.audio.soundfont.SoundFont(soundFontChunk);//:SoundFont 
         this.soundFonts.push(soundFont);
         return soundFont;
     }

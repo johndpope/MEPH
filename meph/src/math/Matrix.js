@@ -43,11 +43,11 @@ MEPH.define('MEPH.math.Matrix', {
     },
     row: function (ith) {
         var me = this;
-        return new Vector(me.matrix.subset(ith * me.columns, (ith + 1) * me.columns));
+        return new MEPH.math.Vector(me.matrix.subset(ith * me.columns, (ith + 1) * me.columns));
     },
     column: function (ith) {
         var me = this;
-        return new Vector([].interpolate(0, me.rows, function (x) {
+        return new MEPH.math.Vector([].interpolate(0, me.rows, function (x) {
             return me.matrix[x * me.columns + ith];
         }));
     },
@@ -200,7 +200,7 @@ MEPH.define('MEPH.math.Matrix', {
             r1 = r1.multiply(multiple);
             r2 = r2.add(r1);
             if (r2.isZero()) {
-                me.setRow(jthRow, Vector.ZeroVector(r2.dimensions()));
+                me.setRow(jthRow, MEPH.math.Vector.ZeroVector(r2.dimensions()));
             }
             else {
                 me.setRow(jthRow, r2);

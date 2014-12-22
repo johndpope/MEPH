@@ -23,8 +23,8 @@ MEPH.define("MEPH.audio.soundfont.Zone", {
     },
     initialize: function (type)//:String
     {
-        this.keyRange = new Range("keyRange", 0, 127);
-        this.velRange = new Range("velocityRange", 0, 127);
+        this.keyRange = new MEPH.audio.soundfont.chunks.data.Range("keyRange", 0, 127);
+        this.velRange = new MEPH.audio.soundfont.chunks.data.Range("velocityRange", 0, 127);
         this.callParent(type);
         if (Zone.PROPERTY_NAMES.length == 0) {
             this.initStaticConstants(Zone.PROPERTY_NAMES, Zone.DEFAULTS);
