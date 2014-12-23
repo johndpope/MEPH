@@ -228,7 +228,7 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
             var source = Dom.getEventSource(evnt), anscestor, domTemplate = me.getDomTemplate();
             if (domTemplate) {
                 anscestor = domTemplate.first(function (x) {
-                    return Dom.isDomDescendant(source, x) || !Dom.isDomDescendant(source, document.body)
+                    return MEPH.util.Dom.isDomDescendant(source, x) || !MEPH.util.Dom.isDomDescendant(source, document.body)
                 });
             }
             if (me.opened && !anscestor && !me.opening) {

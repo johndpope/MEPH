@@ -377,7 +377,7 @@ MEPH.define('MEPH.audio.processor.TDStretch', {
         me.calcSeqParameters();
 
         // Calculate ideal skip length (according to tempo value) 
-        me.nominalSkip = me.tempo * (me.seekWindowLength - me.overlapLength);
+        me.nominalSkip = (me.tempo * (me.seekWindowLength - me.overlapLength));
         intskip = Math.floor(me.nominalSkip + 0.5);
 
         // Calculate how many samples are needed in the 'inputBuffer' to 

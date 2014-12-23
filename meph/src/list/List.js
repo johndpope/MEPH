@@ -94,7 +94,7 @@ MEPH.define('MEPH.list.List', {
         target = eventargs.domEvent.srcElement || eventargs.domEvent.target;
         result = me.boundSource.first(function (info) {
             return me.getDomElements(info).first(function (node) {
-                return node === target || Dom.isDomDescendant(node, target) || Dom.isDomDescendant(target, node);
+                return node === target || MEPH.util.Dom.isDomDescendant(node, target) || MEPH.util.Dom.isDomDescendant(target, node);
             });
         });
         if (result) {

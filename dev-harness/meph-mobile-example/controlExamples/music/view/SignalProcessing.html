@@ -67,6 +67,10 @@
         </div>
         <div class="col-md-12">
             <h4>Frequency</h4>
+            <mephbutton type="button" class="btn btn-primary btn-xs"
+                        meph-event-click="v$.play, v$.freqdata">
+                <span class="glyphicon glyphicon-play"></span>
+            </mephbutton>
             <visualizer source="v$.freqdata"
                         meph-data-height="300"
                         scrollmutiplier="0">
@@ -74,6 +78,10 @@
         </div>
         <div class="col-md-12">
             <h4>Magnitude</h4>
+            <mephbutton type="button" class="btn btn-primary btn-xs"
+                        meph-event-click="v$.play, v$.magdata">
+                <span class="glyphicon glyphicon-play"></span>
+            </mephbutton>
             <visualizer source="v$.magdata"
                         meph-data-height="300"
                         scrollmutiplier="0">

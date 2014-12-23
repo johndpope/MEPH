@@ -9,15 +9,16 @@ MEPH.define('MEPH.audio.processor.SoundProcessor', {
             var res;
             var processor = new MEPH.audio.processor.SoundProcessor();
             processor.setup();
+            processor.setTempo(1.4);
             var buff_size = processor.standardsize;
             var c = 0;
             var oc = 0;
             var channels = 1;
             var buffSizeSamples = buff_size / channels;
+            var outputbuff = new Float32Array(buff_size);
             var output = new Float32Array(signal.length);
             while (c < signal.length) {
                 var sampleBuffer = signal.subset(c, c + buff_size);
-                var outputbuff = new Float32Array(buff_size);
 
                 var numsamples = sampleBuffer.length / channels;
                 processor.putSamples(sampleBuffer, numsamples);
@@ -75,7 +76,7 @@ MEPH.define('MEPH.audio.processor.SoundProcessor', {
         me.setRateChange(0);
 
         //me.setSetting('SETTING_USE_QUICKSEEK', params->quick);
-        me.setSetting('SETTING_USE_AA_FILTER', 128);
+        // me.setSetting('SETTING_USE_AA_FILTER', 128);
 
     },
     // Sets the number of channels, 1 = mono, 2 = stereo
@@ -175,25 +176,21 @@ MEPH.define('MEPH.audio.processor.SoundProcessor', {
         if (!TEST_FLOAT_EQUAL(me.tempo, oldTempo)) me.pTDStretch.setTempo(me.tempo);
 
         //#ifndef SOUNDTOUCH_PREVENT_CLICK_AT_RATE_CROSSOVER
-        //        if (rate <= 1.0f) 
-        //        {
-        //            if (output != pTDStretch) 
-        //            {
-        //                FIFOSamplePipe *tempoOut;
+        if (me.rate <= 1.0) {
+            if (me.output != me.pTDStretch) {
+                var tempoOut;
 
-        //                assert(output == pRateTransposer);
-        //                // move samples in the current output buffer to the output of pTDStretch
-        //                tempoOut = pTDStretch->getOutput();
-        //                tempoOut->moveSamples(*output);
-        //                // move samples in pitch transposer's store buffer to tempo changer's input
-        //                pTDStretch->moveSamples(*pRateTransposer->getStore());
+                me.assert(me.output === me.pRateTransposer);
+                // move samples in the current output buffer to the output of pTDStretch
+                tempoOut = me.pTDStretch.getOutput();
+                tempoOut.moveSamples(me.output);
+                // move samples in pitch transposer's store buffer to tempo changer's input
+                me.pTDStretch.moveSamples(me.pRateTransposer.getStore());
 
-        //                output = pTDStretch;
-        //            }
-        //        }
-        //    else
-        //#endif
-        {
+                me.output = me.pTDStretch;
+            }
+        }//#endif
+        else {
             if (me.output != me.pRateTransposer) {
                 var transOut;
 
@@ -229,35 +226,31 @@ MEPH.define('MEPH.audio.processor.SoundProcessor', {
 
         // Transpose the rate of the new samples if necessary
         /* Bypass the nominal setting - can introduce a click in sound when tempo/pitch control crosses the nominal value...
-        if (rate == 1.0f) 
-        {
+        */ if (me.rate === 1.0) {
             // The rate value is same as the original, simply evaluate the tempo changer. 
-            assert(output == pTDStretch);
-            if (pRateTransposer->isEmpty() == 0) 
-            {
+            me.assert(me.output === me.pTDStretch);
+            if (me.pRateTransposer.isEmpty() == 0) {
                 // yet flush the last samples in the pitch transposer buffer
                 // (may happen if 'rate' changes from a non-zero value to zero)
-                pTDStretch->moveSamples(*pRateTransposer);
+                me.pTDStretch.moveSamples(me.pRateTransposer);
             }
-            pTDStretch->putSamples(samples, nSamples);
-        } 
-        */
-        //#ifndef SOUNDTOUCH_PREVENT_CLICK_AT_RATE_CROSSOVER
-        //    else if (rate <= 1.0f) 
-        //        {
-        //        // transpose the rate down, output the transposed sound to tempo changer buffer
-        //        assert(output == pTDStretch);
-        //        pRateTransposer->putSamples(samples, nSamples);
-        //        pTDStretch->moveSamples(*pRateTransposer);
-        //    } 
-        //else 
-        //#endif
-        {
-            // evaluate the tempo changer, then transpose the rate up, 
-            me.assert(me.output == me.pRateTransposer);
             me.pTDStretch.putSamples(samples, nSamples);
-            me.pRateTransposer.moveSamples(me.pTDStretch);
         }
+
+            // #ifndef SOUNDTOUCH_PREVENT_CLICK_AT_RATE_CROSSOVER
+        else
+            if (me.rate <= 1.0) {
+                // transpose the rate down, output the transposed sound to tempo changer buffer
+                me.assert(me.output == me.pTDStretch);
+                me.pRateTransposer.putSamples(samples, nSamples);
+                me.pTDStretch.moveSamples(me.pRateTransposer);
+            }//#endif
+            else {
+                // evaluate the tempo changer, then transpose the rate up, 
+                me.assert(me.output == me.pRateTransposer);
+                me.pTDStretch.putSamples(samples, nSamples);
+                me.pRateTransposer.moveSamples(me.pTDStretch);
+            }
     },
 
     // Flushes the last samples from the processing pipeline to the output.

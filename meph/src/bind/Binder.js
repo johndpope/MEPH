@@ -459,6 +459,7 @@ MEPH.define('MEPH.bind.Binder', {
             });
         }
         promise = promise.catch(function (error) {
+            MEPH.Log(error);
             throw error;
         });
         me.$bindPromise = promise;

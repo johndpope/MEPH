@@ -6,6 +6,7 @@
     requires: [
         'MEPH.signalprocessing.SignalProcessor',
         'MEPH.file.Dropbox',
+        'MEPH.audio.processor.SoundProcessor',
         'MEPH.audio.Audio',
         'MEPH.util.FileReader',
         'MEPH.audio.view.Visualizer',
@@ -94,7 +95,7 @@
             }).then(function (resource) {
 
                 me.state = 'Processing file';
-                me.processA(resource.buffer.buffer.buffer.getChannelData(0));
+                me.processSound(resource.buffer.buffer.buffer.getChannelData(0));
             })
         }).catch(function (e) {
             console.log(e);
@@ -102,6 +103,45 @@
 
             me.state = 'Processing file complete';
         })
+    },
+    processSound: function (signal) {
+        var me = this;
+        var sampleRate = 44100;
+        var startTime = me.startTime || 0;;
+        var offset = (startTime * sampleRate);
+        var t10 = 44100 * 10 + offset;
+        var t12 = 44100 * 14 + offset;
+        me.magdata = signal.subset(t10, t12);
+        var res = MEPH.audio.processor.SoundProcessor.Process(signal.subset(t10, t12));
+        me.freqdata = res;
+    },
+    play: function (sig) {
+        var sampleRate = 44100;
+        
+        var len = sig.length;
+        var resource = {
+            buffer: {
+                buffer: {
+                    getChannelData: function () {
+                        return sig;
+                    },
+                    sampleRate: sampleRate
+                },
+                channelCount: 1
+            }
+        };
+        var audio = new MEPH.audio.Audio();
+
+        var audioresult = audio.copyToBuffer(resource, 0, len / sampleRate);
+
+        audio.buffer(audioresult.buffer).complete();
+
+        audio.get({ name: 'buffer' }).first().buffer.start();
+        // start the source playing
+        audio.playbuffer();
+        setTimeout(function () {
+            audio.disconnect();
+        }, 5000)
     },
     processAFrame: function (signal) {
         var me = this;
