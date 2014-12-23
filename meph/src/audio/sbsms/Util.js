@@ -61,4 +61,7 @@ MEPH.define('MEPH.audio.sbsms.Util', {
     }
 }).then(function () {
     window.lrintf = Math.round;
+    window.lrint = Math.round;
+    window.float2int = Math.floor;
+    window.double2int = Math.floor;
 })
