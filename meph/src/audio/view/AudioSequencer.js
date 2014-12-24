@@ -71,7 +71,9 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         me.setupKeyCommands();
         Object.defineProperty(me, 'bpm', {
             get: function () {
-                return 60 / me.smallestnote / me.beatspermin;
+                var bpm = me.beatspermin;
+                return (1 / (bpm / 60)) * (1 / me.smallestnote)
+                //return 60 / me.smallestnote / me.beatspermin;
             }
         })
         me.super();

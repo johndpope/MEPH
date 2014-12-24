@@ -635,6 +635,10 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             var addtargetmarker = stretchtemplate.querySelector('[addtargetmarker]');
             var stretchandplay = stretchtemplate.querySelector('[stretchandplay]');
             var normalplaybtn = stretchtemplate.querySelector('[normalplaybtn]');
+
+            var saveclip = stretchtemplate.querySelector('[saveclip]');
+            var savestretchclip = stretchtemplate.querySelector('[savestretchclip]');
+
             var notes = [{
                 name: 'Sixteenth note', value: .25
             }, {
@@ -672,13 +676,17 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                 destroy: function () {
                 }
             }
+            var getwidth = function (bpm, val, samplerate) {
+                return 1 / (bpm / 60) * val * samplerate;
+            }
             stretchvalue.innerHTML = Math.round(100 * parseFloat(control.marker.stretch)) / 100;
             me.don('change', stretchbeattarget, function (control) {
                 var val = parseFloat(stretchbeattarget.value);
                 var bpm = parseFloat(me.beatsPerMin);
                 if (bpm && me.source && me.source.buffer) {
                     var samplerate = me.source.buffer.buffer.sampleRate;
-                    var desiredwidth = bpm / 60 * val * samplerate;
+                    //60 / me.smallestnote / me.beatspermin;
+                    var desiredwidth = getwidth(bpm, val, samplerate);;
                     var stretch = desiredwidth / control.marker.targetposition;
                     control.marker.stretch = stretch;
                     me.update();
@@ -689,38 +697,52 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                 var bpm = parseFloat(me.beatsPerMin);
                 if (bpm && me.source && me.source.buffer) {
                     var samplerate = me.source.buffer.buffer.sampleRate;
-                    var desiredwidth = bpm / 60 * val * samplerate;
+                    var desiredwidth = getwidth(bpm, val, samplerate);
                     control.marker.targetposition = desiredwidth;
                     me.update();
                 }
             }.bind(me, control))
-            me.don('click', normalplaybtn, function (control) {
-
-                var sp = me.$signalProcessor;
+            me.don('click', saveclip, function (control) {
                 var sampleRate = me.getBufferSampleRate();
-                var len = sampleRate * 2;
-                var N = 4096;
-                var Ns = 4096;
-                var M = 2048;
-                var H = Math.floor(Ns / 4);
-                var t = -45;
-                var fs = sampleRate;
-                var w = [].interpolate(0, M, function (x) {
-                    return MEPH.math.Util.window.Blackman(x, M);
-                });
+
+                var snippet = MEPH.audio.Audio.clipBuffer(me.source, control.marker.position, control.marker.position + control.marker.targetposition);
+                var signal = snippet.buffer.buffer.getChannelData(0);
+                var audio = new MEPH.audio.Audio();
+                var audioresult = audio.copyToBuffer(snippet, 0, signal.length / sampleRate);
+                me.markCanvas.dispatchEvent(MEPH.createEvent('saveclip', {
+                    snippets: [snippet]
+                }))
+            }.bind(me, control))
+            me.don('click', normalplaybtn, function (control) {
+                var sampleRate = me.getBufferSampleRate();
 
                 var snippet = MEPH.audio.Audio.clipBuffer(me.source, control.marker.position, control.marker.position + control.marker.targetposition);
                 var signal = snippet.buffer.buffer.getChannelData(0);
 
                 var audio = new MEPH.audio.Audio();
-
-
                 var audioresult = audio.copyToBuffer(snippet, 0, signal.length / sampleRate);
                 me.$playSnippet(audioresult)
-                //audio.buffer(audioresult.buffer).complete();
 
-                //audio.playbuffer();
             }.bind(me, control));
+            me.don('click', savestretchclip, function (control) {
+                var sampleRate = me.getBufferSampleRate();
+                var item = me.getCache({
+                    sampleRate: sampleRate,
+                    position: control.marker.position,
+                    targetposition: control.marker.targetposition,
+                    stretch: control.marker.stretch
+                })
+                if (item) {
+                    var snippet = MEPH.audio.Audio.clipBuffer(me.getResource(item.resource, item.sampleRate), 0, item.resource.length);
+                    var signal = snippet.buffer.buffer.getChannelData(0);
+                    var audio = new MEPH.audio.Audio();
+                    var audioresult = audio.copyToBuffer(snippet, 0, signal.length / sampleRate);
+                    //var snippet = audio.copyToBuffer(me.getResource(item.resource, item.sampleRate), 0, item.resource.length / item.sampleRate);
+                    me.markCanvas.dispatchEvent(MEPH.createEvent('saveclip', {
+                        snippets: [audioresult]
+                    }))
+                }
+            }.bind(me, control))
             me.don('click', stretchandplay, function (control) {
                 var audio = new MEPH.audio.Audio();
                 var sampleRate = me.getBufferSampleRate();
@@ -1020,11 +1042,11 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                         shape: MEPH.util.Renderer.shapes.line,
                         lineWidth: me.stretchlinewidth,
                         end: {
-                            x: targetxpos,
+                            x: xtpos,
                             y: HEIGHT / 2
                         },
                         start: {
-                            x: xtpos,
+                            x: targetxpos,
                             y: me.offsetstretchvertical
                         },
                         strokeStyle: me.markscolor
