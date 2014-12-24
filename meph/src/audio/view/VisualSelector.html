@@ -130,9 +130,10 @@
             </div>
         </div>
         <div style="display:none;" stretchcontrol>
-            <input type="range" min="0.01" max="5" step=".01" class="form-control" stretchselect></input>
+            <input type="range" min="0.5" max="2" step=".01" class="form-control" stretchselect></input>
             <span stretchvalue></span>
             <select stretchbeattarget></select>
+            <select stretchactualbeattarget></select>
             <div class="btn-group">
                 <button type="button" class="btn btn-primary btn-xs" removebtn>
                     <span class="glyphicon glyphicon-minus"></span>
@@ -143,10 +144,13 @@
                 <button type="button" class="btn btn-primary btn-xs" addtargetmarker>
                     <span class="glyphicon glyphicon-hand-left"></span>
                 </button>
-                <button type="button" class="btn btn-primary btn-xs" stretchandplay>
+                <button type="button" class="btn btn-primary btn-xs" normalplaybtn>
                     <span class="glyphicon glyphicon-play"></span>
                 </button>
-                
+                <button type="button" class="btn btn-success btn-xs" stretchandplay>
+                    <span class="glyphicon glyphicon-play"></span>
+                </button>
+
             </div>
         </div>
     </div>

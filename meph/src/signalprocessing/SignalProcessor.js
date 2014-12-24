@@ -207,6 +207,413 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         }
         return hasoutput;
     },
+    signalPitchShift: function (frames, pitchShift, fftFrameSize, osamp, sampleRate) {
+        var k, index, fftFrameSize2;
+
+        /* set up some handy variables */
+        fftFrameSize2 = fftFrameSize / 2;
+
+        var gSynMagn, gAnaMagn;
+        var gSynFreq, gAnaFreq;
+
+        /* ***************** PROCESSING ******************* */
+        /* this does the actual pitch shifting */
+        var res = frames.select(function (frame) {
+            gAnaMagn = frame.mag;
+            gAnaFreq = frame.freq;
+            gSynMagn = new Float32Array(fftFrameSize);
+            gSynFreq = new Float32Array(fftFrameSize);
+
+            for (k = 0; k <= fftFrameSize2; k++) {
+                index = Math.floor(k * pitchShift);
+                if (index <= fftFrameSize2) {
+                    gSynMagn[index] += gAnaMagn[k];
+                    gSynFreq[index] = gAnaFreq[k] * pitchShift;
+                }
+            }
+            return {
+                mag: gSynMagn,
+                freq: gSynFreq
+            }
+        });
+        return res;
+    },
+    timeStretch: function (pitchShift, timeStretch, numSampsToProcess, fftFrameSize, osamp, sampleRate, indata, outdata) {
+        var magn, phase, tmp, window, real, imag;
+        var freqPerBin, expct;
+        var i, k, qpd, index, inFifoLatency, stepSize, fftFrameSize2;
+        var me = this;
+        timeStretch = timeStretch || 1;
+
+        outdata = outdata || indata;
+        var hasoutput = false;
+
+        /* set up some handy variables */
+        fftFrameSize2 = fftFrameSize / 2;
+        stepSize = fftFrameSize / osamp;
+        freqPerBin = sampleRate / fftFrameSize;
+        expct = 2.0 * Math.PI * stepSize / fftFrameSize;
+        inFifoLatency = fftFrameSize - stepSize;
+        if (!me.gRover) me.gRover = inFifoLatency;
+
+
+        /* main processing loop */
+        for (i = 0; i < numSampsToProcess; i++) {
+
+            /* As long as we have not yet collected enough data just read in */
+            me.gInFIFO[me.gRover] = indata[i];
+            outdata[i] = me.gOutFIFO[me.gRover - inFifoLatency];
+
+            me.gRover++;
+
+            /* now we have enough data for processing */
+            if (me.gRover >= fftFrameSize) {
+                me.gRover = inFifoLatency;
+
+                /* do windowing and re,im interleave */
+                for (k = 0; k < fftFrameSize; k++) {
+                    window = -.5 * Math.cos(2.0 * Math.PI * k / fftFrameSize) + .5;
+                    me.gFFTworksp[2 * k] = (me.gInFIFO[k] * window);
+                    me.gFFTworksp[2 * k + 1] = 0.0;
+                }
+
+
+                /* ***************** ANALYSIS ******************* */
+                /* do transform */
+                me.ShortTimeFourierTransform(me.gFFTworksp, fftFrameSize, -1);
+
+                /* this is the analysis step */
+                for (k = 0; k <= fftFrameSize2; k++) {
+
+                    /* de-interlace FFT buffer */
+                    real = me.gFFTworksp[2 * k];
+                    imag = me.gFFTworksp[2 * k + 1];
+
+                    /* compute magnitude and phase */
+                    magn = 2.0 * Math.sqrt(real * real + imag * imag);
+                    phase = Math.atan2(imag, real);
+
+                    /* compute phase difference */
+                    tmp = phase - me.gLastPhase[k];
+                    me.gLastPhase[k] = phase;
+
+                    /* subtract expected phase difference */
+                    tmp -= k * expct;
+
+                    /* map delta phase into +/- Pi interval */
+                    qpd = Math.floor(tmp / Math.PI);
+                    if (qpd >= 0) qpd += qpd & 1;
+                    else qpd -= qpd & 1;
+                    tmp -= Math.PI * qpd;
+
+                    /* get deviation from bin frequency from the +/- Pi interval */
+                    tmp = osamp * tmp / (2.0 * Math.PI);
+
+                    /* compute the k-th partials' true frequency */
+                    tmp = k * freqPerBin + tmp * freqPerBin;
+
+                    /* store magnitude and true frequency in analysis arrays */
+                    me.gAnaMagn[k] = magn;
+                    me.gAnaFreq[k] = tmp;
+
+                }
+
+                /* ***************** PROCESSING ******************* */
+                /* this does the actual pitch shifting */
+                for (var zero = 0; zero < fftFrameSize; zero++) {
+                    me.gSynMagn[zero] = 0;
+                    me.gSynFreq[zero] = 0;
+                }
+
+                for (k = 0; k <= fftFrameSize2; k++) {
+                    index = Math.floor(k * pitchShift);
+                    if (index <= fftFrameSize2) {
+                        me.gSynMagn[index] += me.gAnaMagn[k];
+                        me.gSynFreq[index] = me.gAnaFreq[k] * pitchShift;
+                    }
+                }
+
+                /* ***************** SYNTHESIS ******************* */
+                /* this is the synthesis step */
+                for (k = 0; k <= fftFrameSize2; k++) {
+
+                    /* get magnitude and true frequency from synthesis arrays */
+                    magn = me.gSynMagn[k];
+                    tmp = me.gSynFreq[k];
+
+                    /* subtract bin mid frequency */
+                    tmp -= k * freqPerBin;
+
+                    /* get bin deviation from freq deviation */
+                    tmp /= freqPerBin;
+
+                    /* take osamp into account */
+                    tmp = 2.0 * Math.PI * tmp / osamp;
+
+                    /* add the overlap phase advance back in */
+                    tmp += k * expct;
+
+                    /* accumulate delta phase to get bin phase */
+                    me.gSumPhase[k] += tmp;
+                    phase = me.gSumPhase[k];
+
+                    /* get real and imag part and re-interleave */
+                    me.gFFTworksp[2 * k] = (magn * Math.cos(phase));
+                    me.gFFTworksp[2 * k + 1] = (magn * Math.sin(phase));
+                }
+
+                /* zero negative frequencies */
+                for (k = fftFrameSize + 2; k < 2 * fftFrameSize; k++) {
+                    me.gFFTworksp[k] = 0.0;//
+                }
+
+                /* do inverse transform */
+                me.ShortTimeFourierTransform(me.gFFTworksp, fftFrameSize, 1);
+
+                /* do windowing and add to output accumulator */
+                for (k = 0; k < fftFrameSize; k++) {
+                    window = -.5 * Math.cos(2.0 * Math.PI * k / fftFrameSize) + .5;
+                    me.gOutputAccum[k] += (2.0 * window * me.gFFTworksp[2 * k] / (fftFrameSize2 * osamp));
+                    if (isNaN(me.gOutputAccum[k])) {
+
+                    }
+                }
+                for (k = 0; k < stepSize; k++) me.gOutFIFO[k] = me.gOutputAccum[k];
+                hasoutput = true;
+                /* shift accumulator */
+                //memmove(gOutputAccum, gOutputAccum + stepSize, fftFrameSize * sizeof(float));
+                for (k = 0; k < fftFrameSize; k++) {
+                    me.gOutputAccum[k] = me.gOutputAccum[k + stepSize];
+                }
+
+                /* move input FIFO */
+                for (k = 0; k < inFifoLatency; k++) me.gInFIFO[k] = me.gInFIFO[k + stepSize];
+            }
+        }
+        return hasoutput;
+    },
+    signalAnalysis: function (fftFrameSize, osamp, sampleRate, indata) {
+        var me = this;
+
+        var fftFrameSize2 = fftFrameSize / 2;
+        var stepSize = fftFrameSize / osamp;
+        var freqPerBin = sampleRate / fftFrameSize;
+        var k;
+        var expct = 2.0 * Math.PI * stepSize / fftFrameSize;
+        var inFifoLatency = fftFrameSize - stepSize;
+        var res = [];
+        var magn, phase, tmp, window, real, imag;
+        var freqPerBin, expct;
+        var i, k, qpd, index, inFifoLatency, stepSize, fftFrameSize2;
+        var me = this;
+        var gInFIFO;
+        var gAnaFreq;
+        var gAnaMagn;
+        var gFFTworksp;
+        var gLastPhase;
+        gFFTworksp = new Float32Array(2 * fftFrameSize);
+        var steps = Math.ceil(indata.length / stepSize);
+        gLastPhase = new Float32Array(fftFrameSize);
+        var res = [].interpolate(0, steps, function (step) {
+            gInFIFO = indata.subset(step * stepSize, (step * stepSize) + fftFrameSize);
+            gAnaFreq = new Float32Array(fftFrameSize);
+            gAnaMagn = new Float32Array(fftFrameSize);
+
+            /* do windowing and re,im interleave */
+            for (k = 0; k < fftFrameSize; k++) {
+                window = -.5 * Math.cos(2.0 * Math.PI * k / fftFrameSize) + .5;
+                gFFTworksp[2 * k] = (gInFIFO[k] * window);
+                gFFTworksp[2 * k + 1] = 0.0;
+            }
+
+
+            /* ***************** ANALYSIS ******************* */
+            /* do transform */
+            me.ShortTimeFourierTransform(gFFTworksp, fftFrameSize, -1);
+
+            /* this is the analysis step */
+            for (k = 0; k <= fftFrameSize2; k++) {
+
+                /* de-interlace FFT buffer */
+                real = gFFTworksp[2 * k];
+                imag = gFFTworksp[2 * k + 1];
+
+                /* compute magnitude and phase */
+                magn = 2.0 * Math.sqrt(real * real + imag * imag);
+                phase = Math.atan2(imag, real);
+
+                /* compute phase difference */
+                tmp = phase - gLastPhase[k];
+                gLastPhase[k] = phase;
+
+                /* subtract expected phase difference */
+                tmp -= k * expct;
+
+                /* map delta phase into +/- Pi interval */
+                qpd = Math.floor(tmp / Math.PI);
+                if (qpd >= 0) qpd += qpd & 1;
+                else qpd -= qpd & 1;
+                tmp -= Math.PI * qpd;
+
+                /* get deviation from bin frequency from the +/- Pi interval */
+                tmp = osamp * tmp / (2.0 * Math.PI);
+
+                /* compute the k-th partials' true frequency */
+                tmp = k * freqPerBin + tmp * freqPerBin;
+
+                /* store magnitude and true frequency in analysis arrays */
+                gAnaMagn[k] = magn;
+                gAnaFreq[k] = tmp;
+            }
+            return {
+                mag: gAnaMagn,
+                freq: gAnaFreq
+            }
+        });
+        return res;
+    },
+    signalSynthesis: function (frames, fftFrameSize, osamp, sampleRate) {
+        var magn, phase, tmp, window, real, imag;
+        var freqPerBin, expct;
+        var i, k, qpd, index, inFifoLatency, stepSize, fftFrameSize2;
+        var me = this;
+
+        var hasoutput = false;
+
+        /* set up some handy variables */
+        fftFrameSize2 = fftFrameSize / 2;
+        stepSize = fftFrameSize / osamp;
+        freqPerBin = sampleRate / fftFrameSize;
+        expct = 2.0 * Math.PI * stepSize / fftFrameSize;
+        var gSumPhase = new Float32Array(fftFrameSize);
+        var gFFTworksp = new Float32Array(2 * fftFrameSize);
+        var gOutputAccum = new Float32Array(fftFrameSize + stepSize);
+        var currentstep = 0;
+        var gOutFIFO = new Float32Array(stepSize * frames.length);
+        frames.foreach(function (frame) {
+            var gSynMagn = frame.mag;
+            var gSynFreq = frame.freq;
+            /* ***************** SYNTHESIS ******************* */
+            /* this is the synthesis step */
+            for (k = 0; k <= fftFrameSize2; k++) {
+
+                /* get magnitude and true frequency from synthesis arrays */
+                magn = gSynMagn[k];
+                tmp = gSynFreq[k];
+
+                /* subtract bin mid frequency */
+                tmp -= k * freqPerBin;
+
+                /* get bin deviation from freq deviation */
+                tmp /= freqPerBin;
+
+                /* take osamp into account */
+                tmp = 2.0 * Math.PI * tmp / osamp;
+
+                /* add the overlap phase advance back in */
+                tmp += k * expct;
+
+                /* accumulate delta phase to get bin phase */
+                gSumPhase[k] += tmp;
+                phase = gSumPhase[k];
+
+                /* get real and imag part and re-interleave */
+                gFFTworksp[2 * k] = (magn * Math.cos(phase));
+                gFFTworksp[2 * k + 1] = (magn * Math.sin(phase));
+            }
+
+            /* zero negative frequencies */
+            for (k = fftFrameSize + 2; k < 2 * fftFrameSize; k++) {
+                gFFTworksp[k] = 0.0;//
+            }
+
+            /* do inverse transform */
+            me.ShortTimeFourierTransform(gFFTworksp, fftFrameSize, 1);
+
+            /* do windowing and add to output accumulator */
+            for (k = 0; k < fftFrameSize; k++) {
+                window = -.5 * Math.cos(2.0 * Math.PI * k / fftFrameSize) + .5;
+                gOutputAccum[k] += (2.0 * window * gFFTworksp[2 * k] / (fftFrameSize2 * osamp));
+            }
+            for (k = 0; k < stepSize; k++) {
+                gOutFIFO[k + currentstep] = gOutputAccum[k];
+            }
+            hasoutput = true;
+            currentstep = stepSize + currentstep;
+            /* shift accumulator */
+            //memmove(gOutputAccum, gOutputAccum + stepSize, fftFrameSize * sizeof(float));
+            for (k = 0; k < fftFrameSize; k++) {
+                if (k + stepSize >= gOutputAccum.length) {
+                    MEPH.Log('outside of bounds');
+                }
+                gOutputAccum[k] = gOutputAccum[k + stepSize];
+            }
+
+            /* move input FIFO */
+            //for (k = 0; k < inFifoLatency; k++) me.gInFIFO[k] = me.gInFIFO[k + stepSize];
+        });
+        return gOutFIFO;
+    },
+    modifySignal: function (pitchShift, timeStretch, fftFrameSize, osamp, sampleRate, buffer) {
+        var res;
+        var tres;
+        var sp = this;
+        pitchShift = pitchShift || 1;
+        res = sp.signalAnalysis(fftFrameSize, osamp, sampleRate, buffer);
+        if (timeStretch && timeStretch.length) {
+            tres = sp.timeScaling(res, timeStretch);
+            res = tres;
+        }
+        if (pitchShift !== 1) {
+            tres = sp.signalPitchShift(res, pitchShift, fftFrameSize, osamp, sampleRate);
+            res = tres;
+        }
+        var sres = sp.signalSynthesis(res, fftFrameSize, osamp, sampleRate);
+
+        return sres;
+    },
+    /**
+     * Time scaling of sinusoidal tracks
+     * @param {Array} sfreq
+     * @param {Array} smag
+     * @param {Array} timeScaling
+     * @return {Object} 
+     *          {
+     *            tfreq: [],
+     *            tmag: []
+     *          }
+     ***/
+    timeScaling: function (frames, timeScaling) {
+        if (!timeScaling.length) {
+            throw new Error('Time scaling array does any elements.');
+        }
+        var L = frames.length; //frames
+        var maxInTime = timeScaling.maximum(function (x) { return x.start; });
+        var maxOutTime = timeScaling.maximum(function (x) { return x.scale; });
+        var outL = (L) * maxOutTime / maxInTime;
+        var inFrames = timeScaling.select(function (x) { return x.start * (L - 1) / maxInTime; });
+        var outFrames = timeScaling.select(function (x) { return x.scale * (L - 1) / maxOutTime; });
+        var timeScalingEnv = function (frames) {
+            var tweendata = [{
+                x: inFrames.select(function (x) { return x / (L - 1); }),
+                y: outFrames.select(function (x) { return x / (L - 1); })
+            }]
+            var calculator = new MEPH.tween.Calculator();
+            calculator.setData(tweendata);
+            return frames.select(function (x) {
+                var result = calculator.get(x / (outL - 1));
+                return result * (L - 1);
+            });
+        };
+        var indexes = timeScalingEnv([].interpolate(0, Math.floor(outL)));
+        var ysfreq = [frames[Math.round(indexes[0])]];
+
+        indexes.subset(1).foreach(function (ii) {
+            ysfreq.push(frames[Math.round(ii)]);
+        })
+
+        return ysfreq;
+    },
     guessfrequencies: function (input, sampleRate, windowsize, binsize, step) {
         var me = this;
         var steps = Math.ceil(input.length / windowsize);

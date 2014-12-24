@@ -502,13 +502,12 @@
                 .complete();
 
             // start the source playing
-            //audioresult.buffer.start();
+            audio.playbuffer()
 
             setTimeout(function () {
                 audio.disconnect();
-                done();
-
-            }, 1000)
+            }, 8000)
+            done();
         }).catch(function (e) {
             expect(e).caught();
             done();
@@ -990,4 +989,389 @@
         }, 2000)
 
     });
+
+    it('sychronous audio file pitch shifting', function (done) {
+
+
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+
+            [].interpolate(0, steps, function (x) {
+                var inputData = buffer.subset(x * size, (x + 1) * size);
+                // var inputBuffer = audioProcessingEvent.inputBuffer;
+                // var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+                var d = new Float32Array(size);
+                var hasoutput = sp.pitchShift(2, inputData.length, inputData.length, 4, 44100, inputData, d);
+                //var hasoutput = sp.pitchShift(.95, inputData.length, inputData.length, 4, 44100, inputData, d);
+                if (hasoutput) {
+                    [].interpolate(cstep * size, (cstep + 1) * size, function (t, i) {
+                        signalres[t] = d[i];
+                    })
+                    cstep++;
+                }
+            });
+            var sampleRate = resource.buffer.buffer.sampleRate;
+            var audioresult = audio.copyToBuffer(getResource(signalres, sampleRate), 0, len / sampleRate);
+
+            pitchaudio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            pitchaudio.playbuffer();
+
+            setTimeout(function () {
+                pitchaudio.disconnect();
+
+            }, 10000)
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+
+    });
+
+    it('sychronous audio file pitch shifting and timestretch', function (done) {
+
+
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+
+            [].interpolate(0, steps, function (x) {
+                var inputData = buffer.subset(x * size, (x + 1) * size);
+                // var inputBuffer = audioProcessingEvent.inputBuffer;
+                // var inputData = audioProcessingEvent.inputBuffer.getChannelData(0);
+                var d = new Float32Array(size);
+                var hasoutput = sp.timeStretch(2, 1, inputData.length, inputData.length, 4, 44100, inputData, d);
+                //var hasoutput = sp.pitchShift(.95, inputData.length, inputData.length, 4, 44100, inputData, d);
+                if (hasoutput) {
+                    [].interpolate(cstep * size, (cstep + 1) * size, function (t, i) {
+                        signalres[t] = d[i];
+                    })
+                    cstep++;
+                }
+            });
+            var sampleRate = resource.buffer.buffer.sampleRate;
+            var audioresult = audio.copyToBuffer(getResource(signalres, sampleRate), 0, len / sampleRate);
+
+            pitchaudio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            pitchaudio.playbuffer();
+
+            setTimeout(function () {
+                pitchaudio.disconnect();
+
+            }, 10000)
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+
+    });
+
+    it('can do signalanalysis ', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var res = sp.signalAnalysis(2048, 4, 44100, buffer);
+            expect(res).toBeTruthy();
+
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+
+    it('can do signalanalysis and the timestretch ', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var res = sp.signalAnalysis(2048, 4, 44100, buffer);
+            expect(res).toBeTruthy();
+
+
+            var sres = sp.timeScaling(res, [{
+                start: 0, scale: 0
+            }, {
+                start: .3, scale: 1
+            }, {
+                start: 1, scale: 2
+            }]);
+
+            expect(sres).toBeTruthy();
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+
+
+    it('can do signalanalysis and the pitchshift ', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var res = sp.signalAnalysis(2048, 4, 44100, buffer);
+            expect(res).toBeTruthy();
+
+
+            var psres = sp.signalPitchShift(res, 2, 2048, 4, 44100);
+            expect(psres).toBeTruthy();
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+    it('can do signalanalysis and the signalsynthesis ', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+            var sampleRate = resource.buffer.buffer.sampleRate;
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var res = sp.signalAnalysis(2048, 4, 44100, buffer);
+            expect(res).toBeTruthy();
+
+
+            var psres = sp.signalSynthesis(res, 2048, 4, 44100);
+
+            expect(psres).toBeTruthy();
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+    it('can do signalanalysis and pitchshift and the signalsynthesis ', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+            var sampleRate = resource.buffer.buffer.sampleRate;
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var res = sp.signalAnalysis(2048, 4, 44100, buffer);
+            expect(res).toBeTruthy();
+
+            var psres = sp.signalPitchShift(res, 1.1, 2048, 4, 44100);
+
+            var sres = sp.signalSynthesis(psres, 2048, 4, 44100);
+
+            var audioresult = audio.copyToBuffer(getResource(sres, sampleRate), 0, len / sampleRate);
+
+            pitchaudio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            pitchaudio.playbuffer();
+
+
+            expect(psres).toBeTruthy();
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+
+    it('can do signalanalysis and timescaling and the signalsynthesis ', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+            var sampleRate = resource.buffer.buffer.sampleRate;
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var res = sp.signalAnalysis(2048, 4, 44100, buffer);
+            expect(res).toBeTruthy();
+
+
+            var psres = sp.timeScaling(res, [{
+                start: 0, scale: 0
+            }, {
+                start: .3, scale: 1
+            }, {
+                start: 1, scale: 2
+            }]);
+
+            var sres = sp.signalSynthesis(psres, 2048, 4, 44100);
+
+            var audioresult = audio.copyToBuffer(getResource(sres, sampleRate), 0, len / sampleRate);
+
+            pitchaudio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            pitchaudio.playbuffer();
+
+
+            expect(psres).toBeTruthy();
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+
+
+    it('can do time and pitch adjustments', function (done) {
+        var audio = new MEPH.audio.Audio();
+        var pitchaudio = new MEPH.audio.Audio();
+        var audiofile = '../specs/data/Parasail.mp3', audiofiletyp = 'mp3';
+
+        audio.load(audiofile, audiofiletyp).then(function (resource) {
+            var sp = new SignalProcessor();
+            var sampleRate = resource.buffer.buffer.sampleRate;
+
+            var audioresult = audio.copyToBuffer(resource, 1, 10);
+            var inbucket;
+            var outbucket;
+
+            var buffer = audioresult.buffer.buffer.getChannelData(0);
+            var len = buffer.length;
+            var size = 2048;
+            var steps = Math.ceil(len / size);
+            var cstep = 0;
+            var signalres = new Float32Array(buffer.length);
+            var sres = sp.modifySignal(1, [{ start: 0, scale: 0 }, { start: 1, scale: 2 }], 4096, 8, 44100, buffer)
+
+            var audioresult = audio.copyToBuffer(getResource(sres, sampleRate), 0, len / sampleRate);
+
+            pitchaudio.buffer(audioresult.buffer).complete();
+
+            // start the source playing
+            pitchaudio.playbuffer();
+
+
+            expect(sres).toBeTruthy();
+
+            done();
+        }).catch(function (e) {
+            expect(e).caught();
+            done();
+        });;
+    });
+
+    it('can do time scaling properly ', function () {
+        var sp = new SignalProcessor();
+        
+        var res = sp.timeScaling([].interpolate(0, 100), [{ start: 0, scale: 0 }, { start: 1, scale: 2 }]);
+        var tres = sp.timeScaling([].interpolate(0, 100), [{ start: 0, scale: 0 }, { start: 1, scale: .5 }]);
+
+        expect(res.length).toBe(200);
+        expect(tres.length).toBe(50);
+    })
 });
