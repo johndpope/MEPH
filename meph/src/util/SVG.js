@@ -31,6 +31,7 @@ MEPH.define('MEPH.util.SVG', {
         }
     },
     properties: {
+        batchdraw: false,
         parts: null
     },
     initialize: function () {
@@ -53,14 +54,25 @@ MEPH.define('MEPH.util.SVG', {
     },
     draw: function (args) {
         var me = this,
+            pool = [],
             result = [],
             context = me.getContext();
         if (!Array.isArray(args)) {
             args = [args];
         }
+        if (me.batchdraw) {
+            pool = me.parts.select();
+        };
+
         args.foreach(function (options, index) {
             options = me.applyDefaults(options);
             switch (options.shape) {
+                case MEPH.util.Renderer.shapes.rectangle:
+                    var res = pool.removeFirstWhere(function (x) {
+                        x.options.shape === options.shape;
+                    }).first();
+                    result = result.concat(me.drawRectangle(options, res ? res.shape : null));
+                    break;
                 case MEPH.util.SVG.shapes.bezier:
                 case MEPH.util.SVG.shapes.line:
                     result = result.concat(me.drawLine(options));
@@ -73,6 +85,10 @@ MEPH.define('MEPH.util.SVG', {
                     break;
             }
         });
+        if (me.batchdraw)
+            pool.foreach(function (x) {
+                me.remove(x);
+            })
         result.foreach(function (t) {
             me.parts.push(t);
         })
@@ -96,6 +112,37 @@ MEPH.define('MEPH.util.SVG', {
             if (x.parentNode)
                 x.parentNode.removeChild(x);
         })
+    },
+    drawRectangle: function (options, el) {
+        var me = this,
+                  canvas, shape,
+                  add, line;
+
+        canvas = me.getCanvas();
+        var svgns = "http://www.w3.org/2000/svg";
+        if (!el) {
+            add = true;
+        }
+        else {
+            shape = el.shape;
+            options = me.applyDefaults(options);
+        }
+        shape = shape || document.createElementNS(svgns, "rect");
+        
+        shape.setAttributeNS(null, "x", options.x);
+        shape.setAttributeNS(null, "y", options.y);
+        shape.setAttributeNS(null, "width", options.width);
+        shape.setAttributeNS(null, "height", options.height);
+        shape.setAttributeNS(null, "stroke", options.strokeStyle);
+        shape.setAttributeNS(null, "stroke-width", options.strokeWidth);
+        shape.setAttributeNS(null, "fill", options.fillStyle);
+
+        if (add) {
+            canvas.appendChild(shape);
+        }
+        return {
+            shape: shape, options: options
+        };
     },
     drawText: function (options) {
         var shape;

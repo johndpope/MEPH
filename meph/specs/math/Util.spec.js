@@ -114,7 +114,7 @@
     it('can generate a blackmanharris lobe ', function () {
         var fftsize = 1024;
         
-        var bhl = MEPH.math.Util.window.getBhLobe([].interpolate(0, 10, function (x) {
+        var bhl = MEPH.math.Util.getBhLobe([].interpolate(0, 10, function (x) {
             return Math.sin(x);;
         }), fftsize);
 

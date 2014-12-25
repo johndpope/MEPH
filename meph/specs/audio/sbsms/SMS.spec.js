@@ -3,7 +3,7 @@
         jasmine.addMatchers(MEPH.customMatchers);
     });
 
-    it('can create an SMS', function () {
+    xit('can create an SMS', function () {
         var sms = new MEPH.audio.sbsms.SMS();
 
         expect(sms).toBeTruthy();

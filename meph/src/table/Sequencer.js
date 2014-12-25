@@ -121,7 +121,7 @@ MEPH.define('MEPH.table.Sequencer', {
         var me = this;
         var singleinstruction = me.getInstructionsFor(itemtodraw);
         if (singleinstruction) {
-            me.rendererContent.draw(singleinstruction);
+            me.drawContent(singleinstruction);
         }
     },
     getMainContentInstructions: function (visibleCellData) {
@@ -315,15 +315,20 @@ MEPH.define('MEPH.table.Sequencer', {
             fillStyle: me.color && me.color.function ? me.color.function(sequenceItem) : '#ff0000',
             height: height,
             column: column,
-            row: lane
+            row: lane,
+            relObj: sequenceItem
         };
     },
     onMouseOverCell: function (canvas, evt, header) {
         var metrics, func,
             me = this;
+        if (!header && me.enablesvg) {
+            return;
+        }
         var cell = evt.cells.first();
 
         var items;
+
         switch (header) {
             case 'left':
                 func = me.getItemsInLeftSpace.bind(me);

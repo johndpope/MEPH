@@ -3,7 +3,7 @@
         jasmine.addMatchers(MEPH.customMatchers);
     });
 
-    it('can create an Subband', function () {
+    xit('can create an Subband', function () {
 
         //SubBand *parent, int band, int channels, SBSMSQuality *quality, bool bSynthesize
         var parent = null,
