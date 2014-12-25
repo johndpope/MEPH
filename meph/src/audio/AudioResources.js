@@ -222,8 +222,11 @@ MEPH.define('MEPH.audio.AudioResources', {
         var me = this;
         return me.sequences.select();
     },
-    getResources: function () {
+    getResources: function (audioresources) {
         var me = this;
+        if (audioresources) {
+            return me.resources.select();
+        }
         return me.graphs.select().concat(me.soundfonts.select());
     },
     getResourceById: function (id) {

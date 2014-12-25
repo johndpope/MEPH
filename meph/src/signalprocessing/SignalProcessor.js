@@ -2221,7 +2221,7 @@ MEPH.define('MEPH.signalprocessing.SignalProcessor', {
         });
     },
     genBhLobe: function (array, N) {
-        return MEPH.math.Util.window.getBhLobe(array, N);
+        return MEPH.math.Util.getBhLobe(array, N);
     },
     /**
      * Generates a spectrum from a series of sine values.

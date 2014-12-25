@@ -111,36 +111,36 @@ MEPH.define('MEPH.math.Util', {
             result.push(v);
             return result;
         },
-        window: {
-            /**
-             * Generates the main lobe of a Blackman-Harris window
-             * @param {Array} x
-             * Bin positions to compute.
-             * @param {Number} fftsize
-             * @return {Array}
-             * Main lob as spectrum of a Blackman-Harris window
-             ***/
-            getBhLobe: function (x, fftsize) {
-                var N = fftsize || 512;
-                var f = x.select(function (t) {
-                    return t * Math.PI * 2 / N;
-                });
-                var df = Math.PI * 2 / N;
-                var y = [].interpolate(0, x.length, function () {
-                    return 0;
-                });
+        /**
+         * Generates the main lobe of a Blackman-Harris window
+         * @param {Array} x
+         * Bin positions to compute.
+         * @param {Number} fftsize
+         * @return {Array}
+         * Main lob as spectrum of a Blackman-Harris window
+         ***/
+        getBhLobe: function (x, fftsize) {
+            var N = fftsize || 512;
+            var f = x.select(function (t) {
+                return t * Math.PI * 2 / N;
+            });
+            var df = Math.PI * 2 / N;
+            var y = [].interpolate(0, x.length, function () {
+                return 0;
+            });
 
-                var consts = [0.35875, 0.48829, 0.14128, 0.01168];
-                [].interpolate(0, consts.length, function (m) {
-                    var sincs1 = MEPH.math.Util.sinc(f.select(function (ft) { return ft - df * m }), N);
-                    var sincs2 = MEPH.math.Util.sinc(f.select(function (ft) { return ft + df * m; }), N);
-                    y = y.select(function (y, y0) {
-                        return y + (consts[m] / 2) * (sincs1[y0] + sincs2[y0]);
-                    });
+            var consts = [0.35875, 0.48829, 0.14128, 0.01168];
+            [].interpolate(0, consts.length, function (m) {
+                var sincs1 = MEPH.math.Util.sinc(f.select(function (ft) { return ft - df * m }), N);
+                var sincs2 = MEPH.math.Util.sinc(f.select(function (ft) { return ft + df * m; }), N);
+                y = y.select(function (y, y0) {
+                    return y + (consts[m] / 2) * (sincs1[y0] + sincs2[y0]);
                 });
-                y = y.select(function (t) { return t / N / consts[0]; });
-                return y;
-            },
+            });
+            y = y.select(function (t) { return t / N / consts[0]; });
+            return y;
+        },
+        window: {
             /**
              * http://en.wikipedia.org/wiki/Window_function#Spectral_analysis
              * Triangular windows are given by: w(n)=1 - \left|\frac{n-\frac{N-1}{2}}{\frac{L}{2}}\right|,

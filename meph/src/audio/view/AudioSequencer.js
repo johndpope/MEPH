@@ -41,7 +41,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
         lastMidiNote: null,
         selectedSoundFontValue: null,
         defaultColumnWidth: 25,
-        nearest: 4,
+        nearest: 32,
         singleUnit: 1,
         sequence: null,
         animatemode: true,

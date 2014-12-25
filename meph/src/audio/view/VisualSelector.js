@@ -24,10 +24,12 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         min: null,
         marks: null,
         offsetbtnheight: 19,
+        windowpadding: 5,
         offsetstretchvertical: 4,
         stretchlinewidth: 3,
         marktype: 'default',
         stretchtype: 'stretchtype',
+        windowingcolor:'#aa3939',
         markercolor: '#d9534f',
         markscolor: '#f0ad4e',
         markscolorbg: 'rgba(45, 64, 114, 0.5)',
@@ -619,6 +621,15 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         }
 
     },
+    getWindowfunctions: function () {
+        var me = this;
+        var res = [];
+        for (var i in MEPH.math.Util.window) {
+            res.push({ name: i, value: i })
+        }
+
+        return res;
+    },
     createNewStretchMarkerControls: function (stretchmarks) {
         var me = this;
         return stretchmarks.select(function (x, index) {
@@ -635,10 +646,10 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             var addtargetmarker = stretchtemplate.querySelector('[addtargetmarker]');
             var stretchandplay = stretchtemplate.querySelector('[stretchandplay]');
             var normalplaybtn = stretchtemplate.querySelector('[normalplaybtn]');
-
+            var windowfunction = stretchtemplate.querySelector('[windowfunction]');
             var saveclip = stretchtemplate.querySelector('[saveclip]');
             var savestretchclip = stretchtemplate.querySelector('[savestretchclip]');
-
+            var windowfunctionspread = stretchtemplate.querySelector('[windowfunctionspread]');
             var notes = [{
                 name: 'Sixteenth note', value: .25
             }, {
@@ -668,6 +679,10 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                 MEPH.util.Dom.addOption(note.name, note.value, stretchactualbeattarget);
             });
 
+            me.getWindowfunctions().foreach(function (x) {
+                MEPH.util.Dom.addOption(x.name, x.value, windowfunction);
+            });
+
             var control = {
                 marker: x,
                 dom: stretchtemplate,
@@ -692,6 +707,20 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                     me.update();
                 }
             }.bind(me, control));
+            me.don('change', windowfunction, function (control) {
+                var wf = windowfunction.value;
+                if (MEPH.math.Util.window[wf]) {
+                    control.marker.windowFunc = wf;
+                    me.update();
+                }
+            }.bind(me, control));
+            me.don('change', windowfunctionspread, function (control) {
+                if (MEPH.math.Util.window[control.marker.windowFunc]) {
+                    var wfv = parseFloat(windowfunctionspread.value);
+                    control.marker.windowFuncValue = wfv;
+                    me.update();
+                }
+            }.bind(me, control))
             me.don('change', stretchactualbeattarget, function (control) {
                 var val = parseFloat(stretchactualbeattarget.value);
                 var bpm = parseFloat(me.beatsPerMin);
@@ -704,8 +733,8 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }.bind(me, control))
             me.don('click', saveclip, function (control) {
                 var sampleRate = me.getBufferSampleRate();
-
-                var snippet = MEPH.audio.Audio.clipBuffer(me.source, control.marker.position, control.marker.position + control.marker.targetposition);
+                var windowing = control.marker.windowFunc ? me.createWindow(control.marker.targetposition, control.marker.windowFunc, control.marker.windowFuncValue) : null;
+                var snippet = MEPH.audio.Audio.clipBuffer(me.source, control.marker.position, control.marker.position + control.marker.targetposition, null, windowing);
                 var signal = snippet.buffer.buffer.getChannelData(0);
                 var audio = new MEPH.audio.Audio();
                 var audioresult = audio.copyToBuffer(snippet, 0, signal.length / sampleRate);
@@ -733,7 +762,8 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                     stretch: control.marker.stretch
                 })
                 if (item) {
-                    var snippet = MEPH.audio.Audio.clipBuffer(me.getResource(item.resource, item.sampleRate), 0, item.resource.length);
+                    var windowing = control.marker.windowFunc ? me.createWindow(control.marker.targetposition, control.marker.windowFunc, control.marker.windowFuncValue) : null;
+                    var snippet = MEPH.audio.Audio.clipBuffer(me.getResource(item.resource, item.sampleRate), 0, item.resource.length, null, windowing);
                     var signal = snippet.buffer.buffer.getChannelData(0);
                     var audio = new MEPH.audio.Audio();
                     var audioresult = audio.copyToBuffer(snippet, 0, signal.length / sampleRate);
@@ -1019,7 +1049,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                     var diffx = x.targetposition;
                     var targetxpos = me.getRelativeMarkPosition(x.position + diffx * (x.stretch || 1));
 
-                    return [{
+                    var res = [{
                         shape: MEPH.util.Renderer.shapes.polygon,
                         lb: {
                             x: xpos,
@@ -1062,7 +1092,42 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                             y: me.offsetstretchvertical
                         },
                         strokeStyle: me.markscolor
-                    }]
+                    }];
+                    if (x.windowFunc) {
+                        var width = Math.floor(xtpos - xpos);
+                        var blocksize = 4;
+                        var blockspace = 10;
+                        var N = (width / blockspace);
+                        //var wfv = x.windowFuncValue * N || 0;
+                        //var hwfv = wfv / 2 + N / 2;
+                        //var lwfv = N / 2 - wfv / 2;
+                        //[].interpolate(0, N, function (n) {
+                        //    var r = MEPH.math.Util.window[x.windowFunc](n, N);
+                        //    if (hwfv > n && lwfv < n) {
+                        //        r = 1;
+                        //    }
+                        //    else {
+                        //        if (n < lwfv) {
+                        //            r = MEPH.math.Util.window[x.windowFunc](n, N - wfv);
+                        //        }
+                        //        else
+                        //            r = MEPH.math.Util.window[x.windowFunc](n - wfv, N - wfv);
+                        //    }
+                        //    return r;
+                        //})
+                        me.createWindow(N, x.windowFunc, x.windowFuncValue)
+                            .select(function (r, n) {
+                                return {
+                                    shape: MEPH.util.Renderer.shapes.circle,
+                                    lineWidth: me.stretchlinewidth,
+                                    y: HEIGHT / 2 - HEIGHT / 2 * r + (me.windowpadding || 0),
+                                    x: n * blockspace + xpos,
+                                    fillStyle: me.windowingcolor,
+                                    radius: blocksize
+                                }
+                            }).foreach(function (t) { res.push(t) });
+                    }
+                    return res;
                 });
                 me.renderer.draw(lines);
             }
@@ -1071,6 +1136,25 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
         var rsolve;
         return new Promise(function (r) {
             rsolve = r;
+        });
+    },
+    createWindow: function (N, wf, wfv) {
+        wfv = wfv * N || 0;
+        var hwfv = wfv / 2 + N / 2;
+        var lwfv = N / 2 - wfv / 2;
+        return [].interpolate(0, N, function (n) {
+            var r = MEPH.math.Util.window[wf](n, N);
+            if (hwfv > n && lwfv < n) {
+                r = 1;
+            }
+            else {
+                if (n < lwfv) {
+                    r = MEPH.math.Util.window[wf](n, N - wfv);
+                }
+                else
+                    r = MEPH.math.Util.window[wf](n - wfv, N - wfv);
+            }
+            return r;
         });
     },
     updateMarker: function () {

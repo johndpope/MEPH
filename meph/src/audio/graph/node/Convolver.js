@@ -32,7 +32,7 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
         if (me.audiobuffersources)
             me.audiobuffersources.clear();
         if (me.$inj.audioResources) {
-            me.audiobuffersources.push.apply(me.audiobuffersources, me.$inj.audioResources.getResources());
+            me.audiobuffersources.push.apply(me.audiobuffersources, me.$inj.audioResources.getResources(true));
         }
     },
     onInjectionsComplete: function () {

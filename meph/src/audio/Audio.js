@@ -450,10 +450,10 @@ MEPH.define('MEPH.audio.Audio', {
          * @param {Number} from, frame index
          * @param {Number} to, frame index
          ***/
-        clipBuffer: function (resource, from, to, options) {
+        clipBuffer: function (resource, from, to, options, windowing) {
             var audio = new MEPH.audio.Audio();
 
-            return audio.copyBuffer(resource, from, to, options);
+            return audio.copyBuffer(resource, from, to, options, null, windowing);
         },
         stretch: function (resource, by) {
             var audio = new MEPH.audio.Audio();
@@ -570,7 +570,7 @@ MEPH.define('MEPH.audio.Audio', {
         frameCount = Math.round(frameCount);
         return me.copyBuffer(resource, frame_start, frame_end, options);
     },
-    copyBuffer: function (resource, frame_start, frame_end, options, sampleRate) {
+    copyBuffer: function (resource, frame_start, frame_end, options, sampleRate, windowing) {
         var me = this;
         frame_end = Math.round(frame_end) || resource.buffer.buffer.length;
         frame_start = Math.round(frame_start) || 0;
@@ -587,11 +587,15 @@ MEPH.define('MEPH.audio.Audio', {
         for (var channel = 0; channel < channels; channel++) {
             // This gives us the actual array that contains the data
             var nowBuffering = myArrayBuffer.getChannelData(channel);
-            var bufferdata = buffer.buffer.getChannelData(channel);
+            var bufferdata = buffer.buffer.getChannelData(Math.min(buffer.buffer.numberOfChannels - 1, channel));
             for (var i = 0; i < frameCount; i++) {
                 // Math.random() is in [0; 1.0]
                 // audio needs to be in [-1.0; 1.0]
-                nowBuffering[i] = bufferdata[i + frame_start];
+                if (windowing) {
+                    nowBuffering[i] = bufferdata[i + frame_start] * (windowing[i] !== undefined ? windowing[i] : 1);
+                }
+                else
+                    nowBuffering[i] = bufferdata[i + frame_start];
             }
         }
         var source = audioCtx.createBufferSource();
