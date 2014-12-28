@@ -66,7 +66,11 @@ MEPH.define('MEPH.util.Observable', {
             });
         },
         canObserve: function (object) {
-            return ![Float32Array, AudioBuffer, AudioContext, ArrayBuffer].some(function (x) { return object instanceof x; });
+            var AudioBuffer = AudioBuffer || null;
+            var Float32Array = Float32Array || null;
+            var ArrayBuffer = ArrayBuffer || null;
+            var AudioContext = AudioContext || null;
+            return ![Float32Array, AudioBuffer, AudioContext, ArrayBuffer].where().some(function (x) { return object instanceof x; });
         },
         /**
          * Makes the passed object observable.

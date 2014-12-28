@@ -104,7 +104,6 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                 FB.api(
                     "/me/friends",
                     function (response) {
-                        debugger
                         if (response && !response.error) {
                             r(response)
                         }
