@@ -1,13 +1,18 @@
 ﻿<div class="meph-view meph-view-remove">
-    <activityview data-bind='"activityName": "c$.name"' mephid="$activityview">
-        <div class="col-md-3">
+    <contactview data-bind='"activityName": "v$.contact.name"' mephid="$activityview">
+        <div class="col-md-6 col-xs-6">
             <div class="empty_contact"></div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-xs-6">
             <h3 data-bind='"innerHTML":"v$.contact.name"'></h3>
             <h4 data-bind='"innerHTML":"v$.contact.phone"'></h4>
             <h4 data-bind='"innerHTML":"v$.contact.address"'></h4>
         </div>
-        <div class="col-md-3"></div>
-    </activityview>
+        <div id="qrcode" class="col-md-6 col-xs-12">
+
+        </div>
+        <div class="col-md-12 col-xs-12">
+            <relationship mephid="relationshipdescription"></relationship>
+        </div>
+    </contactview>
 </div>

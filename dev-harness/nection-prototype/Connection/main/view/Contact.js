@@ -3,15 +3,21 @@
     templates: true,
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
-    requires: ['MEPH.input.Search', 'MEPH.util.Observable'],
+    injections: ['contactService'],
+    requires: ['MEPH.input.Search',
+        'Connection.control.relationship.Relationship',
+        'Connection.main.view.contactview.ContactView',
+        'MEPH.util.Observable', 'MEPH.qrcode.Generator'],
     properties: {
         name: null,
-        contact: null
+        contact: null,
+        qrgenerator: null
     },
     initialize: function () {
         var me = this;
         me.callParent.apply(me, arguments);
         me.on('load', me.onLoaded.bind(me));
+        me.qrgenerator = new MEPH.qrcode.Generator();
 
     },
     afterShow: function () {
@@ -20,6 +26,15 @@
 
         if (arguments.data) {
             me.contact = arguments.data;
+        }
+        me.qrcode = me.querySelector('#qrcode');
+        me.qrgenerator.setEl(me.qrcode);
+        me.qrgenerator.clear();
+        me.qrgenerator.makeCode(JSON.stringify(me.contact));
+        if (me.$inj.contactService) {
+            me.$inj.contactService.getRelationShip(me.contact).then(function (relation) {
+                me.relationshipdescription.contact = relation
+            })
         }
     },
     onLoaded: function () {

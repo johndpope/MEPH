@@ -40,6 +40,11 @@ MEPH.ready().then(function () {
                         }]
                     }
                 },
+                contactService: {
+                    'static': true,
+                    type: 'Connection.service.ContactService',
+                    config: {}
+                },
                 contactProvider: {
                     'static': true,
                     type: 'MEPH.identity.ContactProvider',

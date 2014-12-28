@@ -9904,7 +9904,10 @@ div.graphBody div:first-child {
 
 /* line 267, ../sass/meph-default/controls/view/_misc.scss */
 .empty_contact {
-  background-image: url();
+  background-image: url("images/empty_contact.png");
+  height: 88px;
+  width: 50px;
+  background-size: contain;
 }
 
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */

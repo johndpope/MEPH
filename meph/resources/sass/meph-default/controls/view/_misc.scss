@@ -265,5 +265,8 @@ div.graphBody div:first-child {
 
 
 .empty_contact {
-    background-image: url();
+    @include meph-image-background($file: 'empty_contact.png');
+    height: 88px;
+    width: 50px;
+    background-size: contain;
 }
