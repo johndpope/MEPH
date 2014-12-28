@@ -1,5 +1,5 @@
 ﻿$activity-header-height : 40px;
-$activity-footer-height: 40px;
+$activity-footer-height: 50px;
 $meph-activity-body-padding: 2px;
 
 .meph-activity-view {
@@ -18,8 +18,9 @@ $meph-activity-body-padding: 2px;
 	bottom: 0px;
 	background-color: $meph-color-white;
 	width: 100%;
-	height: $activity-header-height;
+	height: $activity-footer-height;
 }
+
 .meph-activity-view-body {
 	height: 100%;
 	padding-top: $activity-header-height;

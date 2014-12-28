@@ -1,0 +1,30 @@
+﻿<div class="meph-view meph-view-remove">
+    <activityview data-bind='"activityName": "c$.name"'>
+
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+        </div>
+        <div class="col-md-3"></div>
+        <search meph-event-keypressed="v$.searchChanged" mephid="searchInput"></search>
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <list data-bind='"source": "v$.listsource"'>
+                <template name="connection_main_list">
+                    <div class="listitem" meph-event-click="v$.openContact, c$.data">
+                        <div class="meph-application-menu-categories-item-details">
+                            <span>Name</span>
+                            <span data-bind='"innerHTML": "c$.data.name"'></span>
+                            <br />
+                            <span>Property</span>
+                            <span data-bind='"innerHTML": "c$.data.property"'></span>
+                            <br />
+                            <span>Address</span>
+                            <span data-bind='"innerHTML": "c$.data.address"'></span>
+                        </div>
+                    </div>
+                </template>
+            </list>
+        </div>
+        <div class="col-md-3"></div>
+    </activityview>
+</div>

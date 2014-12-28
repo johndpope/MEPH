@@ -1,0 +1,39 @@
+﻿{
+    "views": [
+        {
+            "viewId": "FirstTimePage",
+            "view": "Connection.firsttime.view.View",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/first/time/login"
+        },
+        {
+            "viewId": "Fakelogin",
+            "view": "Connection.fakelogin.view.FakeLogin",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/fake/login"
+        },
+        {
+            "viewId": "SyncPage",
+            "view": "Connection.sync.view.SyncContacts",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/sync/contacts"
+        },
+        {
+            "viewId": "main",
+            "view": "Connection.main.view.Main",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/connection"
+        },
+        {
+            "viewId": "Contact",
+            "view": "Connection.main.view.Contact",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/main/contact"
+        }
+    ]
+}

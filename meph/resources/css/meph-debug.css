@@ -9056,6 +9056,11 @@ input[type="range"]::-webkit-slider-thumb {
   height: 100%;
 }
 
+/* line 6, ../sass/meph-default/core/classes/_utility.scss */
+.listitem {
+  cursor: pointer;
+}
+
 /* line 1, ../sass/meph-default/controls/view/_classes.scss */
 .meph-view {
   position: absolute;
@@ -9897,6 +9902,11 @@ div.graphBody div:first-child {
   border: 1px solid #fff;
 }
 
+/* line 267, ../sass/meph-default/controls/view/_misc.scss */
+.empty_contact {
+  background-image: url();
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {
@@ -10040,14 +10050,14 @@ div.graphBody div:first-child {
   bottom: 0px;
   background-color: #ffffff;
   width: 100%;
-  height: 40px;
+  height: 50px;
 }
 
-/* line 23, ../sass/meph-default/mobile/activity/view/_classes.scss */
+/* line 24, ../sass/meph-default/mobile/activity/view/_classes.scss */
 .meph-activity-view-body {
   height: 100%;
   padding-top: 40px;
-  padding-bottom: 40px;
+  padding-bottom: 50px;
   position: absolute;
   background-color: transparent;
   top: 0px;

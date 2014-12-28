@@ -26,6 +26,8 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         me.tokens.push(MEPH.subscribe(MEPH.Constants.startView, me.onStartView.bind(me)));
         me.tokens.push(MEPH.subscribe(MEPH.Constants.showView, me.onShowView.bind(me)));
         me.tokens.push(MEPH.subscribe(MEPH.Constants.closeView, me.onCloseActivity.bind(me)));
+        me.tokens.push(MEPH.subscribe(MEPH.Constants.OPEN_ACTIVITY, me.onOpenActivity.bind(me)));
+
         me.listenToStatePop();
         //window.history.pushState({ activityId: null, initial: true }, '', '');
     },
@@ -181,18 +183,10 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             });
         }).catch(function (e) {
             MEPH.Log(e);
-        }).then(function(){
+        }).then(function () {
             MEPH.Log('view started');
         });
     },
-    //onShowView: function (type, options) {
-    //    var me = this;
-    //    me.activityControllerPromise = me.activityControllerPromise.then(function () {
-    //        return me.showActivity(options.activity);
-    //    }).catch(function (e) {
-    //        MEPH.Log(e);
-    //    });
-    //},
     onShowView: function (type, options) {
         var me = this;
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
@@ -231,6 +225,39 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             return '';
         }
     },
+    onOpenActivity: function (type, option) {
+        var me = this;
+        return me.openOrCreateActivity(option, null)
+    },
+    openOrCreateActivity: function (activityConfig, querystring) {
+        var me = this;
+        me.activityControllerPromise = me.activityControllerPromise.then(function () {
+            var res,
+                activity = me.getActivity(activityConfig);
+
+            if (activity) {
+                res = me.openActivity(activity).then(function (options) {
+                    var activity = options.classInstance;
+                    me.pushState(me.$window, {
+                        activityId: activity.getActivityId(),
+                        path: activity.getActivityPath()
+                    }, '', me.getCombinedPath(activity.getActivityPath()));
+                    return activity;
+                });
+            }
+            else {
+                res = me.startActivity(activityConfig, querystring).then(function (options) {
+                    var activity = options.classInstance;
+                    me.pushState(me.$window, {
+                        activityId: activity.getActivityId(),
+                        path: activity.getActivityPath()
+                    }, '', me.getCombinedPath(activity.getActivityPath()));
+                    return activity;
+                });
+            }
+            return res;
+        })
+    },
     /**
      * Starts an activity
      * @param {Object} activityConfig
@@ -252,6 +279,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                 me.addActivity(result.classInstance, activityConfig.parentActivity || null);
                 if (me.openActivityOnStop) {
                     return me.showActivity(result.classInstance).then(function () {
+
                         return result;
                     });
                 }
@@ -263,8 +291,15 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                 if (path !== null) {
                     combinedPath = me.getCombinedPath(querystring || path);
                     activity.setPath(querystring || path);
-                    me.pushState(me.$window, { activityId: activity.getActivityId(), path: querystring || path }, me.getActivityName(activityConfig, activity), combinedPath);
+                    me.pushState(me.$window, {
+                        activityId: activity.getActivityId(),
+                        path: querystring || path
+                    }, me.getActivityName(activityConfig, activity), combinedPath);
                 }
+
+                if (result.classInstance.afterShow)
+                    result.classInstance.afterShow();
+
                 MEPH.publish(MEPH.Constants.ActivityStarted, { activity: activity });
                 return result;
             }).catch(function (error) {
@@ -330,7 +365,12 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                 node: activityDom,
                 alias: viewConfig.alias,
                 view: true
-            }], dom);
+            }], dom).then(function (res) {
+                res.foreach(function (r) {
+                    r.classInstance.$viewConfiguration = r.classInstance.$viewConfiguration || viewConfig;
+                });
+                return res;
+            })
         });
         return promise;
     },
@@ -502,7 +542,17 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
      */
     getActivity: function (id) {
         var me = this, info;
-        info = me.getActivities().first(function (x) { return x.activity.getActivityId() === id; });
+        info = me.getActivities().first(function (x) {
+            if (typeof id === 'object') {
+                for (var i in id) {
+                    if (x.activity.$viewConfiguration[i] !== id[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return x.activity.getActivityId() === id;
+        });
         if (info) {
             return info.activity;
         }

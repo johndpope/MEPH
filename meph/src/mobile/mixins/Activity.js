@@ -24,7 +24,10 @@ MEPH.define('MEPH.mobile.mixins.Activity', {
         var me = this;
         return me.$activityPath;
     },
-
+    afterShow: function () {
+    },
+    afterHide: function () {
+    },
     /**
      * Adds an activity to the list of child dom activities.
      * @param {MEPH.mobile.mixins.Activity} activity

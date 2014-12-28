@@ -77,6 +77,11 @@ MEPH.define('MEPH.field.FormField', {
         me.addTransferables();
         me.defineDependentProperties();
     },
+    raiseEvent: function (event) {
+        var me = this;
+        var element = me.getFirstElement();
+        element.dispatchEvent(MEPH.createEvent(event, { val: me.inputfield.value }));
+    },
     /**
      * Gets the auto bind property paths.
      * @param {String} path

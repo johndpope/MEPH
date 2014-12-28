@@ -12,6 +12,10 @@
         ACTIVITY_HEART_BEAT: 'MEPH.ACTIVITY_HEART_BEAT',
         closeView: 'MEPH.events.closeView',
         ActivityDestroyed: 'ActivityDestroyed',
-        REQUEST_BLOB_SAVE: 'REQUEST_BLOB_SAVE'
+        REQUEST_BLOB_SAVE: 'REQUEST_BLOB_SAVE',
+        OPEN_ACTIVITY: 'OPEN_ACTIVITY',
+        provider: {
+            IDENTITY_STATUS_CHANGE: 'IDENTITY_STATUS_CHANGE'
+        }
     }
 });
