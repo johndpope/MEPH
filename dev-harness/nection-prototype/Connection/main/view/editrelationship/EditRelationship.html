@@ -1,0 +1,19 @@
+﻿<div class="meph-view meph-view-remove">
+    <relationshipview data-bind='"activityName": "v$.contactname"' mephid="$activityview">
+        <list data-bind='"source": "v$.relationships"'>
+            <template name="relationship_type_list_template">
+                <li class="listitem relationshiplistitem">
+                    <div>
+                        <div class="col-md-2 col-xs-2">
+                            <checkbox mephid="checkbox" meph-event-click="v$.datachanged, c$.data"></checkbox>
+                        </div>
+                        <div class="col-md-10 col-xs-10 relationshiptext">
+                            <b data-bind='"innerHTML": "c$.data.name"'></b>
+                            <span data-bind='"innerHTML": "c$.data.category"'></span>
+                        </div>
+                    </div>
+                </li>
+            </template>
+        </list>
+    </relationshipview>
+</div>

@@ -66,7 +66,9 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
      * @returns {Promise}
      */
     loadMenu: function () {
-        var me = this, menusource = [], promise = Promise.resolve();
+        var me = this,
+            menusource = [],
+            promise = Promise.resolve();
         me.menusource = MEPH.util.Observable.observable([]);
         //menusource.push({ name: 'Activities', type: MEPH.mobile.application.menu.ApplicationMenu.activity });
         //menusource.push({ name: 'Online Users', type: MEPH.mobile.application.menu.ApplicationMenu.onlineusers });
@@ -98,6 +100,7 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
             me.menusource.removeWhere(function () { return true; });
             me.$providersAndItems.foreach(function (x) {
                 x.provider.updateCallback = me.updateCallBack.bind(me, x.provider);
+                x.provider.appMenu = me;
                 x.items.foreach(function (y) {
                     me.menusource.push(MEPH.util.Observable.observable(y));
                 });
@@ -261,7 +264,7 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
     */
     close: function () {
         var me = this;
-        
+
         if (me.opened) {
             MEPH.Log('close application menu');
             me.$applicationMenuPromise = me.$applicationMenuPromise.then(function () {

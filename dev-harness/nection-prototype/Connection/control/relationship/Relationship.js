@@ -14,5 +14,11 @@ MEPH.define('Connection.control.relationship.Relationship', {
           */
         contact: null,
 
+    },
+    editRelationship: function () {
+        var me = this;
+        
+
+        MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'EditRelationship', path: 'main/contact/relationship/edit', contact: me.contact });
     }
 })

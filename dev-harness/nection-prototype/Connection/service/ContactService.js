@@ -5,8 +5,11 @@
         var me = this;
         return Promise.resolve().then(function () {
             return {
-                description: 'this would describe the relation ship'
+                description: 'this would describe the relation ship',
+                relationships: []
             }
         })
+    },
+    updateRelationship: function (contact, relations) {
     }
 });

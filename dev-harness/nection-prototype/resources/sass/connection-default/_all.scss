@@ -139,12 +139,45 @@ $profile-item-image-height: $profile-item-height - 10;
 }
 
 .meph-application-body.container-fluid {
-    padding: 0;
+    padding: 2px;
     margin: 0;
 }
 
 .meph-application-body {
     .btn-lg, .btn-group-lg > .btn {
         border-radius: 0;
+    }
+}
+
+.listitem {
+    list-style: none;
+}
+
+.relationshiplistitem {
+    height: 50px;
+}
+
+.relationshiplistitem input[type=checkbox] {
+    width: 25px;
+    height: 25px;
+}
+
+.relationshiplistitem .relationshiptext {
+    padding-top: 11px;
+}
+
+
+.connecton-application-header [flyoutpanel] {
+    background-color: white;
+    margin-top: 50px;
+    padding-top: 10px;
+    height: 100%;
+
+    .connection-menu-template {
+        color: black;
+    }
+
+    .connection-menu-template.list-group-item:last-child {
+        border-radius: 0px;
     }
 }

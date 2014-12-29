@@ -442,7 +442,8 @@ MEPH.define('MEPH.list.List', {
     },
     appendTemplateSelectionFunction: function (tempSelect) {
         var me = this;
-        return me.templateSelectionFunctions.push(tempSelect);
+        if (!me.templateSelectionFunctions.some(function (x) { return x === tempSelect; }))
+            return me.templateSelectionFunctions.push(tempSelect);
     },
     removeTemplateSelectionFunction: function (tempSelect) {
         var me = this;

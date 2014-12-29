@@ -9103,11 +9103,17 @@ input[type="range"]::-webkit-slider-thumb {
   position: fixed;
   top: 0px;
   z-index: 10000;
+  /* For Safari 3.1 to 6.0 */
+  -webkit-transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  -webkit-transition-timing-function: ease;
+  -webkit-transition-delay: 0s;
+  /* Standard syntax */
+  transition-property: all;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+  transition-delay: 0s;
   opacity: 0;
-  -moz-transition: 1s, 1s;
-  -o-transition: 1s, 1s;
-  -webkit-transition: 1s, 1s;
-  transition: 1s, 1s;
 }
 
 /* line 13, ../sass/meph-default/controls/view/panel/flyout/_flyoutpanel.scss */

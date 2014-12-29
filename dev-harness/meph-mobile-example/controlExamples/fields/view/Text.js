@@ -14,6 +14,7 @@
                 'MEPH.input.Number',
                 'MEPH.input.Range',
                 'MEPH.input.Camera',
+                'MEPH.input.Checkbox',
                 'MEPH.input.Search',
                 'MEPH.input.Telephone',
                 'MEPH.input.Image',

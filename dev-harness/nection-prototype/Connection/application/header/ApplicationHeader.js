@@ -8,10 +8,11 @@
         var me = this;
         me.super();
         MEPH.subscribe(Connection.constant.Constants.LoggedIn, me.onloggedIn.bind(me));
+        MEPH.subscribe(Connection.constant.Constants.LoggedOut, me.onloggedOut.bind(me));
     },
     onLoaded: function () {
         var me = this;
-
+        me.applicationmenu.hide();
         if (me.$inj && me.$inj.userService) {
             if (me.$inj.userService.isLoggedIn()) {
                 me.onloggedIn();
@@ -37,9 +38,16 @@
             }
         }
     },
+    onloggedOut: function () {
+        var me = this;
+        me.loggedin = false;
+        me.applicationmenu.hide();
+        me.headerdom.classList.remove('connection-show');
+    },
     onloggedIn: function () {
         var me = this;
         me.loggedin = true;
+        me.applicationmenu.show();
         me.headerdom.classList.add('connection-show');
     }
 });

@@ -48,6 +48,13 @@
             "singleton": true,
             "namespace": "Connection",
             "path": "/main/create/preview"
+        },
+        {
+            "viewId": "EditRelationship",
+            "view": "Connection.main.view.editrelationship.EditRelationship",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/main/contact/relationship/edit"
         }
     ]
 }

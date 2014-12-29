@@ -96,12 +96,25 @@ MEPH.ready().then(function () {
                     'static': true,
                     type: 'MEPH.mobile.application.menu.ApplicationMenuProvider',
                     config: {
-                        providers: ['activityMenuProvider', 'remoteUserProvider']
+                        providers: ['connectionMenuProvider']
+                    }
+                },
+                connectionMenuProvider: {
+                    'static': true,
+                    type: 'Connection.menu.ConnectionMenuProvider',
+                    config: {
+                    }
+                },
+                relationshipService: {
+                    'static': true,
+                    type: 'Connection.service.RelationshipService',
+                    config: {
+
                     }
                 },
                 userService: {
                     'static': true,
-                    type: 'Connecion.service.UserService',
+                    type: 'Connection.service.UserService',
                     config: {
 
                     }

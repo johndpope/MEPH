@@ -1,4 +1,4 @@
-﻿MEPH.define('Connecion.service.UserService', {
+﻿MEPH.define('Connection.service.UserService', {
     properties: {
         loggedin: false
     },

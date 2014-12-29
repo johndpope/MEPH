@@ -1077,11 +1077,17 @@ input[type="range"]::-webkit-slider-thumb {
   position: fixed;
   top: 0px;
   z-index: 10000;
+  /* For Safari 3.1 to 6.0 */
+  -webkit-transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  -webkit-transition-timing-function: ease;
+  -webkit-transition-delay: 0s;
+  /* Standard syntax */
+  transition-property: all;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+  transition-delay: 0s;
   opacity: 0;
-  -moz-transition: 1s, 1s;
-  -o-transition: 1s, 1s;
-  -webkit-transition: 1s, 1s;
-  transition: 1s, 1s;
 }
 
 /* line 13, ../../../../meph/resources/sass/meph-default/controls/view/panel/flyout/_flyoutpanel.scss */
@@ -2157,11 +2163,48 @@ div.graphBody div:first-child {
 
 /* line 141, ../sass/connection-default/_all.scss */
 .meph-application-body.container-fluid {
-  padding: 0;
+  padding: 2px;
   margin: 0;
 }
 
 /* line 147, ../sass/connection-default/_all.scss */
 .meph-application-body .btn-lg, .meph-application-body .btn-group-lg > .btn {
   border-radius: 0;
+}
+
+/* line 152, ../sass/connection-default/_all.scss */
+.listitem {
+  list-style: none;
+}
+
+/* line 156, ../sass/connection-default/_all.scss */
+.relationshiplistitem {
+  height: 50px;
+}
+
+/* line 160, ../sass/connection-default/_all.scss */
+.relationshiplistitem input[type=checkbox] {
+  width: 25px;
+  height: 25px;
+}
+
+/* line 165, ../sass/connection-default/_all.scss */
+.relationshiplistitem .relationshiptext {
+  padding-top: 11px;
+}
+
+/* line 170, ../sass/connection-default/_all.scss */
+.connecton-application-header [flyoutpanel] {
+  background-color: white;
+  margin-top: 50px;
+  padding-top: 10px;
+  height: 100%;
+}
+/* line 176, ../sass/connection-default/_all.scss */
+.connecton-application-header [flyoutpanel] .connection-menu-template {
+  color: black;
+}
+/* line 180, ../sass/connection-default/_all.scss */
+.connecton-application-header [flyoutpanel] .connection-menu-template.list-group-item:last-child {
+  border-radius: 0px;
 }

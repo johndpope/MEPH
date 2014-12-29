@@ -1,4 +1,4 @@
-﻿@mixins transition($duration: 0.1s, $delay: 0s) {
+﻿@mixin mephtransition($duration: 0.2s, $delay: 0s) {
 
 	/* For Safari 3.1 to 6.0 */
 	-webkit-transition-property: all;
