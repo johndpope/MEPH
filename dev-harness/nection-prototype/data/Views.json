@@ -34,6 +34,20 @@
             "singleton": true,
             "namespace": "Connection",
             "path": "/main/contact"
+        },
+        {
+            "viewId": "CreateContact",
+            "view": "Connection.main.view.create.CreateContact",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/main/create/contact"
+        },
+        {
+            "viewId": "PreviewContact",
+            "view": "Connection.main.view.create.PreviewContact",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/main/create/preview"
         }
     ]
 }

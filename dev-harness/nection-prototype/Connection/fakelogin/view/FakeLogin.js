@@ -1,6 +1,7 @@
 ﻿MEPH.define('Connection.fakelogin.view.FakeLogin', {
     alias: 'fakelogin_connection_view',
     templates: true,
+    requires: ['Connection.constant.Constants'],
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
     properties: {
@@ -17,5 +18,6 @@
     },
     continueTo: function () {
         MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'SyncPage', path: 'sync/contacts' });
+        MEPH.publish(Connection.constant.Constants.LoggedIn, {})
     }
 });

@@ -16,12 +16,18 @@
     },
     onLoaded: function () {
         var me = this;
-        me.synccontacts = MEPH.util.Observable.observable([]);
         me.name = 'Sync Contacts';
+        me.initcontacts();
+    },
+    initcontacts: function () {
+        var me = this;
+
+        me.synccontacts = me.synccontacts || MEPH.util.Observable.observable([]);
     },
     onInjectionsComplete: function () {
         var me = this;
 
+        me.initcontacts();
         if (me.$inj && me.$inj.contactProvider) {
             me.$inj.contactProvider.contacts().then(function (contacts) {
             });;

@@ -54,8 +54,8 @@ MEPH.define('MEPH.mobile.Application', {
         dom.appendChild(generatedDom);
     },
     createMobileAppContainerDom: function () {
-        var dom = document.createElement('mobileApplicationContainer'),
-            me = this;;
+        var me = this, dom = document.createElement(me.mobileApplicationContainer);
+
         dom.setAttribute(MEPH.dataObjectReferenceAttribute, '"ct$": "' + me.controllerType + '"');
         return dom;
     }

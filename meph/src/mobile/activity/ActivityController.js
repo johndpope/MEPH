@@ -56,15 +56,21 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             activity;
         MEPH.Log('on pop state ');
         if (state) {
+
             activity = me.getActivity(state.activityId);
-            if (activity) {
-                MEPH.Log('showing an activity');
-                return me.showActivity(activity);
-            }
-            else {
-                MEPH.Log('start activity from path.');
-                return me.startActivityFromPath(state.path, false)
-            }
+            me.activityControllerPromise = me.activityControllerPromise.then(function () {
+                if (activity) {
+                    MEPH.Log('showing an activity');
+                    return me.showActivity(activity);
+                }
+                else {
+                    MEPH.Log('start activity from path.');
+                    return me.startActivityFromPath(state.path, false)
+                }
+            }).catch(function (e) {
+                MEPH.Log(e);
+            });
+            return me.activityControllerPromise;
         }
         return Promise.resolve();
     },
@@ -234,10 +240,12 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
             var res,
                 activity = me.getActivity(activityConfig);
-
+            var currentactivity = me.getCurrentActivity();
+                
             if (activity) {
+                activity.setActivityArguments(activityConfig);
                 res = me.openActivity(activity).then(function (options) {
-                    var activity = options.classInstance;
+                    //var activity = options.classInstance;
                     me.pushState(me.$window, {
                         activityId: activity.getActivityId(),
                         path: activity.getActivityPath()
@@ -248,10 +256,10 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             else {
                 res = me.startActivity(activityConfig, querystring).then(function (options) {
                     var activity = options.classInstance;
-                    me.pushState(me.$window, {
-                        activityId: activity.getActivityId(),
-                        path: activity.getActivityPath()
-                    }, '', me.getCombinedPath(activity.getActivityPath()));
+                    //me.pushState(me.$window, {
+                    //    activityId: activity.getActivityId(),
+                    //    path: activity.getActivityPath()
+                    //}, '', me.getCombinedPath(activity.getActivityPath()));
                     return activity;
                 });
             }
@@ -469,6 +477,8 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
             if (result.success) {
                 me.setCurrentActivity(activity);
             }
+            if (activity.afterShow)
+                activity.afterShow();
             return result;
         });
 
@@ -544,10 +554,8 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         var me = this, info;
         info = me.getActivities().first(function (x) {
             if (typeof id === 'object') {
-                for (var i in id) {
-                    if (x.activity.$viewConfiguration[i] !== id[i]) {
-                        return false;
-                    }
+                if (x.activity.$viewConfiguration.viewId !== id.viewId) {
+                    return false;
                 }
                 return true;
             }

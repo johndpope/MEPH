@@ -11,14 +11,23 @@
     properties: {
         name: null,
         contact: null,
-        qrgenerator: null
+        $qrgenerator: null
     },
     initialize: function () {
         var me = this;
         me.callParent.apply(me, arguments);
         me.on('load', me.onLoaded.bind(me));
-        me.qrgenerator = new MEPH.qrcode.Generator();
+        me.$qrgenerator = new MEPH.qrcode.Generator();
 
+    },
+
+    toPhoneNumber: function (val) {
+        if (val)
+            return 'tel:' + val.phone;
+    },
+    toSMS: function (val) {
+        if (val)
+            return 'sms:' + val.phone;
     },
     afterShow: function () {
         var me = this;
@@ -28,9 +37,9 @@
             me.contact = arguments.data;
         }
         me.qrcode = me.querySelector('#qrcode');
-        me.qrgenerator.setEl(me.qrcode);
-        me.qrgenerator.clear();
-        me.qrgenerator.makeCode(JSON.stringify(me.contact));
+        me.$qrgenerator.setEl(me.qrcode);
+        me.$qrgenerator.clear();
+        me.$qrgenerator.makeCode((me.contact.id));
         if (me.$inj.contactService) {
             me.$inj.contactService.getRelationShip(me.contact).then(function (relation) {
                 me.relationshipdescription.contact = relation

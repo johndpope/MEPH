@@ -17,18 +17,23 @@
             me.qrcodeGenerator.clear();
     },
     makeCode: function (code) {
-        var me = this;
-        if (!me.qrcodeGenerator && me.element)
+        var me = this, size;
+        if (!me.qrcodeGenerator && me.element) {
+            size = Math.max(parseFloat(me.element.clientHeight), parseFloat(me.element.clientWidth));
             me.qrcodeGenerator = me.qrcodeGenerator || new MEPH.qrcode.Generator.$QRCode(me.element, {
                 text: code,
-                width: 128,
-                height: 128,
+                width: 256,
+                height: 256,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: MEPH.qrcode.Generator.$QRCode.CorrectLevel.H
             });
-        else if (me.qrcodeGenerator)
+        }
+        else if (me.qrcodeGenerator) {
+            size = Math.max(parseFloat(me.element.clientHeight), parseFloat(me.element.clientWidth));
+            me.setSize(size, size)
             me.qrcodeGenerator.makeCode(code)
+        }
     }
 }).then(function () {
     /**
@@ -383,6 +388,11 @@
                     elTable.style.margin = nTopMarginTable + "px " + nLeftMarginTable + "px";
                 }
             };
+
+            Drawing.prototype.setSize = function (width, height) {
+                this._htOption.width = width;
+                this._htOption.height = height;
+            }
 
             /**
              * Clear the QRCode

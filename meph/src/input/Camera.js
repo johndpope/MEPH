@@ -47,11 +47,11 @@ MEPH.define('MEPH.input.Camera', {
                 });
             }
             else {
-                alert('does not support user media');
+                //alert('does not support user media');
             }
         }
         else {
-            alert('does not support user media');
+            //alert('does not support user media');
         }
     }
 });

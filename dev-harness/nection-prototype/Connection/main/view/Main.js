@@ -3,7 +3,9 @@
     templates: true,
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
-    requires: ['MEPH.input.Search', 'MEPH.util.Observable'],
+    requires: ['MEPH.input.Search',
+        'MEPH.util.Observable',
+        'Connection.main.view.mainview.MainView'],
     properties: {
         listsource: null,
         name: null
@@ -17,15 +19,20 @@
         var me = this;
         me.name = 'Main';
         me.listsource = MEPH.util.Observable.observable([]);
-        [].interpolate(0, 10, function () {
+        [].interpolate(0, 10, function (i) {
             me.listsource.push({
-                name: 'Test',
-                phone: '555-867-5309',
+                name: 'Kass ' + i,
+                phone: '+17634287335',
                 address: '4100 Raspberry Dr.',
+                title: ['Expert Design Blogger', 'Realtor', 'Mechanical Engineer', 'Plumber'].random().first(),
                 id: MEPH.GUID()
             })
         });
         me.orgsource = me.listsource.select();
+    },
+    toImageSource: function () {
+        var me = this;
+        return 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
     },
     searchChanged: function (type, val) {
         var me = this;
@@ -47,6 +54,5 @@
     },
     openContact: function (data) {
         MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'Contact', path: 'main/contact', data: data });
-
     }
 });

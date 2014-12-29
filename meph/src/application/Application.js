@@ -70,6 +70,16 @@ MEPH.define('MEPH.application.Application', {
         var me = this;
         window.MEPH.App = me;
         return Promise.resolve()
+            .then(function () {
+                return new Promise(function (r, f) {
+                    var tid = setInterval(function () {
+                        if (document.readyState !== 'complete') return;
+                        clearInterval(tid);
+                        // do your work
+                        r();
+                    }, 100);
+                })
+            })
             .then(me.storeIntialSetup.bind(me))
             .then(me.applyIOC.bind(me))
             .then(me.checkSession.bind(me))

@@ -9,6 +9,7 @@ MEPH.define('MEPH.control.Control', {
                 'MEPH.mixins.Injections',
                 'MEPH.mobile.services.MobileServices',
                 'MEPH.util.Observable',
+                'MEPH.util.Style',
                'MEPH.mixins.Observable'],
     mixins: {
         observable: 'MEPH.mixins.Observable',
@@ -434,6 +435,22 @@ MEPH.define('MEPH.control.Control', {
             }
             return result;
         }).concatFluentReverse(function (x) { return x; });
+    },
+    hide: function () {
+        var me = this;
+        me.getDomTemplate().foreach(function (t) {
+            if (t) {
+                Style.hide(t);
+            }
+        })
+    },
+    show: function () {
+        var me = this;
+        me.getDomTemplate().foreach(function (t) {
+            if (t) {
+                Style.show(t);
+            }
+        })
     },
     /**
      * Gets the dom element which meet the selector specification.

@@ -27,6 +27,10 @@ MEPH.define('MEPH.button.Button', {
         me.on('load', me.initializeDomEvents.bind(me));
         me.defineButtonDependentProperties();
     },
+    hide: function(){
+        var me = this;
+        Style.hide(me.button);  
+    },
     initializeDomEvents: function () {
         var me = this, button;
         button = me.getButtonDom();

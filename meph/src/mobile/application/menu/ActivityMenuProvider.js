@@ -3,7 +3,9 @@
  * An activity menu provider.
  */
 MEPH.define('MEPH.mobile.application.menu.ActivityMenuProvider', {
-    requires: ['MEPH.util.Observable', 'MEPH.mobile.application.menu.ApplicationMenu', 'MEPH.Constants'],
+    requires: ['MEPH.util.Observable',
+        'MEPH.mobile.application.menu.ApplicationMenu',
+        'MEPH.Constants'],
     properties: {
         name: 'Activity',
         type: 'activity',

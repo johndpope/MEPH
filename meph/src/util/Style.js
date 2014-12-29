@@ -16,10 +16,11 @@
             dom.height = parseFloat(height);
         },
         hide: function (dom) {
-            dom.style.display = 'none';
+            if (dom.style) dom.style.display = 'none';
         },
-        show: function(dom){
-            dom.style.display = '';
+        show: function (dom) {
+            if (dom.style)
+                dom.style.display = '';
         },
         clear: function (dom, prop) {
             dom.style.removeProperty(prop);
@@ -53,7 +54,7 @@
         backgroundColor: function (dom, color) {
             dom.style.backgroundColor = color;
         },
-        absolute: function(dom){
+        absolute: function (dom) {
             Style.position(dom, 'absolute');
         },
         position: function (dom, position) {

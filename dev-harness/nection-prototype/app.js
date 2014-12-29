@@ -9,7 +9,7 @@ MEPH.ready().then(function () {
     MEPH.setPath(MEPHControlsPath, 'Connection');
     //MEPH.setPath(ProvidersPath, 'Providers');
     MEPH.setPath(rel + mobileexample + 'data', 'dataviews');
-    MEPH.create('MEPH.mobile.Application').then(function () {
+    MEPH.create('Connection.application.Application').then(function () {
         var app = MEPH.App.mobileApplication({
             product: 'Connection',
             applicationName: 'Connection Mobile',
@@ -97,6 +97,13 @@ MEPH.ready().then(function () {
                     type: 'MEPH.mobile.application.menu.ApplicationMenuProvider',
                     config: {
                         providers: ['activityMenuProvider', 'remoteUserProvider']
+                    }
+                },
+                userService: {
+                    'static': true,
+                    type: 'Connecion.service.UserService',
+                    config: {
+
                     }
                 },
                 //remoteUserProvider: {
