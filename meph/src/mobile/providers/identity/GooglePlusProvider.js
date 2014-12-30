@@ -117,6 +117,30 @@
         }
         return false;
     },
+    contact: function () {
+        var me = this;
+        return me.ready().then(function () {
+            // This sample assumes a client object has been created.
+            // To learn more about creating a client, check out the starter:
+            //  https://developers.google.com/+/quickstart/javascript
+            var request = gapi.client.plus.people.get({
+                'userId': 'me'
+            });
+            return new Promise(function (resolve, fail) {
+                try {
+                    request.execute(function (resp) {
+                        console.log('ID: ' + resp.id);
+                        console.log('Display Name: ' + resp.displayName);
+                        console.log('Image URL: ' + resp.image.url);
+                        console.log('Profile URL: ' + resp.url);
+                        resolve(resp);
+                    });
+                } catch (e) {
+                    fail(e);
+                }
+            })
+        })
+    },
     online: function () {
         var me = this;
         return me.ready().then(function () {

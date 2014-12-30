@@ -40,6 +40,8 @@
 
         if (res) {
             res.then(function (provider) {
+
+                MEPH.publish(Connection.constant.Constants.LoggedIn, {});
                 if (provider.online)
                     MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
 
@@ -48,6 +50,7 @@
     },
     accountOnline: function () {
         var me = this;
+        MEPH.publish(Connection.constant.Constants.LoggedIn, {});
         MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
     },
     onInjectionsComplete: function () {

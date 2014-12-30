@@ -4,7 +4,7 @@
         providers: null,
         $promise: null
     },
-    requires: ['MEPH.mixins.Injections'],
+    requires: ['MEPH.mixins.Injections', 'Connection.constant.Constants'],
     mixins: {
         injectable: 'MEPH.mixins.Injections'
     },
@@ -81,13 +81,18 @@
                         if (prov) {
                             return obj.p.online().then(function (online) {
                                 prov.online = online;
-                                if (online)
+                                if (online) {
                                     MEPH.publish(MEPH.Constants.provider.PROVIDERONLINE, { provider: prov });
+                                    MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: prov });
+
+                                }
                                 prov.login = function (toggle) {
                                     if (!prov.online) {
                                         return obj.p.login().then(function (res) {
                                             prov.online = res;
                                             MEPH.Log(obj.key + ' provider online state : ' + res);
+                                            if (res)
+                                                MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: prov });
                                             return prov;
                                         });;
                                     }

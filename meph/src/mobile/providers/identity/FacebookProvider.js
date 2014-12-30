@@ -164,6 +164,22 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
         }
         return false;
     },
+    contact: function () {
+        var me = this;
+        return me.ready().then(function () {
+            return new Promise(function (resolve, fail) {
+                try {
+                    FB.api('/me', function (response) {
+                        console.log('Successful login for: ' + response.name);
+                        resolve(response);
+                    });
+                }
+                catch (e) {
+                    fail(e);
+                }
+            })
+        })
+    },
     online: function () {
         var me = this;
         return me.ready().then(function () {
