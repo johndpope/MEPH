@@ -1,7 +1,7 @@
 ﻿MEPH.define('Connection.firsttime.view.View', {
     alias: 'firstime_connection_view',
     templates: true,
-    requires: ['MEPH.mixins.Injections'],
+    requires: ['MEPH.mixins.Injections', 'MEPH.Constants'],
     injections: ['identityProvider'],
     extend: 'Connection.account.view.Accounts',
     mixins: ['MEPH.mobile.mixins.Activity'],
@@ -12,6 +12,10 @@
         var me = this;
         me.callParent.apply(me, arguments);
         me.on('load', me.onLoaded.bind(me));
+        var res = MEPH.subscribe(MEPH.Constants.provider.PROVIDERONLINE, function () {
+            me.accountOnline();
+            MEPH.unsubscribe(res);
+        });
     },
     onLoaded: function () {
         var me = this;

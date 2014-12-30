@@ -81,6 +81,8 @@
                         if (prov) {
                             return obj.p.online().then(function (online) {
                                 prov.online = online;
+                                if (online)
+                                    MEPH.publish(MEPH.Constants.provider.PROVIDERONLINE, { provider: prov });
                                 prov.login = function (toggle) {
                                     if (!prov.online) {
                                         return obj.p.login().then(function (res) {

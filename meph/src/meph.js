@@ -172,6 +172,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.subscribe = function (event, func) {
         var guid = meph.GUID();
         pubsubevents.push({ event: event, func: func, reference: guid });
+        return guid;
     }
     meph.Log = function (error) {
         //log stuff.
@@ -211,7 +212,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.unsubscribe = function (ids) {
         ids = Array.isArray(ids) ? ids : [ids];
         meph.Array(ids).foreach(function (id) {
-            meph.Array(pubsubevents).removeWhere(function (x) { return x === id; });
+            meph.Array(pubsubevents).removeWhere(function (x) { return x === id || (x && x.reference === id); });
         });
     }
 
