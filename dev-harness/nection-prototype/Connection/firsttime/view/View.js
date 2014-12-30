@@ -42,6 +42,10 @@
             })
         }
     },
+    accountOnline: function () {
+        var me = this;
+        MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
+    },
     onInjectionsComplete: function () {
         var me = this;
         me.loadProviders();

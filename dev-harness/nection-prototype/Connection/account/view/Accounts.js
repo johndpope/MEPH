@@ -108,11 +108,17 @@
                 me.accounts.push.apply(me.accounts, providers.select(function (x) {
                     x.using = false;
                     MEPH.util.Observable.observable(x);
+                    if (x.online) {
+                        me.accountOnline();
+                    }
                     return (x);
                 }));
             });
         }
         return Promise.resolve();
+    },
+    accountOnline: function () {
+        var me = this;  
     },
     onInjectionsComplete: function () {
         var me = this;
