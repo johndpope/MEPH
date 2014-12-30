@@ -3,7 +3,7 @@
     templates: true,
     requires: ['MEPH.mixins.Injections'],
     injections: ['identityProvider'],
-    extend: 'MEPH.mobile.activity.container.Container',
+    extend: 'Connection.account.view.Accounts',
     mixins: ['MEPH.mobile.mixins.Activity'],
     properties: {
         name: null
@@ -15,7 +15,9 @@
     },
     onLoaded: function () {
         var me = this;
+        me.super()
         me.name = 'First time login';
+
         me.loadProviders();
     },
     loadProviders: function () {
@@ -28,9 +30,22 @@
         }
 
     },
+    logInWith: function () {
+        var me = this;
+        var res = me.super();
+
+        if (res) {
+            res.then(function (provider) {
+                if (provider.online)
+                    MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
+
+            })
+        }
+    },
     onInjectionsComplete: function () {
         var me = this;
         me.loadProviders();
+        me.super();
     },
     continueTo: function () {
         MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'Fakelogin', path: 'fake/login' });

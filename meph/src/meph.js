@@ -1841,7 +1841,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                                     this.callParent = _super[name];
                                     var theargs = arguments;
                                     this.super = function () {
-                                        _super[name].apply(this, theargs);
+                                        return _super[name].apply(this, theargs);
 
                                     }
                                 }

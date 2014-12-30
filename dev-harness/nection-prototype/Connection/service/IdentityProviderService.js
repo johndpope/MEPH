@@ -81,7 +81,27 @@
                         if (prov) {
                             return obj.p.online().then(function (online) {
                                 prov.online = online;
-                            })
+                                prov.login = function (toggle) {
+                                    if (!prov.online) {
+                                        return obj.p.login().then(function (res) {
+                                            prov.online = res;
+                                            MEPH.Log(obj.key + ' provider online state : ' + res);
+                                            return prov;
+                                        });;
+                                    }
+                                    else {
+                                        obj.p.logoff().then(function (res) {
+                                            prov.online = res;
+                                            MEPH.Log(obj.key + ' provider offline state : ' + res)
+                                            return prov;
+                                        });;
+                                    }
+                                };
+                            }).catch(function (e) {
+
+                                debugger
+                                MEPH.Log(e);
+                            });
                         }
                     }).where());
                 });

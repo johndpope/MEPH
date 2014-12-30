@@ -29,7 +29,7 @@ MEPH.define('MEPH.input.Camera', {
         if (me.autoload) {
             setTimeout(function () {
                 me.loadVideo();
-            }, 3000);
+            }, 300);
         }
     },
     getVideo: function () {

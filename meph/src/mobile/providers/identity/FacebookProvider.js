@@ -9,14 +9,44 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     statics: {
         key: 'facebook',
         maxWaittime: 10000,
-        online: function () {
+        login: function () {
             return new Promise(function (r, f) {
                 var $timeout = setTimeout(function () {
                     r(false);
                 }, FacebookProvider.maxWaittime);
+
+                FB.login(function (response) {
+                    FacebookProvider.response = response;
+                    MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
+                        status: response.status
+                    });
+                    MEPH.publish('facebook_provider_response', {
+                        type: 'facebook', response: response
+                    });
+
+                    if (response.status === 'connected') {
+                        // Logged into your app and Facebook.
+                        r(true);
+                    } else if (response.status === 'not_authorized') {
+                        r(false);;
+                        // The person is logged into Facebook, but not your app.
+                    } else {
+                        // The person is not logged into Facebook, so we're not sure if
+                        // they are logged into this app or not.
+
+                        r(false);;
+                    }
+                });
+            });
+        },
+        online: function () {
+            return new Promise(function (resolve, f) {
+                var $timeout = setTimeout(function () {
+                    resolve(true);
+                }, FacebookProvider.maxWaittime);
                 FB.getLoginStatus(function (response) {
                     clearTimeout($timeout);
-                    r(response && (response.status === 'connected'));
+                    resolve(response && (response.status === 'connected'));
                 });
 
             })
@@ -87,7 +117,8 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                             loginbtn = args.loginbtn;
 
                         }
-                        loginbtn.innerHTML = '<fb:login-button scope="public_profile,email" onlogin="MEPH.mobile.providers.identity.FacebookProvider.checkLoginState();"></fb:login-button>';
+                        if (loginbtn)
+                            loginbtn.innerHTML = '<fb:login-button scope="public_profile,email" onlogin="MEPH.mobile.providers.identity.FacebookProvider.checkLoginState();"></fb:login-button>';
                     }
                     if (!MEPH.mobile.providers.identity.FacebookProvider.libraryLoaded) {
                         (function (d, s, id) {
@@ -136,7 +167,25 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     online: function () {
         var me = this;
         return me.ready().then(function () {
-            return FacebookProvider.online();
+            return me.$online();
+        })
+    },
+    login: function () {
+        var me = this;
+        return me.ready().then(function () {
+            return FacebookProvider.login();
+        })
+    },
+    $online: function () {
+        return new Promise(function (resolve, f) {
+            var $timeout = setTimeout(function () {
+                resolve(false);
+            }, FacebookProvider.maxWaittime);
+            FB.getLoginStatus(function (response) {
+                clearTimeout($timeout);
+                resolve(response && (response.status === 'connected'));
+            });
+
         })
     },
     ready: function () {
@@ -145,7 +194,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
 
             return new Promise(function (r) {
                 if (me.isReady) {
-                    r();
+                    r(FacebookProvider.key);
                     return;
                 }
 

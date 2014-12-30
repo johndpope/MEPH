@@ -49,7 +49,7 @@
     onLoaded: function () {
         var me = this;
         me.name = 'Create Contact';
-        if (false) {//me.$supportsUserMedia
+        if (me.$supportsUserMedia) {//
             me.createview.camera.hide();
         }
         else {

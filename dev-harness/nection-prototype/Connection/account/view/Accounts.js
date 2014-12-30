@@ -19,10 +19,16 @@
         var me = this;
         me.name = 'Accounts';
         me.super();
-        me.activityview.hideCloseBtn();
+        if (me.activityview)
+            me.activityview.hideCloseBtn();
         me.$promise = me.$promise.then(function () {
             return me.initAccounts();
         });
+    },
+    logInWith: function (data) {
+        if (data && data.login) {
+            return data.login(true);
+        }
     },
     toOnlineBtnClass: function (online) {
         var cls = '';

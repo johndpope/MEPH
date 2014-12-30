@@ -37,6 +37,13 @@ MEPH.ready().then(function () {
                                 appId: '414352408719933',
                                 loginbtn: '#facebooklogin'
                             }
+                        }, {
+                            type: 'MEPH.mobile.providers.identity.GooglePlusProvider',
+                            args: {
+                                clientId: '517106140753-3vmlkec7jhi5s0bmv89tkc8kho1u21e3.apps.googleusercontent.com',
+                                clientsecret: 'Kf2BwHPkUh2SPnhoB9Rf9ZxS',
+                                script: '<script src="https://apis.google.com/js/client:platform.js" async defer></script>'
+                            }
                         }]
                     }
                 },
