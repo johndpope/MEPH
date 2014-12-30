@@ -40,7 +40,7 @@ $image-search-path: './' !default;
 @import "variables";
 @import "bootstrap";
 @import 'meph-default/all';
-
+@import 'scss/font-awesome';
 
 .graphwrap{
 	height: 500px;

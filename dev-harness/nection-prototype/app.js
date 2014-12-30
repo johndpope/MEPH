@@ -92,6 +92,12 @@ MEPH.ready().then(function () {
                         root: 'menu'
                     }
                 },
+                identityProviderService: {
+                    'static': true,
+                    type: 'Connection.service.IdentityProviderService',
+                    config: {
+                    }
+                },
                 applicationMenuProvider: {
                     'static': true,
                     type: 'MEPH.mobile.application.menu.ApplicationMenuProvider',

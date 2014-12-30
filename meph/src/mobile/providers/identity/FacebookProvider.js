@@ -7,21 +7,41 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     properties: {
     },
     statics: {
+        key: 'facebook',
+        maxWaittime: 10000,
+        online: function () {
+            return new Promise(function (r, f) {
+                var $timeout = setTimeout(function () {
+                    r(false);
+                }, FacebookProvider.maxWaittime);
+                FB.getLoginStatus(function (response) {
+                    clearTimeout($timeout);
+                    r(response && (response.status === 'connected'));
+                });
+
+            })
+        },
         init: function (args) {
             return new Promise(function (promiseresponse, f) {
                 if (!MEPH.mobile.providers.identity.FacebookProvider.initStarted && args && args.appId) {
                     window.fbAsyncInit = window.fbAsyncInit || function () {
-                        FB.init({
-                            cookie: true,  // enable cookies to allow the server to access 
-                            // the session
-                            appId: args.appId,
-                            xfbml: true,
-                            version: 'v2.2'
-                        });
+                        try {
+                            FB.init({
+                                cookie: true,  // enable cookies to allow the server to access 
+                                // the session
+                                appId: args.appId,
+                                xfbml: true,
+                                version: 'v2.2'
+                            });
 
-                        FB.getLoginStatus(function (response) {
-                            statusChangeCallback(response);
-                        });
+                            FB.getLoginStatus(function (response) {
+                                statusChangeCallback(response);
+                            }, true);
+                            MEPH.publish('facebook_provider_inited', { type: 'facebook' });
+                        } catch (e) {
+                            MEPH.Log(e);
+                            f(e);
+                        }
 
                     };
 
@@ -80,7 +100,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                         MEPH.mobile.providers.identity.FacebookProvider.libraryLoaded = true;
                     }
                     MEPH.mobile.providers.identity.FacebookProvider.initStarted = true;
-                    window.fbAsyncInit();
+                    //window.fbAsyncInit();
                 }
             });
         }
@@ -113,19 +133,37 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
         }
         return false;
     },
+    online: function () {
+        var me = this;
+        return me.ready().then(function () {
+            return FacebookProvider.online();
+        })
+    },
     ready: function () {
         var me = this;
-        return me.$providerpromise.then(function () {
+        me.$providerpromise = me.$providerpromise.then(function () {
+
             return new Promise(function (r) {
+                if (me.isReady) {
+                    r();
+                    return;
+                }
+
                 var ref = MEPH.subscribe('facebook_provider_response', function (type, res) {
-                    
                     me.$response = res.response;
-                    me.isReady = true;
                     MEPH.unsubscribe(ref);
-                    r(res);
                 });
+
+                var refinit = MEPH.subscribe('facebook_provider_inited', function (type) {
+
+                    me.isReady = true;
+                    MEPH.unsubscribe(refinit);
+                    r(FacebookProvider.key);
+                });
+
                 return FacebookProvider.init(me.args)
-            })
+            });
         });
+        return me.$providerpromise;
     }
 });

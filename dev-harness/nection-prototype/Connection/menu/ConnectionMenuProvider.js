@@ -33,7 +33,9 @@
             name: 'New Contact'
         }, {
             connectionmenu: true,
-            name: 'Account'
+            name: 'Accounts',
+            viewId: 'Accounts',
+            path: 'accounts'
         }]
     },
     ownsData: function (data) {

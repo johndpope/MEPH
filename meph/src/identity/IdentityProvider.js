@@ -16,20 +16,24 @@ MEPH.define('MEPH.identity.IdentityProvider', {
         me.providers = options.providers;
         me.promise = Promise.resolve();
     },
-    getProviders: function(){
+    getProviders: function () {
         var me = this;
         return me.$registeredProviders;
     },
     ready: function () {
         var me = this;
-        return me.promise.then(function (t) {
+        me.promise = me.promise.then(function (t) {
+            if (me.isReady) {
+                return me.$registeredProviders;
+            }
             return Promise.all(me.providers.select(function (provider) {
                 return MEPH.create(provider.type).then(function ($class) {
                     var p = new $class(provider.args);
-                    return p.ready().then(function () {
+                    return p.ready().then(function (key) {
                         return {
                             p: p,
-                            type: provider.type
+                            type: provider.type,
+                            key: key
                         };
                     });
                 })
@@ -39,5 +43,6 @@ MEPH.define('MEPH.identity.IdentityProvider', {
             me.isReady = true;
             me.fire('isready', { isready: true })
         });
+        return me.promise;
     }
 })

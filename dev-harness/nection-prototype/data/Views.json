@@ -55,6 +55,13 @@
             "singleton": true,
             "namespace": "Connection",
             "path": "/main/contact/relationship/edit"
+        },
+        {
+            "viewId": "Accounts",
+            "view": "Connection.account.view.Accounts",
+            "singleton": true,
+            "namespace": true,
+            "path": "accounts"
         }
     ]
 }
