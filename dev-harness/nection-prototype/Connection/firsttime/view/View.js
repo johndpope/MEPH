@@ -3,7 +3,7 @@
     templates: true,
     requires: ['MEPH.mixins.Injections', 'MEPH.Constants'],
     injections: ['identityProvider'],
-    extend: 'Connection.account.view.Accounts',
+    extend: 'Connection.control.accountbase.AccountBase',
     mixins: ['MEPH.mobile.mixins.Activity'],
     properties: {
         name: null
