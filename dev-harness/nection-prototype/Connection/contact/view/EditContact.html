@@ -6,7 +6,7 @@
             <div class="row">
                 <div class="col-md-3 col-sm-3 col-xs-3">
                     <div class="connection-list-profile-image">
-                        <img data-bind='"src": "c$.contact.img | v$.toImageSource"' />
+                        <img mephid="currentprofileimage" data-bind='"src": "c$.profileimagesource | v$.toImageSource"' />
                     </div>
                 </div>
                 <div class="col-md-9 col-sm-9 col-xs-9">
@@ -18,12 +18,17 @@
         <div class="col-md-3"></div>
         <div class="col-md-3"></div>
         <div class="col-md-6">
+            <label>Select a profile image.</label>
             <list data-bind='"source": "v$.profileImages"'>
                 <template name="edit_list_template_afdasdfasdf">
                     <li class="listitem">
                         <fieldset>
-                            <radio mephid="checkbox" meph-data-name="image" meph-event-click="v$.selectImage, c$.data"></radio>
-                            <img data-bind='"src": "c$.data.value| v$.toImageSource"' />
+                            <div class="col-md-3 col-sm-3 col-xs-3">
+                                <radio mephid="checkbox" meph-data-name="image" meph-event-click="v$.selectImage, c$.data"></radio>
+                            </div>
+                            <div class="col-md-9 col-sm-9 col-xs-9">
+                                <img data-bind='"src": "c$.data.value| v$.toImageSource"' />
+                            </div>
                         </fieldset>
                     </li>
                 </template>

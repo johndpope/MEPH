@@ -116,6 +116,7 @@ $profile-item-height: 75px;
 
 .connection-list-profile-image {
     position: absolute;
+    width: 50px;
 }
 
 $connection-list-profile-details-padding: 55px;
@@ -139,8 +140,8 @@ $connection-list-profile-image-width: $connection-list-profile-details-padding -
 $profile-item-image-height: $profile-item-height - 10;
 
 .connection-list-profile-image img {
-    height: $profile-item-image-height;
-    width: $connection-list-profile-image-width;
+    height: 100%;
+    width: 100%;
     background-repeat: no-repeat;
     background-size: contain;
     background-color: white;

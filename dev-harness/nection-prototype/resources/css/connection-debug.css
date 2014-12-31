@@ -2141,15 +2141,16 @@ div.graphBody div:first-child {
 /* line 117, ../sass/connection-default/_all.scss */
 .connection-list-profile-image {
   position: absolute;
+  width: 50px;
 }
 
-/* line 124, ../sass/connection-default/_all.scss */
+/* line 125, ../sass/connection-default/_all.scss */
 .connection-list-profile-image + .meph-application-menu-categories-item-details {
   padding-left: 55px;
   color: white;
 }
 
-/* line 129, ../sass/connection-default/_all.scss */
+/* line 130, ../sass/connection-default/_all.scss */
 .meph-application-menu-categories-item-details hr {
   margin: 1px;
   border: 0;
@@ -2160,65 +2161,65 @@ div.graphBody div:first-child {
   background-image: -o-linear-gradient(left, transparent, rgba(255, 255, 255, 0.75), transparent);
 }
 
-/* line 141, ../sass/connection-default/_all.scss */
+/* line 142, ../sass/connection-default/_all.scss */
 .connection-list-profile-image img {
-  height: 65px;
-  width: 50px;
+  height: 100%;
+  width: 100%;
   background-repeat: no-repeat;
   background-size: contain;
   background-color: white;
   background-image: url("images/empty_contact.png");
 }
 
-/* line 150, ../sass/connection-default/_all.scss */
+/* line 151, ../sass/connection-default/_all.scss */
 .meph-application-body.container-fluid {
   padding: 2px;
   margin: 0;
 }
 
-/* line 156, ../sass/connection-default/_all.scss */
+/* line 157, ../sass/connection-default/_all.scss */
 .meph-application-body .btn-lg, .meph-application-body .btn-group-lg > .btn {
   border-radius: 0;
 }
 
-/* line 161, ../sass/connection-default/_all.scss */
+/* line 162, ../sass/connection-default/_all.scss */
 .listitem {
   list-style: none;
 }
 
-/* line 165, ../sass/connection-default/_all.scss */
+/* line 166, ../sass/connection-default/_all.scss */
 .relationshiplistitem {
   height: 50px;
 }
 
-/* line 169, ../sass/connection-default/_all.scss */
+/* line 170, ../sass/connection-default/_all.scss */
 .relationshiplistitem input[type=checkbox] {
   width: 25px;
   height: 25px;
 }
 
-/* line 174, ../sass/connection-default/_all.scss */
+/* line 175, ../sass/connection-default/_all.scss */
 .relationshiplistitem .relationshiptext {
   padding-top: 11px;
 }
 
-/* line 179, ../sass/connection-default/_all.scss */
+/* line 180, ../sass/connection-default/_all.scss */
 .connecton-application-header [flyoutpanel] {
   background-color: white;
   margin-top: 50px;
   padding-top: 10px;
   height: 100%;
 }
-/* line 185, ../sass/connection-default/_all.scss */
+/* line 186, ../sass/connection-default/_all.scss */
 .connecton-application-header [flyoutpanel] .connection-menu-template {
   color: black;
 }
-/* line 189, ../sass/connection-default/_all.scss */
+/* line 190, ../sass/connection-default/_all.scss */
 .connecton-application-header [flyoutpanel] .connection-menu-template.list-group-item:last-child {
   border-radius: 0px;
 }
 
-/* line 194, ../sass/connection-default/_all.scss */
+/* line 195, ../sass/connection-default/_all.scss */
 .vertspace {
   margin-top: 4px;
 }

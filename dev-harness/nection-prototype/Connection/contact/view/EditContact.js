@@ -13,7 +13,8 @@
     properties: {
         profileImages: null,
         namesource: null,
-        occupationsource: null
+        occupationsource: null,
+        profileimagesource: null
     },
     initialize: function () {
         var me = this;
@@ -50,6 +51,8 @@
         var me = this;
         me.selectedImage = data;
         data.selected = true;
+        // me.profileimagesource = data.value;
+        me.activityview.currentprofileimage.src = data.value;
     },
     editMe: function () {
         var me = this;
