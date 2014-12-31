@@ -1,7 +1,6 @@
 ﻿MEPH.define('MEPH.mobile.providers.identity.GooglePlusProvider', {
     alternateNames: ['GooglePlusProvider'],
-    properties: {
-    },
+    extend: 'MEPH.mobile.providers.identity.IdentityProvider',
     statics: {
         key: 'google',
         maxWaitTime: 10000,
@@ -10,10 +9,15 @@
                 r(GooglePlusProvider.response ? GooglePlusProvider.response['status']['signed_in'] : false);
             })
         },
-        logoff: function () {
+        logoff: function (provider) {
             window.open('https://accounts.google.com/logout', "");
+
+            MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                provider: provider,
+                online: false
+            });
         },
-        login: function () {
+        login: function (provider) {
             return new Promise(function (r, f) {
                 var additionalParams = {
                     callback: function (authResult) {
@@ -22,9 +26,17 @@
                             // Update the app to reflect a signed in user
                             gapi.client.load('plus', 'v1').then(function () {
                                 // Hide the sign-in button now that the user is authorized, for example:
+                                MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                                    provider: provider,
+                                    online: true
+                                });
                                 r(true);
                             });
                         } else {
+                            MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                                provider: provider,
+                                online: false
+                            });
                             // Update the app to reflect a signed out user
                             // Possible error values:
                             //   "user_signed_out" - User is signed-out
@@ -123,68 +135,70 @@
     },
     property: function (prop) {
         var me = this;
-        return new Promise(function (resolve, f) {
-            if (me.cachedResponse) {
-                resolve(me.cachedResponse);
-            }
-            var $timeout = setTimeout(function () {
-                resolve(null);
-            }, GooglePlusProvider.maxWaitTime);
-            me.contact().then(function (response) {
-                resolve(response);
-            });
-        }).then(function (response) {
-            var val = null;
-            if (response) {
-
-                switch (prop) {
-                    case 'name':
-                        val = response.displayName;
-                        break;
-                    case 'gender':
-                        val = response.gender;
-                        break;
-                    case 'link':
-                        val = response.link;
-                        break;
-                    case 'profileimage':
-                        val = response.image.url
-                        break;
-                    case 'occupation':
-                        val = response.occupation;
-                        break;
-                    case 'skills':
-                        val = response.skills;
-                        break;
-                    case 'url':
-                        val = response.url;
-                        break;
+        me.$providerpromise = me.$providerpromise.then(function () {
+            return new Promise(function (resolve, f) {
+                if (me.cachedResponse) {
+                    resolve(me.cachedResponse);
                 }
-            }
-            return {
-                provider: me,
-                type: GooglePlusProvider.key,
-                response: response,
-                value: val
-            };
+                var $timeout = setTimeout(function () {
+                    resolve(null);
+                }, GooglePlusProvider.maxWaitTime);
+                me.contact().then(function (response) {
+                    resolve(response);
+                });
+            }).then(function (response) {
+                var val = null;
+                if (response) {
+
+                    switch (prop) {
+                        case 'name':
+                            val = response.displayName;
+                            break;
+                        case 'gender':
+                            val = response.gender;
+                            break;
+                        case 'link':
+                            val = response.link;
+                            break;
+                        case 'profileimage':
+                            val = response.image.url
+                            break;
+                        case 'occupation':
+                            val = response.occupation;
+                            break;
+                        case 'skills':
+                            val = response.skills;
+                            break;
+                        case 'url':
+                            val = response.url;
+                            break;
+                    }
+                }
+                return {
+                    provider: me,
+                    type: GooglePlusProvider.key,
+                    response: response,
+                    value: val
+                };
+            });
         });
+        return me.$providerpromise;
     },
     contact: function () {
         var me = this;
-        return me.ready().then(function () {
+        return (!me.isReady ? me.ready() : Promise.resolve()).then(function () {
             // This sample assumes a client object has been created.
             // To learn more about creating a client, check out the starter:
             //  https://developers.google.com/+/quickstart/javascript
+            if (me.cachedResponse) {
+                return me.cachedResponse;
+            }
             var request = gapi.client.plus.people.get({
                 'userId': 'me'
             });
             return new Promise(function (resolve, fail) {
                 try {
                     request.execute(function (resp) {
-                        console.log('ID: ' + resp.id);
-                        console.log('Display Name: ' + resp.displayName);
-                        console.log('Image URL: ' + resp.image.url);
-                        console.log('Profile URL: ' + resp.url);
                         me.cachedResponse = resp;
                         resolve(resp);
                     });
@@ -203,14 +217,14 @@
     login: function () {
         var me = this;
         return me.ready().then(function () {
-            return GooglePlusProvider.login();
+            return GooglePlusProvider.login(me);
         })
     },
     logoff: function () {
 
         var me = this;
         return me.ready().then(function () {
-            return GooglePlusProvider.logoff();
+            return GooglePlusProvider.logoff(me);
         })
     },
     ready: function () {

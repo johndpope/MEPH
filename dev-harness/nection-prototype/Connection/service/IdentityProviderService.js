@@ -58,10 +58,20 @@
             MEPH.util.Observable.observable(x);
             return x;
         });
+        MEPH.subscribe(Connection.constant.Constants.ProviderStatusChange,
+            me.providerStatusChange.bind(me))
     },
     onInjectionsComplete: function () {
         var me = this, identityProvider;
         return me.updateProviders();
+    },
+    providerStatusChange: function (type, args) {
+        var me = this;
+        var provider = me.providers.first(function (obj) {
+            return obj.type === args.provider.constructor.key;;
+        });
+        provider.online = args.online;
+        MEPH.publish(provider.online ? Connection.constant.Constants.LoggedIn : Connection.constant.Constants.LoggedOut, { provider: provider });
     },
     updateProviders: function () {
         var me = this;
@@ -87,7 +97,7 @@
 
                                 }
                                 prov.login = function (toggle) {
-                                    if (!prov.online) {
+                                    if (!prov.online || !toggle) {
                                         return obj.p.login().then(function (res) {
                                             prov.online = res;
                                             MEPH.Log(obj.key + ' provider online state : ' + res);
@@ -99,7 +109,10 @@
                                     else {
                                         obj.p.logoff().then(function (res) {
                                             prov.online = res;
-                                            MEPH.Log(obj.key + ' provider offline state : ' + res)
+                                            MEPH.Log(obj.key + ' provider offline state : ' + res);
+
+                                            if (!res)
+                                                MEPH.publish(Connection.constant.Constants.LoggedOut, { provider: prov });
                                             return prov;
                                         });;
                                     }

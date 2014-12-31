@@ -7,8 +7,8 @@
     initialize: function () {
         var me = this;
         me.super();
-        MEPH.subscribe(Connection.constant.Constants.LoggedIn, me.onloggedIn.bind(me));
-        MEPH.subscribe(Connection.constant.Constants.LoggedOut, me.onloggedOut.bind(me));
+        MEPH.subscribe(Connection.constant.Constants.ConnectionLogIn, me.onloggedIn.bind(me));
+        MEPH.subscribe(Connection.constant.Constants.ConnectionLogOut, me.onloggedOut.bind(me));
     },
     onLoaded: function () {
         var me = this;

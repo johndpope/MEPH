@@ -4,6 +4,7 @@
  */
 MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     alternateNames: ['FacebookProvider'],
+    extend:'MEPH.mobile.providers.identity.IdentityProvider',
     properties: {
     },
     statics: {
@@ -85,11 +86,9 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                         });
                         if (response) {
                             if (response.status === 'connected') {
-                                FB.api('/me', function (response) {
-                                    console.log('Successful login for: ' + response.name);
-                                    document.querySelector(args.loginbtn).innerHTML =
-                                      'Thanks for logging in, ' + response.name + '!';
-                                });
+                                //FB.api('/me', function (response) {
+                                //    console.log('Successful login for: ' + response.name);
+                                //});
 
                                 MEPH.publish('facebook_provider_response', { type: 'facebook', response: response });
                             }
@@ -166,51 +165,62 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     },
     property: function (prop) {
         var me = this;
-        return new Promise(function (resolve, f) {
-            if (me.cachedResponse) {
-                resolve(me.cachedResponse);
-            }
-            var $timeout = setTimeout(function () {
-                resolve(null);
-            }, FacebookProvider.maxWaitTime);
-            me.contact().then(function (response) {
-                resolve(response);
-            });
-        }).then(function (response) {
-            var val = null;
-            if (response)
-                if (response.error) {
-                    val = null;
+        me.$providerpromise = me.$providerpromise.then(function () {
+            return new Promise(function (resolve, f) {
+                if (me.cachedResponse) {
+                    resolve(me.cachedResponse);
                 }
-                else
-                    switch (prop) {
-                        case 'name':
-                            val = response.name;
-                            break;
-                        case 'gender':
-                            val = response.gender;
-                            break;
-                        case 'link':
-                            val = response.link;
-                            break;
-                        case 'profileimage':
-                            val = 'https://graph.facebook.com/' + response.id + '/picture'
-                            break;
+                var $timeout = setTimeout(function () {
+                    resolve(null);
+                }, FacebookProvider.maxWaitTime);
+                me.contact().then(function (response) {
+                    resolve(response);
+                });
+            }).then(function (response) {
+                var val = null;
+                if (response)
+                    if (response.error) {
+                        val = null;
                     }
-            return {
-                provider: me,
-                type: FacebookProvider.key,
-                response: response,
-                value: val
-            };
+                    else
+                        switch (prop) {
+                            case 'name':
+                                val = response.name;
+                                break;
+                            case 'gender':
+                                val = response.gender;
+                                break;
+                            case 'link':
+                                val = response.link;
+                                break;
+                            case 'profileimage':
+                                val = 'https://graph.facebook.com/' + response.id + '/picture'
+                                break;
+                        }
+                return {
+                    provider: me,
+                    type: FacebookProvider.key,
+                    response: response,
+                    value: val
+                };
+            });
         });
+        return me.$providerpromise;
     },
     contact: function () {
         var me = this;
-        return me.ready().then(function () {
+        return (!me.isReady ? me.ready() : Promise.resolve()).then(function () {
             return new Promise(function (resolve, fail) {
                 try {
+                    if (me.cachedResponse) {
+                        return me.cachedResponse;
+                    }
+
                     FB.api('/me', function (response) {
+                        if (response.error) {
+                            me.cachedResponse = null;
+                            fail(null);
+                        }
                         console.log('Successful login for: ' + response.name);
                         me.cachedResponse = response;
                         resolve(response);

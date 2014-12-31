@@ -2,7 +2,7 @@
     alias: 'firstime_connection_view',
     templates: true,
     requires: ['MEPH.mixins.Injections', 'MEPH.Constants'],
-    injections: ['identityProvider'],
+    injections: ['identityProvider', 'userService'],
     extend: 'Connection.control.accountbase.AccountBase',
     mixins: ['MEPH.mobile.mixins.Activity'],
     properties: {
@@ -12,8 +12,8 @@
         var me = this;
         me.callParent.apply(me, arguments);
         me.on('load', me.onLoaded.bind(me));
-        var res = MEPH.subscribe(MEPH.Constants.provider.PROVIDERONLINE, function () {
-            me.accountOnline();
+        var res = MEPH.subscribe(MEPH.Constants.provider.PROVIDERONLINE, function (args) {
+            me.accountOnline(args.provider);
             MEPH.unsubscribe(res);
         });
     },
@@ -36,26 +36,27 @@
     },
     logInWith: function () {
         var me = this;
+        if (!me.$injectionscompleted) {
+            return;
+        }
         var res = me.super();
-
         if (res) {
             res.then(function (provider) {
 
-                MEPH.publish(Connection.constant.Constants.LoggedIn, {});
-                if (provider.online)
-                    MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
-
+                MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: provider });
+                return me.$inj.userService.checkCredentials(provider)
             })
         }
     },
-    accountOnline: function () {
+    accountOnline: function (provider) {
         var me = this;
-        MEPH.publish(Connection.constant.Constants.LoggedIn, {});
+        MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: provider });
         MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
     },
     onInjectionsComplete: function () {
         var me = this;
         me.loadProviders();
+        me.$injectionscompleted = true;
         me.super();
     },
     continueTo: function () {

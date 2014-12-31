@@ -23,10 +23,11 @@
             return me.initAccounts();
         });
     },
-    logInWith: function (data) {
-        if (data && data.login) {
-            return data.login(true);
-        }
+    logInWith: function (data, execute) {
+        if (execute)
+            if (data && data.login) {
+                return data.login(true);
+            }
     },
     toOnlineBtnClass: function (online) {
         var cls = '';
@@ -68,9 +69,10 @@
             return cls + hide;
         }
     },
-    longRunning: function (data) {
-        if (data.online)
-            data.retrieving = true;
+    longRunning: function (data, template, execute) {
+        if (execute)
+            if (data && data.online)
+                data.retrieving = true;
     },
     toAccountStatus: function (cls, icon, data) {
         var me = this, hide = '  btn-hide',

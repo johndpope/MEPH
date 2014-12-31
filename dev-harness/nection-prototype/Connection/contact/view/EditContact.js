@@ -7,7 +7,8 @@
     requires: ['MEPH.util.Observable',
                 'MEPH.mobile.activity.view.ActivityView',
                 'MEPH.input.Dropdown',
-                'MEPH.input.Checkbox',
+                'Connection.constant.Constants',
+                'MEPH.input.Radio',
                 'MEPH.util.Style'],
     properties: {
         profileImages: null,
@@ -17,6 +18,10 @@
     initialize: function () {
         var me = this;
         me.super();
+
+        MEPH.subscribe([Connection.constant.Constants.LoggedOut, Connection.constant.Constants.LoggedIn], function () {
+            me.initMe();
+        })
     },
     onLoaded: function () {
         var me = this;

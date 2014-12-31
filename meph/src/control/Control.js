@@ -270,6 +270,10 @@ MEPH.define('MEPH.control.Control', {
         var promise = Promise.resolve();
         return promise;
     },
+    filterEvents: function (template) {
+        var srcelement = MEPH.Array(arguments).last().domEvent.srcElement;
+        return !!MEPH.util.Dom.isDomDescendant(srcelement, template);
+    },
     cancelEvent: function () {
         var evntArgs = MEPH.util.Array.convert(arguments).last();
         evntArgs.domEvent.preventDefault();

@@ -8,14 +8,18 @@
                     <li class="listitem accounttemplate">
                         <div>
                             <div class="col-md-2 col-xs-2">
-                                <a class="btn btn-block " meph-event-click="v$.longRunning , c$.data | v$.toggleAccountConnection, c$.data">
+                                <a class="btn btn-block "
+                                   mephid="plugbtn"
+                                   meph-event-click="c$.filterEvents, c$.plugbtn | v$.longRunning , c$.data, c$.plugbtn | v$.toggleAccountConnection, c$.data">
                                     <i data-bind='"class":"c$.data.using | v$.toAccountStatus,fa fa-plug fa-2, false, c$.data"' class="fa fa-plug fa-2"></i>
                                     <i data-bind='"class":"c$.data.using | v$.toAccountStatus,fa fa-ban fa-2, true, c$.data"' class="fa fa-ban fa-2 btn-hide"></i>
                                     <i data-bind='"class":"c$.data.retrieving | v$.toAccountStatus,fa fa-wifi fa-2, wifi, c$.data"' class="fa fa-wifi fa-2 btn-hide"></i>
                                 </a>
                             </div>
                             <div class="col-md-10 col-xs-10 ">
-                                <a data-bind='"class":"c$.data.$btnclass "' meph-event-click="v$.logInWith, c$.data" class="btn btn-block btn-social btn-pinterest">
+                                <a data-bind='"class":"c$.data.$btnclass "'
+                                   mephid="loginbtn"
+                                   meph-event-click="c$.filterEvents, c$.loginbtn | v$.logInWith, c$.data" class="btn btn-block btn-social btn-pinterest">
                                     <i data-bind='"class":"c$.data.$iconclass"'></i>
                                     <span data-bind='"class":"c$.data.online | v$.toOnlineBtnClass"'>Sign in with <b data-bind='"innerHTML": "c$.data.name"'></b></span>
                                     <span data-bind='"class":"c$.data.online | v$.toOfflineBtnClass"'>Sign out of <b data-bind='"innerHTML": "c$.data.name"'></b></span>

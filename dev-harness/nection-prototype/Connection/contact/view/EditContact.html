@@ -22,7 +22,7 @@
                 <template name="edit_list_template_afdasdfasdf">
                     <li class="listitem">
                         <fieldset>
-                            <checkbox mephid="checkbox" meph-event-click="v$.selectImage, c$.data"></checkbox>
+                            <radio mephid="checkbox" meph-data-name="image" meph-event-click="v$.selectImage, c$.data"></radio>
                             <img data-bind='"src": "c$.data.value| v$.toImageSource"' />
                         </fieldset>
                     </li>

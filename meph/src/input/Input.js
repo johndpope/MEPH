@@ -20,6 +20,7 @@ MEPH.define('MEPH.input.Input', {
         readonly: null,
         required: null,
         placeholder: null,
+        name: null,
         size: null
     },
     initialize: function () {

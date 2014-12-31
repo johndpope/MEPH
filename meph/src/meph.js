@@ -169,9 +169,14 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      * @param {String} event
      * @param {Function} func
      **/
-    meph.subscribe = function (event, func) {
+    meph.subscribe = function (events, func) {
         var guid = meph.GUID();
-        pubsubevents.push({ event: event, func: func, reference: guid });
+        if (!Array.isArray(events)) {
+            events = [events];
+        }
+        events.foreach(function (event) {
+            pubsubevents.push({ event: event, func: func, reference: guid });
+        })
         return guid;
     }
     meph.Log = function (error) {
