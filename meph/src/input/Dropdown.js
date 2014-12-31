@@ -25,6 +25,15 @@ MEPH.define('MEPH.input.Dropdown', {
     onAltered: function (type, args) {
         var me = this;
         if (args.path === 'source' || args.property === 'source') {
+            if (args && args.old && args.old.un)
+                args.old.un(args.old);
+
+            if (me.source && me.source.isObservable) {
+                me.source.on('changed', function () {
+                    me.updateselectDom();
+                }, me.source);
+            }
+
             me.updateselectDom();
         }
     },
@@ -33,6 +42,7 @@ MEPH.define('MEPH.input.Dropdown', {
         if (me.selectDom) {
             me.selectDom.options.length = 0;
             if (me.source && Array.isArray(me.source) && me.source.length) {
+
                 me.source.foreach(function (x) {
                     MEPH.util.Dom.addOption(x[me.labelfield], x[me.valuefield], me.selectDom);
                 })

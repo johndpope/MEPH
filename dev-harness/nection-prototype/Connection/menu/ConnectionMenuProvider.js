@@ -23,6 +23,11 @@
         var me = this;
         return [{
             connectionmenu: true,
+            viewId: 'Me',
+            name: 'My profile',
+            path: 'main/me'
+        }, {
+            connectionmenu: true,
             viewId: 'main',
             name: 'Contacts',
             path: 'main/contact'

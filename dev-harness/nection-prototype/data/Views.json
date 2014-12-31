@@ -60,8 +60,22 @@
             "viewId": "Accounts",
             "view": "Connection.account.view.Accounts",
             "singleton": true,
-            "namespace": true,
+            "namespace": "Connection",
             "path": "accounts"
+        },
+        {
+            "viewId": "Me",
+            "view": "Connection.contact.view.Contact",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/main/me"
+        },
+        {
+            "viewId": "EditContact",
+            "view": "Connection.contact.view.EditContact",
+            "singleton": true,
+            "namespace": "Connection",
+            "path": "/main/me/edit"
         }
     ]
 }

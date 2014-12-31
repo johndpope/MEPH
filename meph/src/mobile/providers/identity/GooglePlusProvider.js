@@ -4,7 +4,7 @@
     },
     statics: {
         key: 'google',
-        maxWaittime: 10000,
+        maxWaitTime: 10000,
         online: function () {
             return new Promise(function (r, f) {
                 r(GooglePlusProvider.response ? GooglePlusProvider.response['status']['signed_in'] : false);
@@ -20,8 +20,10 @@
                         GooglePlusProvider.response = authResult;
                         if (authResult['status']['signed_in']) {
                             // Update the app to reflect a signed in user
-                            // Hide the sign-in button now that the user is authorized, for example:
-                            r(true);
+                            gapi.client.load('plus', 'v1').then(function () {
+                                // Hide the sign-in button now that the user is authorized, for example:
+                                r(true);
+                            });
                         } else {
                             // Update the app to reflect a signed out user
                             // Possible error values:
@@ -72,10 +74,12 @@
                         // come from the page-level configuration.
                         var additionalParams = {
                             'callback': signinCallback
-                        };
+                        }; //debugger
+                        // gapi.client.load('plus', 'v1').then(function () {
+
                         promiseresponse();
                         MEPH.publish('googleplus_provider_inited', { type: GooglePlusProvider.key });
-
+                        //});
                     });
 
                     function signinCallback(response) {
@@ -117,6 +121,54 @@
         }
         return false;
     },
+    property: function (prop) {
+        var me = this;
+        return new Promise(function (resolve, f) {
+            if (me.cachedResponse) {
+                resolve(me.cachedResponse);
+            }
+            var $timeout = setTimeout(function () {
+                resolve(null);
+            }, GooglePlusProvider.maxWaitTime);
+            me.contact().then(function (response) {
+                resolve(response);
+            });
+        }).then(function (response) {
+            var val = null;
+            if (response) {
+
+                switch (prop) {
+                    case 'name':
+                        val = response.displayName;
+                        break;
+                    case 'gender':
+                        val = response.gender;
+                        break;
+                    case 'link':
+                        val = response.link;
+                        break;
+                    case 'profileimage':
+                        val = response.image.url
+                        break;
+                    case 'occupation':
+                        val = response.occupation;
+                        break;
+                    case 'skills':
+                        val = response.skills;
+                        break;
+                    case 'url':
+                        val = response.url;
+                        break;
+                }
+            }
+            return {
+                provider: me,
+                type: GooglePlusProvider.key,
+                response: response,
+                value: val
+            };
+        });
+    },
     contact: function () {
         var me = this;
         return me.ready().then(function () {
@@ -133,6 +185,7 @@
                         console.log('Display Name: ' + resp.displayName);
                         console.log('Image URL: ' + resp.image.url);
                         console.log('Profile URL: ' + resp.url);
+                        me.cachedResponse = resp;
                         resolve(resp);
                     });
                 } catch (e) {

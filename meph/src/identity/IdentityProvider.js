@@ -20,6 +20,26 @@ MEPH.define('MEPH.identity.IdentityProvider', {
         var me = this;
         return me.$registeredProviders;
     },
+    getNameSources: function (observableArray) {
+        var me = this;
+        return me.ready().then(function (registeredProviders) {
+            return registeredProviders.select(function (obj) {
+                return obj.p.property('name');
+            });
+        }).then(function (promises) {
+            promises.foreach(function (promise) {
+                promise.then(function (obj) {
+                    observableArray.removeWhere(function (x) {
+                        return x.provider === obj.provider;
+                    });
+                    if (obj.value !== null && obj.value !== undefined) {
+                        obj.label = obj.value + ' (' + obj.type + ')';
+                        observableArray.push(obj);
+                    }
+                })
+            })
+        });
+    },
     ready: function () {
         var me = this;
         me.promise = me.promise.then(function (t) {
@@ -42,6 +62,7 @@ MEPH.define('MEPH.identity.IdentityProvider', {
             me.$registeredProviders = providers;
             me.isReady = true;
             me.fire('isready', { isready: true })
+            return me.$registeredProviders;
         });
         return me.promise;
     }

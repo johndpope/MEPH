@@ -1,5 +1,5 @@
 ﻿<div class="meph-view meph-view-remove ">
-    <meview data-bind='"activityName": "c$.contact.name"' mephid="activityview">
+    <activityview data-bind='"activityName": "c$.contact.name"' mephid="activityview">
 
         <div class="col-md-3"></div>
         <div class="col-md-6">
@@ -10,7 +10,7 @@
                     </div>
                 </div>
                 <div class="col-md-9 col-sm-9 col-xs-9">
-                    <span data-bind='"innerHTML": "v$.contact.name"'></span><br>
+                    <dropdown descriptiontext="Select name source" labeltext="Select name" meph-data-source="v$.namesource"></dropdown><br>
                     <span data-bind='"innerHTML": "v$.contact.dob"'></span><br>
                     <span data-bind='"innerHTML": "v$.contact.dob"'></span><br>
                 </div>
@@ -20,7 +20,7 @@
         <div class="col-md-3"></div>
         <div class="col-md-6">
             <list data-bind='"source": "v$.contact.businesses"'>
-                <template name="contact_list_template_afdasdfasdf">
+                <template name="edit_list_template_afdasdfasdf">
                     <li class="listitem">
                         <fieldset>
                             <strong>Twitter, Inc.</strong><br>
@@ -45,5 +45,5 @@
         </div>
         <div class="col-md-3"></div>
 
-    </meview>
+    </activityview>
 </div>

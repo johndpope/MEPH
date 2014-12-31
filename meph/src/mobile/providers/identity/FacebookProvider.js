@@ -8,12 +8,12 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     },
     statics: {
         key: 'facebook',
-        maxWaittime: 10000,
+        maxWaitTime: 10000,
         login: function () {
             return new Promise(function (r, f) {
                 var $timeout = setTimeout(function () {
                     r(false);
-                }, FacebookProvider.maxWaittime);
+                }, FacebookProvider.maxWaitTime);
 
                 FB.login(function (response) {
                     FacebookProvider.response = response;
@@ -43,7 +43,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
             return new Promise(function (resolve, f) {
                 var $timeout = setTimeout(function () {
                     resolve(true);
-                }, FacebookProvider.maxWaittime);
+                }, FacebookProvider.maxWaitTime);
                 FB.getLoginStatus(function (response) {
                     clearTimeout($timeout);
                     resolve(response && (response.status === 'connected'));
@@ -164,6 +164,47 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
         }
         return false;
     },
+    property: function (prop) {
+        var me = this;
+        return new Promise(function (resolve, f) {
+            if (me.cachedResponse) {
+                resolve(me.cachedResponse);
+            }
+            var $timeout = setTimeout(function () {
+                resolve(null);
+            }, FacebookProvider.maxWaitTime);
+            me.contact().then(function (response) {
+                resolve(response);
+            });
+        }).then(function (response) {
+            var val = null;
+            if (response)
+                if (response.error) {
+                    val = null;
+                }
+                else
+                    switch (prop) {
+                        case 'name':
+                            val = response.name;
+                            break;
+                        case 'gender':
+                            val = response.gender;
+                            break;
+                        case 'link':
+                            val = response.link;
+                            break;
+                        case 'profileimage':
+                            val = 'https://graph.facebook.com/' + response.id + '/picture'
+                            break;
+                    }
+            return {
+                provider: me,
+                type: FacebookProvider.key,
+                response: response,
+                value: val
+            };
+        });
+    },
     contact: function () {
         var me = this;
         return me.ready().then(function () {
@@ -171,6 +212,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                 try {
                     FB.api('/me', function (response) {
                         console.log('Successful login for: ' + response.name);
+                        me.cachedResponse = response;
                         resolve(response);
                     });
                 }
@@ -196,7 +238,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
         return new Promise(function (resolve, f) {
             var $timeout = setTimeout(function () {
                 resolve(false);
-            }, FacebookProvider.maxWaittime);
+            }, FacebookProvider.maxWaitTime);
             FB.getLoginStatus(function (response) {
                 clearTimeout($timeout);
                 resolve(response && (response.status === 'connected'));

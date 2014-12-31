@@ -1,14 +1,15 @@
-﻿MEPH.define('Connection.contact.view.Contact', {
-    alias: 'my_contact_page',
+﻿MEPH.define('Connection.contact.view.EditContact', {
+    alias: 'editcontact',
     templates: true,
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
-    injections: ['contactService'],
+    injections: ['contactService', 'identityProvider'],
     requires: ['MEPH.util.Observable',
-        'Connection.contact.view.contactview.ContactView',
+                'MEPH.mobile.activity.view.ActivityView',
+                'MEPH.input.Dropdown',
                 'MEPH.util.Style'],
     properties: {
-        contact: null
+        namesource: null
     },
     initialize: function () {
         var me = this;
@@ -26,17 +27,13 @@
     },
     initMe: function () {
         var me = this;
-        if (me.$inj && me.$inj.contactService) {
-            me.$inj.contactService.me().then(function (contact) {
-                me.contact = contact;
-            });
+        if (me.$inj && me.$inj.identityProvider) {
+            me.namesource = me.namesource || MEPH.util.Observable.observable([]);
+            me.$inj.identityProvider.getNameSources(me.namesource);
         }
     },
     editMe: function () {
         var me = this;
-        MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, {
-            viewId: 'EditContact', path: 'main/me/edit'
-        });
     },
     toImageSource: function () {
         return 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
