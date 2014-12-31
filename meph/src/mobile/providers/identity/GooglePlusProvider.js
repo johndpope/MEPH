@@ -84,9 +84,9 @@
                     MEPH.loadJSCssFile(filename, '.js', function () {
                         // Additional params including the callback, the rest of the params will
                         // come from the page-level configuration.
-                        var additionalParams = {
-                            'callback': signinCallback
-                        }; //debugger
+                        //var additionalParams = {
+                        //    'callback': signinCallback
+                        //}; //debugger
                         // gapi.client.load('plus', 'v1').then(function () {
 
                         promiseresponse();
@@ -100,7 +100,6 @@
 
                     }
                     MEPH.mobile.providers.identity.GooglePlusProvider.initStarted = true;
-                    //window.fbAsyncInit();
                 }
             });
         }
@@ -121,14 +120,7 @@
         if (me.isReady) {
             return new Promise(function (r, f) {
                 /* make the API call */
-                FB.api(
-                    "/me/friends",
-                    function (response) {
-                        if (response && !response.error) {
-                            r(response)
-                        }
-                    }
-                );
+                throw new Error('not implmented. Googleplus');
             })
         }
         return false;
@@ -247,10 +239,10 @@
                     me.isReady = true;
                     MEPH.unsubscribe(refinit);
                     r(GooglePlusProvider.key);
-                });
+                })
 
                 GooglePlusProvider.init(me.args)
-            });
+            })
         });
         return me.$providerpromise;
     }

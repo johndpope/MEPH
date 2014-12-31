@@ -9,7 +9,10 @@
                         <li class="listitem accounttemplate">
                             <div>
                                 <div class="col-md-12 col-xs-12 ">
-                                    <a meph-event-click="v$.logInWith, c$.data" data-bind='"class":"c$.data.$btnclass "' class="btn btn-block btn-social btn-pinterest">
+                                    <a meph-event-click="v$.logInWith, c$.data"
+                                       mephid="link"
+                                       meph-data-nothing="c$.data.loginAdded | v$.toDisabled, c$.data, c$.link"
+                                       data-bind='"class":"c$.data.$btnclass"' class="btn btn-block btn-social btn-pinterest">
                                         <i data-bind='"class":"c$.data.$iconclass"'></i>
                                         <span data-bind='"class":"c$.data.online | v$.toOnlineBtnClass"'>Sign in with <b data-bind='"innerHTML": "c$.data.name"'></b></span>
                                         <span data-bind='"class":"c$.data.online | v$.toOfflineBtnClass"'>Sign out of <b data-bind='"innerHTML": "c$.data.name"'></b></span>

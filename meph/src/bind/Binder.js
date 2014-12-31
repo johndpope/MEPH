@@ -500,6 +500,8 @@ MEPH.define('MEPH.bind.Binder', {
                     case 'innerHTML':
                         MEPH.setPathValue(dom, prop, value);
                         break;
+                    case 'nothing':
+                        break;
                     default:
                         dom.setAttribute(prop, value);
                         break;

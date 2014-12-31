@@ -4,7 +4,7 @@
  */
 MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
     alternateNames: ['FacebookProvider'],
-    extend:'MEPH.mobile.providers.identity.IdentityProvider',
+    extend: 'MEPH.mobile.providers.identity.IdentityProvider',
     properties: {
     },
     statics: {
@@ -65,9 +65,9 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                                 version: 'v2.2'
                             });
 
-                            FB.getLoginStatus(function (response) {
-                                statusChangeCallback(response);
-                            }, true);
+                            //FB.getLoginStatus(function (response) {
+                            //    statusChangeCallback(response);
+                            //}, true);
                             MEPH.publish('facebook_provider_inited', { type: 'facebook' });
                         } catch (e) {
                             MEPH.Log(e);
@@ -76,34 +76,34 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
 
                     };
 
-                    function statusChangeCallback(response) {
-                        // The response object is returned with a status field that lets the
-                        // app know the current login status of the person.
-                        // Full docs on the response object can be found in the documentation
-                        // for FB.getLoginStatus().
-                        MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
-                            status: response.status
-                        });
-                        if (response) {
-                            if (response.status === 'connected') {
-                                //FB.api('/me', function (response) {
-                                //    console.log('Successful login for: ' + response.name);
-                                //});
+                    //function statusChangeCallback(response) {
+                    //    // The response object is returned with a status field that lets the
+                    //    // app know the current login status of the person.
+                    //    // Full docs on the response object can be found in the documentation
+                    //    // for FB.getLoginStatus().
+                    //    MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
+                    //        status: response.status
+                    //    });
+                    //    if (response) {
+                    //        if (response.status === 'connected') {
+                    //            //FB.api('/me', function (response) {
+                    //            //    console.log('Successful login for: ' + response.name);
+                    //            //});
 
-                                MEPH.publish('facebook_provider_response', { type: 'facebook', response: response });
-                            }
-                            else {
-                                f({ type: 'facebook', response: response });
-                            }
-                        }
-                    }
+                    //            MEPH.publish('facebook_provider_response', { type: 'facebook', response: response });
+                    //        }
+                    //        else {
+                    //            f({ type: 'facebook', response: response });
+                    //        }
+                    //    }
+                    //}
                     // This function is called when someone finishes with the Login
                     // Button.  See the onlogin handler attached to it in the sample
                     // code below.
                     function checkLoginState() {
-                        FB.getLoginStatus(function (response) {
-                            statusChangeCallback(response);
-                        });
+                        //FB.getLoginStatus(function (response) {
+                        //    statusChangeCallback(response);
+                        //});
                     }
 
                     MEPH.mobile.providers.identity.FacebookProvider.checkLoginState = checkLoginState;

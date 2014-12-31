@@ -1,6 +1,7 @@
 ﻿MEPH.define('Connection.service.UserService', {
     properties: {
-        loggedin: false
+        loggedin: false,
+        $promise: null
     },
     initialize: function () {
         var me = this;
@@ -13,23 +14,25 @@
         });
         me.hasLoggedIn = false
 
-
+        me.$promise = Promise.resolve();
     },
     /**
      * Checks the users credentials.
      **/
     checkCredentials: function (provider) {
         var me = this;
-        return Promise.resolve().then(function () {
-            MEPH.publish(Connection.constant.Constants.ConnectionLogIn, {});
-
-            if (provider.online && !me.hasLoggedIn) {
-                MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
-                me.hasLoggedIn = true;
-                return true;
-            }
-            return false;
+        me.$promise = me.$promise.then(function () {
+            return Promise.resolve().then(function () {
+                if (provider.online && !me.hasLoggedIn) {
+                    MEPH.publish(Connection.constant.Constants.ConnectionLogIn, {});
+                    MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'main', path: '/main' });
+                    me.hasLoggedIn = true;
+                    return true;
+                }
+                return false;
+            });
         });
+        return me.$promise;
     },
     toggleAccount: function (current) {
         var me = this;

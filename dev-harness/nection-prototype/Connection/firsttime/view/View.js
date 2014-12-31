@@ -42,11 +42,22 @@
         var res = me.super();
         if (res) {
             res.then(function (provider) {
+                if (provider.online) {
+                    //MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: provider });
 
-                MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: provider });
-                return me.$inj.userService.checkCredentials(provider)
-            })
+                    return me.$inj.userService.checkCredentials(provider)
+                }
+            });
         }
+    },
+    toDisabled: function (data, link) {
+        if (data && data.login) {
+            link.removeAttribute('disabled');
+        }
+        else {
+            link.setAttribute('disabled', 'disabled');
+        }
+        return null;
     },
     accountOnline: function (provider) {
         var me = this;

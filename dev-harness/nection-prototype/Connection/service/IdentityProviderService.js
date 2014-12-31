@@ -51,6 +51,7 @@
             var te = x.$iconclass;
             x.online = false;
             x.using = false;
+            x.loginAdded = false;
             x.retrieving = false;
             x.error = '';
             x.$iconclass = 'fa fa-' + te;
@@ -117,6 +118,7 @@
                                         });;
                                     }
                                 };
+                                prov.loginAdded= true;
                             }).catch(function (e) {
 
                                 debugger
