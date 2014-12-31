@@ -23,7 +23,7 @@
 */
 
 
-$image-search-path: './' !default;
+$image-search-path: './' !default; 
 //$ext-theme-base-resource-path: '../images/extjs' !default;
 //$ext-theme-classic-resource-path: $ext-theme-base-resource-path !default;
 //$ext-theme-neutral-resource-path: $ext-theme-base-resource-path !default;
@@ -41,6 +41,7 @@ $image-search-path: './' !default;
 @import "bootstrap";
 @import 'meph-default/all';
 @import 'scss/font-awesome';
+@import 'bootstrapsocial';
 
 .graphwrap{
 	height: 500px;

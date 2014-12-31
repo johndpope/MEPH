@@ -23,6 +23,15 @@
             return me.initAccounts();
         });
     },
+    toDisabled: function (data, link) {
+        if (data && data.login) {
+            link.removeAttribute('disabled');
+        }
+        else {
+            link.setAttribute('disabled', 'disabled');
+        }
+        return null;
+    },
     logInWith: function (data, execute) {
         if (execute)
             if (data && data.login) {

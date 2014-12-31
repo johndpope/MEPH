@@ -7,5 +7,7 @@
         var me = this;
         me.super();
         me.hideCloseBtn()
+        me.hideFooter();
+        me.hideHeaderName();
     }
 });

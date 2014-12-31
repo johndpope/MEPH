@@ -50,15 +50,6 @@
             });
         }
     },
-    toDisabled: function (data, link) {
-        if (data && data.login) {
-            link.removeAttribute('disabled');
-        }
-        else {
-            link.setAttribute('disabled', 'disabled');
-        }
-        return null;
-    },
     accountOnline: function (provider) {
         var me = this;
         MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: provider });

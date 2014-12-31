@@ -57,9 +57,18 @@ $rgba-complement-4: rgba( 0, 68, 0,1);
 .connection-application-logo {
 }
 
-.mainview .meph-activity-view-body {
-    padding-top: 82px;
+$view-header-body-height: 50px;
+
+.mainview {
+    .meph-activity-view-body {
+        padding-top: $view-header-body-height;
+    }
+
+    .meph-activity-view-header {
+        height: $view-header-body-height + 10px;
+    }
 }
+
 
 
 .connection-app-add-contact {
@@ -180,4 +189,8 @@ $profile-item-image-height: $profile-item-height - 10;
     .connection-menu-template.list-group-item:last-child {
         border-radius: 0px;
     }
+}
+
+.vertspace {
+    margin-top: 4px;
 }

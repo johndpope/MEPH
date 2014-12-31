@@ -20,6 +20,18 @@
         var me = this;
         Style.hide(me.closeBtn);
     },
+    hideFooter: function () {
+        var me = this;
+        Style.hide(me.footer);
+    },
+    hideHeaderName: function () {
+        var me = this;
+        Style.hide(me.headername);
+    },
+    hideHeader: function () {
+        var me = this;
+        Style.hide(me.header);
+    },
     onButtonClicked: function (a, b, c, d, e, f, evt) {
         var me = this;
         me.getFirstElement().dispatchEvent(MEPH.createEvent(MEPH.mobile.activity.view.ActivityView.CloseActivity, {}));

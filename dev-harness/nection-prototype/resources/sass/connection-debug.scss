@@ -38,4 +38,5 @@ $image-search-path: './' !default;
 //$relative-image-path-for-uis: true; // defaults to "../images/" when true
 
 @import '../../../../meph/resources/sass/meph-default/all';
-@import 'connection-default/all'; 
+
+@import 'connection-default/all';  

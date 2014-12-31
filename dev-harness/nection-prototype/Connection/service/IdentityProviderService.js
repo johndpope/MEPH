@@ -90,13 +90,9 @@
                     return Promise.all(providers.select(function (obj) {
                         var prov = me.providers.first(function (x) { return x.type === obj.key; });
                         if (prov) {
-                            return obj.p.online().then(function (online) {
-                                prov.online = online;
-                                if (online) {
-                                    MEPH.publish(MEPH.Constants.provider.PROVIDERONLINE, { provider: prov });
-                                    MEPH.publish(Connection.constant.Constants.LoggedIn, { provider: prov });
-
-                                }
+                            return obj.p.ready().then(function () {
+                                prov.online = false;
+                                
                                 prov.login = function (toggle) {
                                     if (!prov.online || !toggle) {
                                         return obj.p.login().then(function (res) {
