@@ -10,34 +10,20 @@
                     </div>
                 </div>
                 <div class="col-md-9 col-sm-9 col-xs-9">
+                    <dropdown descriptiontext="Select occupation source" labeltext="Select occupation" meph-data-source="v$.occupationsource"></dropdown><br>
                     <dropdown descriptiontext="Select name source" labeltext="Select name" meph-data-source="v$.namesource"></dropdown><br>
-                    <span data-bind='"innerHTML": "v$.contact.dob"'></span><br>
-                    <span data-bind='"innerHTML": "v$.contact.dob"'></span><br>
                 </div>
             </div>
         </div>
         <div class="col-md-3"></div>
         <div class="col-md-3"></div>
         <div class="col-md-6">
-            <list data-bind='"source": "v$.contact.businesses"'>
+            <list data-bind='"source": "v$.profileImages"'>
                 <template name="edit_list_template_afdasdfasdf">
                     <li class="listitem">
                         <fieldset>
-                            <strong>Twitter, Inc.</strong><br>
-                            <label>Title:</label>
-                            <span data-bind='"innerHTML": "c$.data.title"'></span>
-                            <label>Address:</label>
-                            <span data-bind='"innerHTML": "c$.data.address"'></span>
-                            <address>
-                                <span data-bind='"innerHTML": "c$.data.address"'></span><br />
-                                <span data-bind='"innerHTML": "c$.data.city"'></span>,
-                                <span data-bind='"innerHTML": "c$.data.state"'></span>
-                                <span data-bind='"innerHTML": "c$.data.zip"'></span><br>
-                                <abbr title="Phone">P:</abbr> <span data-bind='"innerHTML": "c$.data.phone1"'></span><br>
-                                <abbr title="Phone 2">P2:</abbr> <span data-bind='"innerHTML": "c$.data.phone2"'></span><br>
-                                <abbr title="Cell">Cell:</abbr> <span data-bind='"innerHTML": "c$.data.cell"'></span><br>
-                                <abbr title="Email">Email:</abbr> <span data-bind='"innerHTML": "c$.data.email"'></span><br>
-                            </address>
+                            <checkbox mephid="checkbox" meph-event-click="v$.selectImage, c$.data"></checkbox>
+                            <img data-bind='"src": "c$.data.value| v$.toImageSource"' />
                         </fieldset>
                     </li>
                 </template>

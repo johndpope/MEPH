@@ -84,7 +84,7 @@
 
                     function signinCallback(response) {
 
-                        MEPH.publish('google_plus_provider_response', { type: 'facebook', response: response });
+                        MEPH.publish('google_plus_provider_response', { type: GooglePlusProvider.key, response: response });
 
                     }
                     MEPH.mobile.providers.identity.GooglePlusProvider.initStarted = true;

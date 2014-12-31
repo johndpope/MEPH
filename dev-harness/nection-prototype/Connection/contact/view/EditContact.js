@@ -7,9 +7,12 @@
     requires: ['MEPH.util.Observable',
                 'MEPH.mobile.activity.view.ActivityView',
                 'MEPH.input.Dropdown',
+                'MEPH.input.Checkbox',
                 'MEPH.util.Style'],
     properties: {
-        namesource: null
+        profileImages: null,
+        namesource: null,
+        occupationsource: null
     },
     initialize: function () {
         var me = this;
@@ -29,14 +32,25 @@
         var me = this;
         if (me.$inj && me.$inj.identityProvider) {
             me.namesource = me.namesource || MEPH.util.Observable.observable([]);
+            me.occupationsource = me.occupationsource || MEPH.util.Observable.observable([]);
+            me.profileImages = me.profileImages || MEPH.util.Observable.observable([]);
+
             me.$inj.identityProvider.getNameSources(me.namesource);
+            me.$inj.identityProvider.get('occupation', me.occupationsource);
+            me.$inj.identityProvider.get('profileimage', me.profileImages);
+
         }
+    },
+    selectImage: function (data) {
+        var me = this;
+        me.selectedImage = data;
+        data.selected = true;
     },
     editMe: function () {
         var me = this;
     },
-    toImageSource: function () {
-        return 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+    toImageSource: function (value) {
+        return value || 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
     }
 
 });
