@@ -114,14 +114,6 @@
                                         Promise.resolve().then(function () {
                                             return prov;
                                         });
-                                        //obj.p.logoff().then(function (res) {
-                                        //    prov.online = res;
-                                        //    MEPH.Log(obj.key + ' provider offline state : ' + res);
-
-                                        //    if (!res)
-                                        //        MEPH.publish(Connection.constant.Constants.LoggedOut, { provider: prov });
-                                        //    return prov;
-                                        //});;
                                     }
                                 };
                                 prov.loginAdded = true;

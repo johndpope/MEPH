@@ -16,37 +16,52 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                     r(false);
                 }, FacebookProvider.maxWaitTime);
 
-                FB.login(function (response) {
-                    FacebookProvider.response = response;
-                    MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
-                        status: response.status
-                    });
-                    MEPH.publish('facebook_provider_response', {
-                        type: 'facebook', response: response
-                    });
+                FB.getLoginStatus(function (response) {
 
-                    if (response.status === 'connected') {
-                        // Logged into your app and Facebook.
+                    if (response.status !== 'connected') {
+                        FB.login(function (response) {
+                            FacebookProvider.response = response;
+                            MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
+                                status: response.status
+                            });
+                            MEPH.publish('facebook_provider_response', {
+                                type: 'facebook', response: response
+                            });
+                            MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                                provider: provider,
+                                online: response && (response.status === 'connected')
+                            });
+                            if (response.status === 'connected') {
+                                // Logged into your app and Facebook.
+                                r(true);
+                            } else if (response.status === 'not_authorized') {
+                                r(false);;
+                                // The person is logged into Facebook, but not your app.
+                            } else {
+                                // The person is not logged into Facebook, so we're not sure if
+                                // they are logged into this app or not.
+
+                                r(false);;
+                            }
+                        });
+                    }
+                    else {
                         r(true);
-                    } else if (response.status === 'not_authorized') {
-                        r(false);;
-                        // The person is logged into Facebook, but not your app.
-                    } else {
-                        // The person is not logged into Facebook, so we're not sure if
-                        // they are logged into this app or not.
-
-                        r(false);;
                     }
                 });
             });
         },
-        online: function () {
+        online: function (provider) {
             return new Promise(function (resolve, f) {
                 var $timeout = setTimeout(function () {
                     resolve(true);
                 }, FacebookProvider.maxWaitTime);
                 FB.getLoginStatus(function (response) {
                     clearTimeout($timeout);
+                    MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                        provider: provider,
+                        online: response && (response.status === 'connected')
+                    });
                     resolve(response && (response.status === 'connected'));
                 });
 
@@ -69,6 +84,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                             //    statusChangeCallback(response);
                             //}, true);
                             MEPH.publish('facebook_provider_inited', { type: 'facebook' });
+                            promiseresponse();
                         } catch (e) {
                             MEPH.Log(e);
                             f(e);
@@ -137,15 +153,12 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
 
     },
     properties: {
-        isReady: false,
-        $providerpromise: null,
-        $response: null
     },
-    initialize: function (args) {
-        var me = this;
-        me.args = args;
-        me.$providerpromise = Promise.resolve();
-    },
+    //initialize: function (args) {
+    //    var me = this;
+    //    me.args = args;
+    //    me.$providerpromise = Promise.resolve();
+    //},
     contacts: function () {
         var me = this;
         if (me.isReady) {
@@ -232,6 +245,26 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
             })
         })
     },
+    Callback: function (response) {
+        var me = this;
+        FacebookProvider.response = response;
+        MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
+            status: response.status
+        });
+        MEPH.publish('facebook_provider_response', {
+            type: 'facebook', response: response
+        });
+    },
+    renderBtn: function (container) {
+        var me = this;
+        window.FacebookCallback = me.Callback.bind(me);
+        container.innerHTML = '<fb:login-button size="medium" onlogin="FacebookCallback">Connect with Facebook</fb:login-button>';
+        container.classList.add('g-signin');
+        var id = 'c' + MEPH.GUID();
+        container.setAttribute('id', id);
+        FB.XFBML.parse(document.getElementById(id));
+        me.tempBtn = container;
+    },
     online: function () {
         var me = this;
         return me.ready().then(function () {
@@ -245,6 +278,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
         })
     },
     $online: function () {
+        var me = this;
         return new Promise(function (resolve, f) {
             var $timeout = setTimeout(function () {
                 resolve(false);
@@ -252,6 +286,16 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
             FB.getLoginStatus(function (response) {
                 clearTimeout($timeout);
                 resolve(response && (response.status === 'connected'));
+                MEPH.publish(MEPH.Constants.provider.IDENTITY_STATUS_CHANGE, {
+                    status: response.status
+                });
+                MEPH.publish('facebook_provider_response', {
+                    type: 'facebook', response: response
+                });
+                MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                    provider: me,
+                    online: response && (response.status === 'connected')
+                });
             });
 
         })
@@ -269,6 +313,7 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                 var ref = MEPH.subscribe('facebook_provider_response', function (type, res) {
                     me.$response = res.response;
                     MEPH.unsubscribe(ref);
+                    clearTimeout($timeout)
                 });
 
                 var refinit = MEPH.subscribe('facebook_provider_inited', function (type) {
@@ -276,9 +321,15 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                     me.isReady = true;
                     MEPH.unsubscribe(refinit);
                     r(FacebookProvider.key);
+                    clearTimeout($timeout)
                 });
+                var $timeout = setTimeout(function () {
+                    r(FacebookProvider.key);
+                }, FacebookProvider.maxWaitTime);
 
-                return FacebookProvider.init(me.args)
+                FacebookProvider.init(me.args).then(function () {
+                    return me.$online();
+                })
             });
         });
         return me.$providerpromise;

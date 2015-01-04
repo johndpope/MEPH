@@ -44,7 +44,21 @@ MEPH.ready().then(function () {
                                 clientsecret: 'Kf2BwHPkUh2SPnhoB9Rf9ZxS',
                                 script: '<script src="https://apis.google.com/js/client:platform.js" async defer></script>'
                             }
-                        }]
+                        },
+                        {
+                            type: 'MEPH.mobile.providers.identity.LinkedInProvider',
+                            args: {
+                                //Application Details
+                                Company: 'Nection',
+
+                                'Application Name': 'Nection',
+                                'API Key': '78fhoxc30y05b7',
+                                'Secret Key': 'IPKMnGBTbB8tNY41',
+                                'OAuth User Token': 'd728c483-a2b5-4d74-afb9-cbeb6727673b',
+                                'OAuth User Secret': '1deb0c26-26f5-48cd-ac16-52237d9542a6'
+                            }
+                        }
+                        ]
                     }
                 },
                 contactService: {

@@ -653,7 +653,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      * @param {String} filetype
      * @param {Function} callback
      **/
-    meph.loadJSCssFile = function (filename, filetype, callback) {
+    meph.loadJSCssFile = function (filename, filetype, callback, attributes, innerHTML) {
         callback = callback || meph.emptyFunction;
         var toResolve,
             toReject,
@@ -681,6 +681,14 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 script.type = 'text/javascript';
                 script.onreadystatechange = function () {
                     if (this.readyState == 'complete') callback();
+                }
+                if (attributes) {
+                    for (var i in attributes) {
+                        script.setAttribute(i, attributes[i] || '');
+                    }
+                }
+                if (innerHTML){
+                    script.innerHTML = innerHTML;
                 }
                 script.onload = callback;
                 script.src = filename// 'helper.js';
