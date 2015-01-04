@@ -52,6 +52,8 @@
             x.online = false;
             x.using = false;
             x.loginAdded = false;
+            x.class = '';
+            x.btnAttributes = null;
             x.retrieving = false;
             x.error = '';
             x.$iconclass = 'fa fa-' + te;
@@ -90,12 +92,17 @@
                     return Promise.all(providers.select(function (obj) {
                         var prov = me.providers.first(function (x) { return x.type === obj.key; });
                         if (prov) {
+                            if (obj.p.renderBtn) {
+                                prov.renderBtn = obj.p.renderBtn.bind(obj.p);
+                            }
                             return obj.p.ready().then(function () {
                                 prov.online = false;
-                                
+
                                 prov.login = function (toggle) {
+                                    MEPH.Log('Login attempting')
                                     if (!prov.online || !toggle) {
                                         return obj.p.login().then(function (res) {
+                                            MEPH.Log('Login attempted');
                                             prov.online = res;
                                             MEPH.Log(obj.key + ' provider online state : ' + res);
                                             if (res)
@@ -104,17 +111,20 @@
                                         });;
                                     }
                                     else {
-                                        obj.p.logoff().then(function (res) {
-                                            prov.online = res;
-                                            MEPH.Log(obj.key + ' provider offline state : ' + res);
-
-                                            if (!res)
-                                                MEPH.publish(Connection.constant.Constants.LoggedOut, { provider: prov });
+                                        Promise.resolve().then(function () {
                                             return prov;
-                                        });;
+                                        });
+                                        //obj.p.logoff().then(function (res) {
+                                        //    prov.online = res;
+                                        //    MEPH.Log(obj.key + ' provider offline state : ' + res);
+
+                                        //    if (!res)
+                                        //        MEPH.publish(Connection.constant.Constants.LoggedOut, { provider: prov });
+                                        //    return prov;
+                                        //});;
                                     }
                                 };
-                                prov.loginAdded= true;
+                                prov.loginAdded = true;
                             }).catch(function (e) {
 
                                 debugger

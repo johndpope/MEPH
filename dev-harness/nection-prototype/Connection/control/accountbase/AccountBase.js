@@ -23,7 +23,17 @@
             return me.initAccounts();
         });
     },
-    toDisabled: function (data, link) {
+    toDisabled: function (data, link, wrapper) {
+
+        if (data.renderBtn && !data.rendered) {
+            
+            data.renderBtn(wrapper);
+            data.rendered = true;
+            //for (var i in data.btnAttributes) {
+            //    if (i.indexOf('data-') === 0)
+            //        link.setAttribute(i, data.btnAttributes[i]);
+            //}
+        }
         if (data && data.login) {
             link.removeAttribute('disabled');
         }

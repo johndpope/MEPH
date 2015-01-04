@@ -1,5 +1,6 @@
 ﻿MEPH.define('MEPH.mobile.providers.identity.GooglePlusProvider', {
     alternateNames: ['GooglePlusProvider'],
+    requires: ['MEPH.util.Style'],
     extend: 'MEPH.mobile.providers.identity.IdentityProvider',
     statics: {
         key: 'google',
@@ -9,45 +10,89 @@
                 r(GooglePlusProvider.response ? GooglePlusProvider.response['status']['signed_in'] : false);
             })
         },
-        logoff: function (provider) {
-            window.open('https://accounts.google.com/logout', "");
-
-            MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
-                provider: provider,
-                online: false
-            });
-        },
         login: function (provider) {
+            MEPH.Log('login start');
             return new Promise(function (r, f) {
-                var additionalParams = {
-                    callback: function (authResult) {
-                        GooglePlusProvider.response = authResult;
-                        if (authResult['status']['signed_in']) {
-                            // Update the app to reflect a signed in user
-                            gapi.client.load('plus', 'v1').then(function () {
-                                // Hide the sign-in button now that the user is authorized, for example:
-                                MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
-                                    provider: provider,
-                                    online: true
-                                });
-                                r(true);
-                            });
-                        } else {
+                MEPH.Log('login promise start');
+                window.GooglePlusProviderLoginCallback = function (authResult) {
+                    GooglePlusProvider.response = authResult;
+
+                    MEPH.Log('login call back ');
+
+                    if (authResult['status']['signed_in']) {
+                        MEPH.Log('login success');
+                        // Update the app to reflect a signed in user
+                        gapi.client.load('plus', 'v1').then(function () {
+                            // Hide the sign-in button now that the user is authorized, for example:
+                            MEPH.Log('login : loaded the client ');
                             MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
                                 provider: provider,
-                                online: false
+                                online: true
                             });
-                            // Update the app to reflect a signed out user
-                            // Possible error values:
-                            //   "user_signed_out" - User is signed-out
-                            //   "access_denied" - User denied access to your app
-                            //   "immediate_failed" - Could not automatically log in the user
-                            r(false);
-                        }
+                            r(true);
+                        });
+                    } else {
+                        MEPH.Log(JSON.stringify(authResult));
+                        MEPH.Log('login : not successful');
+                        MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                            provider: provider,
+                            online: false
+                        });
+                        // Update the app to reflect a signed out user
+                        // Possible error values:
+                        //   "user_signed_out" - User is signed-out
+                        //   "access_denied" - User denied access to your app
+                        //   "immediate_failed" - Could not automatically log in the user
+                        r(false);
                     }
+                };
+                MEPH.Log(GooglePlusProvider.args.clientId);
+                var additionalParams = {
+                    'callback': GooglePlusProviderLoginCallback,
+                    'clientid': GooglePlusProvider.args.clientId,
+                    'cookiepolicy': 'single_host_origin',
+                    'requestvisibleactions': 'http://schema.org/AddAction',
+                    'scope': 'https://www.googleapis.com/auth/plus.login'
+
                 }
+                MEPH.Log(gapi);
+                MEPH.Log(gapi.auth);
+                MEPH.Log(gapi.auth.signIn);
                 gapi.auth.signIn(additionalParams);
             })
+        },
+        LoginCallback: function (provider, authResult) {
+
+            GooglePlusProvider.response = authResult;
+
+            MEPH.Log('login call back ');
+
+            if (authResult['status']['signed_in']) {
+                MEPH.Log('login success');
+                // Update the app to reflect a signed in user
+                gapi.client.load('plus', 'v1').then(function () {
+                    // Hide the sign-in button now that the user is authorized, for example:
+                    MEPH.Log('login : loaded the client ');
+                    MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                        provider: provider,
+                        online: true
+                    });
+                    // r(true);
+                });
+            } else {
+                MEPH.Log(JSON.stringify(authResult));
+                MEPH.Log('login : not successful');
+                MEPH.publish(Connection.constant.Constants.ProviderStatusChange, {
+                    provider: provider,
+                    online: false
+                });
+                // Update the app to reflect a signed out user
+                // Possible error values:
+                //   "user_signed_out" - User is signed-out
+                //   "access_denied" - User denied access to your app
+                //   "immediate_failed" - Could not automatically log in the user
+                // r(false);
+            }
         },
         init: function (args) {
             return new Promise(function (promiseresponse, f) {
@@ -56,31 +101,31 @@
                     //<meta name="google-signin-scope" content="https://www.googleapis.com/auth/plus.login" />
                     //<meta name="google-signin-requestvisibleactions" content="http://schema.org/AddAction" />
                     //<meta name="google-signin-cookiepolicy" content="single_host_origin" />
+                    GooglePlusProvider.args = args;
+                    //var meta = document.createElement('meta');
+                    //meta.setAttribute('name', 'google-signin-clientid');
+                    //meta.setAttribute('content', args.clientId);
+                    //document.head.appendChild(meta);
 
-                    var meta = document.createElement('meta');
-                    meta.setAttribute('name', 'google-signin-clientid');
-                    meta.setAttribute('content', args.clientId);
-                    document.head.appendChild(meta);
+                    //meta = document.createElement('meta');
+                    //meta.setAttribute('name', 'google-signin-scope');
+                    //meta.setAttribute('content', 'https://www.googleapis.com/auth/plus.login');
+                    //document.head.appendChild(meta);
 
-                    meta = document.createElement('meta');
-                    meta.setAttribute('name', 'google-signin-scope');
-                    meta.setAttribute('content', 'https://www.googleapis.com/auth/plus.login');
-                    document.head.appendChild(meta);
+                    //meta = document.createElement('meta');
+                    //meta.setAttribute('name', 'google-signin-requestvisibleactions');
+                    //meta.setAttribute('content', 'http://schema.org/AddAction');
+                    //document.head.appendChild(meta);
 
-                    meta = document.createElement('meta');
-                    meta.setAttribute('name', 'google-signin-requestvisibleactions');
-                    meta.setAttribute('content', 'http://schema.org/AddAction');
-                    document.head.appendChild(meta);
+                    //meta = document.createElement('meta');
+                    //meta.setAttribute('name', 'google-signin-cookiepolicy');
+                    //meta.setAttribute('content', 'single_host_origin');
+                    //document.head.appendChild(meta);
 
-                    meta = document.createElement('meta');
-                    meta.setAttribute('name', 'google-signin-cookiepolicy');
-                    meta.setAttribute('content', 'single_host_origin');
-                    document.head.appendChild(meta);
-
-                    GooglePlusProvider.Callback = function () {
+                    window.GooglePlusProviderCallback = function () {
                         MEPH.Log('GooglePlusProvider.Callback ');
                     }
-                    var filename = "https://apis.google.com/js/client:platform.js?onload=GooglePlusProvider.Callback";
+                    var filename = "https://apis.google.com/js/client:platform.js?onload=GooglePlusProviderCallback";
                     MEPH.loadJSCssFile(filename, '.js', function () {
                         // Additional params including the callback, the rest of the params will
                         // come from the page-level configuration.
@@ -88,14 +133,16 @@
                         //    'callback': signinCallback
                         //}; //debugger
                         // gapi.client.load('plus', 'v1').then(function () {
-
+                        MEPH.Log('loaded google plus source');
                         promiseresponse();
                         MEPH.publish('googleplus_provider_inited', { type: GooglePlusProvider.key });
                         //});
+                    }, {
+                        async: '', defer: ''
                     });
 
                     function signinCallback(response) {
-
+                        MEPH.Log('signin callback ' + response);
                         MEPH.publish('google_plus_provider_response', { type: GooglePlusProvider.key, response: response });
 
                     }
@@ -105,15 +152,48 @@
         }
 
     },
-    properties: {
-        isReady: false,
-        $providerpromise: null,
-        $response: null
-    },
     initialize: function (args) {
         var me = this;
         me.args = args;
         me.$providerpromise = Promise.resolve();
+    },
+    properties: {
+    },
+    renderBtn: function (container) {
+        var me = this,
+            parameters = me.loginBtnAttributes();
+
+        container.innerHTML = '';
+        container.classList.add('g-signin');
+        var id = 'c' + MEPH.GUID();
+        container.setAttribute('id', id);
+        gapi.signin.render(id, parameters);
+        //    Style.hide(ocontainer)
+        me.tempBtn = container;
+    },
+    loginBtnAttributes: function () {
+        var me = this;
+        //class="g-signin"
+        //data-callback="signinCallback"
+        //data-clientid="517106140753-3vmlkec7jhi5s0bmv89tkc8kho1u21e3.apps.googleusercontent.com"
+        //data-cookiepolicy="single_host_origin"
+        //data-requestvisibleactions="http://schema.org/AddAction"
+        //data-scope="https://www.googleapis.com/auth/plus.login"
+        //var t = {
+        //    'clientid': 'xxxxxxx.apps.googleusercontent.com',
+        //    'cookiepolicy': 'single_host_origin',
+        //    'callback': 'myCallback',
+        //    'requestvisibleactions': 'http://schema.org/AddAction http://schema.org/CommentAction'
+        //};
+        window.GooglePlusProviderLoginCallback = GooglePlusProvider.LoginCallback.bind(me, me);
+        return {
+            //'class': 'g-signin',
+            'callback': 'GooglePlusProviderLoginCallback',
+            'clientid': me.args.clientId,
+            'cookiepolicy': 'single_host_origin',
+            'requestvisibleactions': 'http://schema.org/AddAction',
+            'scope': 'https://www.googleapis.com/auth/plus.login'
+        }
     },
     contacts: function () {
         var me = this;
@@ -209,15 +289,36 @@
     login: function () {
         var me = this;
         return me.ready().then(function () {
-            return GooglePlusProvider.login(me);
+            var resolve;
+            if (GooglePlusProvider.response && GooglePlusProvider.response.status.signed_in) {
+                return GooglePlusProvider.response.status.signed_in;
+            }
+            var res = MEPH.subscribe(Connection.constant.Constants.ProviderStatusChange, function (type, args) {
+                resolve(args.online);
+                debugger
+                MEPH.unsubscribe(res);
+            });
+            var promise = new Promise(function (r, fail) {
+                resolve = r;
+            });
+            var btn = me.tempBtn.querySelector('button');
+            btn.click();
+            return promise;
+            //return GooglePlusProvider.login(me);
         })
     },
     logoff: function () {
 
+
         var me = this;
-        return me.ready().then(function () {
-            return GooglePlusProvider.logoff(me);
-        })
+        return Promise.resolve().then(function () {
+            return true;
+        });
+        //return me.ready().then(function () {
+        //    if (GooglePlusProvider.response && GooglePlusProvider.response.status.signed_in)
+        //        gapi.auth.signOut()
+        //    // return GooglePlusProvider.logoff(me);
+        //})
     },
     ready: function () {
         var me = this;
