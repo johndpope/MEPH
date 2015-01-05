@@ -42,8 +42,9 @@ MEPH.define('MEPH.identity.IdentityProvider', {
         //});
     },
     get: function (property, observableArray) {
-
         var me = this;
+
+        //me.promise = me.promise.then(function () {
         return me.ready().then(function (registeredProviders) {
             return registeredProviders.select(function (obj) {
                 return obj.p.property(property);
@@ -61,12 +62,17 @@ MEPH.define('MEPH.identity.IdentityProvider', {
                 })
             })
         });
+        //});
 
+        //return me.promise;
     },
     ready: function () {
         var me = this;
-        me.promise = me.promise.then(function (t) {
-            if (me.isReady) {
+        if (me.readypromise) {
+            return me.readypromise;
+        }
+        me.readypromise = (Promise.resolve().then(function (t) {
+            if (me.$registeredProviders && me.$registeredProviders.length) {
                 return me.$registeredProviders;
             }
             return Promise.all(me.providers.select(function (provider) {
@@ -83,10 +89,9 @@ MEPH.define('MEPH.identity.IdentityProvider', {
             }));
         }).then(function (providers) {
             me.$registeredProviders = providers;
-            me.isReady = true;
             me.fire('isready', { isready: true })
             return me.$registeredProviders;
-        });
-        return me.promise;
+        }));
+        return me.readypromise;
     }
 })

@@ -295,7 +295,6 @@
             }
             var res = MEPH.subscribe(Connection.constant.Constants.ProviderStatusChange, function (type, args) {
                 resolve(args.online);
-                debugger
                 MEPH.unsubscribe(res);
             });
             var promise = new Promise(function (r, fail) {

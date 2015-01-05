@@ -3,6 +3,9 @@
  * A base class for identity providers.
  */
 MEPH.define('MEPH.mobile.providers.identity.IdentityProvider', {
+    'statics': {
+        maxWaitTime: 10000
+    },
     properties: {
         isReady: false,
         $providerpromise: null,

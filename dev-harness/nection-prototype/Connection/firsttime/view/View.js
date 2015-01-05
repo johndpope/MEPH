@@ -88,8 +88,7 @@
         var me = this;
 
         if (me.$inj && me.$inj.identityProvider && !me.notretrieved) {
-            me.$inj.identityProvider.ready().then(function () {
-            });
+            me.$inj.identityProvider.ready();
             me.notretrieved = true;
         }
 
