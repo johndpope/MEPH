@@ -43,7 +43,7 @@ MEPH.define('MEPH.mobile.providers.identity.LinkedInProvider', {
             }).then(function (response) {
                 var val = null;
                 if (response) {
-                    
+
                     switch (prop) {
                         case 'headline':
                             val = response.headline;;
@@ -58,9 +58,11 @@ MEPH.define('MEPH.mobile.providers.identity.LinkedInProvider', {
                         case 'profileimage':
                             val = response.pictureUrl;
                             break;
-                        case 'occupation':
+                        case 'occupation': 
                             break;
                         case 'skills':
+                            if (response.skills && response.skills.values)
+                                val = response.skills.values.select(function (skill) { return skill.skill.name }).join();
                             break;
                         case 'url':
                             break;
@@ -81,6 +83,10 @@ MEPH.define('MEPH.mobile.providers.identity.LinkedInProvider', {
         return new Promise(function (resolve, fail) {
             try {
                 IN.API.Profile("me")
+                        .fields('skills', 'positions', 'first-name',
+                        'picture-url',
+                        'last-name', 'three-current-positions', 'three-past-positions',
+                        'phone-numbers')
                        .result(function (result) {
 
                            me.cachedResponse = result.values.first();
