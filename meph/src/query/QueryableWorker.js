@@ -8,12 +8,19 @@ MEPH.define('MEPH.query.QueryableWorker', {
     },
     initialize: function () {
         var me = this;
-        me.$worker = new Worker(MEPH.frameWorkPathSource);
+        me.$worker = window.SingleFileQueryMode ? new Worker(window.minSourceFile) : new Worker(MEPH.frameWorkPathSource);
         var src = ' ' +
             'var t=  mephFrameWork(\'MEPH\', "' + MEPH.frameWorkPath + '",null, self);' +
             ' t.framework.ready().then(function(){ ' +
             'MEPH.setPath("' + MEPH.frameWorkPath + '","MEPH");' +
             'postMessage({ "success": true });});'
+        if (window.SingleFileQueryMode) {
+            debugger
+            src = 'var t=  singleFileFunction("' + MEPH.frameWorkPath + '");' +
+            ' t.framework.ready().then(function(){ ' +
+            'MEPH.setPath("' + MEPH.frameWorkPath + '","MEPH");' +
+            'postMessage({ "success": true });});'
+        }
         //me.$worker.postMessage('');
         me.$promise = Promise.resolve().then(function () {
             return me.post({
@@ -49,7 +56,7 @@ MEPH.define('MEPH.query.QueryableWorker', {
     },
     terminate: function () {
         var me = this;
-        
+
         me.$worker.terminate();
         me.$worker = null;
     },

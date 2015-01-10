@@ -1,5 +1,5 @@
 ﻿MEPH.define('MEPHControls.drawing.view.DrawingSurface', {
-    alias: 'mephcontrols_panel',
+    alias: 'mephcontrols_drawingsurface',
     templates: true,
     extend: 'MEPH.control.Control',
     mixins: ['MEPH.mobile.mixins.Activity'],

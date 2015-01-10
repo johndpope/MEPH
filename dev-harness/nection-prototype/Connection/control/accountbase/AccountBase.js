@@ -10,13 +10,13 @@
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
         me.$promise = Promise.resolve();
     },
     onLoaded: function () {
         var me = this;
         me.name = 'Accounts';
-        me.super();
+        me.great()
         if (me.activityview)
             me.activityview.hideCloseBtn();
         me.$promise = me.$promise.then(function () {

@@ -39,6 +39,33 @@ MEPH.define('MEPH.mobile.services.MobileServices', {
                 return instance;
             });
         },
+        loadAll: function () {
+            var result,
+               cache = MEPH.Array(MEPH.MobileServices.cache),
+               serviceConfigs = MEPH.IOC.getServices();
+            if (!serviceConfigs) {
+                return Promise.resolve().then(function () { return null; });
+            }
+            return Promise.all(serviceConfigs.foreach(function (serviceConfig) {
+                if (serviceConfig['static']) {
+                    result = cache.first(function (x) { return x.name === serviceConfig.name; });
+                    if (result) {
+                        return Promise.resolve().then(function () { return result.instance; });
+                    }
+                }
+                return MEPH.MobileServices.createInstance(serviceConfig).then(function (instance) {
+                    if (serviceConfig['static']) {
+                        cache.push({
+                            name: serviceConfig.name,
+                            config: serviceConfig.config,
+                            type: serviceConfig.type,
+                            instance: instance
+                        });
+                    }
+                    return instance;
+                });
+            }));
+        },
         add: function (instance, serviceConfig) {
             var cache = MEPH.Array(MEPH.MobileServices.cache);
             MEPH.IOC.register(serviceConfig);

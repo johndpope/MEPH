@@ -98,7 +98,7 @@
         if (!me.$injectionscompleted) {
             return;
         }
-        var res = me.super();
+        var res = me.great()
         if (res) {
             res.then(function (provider) {
                 if (provider.online) {
@@ -118,7 +118,7 @@
         var me = this;
         me.loadProviders();
         me.$injectionscompleted = true;
-        me.super();
+        me.great()
     },
     continueTo: function () {
         MEPH.publish(MEPH.Constants.OPEN_ACTIVITY, { viewId: 'Fakelogin', path: 'fake/login' });

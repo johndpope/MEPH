@@ -5,6 +5,7 @@ var buildpath = rel + 'meph';
 var mobileexample = 'dev-harness/meph-mobile-example/';
 var MEPHControlsPath = rel + mobileexample + 'controlExamples';
 var ProvidersPath = rel + mobileexample + 'providerExamples';
+window.minSourceFile = 'meph-min.js';
 //mephFrameWork('MEPH', path);
 singleFileFunction(path);
 MEPH.ready().then(function () {

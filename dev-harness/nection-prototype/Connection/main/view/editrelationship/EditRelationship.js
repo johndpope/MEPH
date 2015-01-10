@@ -16,7 +16,7 @@
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.init();
     },
     init: function () {

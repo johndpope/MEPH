@@ -32,12 +32,24 @@ MEPH.define('MEPH.util.Manifest', {
             var promise = Promise.resolve();
             viewConfigs.foreach(function (x) {
                 promise = promise.then(function () {
-                    MEPH.create(x.view);
-                })['catch'](function (error) {
+                    return MEPH.create(x.view);
+                }).then(null, function (error) {
                     MEPH.Log(error);
-                });;
+                }).then(function () {
+                    if (x.controller)
+                        return MEPH.create(x.controller);
+                }).then(null, function (error) {
+                    MEPH.Log(error);
+                }).then(function () {
+                    if (x.presenter)
+                        return MEPH.create(x.presenter);
+                }).then(null, function (error) {
+                    MEPH.Log(error);
+                });
             })
             return promise;
+        }).then(function(){
+            return MEPH.MobileServices.loadAll();
         }).then(function (x) {
             var classes = MEPH.getDefinedClasses(),
                 templates = MEPH.getTemplates();

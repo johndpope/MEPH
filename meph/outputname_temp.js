@@ -3160,7 +3160,7 @@ MEPH.define('MEPH.tween.TweenEditor', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.renderer = new MEPH.util.SVG();
         me.renderer.setCanvas(me.svg);
         me.appendEvents();
@@ -40207,7 +40207,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
         me.markerBtns = [];
         me.stretchControls = [];
         me.$signalProcessor = new SignalProcessor();;
@@ -41048,7 +41048,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }
         }
         else {
-            me.super();
+            me.great()
         }
     },
 
@@ -41510,7 +41510,7 @@ MEPH.define('MEPH.input.Dropdown', {
     },
     onLoaded: function () {
         var me = this;;
-        me.super();
+        me.great()
         me.updateselectDom();
     },
     /**
@@ -41668,7 +41668,7 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
         me.markerBtns = [];
         me.$signalProcessor = new SignalProcessor();;
 
@@ -42416,7 +42416,7 @@ MEPH.define('MEPH.table.Sequencer', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
 
         me.don('mouseovercell', me.canvas, function (evt) {
             me.onMouseOverCell(me.canvas, evt);
@@ -42770,7 +42770,7 @@ MEPH.define('MEPH.table.Sequencer', {
             }
         }
         else {
-            me.super();
+            me.great()
         }
     },
     positionGrabRep: function (options) {
@@ -43487,7 +43487,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 //return 60 / me.smallestnote / me.beatspermin;
             }
         })
-        me.super();
+        me.great()
         if (!me.sequence) {
             me.sequence = new MEPH.audio.Sequence();
         }
@@ -43539,7 +43539,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.beatspermin = me.defaultBpm;
         me.firstMidiNote = 0;
         me.lastMidiNote = 192;
@@ -44806,11 +44806,11 @@ MEPH.define('MEPH.audio.view.AudioResourceManager', {
     initialize: function () {
         var me = this;
 
-        me.super();
+        me.great()
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
 
         MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onInjectionsComplete.bind(me));
         MEPH.subscribe('select_audio_buffer_resourcemanager', function (type, args) {
@@ -51577,7 +51577,7 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
         me.storeBuffer = new MEPH.audio.processor.FIFOSampleBuffer(1);
         me.tempBuffer = new MEPH.audio.processor.FIFOSampleBuffer(1);
         me.pAAFilter = new MEPH.audio.effects.AAFilter(32);
-        me.super();
+        me.great()
     },
     getOutput: function () {
         var me = this;
@@ -52534,7 +52534,7 @@ MEPH.define('MEPH.audio.graph.node.SequenceNode', {
         me.nodecontrols.push('bufferoutput');
 
         me.sequences = me.sequences || MEPH.util.Observable.observable([]);
-        me.super();
+        me.great()
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -52542,7 +52542,7 @@ MEPH.define('MEPH.audio.graph.node.SequenceNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
 
         me.sequences = me.sequences || MEPH.util.Observable.observable([]);
 
@@ -54228,7 +54228,7 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
 
        me.on('altered', function (type, args) {
             if (args.path === 'collection') {
@@ -54245,7 +54245,7 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
 
         me.getFirstElement().dispatchEvent(MEPH.createEvent('height', { height: me.controlheight }));
     },
@@ -54342,15 +54342,15 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioControl', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
     },
     defineTextX: function () {
         var me = this;
-        me.super();
+        me.great()
 
         MEPH.util.Observable.defineDependentProperty('dragareatransform', me, ['texttransform', 'left', 'width', 'connectorxmargin', 'radius', 'bufferx'], function () {
             var result;
@@ -55597,7 +55597,7 @@ MEPH.define('MEPH.audio.graph.node.InOutNodeBase', {
     //    me.nodecontrols = me.nodecontrols || [];
     //    me.nodecontrols.push('bufferoutput');
 
-    //    me.super();
+    //    me.great()
 
     //    me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.Anything));
 
@@ -55605,7 +55605,7 @@ MEPH.define('MEPH.audio.graph.node.InOutNodeBase', {
     setupActiveZones: function (viewport, node) {
         var me = this;
         node.on('connectionadded', me.onNodeChanged.bind(me));
-        return me.super();
+        return me.great()
     },
     onConnectionChanged: function (connection, type, type2, args) {
 
@@ -55647,7 +55647,7 @@ MEPH.define('MEPH.audio.graph.node.InOutNodeBase', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.title = 'Input(s)';
 
         me.fire('altered', { path: 'nodeOutputs' })
@@ -56326,7 +56326,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.nodeInputs = MEPH.util.Observable.observable([]);
         me.nodeOutputs = MEPH.util.Observable.observable([]);
         me.id = MEPH.GUID();
-        me.super();
+        me.great()
 
 
         me.defineNodeDependentProperties();
@@ -59492,7 +59492,7 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
         me.nodecontrols.push('curve');
         me.nodecontrols.push('oversample');
 
-        me.super();
+        me.great()
 
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -59507,7 +59507,7 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.oversampletypes = me.oversampletypes.select()
         me.title = 'Wave Shaper';
         me.curveTitle = 'curve';
@@ -59550,7 +59550,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
         me.nodecontrols.push('rolloffFactor');
         me.nodecontrols.push('panningModel');
 
-        me.super();
+        me.great()
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('coneInnerAngle', MEPH.audio.graph.node.Node.Number));
@@ -59574,7 +59574,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
 
         me.title = 'Panner';
         me.distanceModelTypes = me.distanceModelTypes.select();
@@ -59611,7 +59611,7 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
         me.nodecontrols.push('detune');
         me.nodecontrols.push('typeinput');
 
-        me.super();
+        me.great()
 
         me.typesource = ['sine', 'square', 'sawtooth', 'triangle', 'custom'];
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -59625,7 +59625,7 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.typesource = me.typesource.select();
         me.title = 'Oscillator';
         me.typefieldTitle = 'type';
@@ -59664,7 +59664,7 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         me.nodecontrols.push('loopEnd');
         me.nodecontrols.push('loopStart');
         me.nodecontrols.push('playbackRate');
-        me.super();
+        me.great()
         me.nodeInputs.push(me.createInput('source', MEPH.audio.graph.node.Node.String));
         me.nodeInputs.push(me.createInput('loop', MEPH.audio.graph.node.Node.Boolean));
         me.nodeInputs.push(me.createInput('loopEnd', MEPH.audio.graph.node.Node.Number));
@@ -59690,7 +59690,7 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         me.audiobuffersources = MEPH.util.Observable.observable([]);
         me.subscription(MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onResourcesUpdated.bind(me)));
         me.onResourcesUpdated();
-        me.super();
+        me.great()
         me.title = 'Audio Buffer Source';
         me.hideConnector = true;
         me.sourceTitle = 'source';
@@ -59719,7 +59719,7 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
         me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('gain');
 
-        me.super();
+        me.great()
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('gain', MEPH.audio.graph.node.Node.Number, { path: 'gain.value' }));
 
@@ -59728,7 +59728,7 @@ MEPH.define('MEPH.audio.graph.node.GainNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.title = 'Gain';
 
         me.gainTitle = 'Volume';
@@ -59770,7 +59770,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.nodecontrols.push('reduction');
         me.nodecontrols.push('threshold');
 
-        me.super();
+        me.great()
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('attack', MEPH.audio.graph.node.Node.Number, { path: 'attack.value' }));
         me.nodeInputs.push(me.createInput('knee', MEPH.audio.graph.node.Node.Number, { path: 'knee.value' }));
@@ -59790,7 +59790,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.reductionTitle = 'reduction';
         me.releaseTitle = 'release';
         me.thresholdTitle = 'threshold';
-        me.super();
+        me.great()
     }
 });﻿/**
 * @class MEPH.graph.SVGGraphRenderer
@@ -59803,7 +59803,7 @@ MEPH.define('MEPH.graph.SVGGraphRenderer', {
     extend: 'MEPH.graph.GraphRenderer',
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
         MEPH.graph.SVGGraphRenderer.graphtemplates = [];
     },
     clearCanvas: function (canvas) {
@@ -59815,7 +59815,7 @@ MEPH.define('MEPH.graph.SVGGraphRenderer', {
     },
     setViewPort: function () {
         var me = this;
-        me.super();
+        me.great()
 
         me.$viewport.on('viewportconnectionflowcomplete', me.onFlowClear.bind(me));
         me.$viewport.on('viewportconnectionflowclear', me.onFlowClear.bind(me));
@@ -59921,7 +59921,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelSplitterNode', {
         me.nodecontrols.push('buffer4output');
         me.nodecontrols.push('bufferinput');
 
-        me.super();
+        me.great()
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeOutputs.push(me.createOutput('buffer2', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -59930,7 +59930,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelSplitterNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.buffer2output.left = false;
         me.buffer3output.left = false;
         me.buffer4output.left = false;
@@ -59997,7 +59997,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
         //me.nodecontrols.push('bufferinput');
         //me.nodecontrols.push('gain');
 
-        me.super();
+        me.great()
         if (input && output) {
             input.nodeInputs.foreach(function (inp) {
                 me.nodeInputs.push(me.createInput(inp.name, inp.type));
@@ -60139,7 +60139,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.title = 'Generated Node';
         me.setGeneratedProperties(me.$input, me.$output);
 
@@ -60164,7 +60164,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelMergerNode', {
         me.nodecontrols.push('buffer3input');
         me.nodecontrols.push('buffer4input');
 
-        me.super();
+        me.great()
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer, { count: 100 }));
         me.nodeInputs.push(me.createInput('buffer2', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -60175,7 +60175,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelMergerNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.title = 'Channel Merger';
     }
 });﻿/**
@@ -60210,7 +60210,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
         me.nodecontrols.push('detune');
         me.nodecontrols.push('gain');
         me.nodecontrols.push('typeinput');
-        me.super();
+        me.great()
         var types = ['lowpass', 'highpass', 'bandpass', 'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass'];
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('q', MEPH.audio.graph.node.Node.Number, { path: 'Q.value' }));
@@ -60225,7 +60225,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.title = 'Biquad Filter';
 
         me.qTitle = 'Q';
@@ -60813,7 +60813,7 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
         me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('normalize');
         me.nodecontrols.push('convobuffer');
-        me.super();
+        me.great()
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('normalize', MEPH.audio.graph.node.Node.Boolean));
         me.nodeInputs.push(me.createInput('convobuffer', MEPH.audio.graph.node.Node.String, { path: 'buffer' }));
@@ -60839,7 +60839,7 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
         me.onResourcesUpdated();
         //me.inputsy = 0;
         me.title = 'Convolver';
-        me.super();
+        me.great()
     }
 });﻿/**
 * @class MEPH.graph.Graph
@@ -60849,7 +60849,7 @@ MEPH.define('MEPH.graph.SVGGraph', {
     extend: 'MEPH.graph.Graph',
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
         me.on('nodeadded', function (type, evtfunc, args) {
 
             args.added.foreach(function (x) {
@@ -61445,7 +61445,7 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
 
         svg.addEventListener('mousedown', me.onMaskMouseDown.bind(me));
         svg.addEventListener('mousemove', me.onSVGMaskMouseMove.bind(me));
-        me.super();
+        me.great()
         //me.$mask.addEventListener('mouseup', me.onMaskMouseUp.bind(me));
         //me.$mask.addEventListener('mouseout', me.onMaskMouseOut.bind(me));
         //me.$mask.addEventListener('dblclick', me.onDblClick.bind(me));
@@ -61469,7 +61469,7 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
     onMaskMouseDown: function (ee) {
         if (this.getCanvas() === ee.srcElement) {
             var me = this;
-            me.super();
+            me.great()
         }
     },
     getGCanvas: function () {
@@ -61501,14 +61501,14 @@ MEPH.define('MEPH.audio.graph.node.DelayNode', {
         me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('delayTime');
 
-        me.super();
+        me.great()
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('delayTime', MEPH.audio.graph.node.Node.Number, { path: 'delayTime.value' }));
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer)); 
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.title = 'Delay';
 
         me.delayTimeTitle = 'delay';
@@ -61731,12 +61731,12 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
     },
     onLoaded: function () {
         var me = this;
         me.fontsize = me.fontsize || '12px';
-        me.super();
+        me.great()
         me.defineTextX();
     },
     /**
@@ -62015,7 +62015,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         me.graph = new MEPH.graph.SVGGraph();
         MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.updateGraphList.bind(me));
         MEPH.subscribe('opengraphinstance', me.openGraphInstanceHandler.bind(me));;
-        me.super();
+        me.great()
     },
     statics: {
         screate: function (graph, size, selector, holder) {;

@@ -20,7 +20,7 @@
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
         ///meph-event-change="ct$.loadBytes, ct$.lastSong | v$.drawBytes"
         var source = [];
         MEPH.util.Observable.observable(source)
@@ -40,7 +40,7 @@
             res.foreach(function (t) {
                 me.fileResources.push(t);
             })
-        }).catch(function (e) {
+        }).then(null, function (e) {
             console.log(e);
         });
     },

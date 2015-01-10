@@ -12,11 +12,11 @@
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.activityview.hideCloseBtn()
         me.initMe();
     },

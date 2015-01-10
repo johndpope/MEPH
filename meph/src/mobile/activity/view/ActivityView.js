@@ -30,7 +30,7 @@
     },
     hideHeader: function () {
         var me = this;
-        Style.hide(me.header);
+        Style.hide(me.headerdiv);
     },
     onButtonClicked: function (a, b, c, d, e, f, evt) {
         var me = this;

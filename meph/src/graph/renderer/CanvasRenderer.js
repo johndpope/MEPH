@@ -13,8 +13,8 @@ MEPH.define('MEPH.graph.renderer.CanvasRenderer', {
                     width: 400
                 }
             }
-        },
-        cacheDomBag: document.body
+        }//,
+        //cacheDomBag: document.body
     },
     initialize: function () {
         var me = this;
@@ -138,4 +138,7 @@ MEPH.define('MEPH.graph.renderer.CanvasRenderer', {
     draw: function (options) {
         throw 'must implement this function';
     }
+}).then(function () {
+    if (window.document && document.body)
+        MEPH.graph.renderer.CanvasRenderer.cacheDomBag = document.body;
 });

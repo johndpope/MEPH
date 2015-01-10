@@ -18,7 +18,7 @@
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great()
 
         MEPH.subscribe([Connection.constant.Constants.LoggedOut, Connection.constant.Constants.LoggedIn], function () {
             me.initMe();
@@ -26,7 +26,7 @@
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great()
         me.activityview.hideCloseBtn()
         me.initMe();
     },

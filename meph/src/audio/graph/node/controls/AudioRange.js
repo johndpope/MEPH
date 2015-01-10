@@ -20,4 +20,4 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioRange', {
         element.value = me['default'] || 0;
         element.step = me.increment || .01;
     }
-})
+});

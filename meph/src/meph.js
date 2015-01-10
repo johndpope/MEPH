@@ -7,10 +7,12 @@
  * MEPH is the framework.
  */
 var window = window || self;
+var workerthread = false;
 // run this in global scope of window or worker. since window.self = window, we're ok
 if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
     // huzzah! a worker!
-    var workerthread = true;
+    console.log('its a worker thread.')
+    workerthread = true;
 } else {
     // I'm a window... sad trombone.
 }
@@ -55,6 +57,9 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             undefinedRequirements,
             requirements = [],
             requiredClasses;
+        var $ti_meout = setTimeout(function () {
+            console.log('did not define ' + className);
+        }, 1000)
         if (!definedClass) {
             requiredClasses = getRequiredClasses(config);
             requiredTemplates = getRequiredTemplates(config, className);
@@ -143,7 +148,8 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 }
                 meph.fire(meph.events.definedClass, className);
                 meph.fire(meph.events.definedClass + className + javascriptType, className);
-
+                //console.log(className);
+                clearTimeout($ti_meout);
                 return getDefinedClass(className);
             }
             if (requirements.length === 0) {
@@ -619,7 +625,8 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
 
         iframe.setAttribute('src', uri);
         iframe.classList.add('u4-iframe');
-        document.body.appendChild(iframe);
+        if (document && document.body)
+            document.body.appendChild(iframe);
         return iframe;
     }
 
@@ -2074,7 +2081,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
 
         frameworkPromise = new Promise(function (resolve, failed) {
             frameworkReady = resolve;
-            if (getDefinedClass('mobile.Application', meph)) {
+            if (getDefinedClass('util.Observable', meph)) {
                 meph.fire(meph.events.frameworkReady);
 
             }
@@ -2089,6 +2096,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 meph.mouse = meph.mouse || { position: { x: 0, y: 0 } }
                 meph.workerthread = workerthread;
                 if (!workerthread) {
+                    console.log('adding mouse move ')
                     document.body.addEventListener('mousemove', function (e) {
                         if (MEPH.util && MEPH.util.Dom)
                             meph.mouse.position = MEPH.util.Dom.getScreenEventPositions(e).first();
@@ -2099,7 +2107,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         return frameworkPromise;
     }
     meph.on(meph.events.definedClass, function (className) {
-        if (getDefinedClass('mobile.Application', meph)) {
+        if (getDefinedClass('util.Observable', meph)) {
             meph.fire(meph.events.frameworkReady);
             meph.removeListeners(meph.events.definedClass, meph);
         }
@@ -2109,7 +2117,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             frameworkReady();
     });
     var loadpromise = null;
-    if (getDefinedClass('mobile.Application', meph)) {
+    if (getDefinedClass('util.Observable', meph)) {
         meph.fire(meph.events.frameworkReady);
 
     }
@@ -2128,7 +2136,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         }).then(function () {
             return meph.requires($meph + '.util.Template');
         }).then(function () {
-            return meph.requires($meph + '.util.Observable', $meph + '.mobile.Application');
+            return meph.requires($meph + '.util.Observable');
         });
         //meph.loadScripts(meph.requiredFiles);
     }
