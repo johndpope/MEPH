@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.ScaleTuning",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){if(a==null||a==undefined){a=100}this.callParent(Operator.SCALE_TUNING,a)}});

@@ -48,7 +48,7 @@
             });;
         })).then(function () {
             return true;
-        }).catch(function (e) {
+        })['catch'](function (e) {
             MEPH.Log(e);
             return false;
         });

@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.VelocityOverride",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.SubstitutionOperator",statics:{},initialize:function(a){if(a==null||a==undefined){a=-1}this.callParent(Operator.VELOCITY,a)}});

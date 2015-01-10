@@ -24,7 +24,7 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
         me.nodecontrols.push('detune');
         me.nodecontrols.push('typeinput');
 
-        me.super();
+        me.great();
 
         me.typesource = ['sine', 'square', 'sawtooth', 'triangle', 'custom'];
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -38,7 +38,7 @@ MEPH.define('MEPH.audio.graph.node.OscillatorNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.typesource = me.typesource.select();
         me.title = 'Oscillator';
         me.typefieldTitle = 'type';

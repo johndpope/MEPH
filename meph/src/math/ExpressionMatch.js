@@ -6,10 +6,10 @@
             switch (expression.type) {
                 case Expression.type.integral:
                     //Integral of a constant
-                    var respectTo = expression.part(Expression.function.respectTo).val;
+                    var respectTo = expression.part(Expression['function'].respectTo).val;
                     var integral = Expression.integral(Expression.variable('#C'), respectTo);
-                    var v = expression.part(Expression.function.input);
-                    var dx = expression.part(Expression.function.respectTo);
+                    var v = expression.part(Expression['function'].input);
+                    var dx = expression.part(Expression['function'].respectTo);
                     var variable = Expression.variable(v.val);
                     if (expression.equals(integral)) {
                         result.push(Expression.addition(Expression.multiplication(variable, Expression.variable(dx)), Expression.variable('c')));

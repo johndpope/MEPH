@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.ExclusiveClass",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){this.callParent(Operator.EXCLUSIVE_CLASS,a||0)}});

@@ -7,7 +7,7 @@
         //Arrange
         MEPH.create('MEPH.identity.IdentityProvider').then(function ($class) {
             //Act
-            var instance = new $class();
+            var instance = new $class({ providers: [] });
 
             //Assert
             expect(instance).theTruth('an identity provider could not be created.');

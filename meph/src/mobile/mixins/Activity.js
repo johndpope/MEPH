@@ -149,7 +149,7 @@ MEPH.define('MEPH.mobile.mixins.Activity', {
             if (me.show) {
                 return me.open().then(function () {
                     return { success: true };
-                }).catch(function () {
+                })['catch'](function () {
                     return { success: false, error: new Error('There was a problem opening: Activity.js') };
                 });
             }
@@ -182,7 +182,7 @@ MEPH.define('MEPH.mobile.mixins.Activity', {
             if (me.show) {
                 return me.show().then(function () {
                     return { success: true };
-                }).catch(function () {
+                })['catch'](function () {
                     return { success: false, error: new Error('There was a problem opening: Activity.js') };
                 });
             }
@@ -259,7 +259,7 @@ MEPH.define('MEPH.mobile.mixins.Activity', {
                 else {
                     return me.hide().then(function () {
                         return { success: true };
-                    }).catch(function () {
+                    })['catch'](function () {
                         return { success: false, error: new Error('There was a problem opening: Activity.js') };
                     });
                 }
@@ -314,7 +314,7 @@ MEPH.define('MEPH.mobile.mixins.Activity', {
             }
             return Promise.resolve().then(function () {
                 return { success: true };
-            }).catch(function () {
+            })['catch'](function () {
                 return { success: false, error: new Error('There was a problem opening: Activity.js') };
             });
         });

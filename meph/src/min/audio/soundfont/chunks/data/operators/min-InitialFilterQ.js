@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.InitialFilterQ",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){this.callParent(Operator.INITIAL_FILTER_Q,a||0)}});

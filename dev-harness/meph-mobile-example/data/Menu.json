@@ -18,6 +18,13 @@
                     "path": "signal/processing"
                 },
                 {
+                    "viewId": "BUILD_MANAGER",
+                    "description": "Build Manager",
+                    "iconType": "launch",
+                    "itemType": "launch",
+                    "path": "build/manager"
+                },
+                {
                     "viewId": "MEPH009",
                     "description": "Communication",
                     "iconType": "launch",

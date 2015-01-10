@@ -4,7 +4,16 @@
  *
  **/
 MEPH.define('MEPH.util.Manifest', {
-    requires: ['MEPH.mobile.services.MobileServices'],
+    requires: ['MEPH.mobile.services.MobileServices',
+        'MEPH.util.Dom',
+        'MEPH.util.String',
+        'MEPH.util.Template',
+        'MEPH.mobile.Application',
+        'MEPH.application.Application',
+        'MEPH.util.Array',
+        'MEPH.bind.Binder',
+        'MEPH.dom.ControlLoader',
+        'MEPH.util.Observable'],
     /**
      * Gets all the views in the application.
      **/
@@ -24,7 +33,7 @@ MEPH.define('MEPH.util.Manifest', {
             viewConfigs.foreach(function (x) {
                 promise = promise.then(function () {
                     MEPH.create(x.view);
-                }).catch(function (error) {
+                })['catch'](function (error) {
                     MEPH.Log(error);
                 });;
             })

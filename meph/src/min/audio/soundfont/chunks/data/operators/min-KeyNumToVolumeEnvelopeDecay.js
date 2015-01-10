@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.KeyNumToVolumeEnvelopeDecay",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){this.callParent(Operator.KEYNUM_TO_RecordL_ENV_DECAY,a||0)}});

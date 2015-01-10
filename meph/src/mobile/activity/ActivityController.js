@@ -67,7 +67,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                     MEPH.Log('start activity from path.');
                     return me.startActivityFromPath(state.path, false)
                 }
-            }).catch(function (e) {
+            })['catch'](function (e) {
                 MEPH.Log(e);
             });
             return me.activityControllerPromise;
@@ -99,7 +99,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         }).then(function () {
 
             MEPH.Log('activity started from path.');
-        }).catch(function (e) {
+        })['catch'](function (e) {
 
             MEPH.Log('activity failed to start.');
             throw e;
@@ -184,10 +184,10 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         var me = this;
         MEPH.Log('onstartview');
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
-            return me.startActivity(options).catch(function () {
+            return me.startActivity(options)['catch'](function () {
                 MEPH.Log.apply(MEPH, arguments);
             });
-        }).catch(function (e) {
+        })['catch'](function (e) {
             MEPH.Log(e);
         }).then(function () {
             MEPH.Log('view started');
@@ -205,7 +205,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
                 }
                 return result;
             });;
-        }).catch(function (e) {
+        })['catch'](function (e) {
             MEPH.Log(e);
         });
         return me.activityControllerPromise;
@@ -214,7 +214,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
         var me = this;
         me.activityControllerPromise = me.activityControllerPromise.then(function () {
             return me.closeActivity(options.activity);
-        }).catch(function (e) {
+        })['catch'](function (e) {
             MEPH.Log(e);
         }).then(function () {
             me.setCurrentActivity(null);
@@ -310,7 +310,7 @@ MEPH.define('MEPH.mobile.activity.ActivityController', {
 
                 MEPH.publish(MEPH.Constants.ActivityStarted, { activity: activity });
                 return result;
-            }).catch(function (error) {
+            })['catch'](function (error) {
                 MEPH.Log(error);
             });;
         })

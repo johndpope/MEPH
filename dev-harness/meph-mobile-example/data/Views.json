@@ -18,6 +18,11 @@
             "path": "/sig/process"
         },
         {
+            "viewId": "BUILD_MANAGER",
+            "view": "MEPHControls.build.view.BuildManager",
+            "path": "/build/manager"
+        },
+        {
             "viewId": "MEPH0102",
             "view": "MEPHControls.music.view.MusicVisualizer",
             "controller": "MEPHControls.music.controller.Controller",

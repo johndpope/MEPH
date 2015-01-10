@@ -214,7 +214,7 @@ MEPH.define('MEPH.mobile.application.menu.ApplicationMenu', {
         if (clickResult instanceof Promise) {
             return clickResult.then(function (result) {
                 return handler(result);
-            }).catch(function (error) {
+            })['catch'](function (error) {
                 MEPH.Log(error);
             });;
         }

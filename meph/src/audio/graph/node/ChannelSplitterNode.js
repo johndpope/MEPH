@@ -18,7 +18,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelSplitterNode', {
         me.nodecontrols.push('buffer4output');
         me.nodecontrols.push('bufferinput');
 
-        me.super();
+        me.great();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeOutputs.push(me.createOutput('buffer2', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -27,7 +27,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelSplitterNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.buffer2output.left = false;
         me.buffer3output.left = false;
         me.buffer4output.left = false;

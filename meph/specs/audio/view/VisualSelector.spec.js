@@ -14,7 +14,7 @@
 
     });
 
-    it('can render a VisualSelector', function () {
+    it('can render a VisualSelector', function (done) {
         MEPH.render('MEPH.audio.view.VisualSelector', 'visualizer').then(function (r) {
             var results = r.res;
             var app = r.app;

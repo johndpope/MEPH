@@ -26,12 +26,12 @@ MEPH.define('MEPH.audio.graph.node.controls.Control', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
     },
     onLoaded: function () {
         var me = this;
         me.fontsize = me.fontsize || '12px';
-        me.super();
+        me.great();
         me.defineTextX();
     },
     /**

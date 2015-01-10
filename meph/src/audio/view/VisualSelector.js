@@ -57,7 +57,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
         me.markerBtns = [];
         me.stretchControls = [];
         me.$signalProcessor = new SignalProcessor();;
@@ -898,7 +898,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
             }
         }
         else {
-            me.super();
+            me.great();
         }
     },
 
@@ -1014,7 +1014,7 @@ MEPH.define('MEPH.audio.view.VisualSelector', {
                         me.calculatedBpm = bpm;
                     }, 10)
                 }
-            }).catch(function (e) {
+            })['catch'](function (e) {
                 MEPH.Log(e);
             });
         }

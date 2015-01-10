@@ -19,7 +19,7 @@ MEPH.define('MEPH.audio.graph.node.SequenceNode', {
         me.nodecontrols.push('bufferoutput');
 
         me.sequences = me.sequences || MEPH.util.Observable.observable([]);
-        me.super();
+        me.great();
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -27,7 +27,7 @@ MEPH.define('MEPH.audio.graph.node.SequenceNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
 
         me.sequences = me.sequences || MEPH.util.Observable.observable([]);
 

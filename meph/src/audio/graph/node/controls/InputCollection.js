@@ -13,7 +13,7 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
 
        me.on('altered', function (type, args) {
             if (args.path === 'collection') {
@@ -30,7 +30,7 @@ MEPH.define('MEPH.audio.graph.node.controls.InputCollection', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
 
         me.getFirstElement().dispatchEvent(MEPH.createEvent('height', { height: me.controlheight }));
     },

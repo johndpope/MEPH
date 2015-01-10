@@ -22,7 +22,7 @@ MEPH.define('MEPH.audio.processor.RateTransposer', {
         me.storeBuffer = new MEPH.audio.processor.FIFOSampleBuffer(1);
         me.tempBuffer = new MEPH.audio.processor.FIFOSampleBuffer(1);
         me.pAAFilter = new MEPH.audio.effects.AAFilter(32);
-        me.super();
+        me.great();
     },
     getOutput: function () {
         var me = this;

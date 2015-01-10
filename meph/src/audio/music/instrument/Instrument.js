@@ -31,7 +31,7 @@ MEPH.define('MEPH.audio.music.instrument.Instrument', {
             return audio.load(x.file, x.type, option);
         })).then(function () {
             return true;
-        }).catch(function (e) {
+        })['catch'](function (e) {
             MEPH.Log(e);
             return false;
         });

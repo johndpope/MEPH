@@ -1092,10 +1092,11 @@ MEPH.define('MEPH.util.Array', {
             return result;
         }
     }
-}).then(function () {
+});
+(function () {
     MEPH.util.Array.create(Array.prototype, true);
     if (Float32Array)
         MEPH.util.Array.create(Float32Array.prototype, true);
     if (Float64Array)
         MEPH.util.Array.create(Float64Array.prototype, true);
-})
+})();

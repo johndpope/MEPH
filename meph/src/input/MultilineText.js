@@ -16,9 +16,7 @@ MEPH.define('MEPH.input.MultilineText', {
     },
     initialize: function () {
         var me = this;
-
-        me.callParent.apply(me, arguments);
-
+        me.great();
     },
     /**
     * @private

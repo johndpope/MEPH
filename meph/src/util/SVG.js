@@ -201,8 +201,8 @@ MEPH.define('MEPH.util.SVG', {
         if (options.strokeStyle !== 'css')
             shape.setAttributeNS(null, "style", "stroke:" + options.strokeStyle + "; stroke-width:" + options.strokeWidth + ";");
 
-        if (options.class) {
-            shape.classList.add(options.class);
+        if (options['class']) {
+            shape.classList.add(options['class']);
         }
 
         if (add) {

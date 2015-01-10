@@ -9,7 +9,7 @@ MEPH.define('MEPH.graph.SVGGraphRenderer', {
     extend: 'MEPH.graph.GraphRenderer',
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
         MEPH.graph.SVGGraphRenderer.graphtemplates = [];
     },
     clearCanvas: function (canvas) {
@@ -21,7 +21,7 @@ MEPH.define('MEPH.graph.SVGGraphRenderer', {
     },
     setViewPort: function () {
         var me = this;
-        me.super();
+        me.great();
 
         me.$viewport.on('viewportconnectionflowcomplete', me.onFlowClear.bind(me));
         me.$viewport.on('viewportconnectionflowclear', me.onFlowClear.bind(me));

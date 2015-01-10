@@ -16,7 +16,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelMergerNode', {
         me.nodecontrols.push('buffer3input');
         me.nodecontrols.push('buffer4input');
 
-        me.super();
+        me.great();
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer, { count: 100 }));
         me.nodeInputs.push(me.createInput('buffer2', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -27,7 +27,7 @@ MEPH.define('MEPH.audio.graph.node.ChannelMergerNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.title = 'Channel Merger';
     }
 });

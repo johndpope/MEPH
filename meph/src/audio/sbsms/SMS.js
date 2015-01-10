@@ -384,7 +384,7 @@ MEPH.define('MEPH.audio.sbsms.SMS', {
     trial2Start: function (c) {
         var me = this;
         if (me.band >= minTrial2Band) {
-            memset(trial2Buf[c], 0, me.h * me.res * sizeof(float));
+            memset(trial2Buf[c], 0, me.h * me.res);
         }
     },
     //void SMS :: //int c

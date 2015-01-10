@@ -349,7 +349,7 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                     }
                 }
                 b_copy.getMark(transform.transform.to).clearParts();
-                b_copy.getMark(transform.transform.to).setParts(tranformedRepeats, Expression.function.input);
+                b_copy.getMark(transform.transform.to).setParts(tranformedRepeats, Expression['function'].input);
                 return b_copy;
             }
             else if (transform.pattern) {
@@ -533,14 +533,14 @@ MEPH.define('MEPH.math.ExpressionTranslation', {
                                 }).select(function (x) { return x.copy(); });
 
                                 copyto.clearParts();
-                                copyto.setParts(res, Expression.function.input);
+                                copyto.setParts(res, Expression['function'].input);
 
                                 return copyto;
                             });
 
 
                             b_copy.getMark(transformation.transform.to).clearParts();
-                            b_copy.getMark(transformation.transform.to).setParts(partsTo, Expression.function.input);
+                            b_copy.getMark(transformation.transform.to).setParts(partsTo, Expression['function'].input);
                             return b_copy;
                         }
                     },

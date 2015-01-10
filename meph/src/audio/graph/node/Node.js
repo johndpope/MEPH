@@ -66,7 +66,7 @@ MEPH.define('MEPH.audio.graph.node.Node', {
         me.nodeInputs = MEPH.util.Observable.observable([]);
         me.nodeOutputs = MEPH.util.Observable.observable([]);
         me.id = MEPH.GUID();
-        me.super();
+        me.great();
 
 
         me.defineNodeDependentProperties();

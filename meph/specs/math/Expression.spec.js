@@ -790,7 +790,7 @@
                             Expression.multiplication(Expression.variable('a')), 'x');
 
             expression.mark('A');
-            var variable = expression.partVal(Expression.function.input);
+            var variable = expression.partVal(Expression['function'].input);
             variable.mark('B');
 
             expect(expression.mark() === 'A').toBeTruthy();

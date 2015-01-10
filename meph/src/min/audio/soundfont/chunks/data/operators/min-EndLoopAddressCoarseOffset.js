@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.EndLoopAddressCoarseOffset",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk","MEPH.audio.soundfont.chunks.data.operators.Operator"],extend:"MEPH.audio.soundfont.chunks.data.operators.SampleOperator",statics:{},properties:{},constructor:function(a){this.callParent(Operator.END_LOOP_ADDRS_COARSE_OFFSET,a)}});

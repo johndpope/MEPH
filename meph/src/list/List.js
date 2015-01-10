@@ -303,7 +303,7 @@ MEPH.define('MEPH.list.List', {
             if (previousSource) {
                 lastelement = me.getLastDomElement(previousSource);
                 me.getDomElements(info).foreach(function (el) {
-                    Dom.insertAfter(lastelement, el);
+                    MEPH.util.Dom.insertAfter(lastelement, el);
                     lastelement = el;
                 });
                 me.boundSource.removeWhere(function (x) { return x === info; });

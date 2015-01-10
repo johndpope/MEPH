@@ -33,7 +33,7 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.nodecontrols.push('reduction');
         me.nodecontrols.push('threshold');
 
-        me.super();
+        me.great();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('attack', MEPH.audio.graph.node.Node.Number, { path: 'attack.value' }));
         me.nodeInputs.push(me.createInput('knee', MEPH.audio.graph.node.Node.Number, { path: 'knee.value' }));
@@ -53,6 +53,6 @@ MEPH.define('MEPH.audio.graph.node.DynamicsCompressorNode', {
         me.reductionTitle = 'reduction';
         me.releaseTitle = 'release';
         me.thresholdTitle = 'threshold';
-        me.super();
+        me.great();
     }
 });

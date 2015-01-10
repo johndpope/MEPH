@@ -22,7 +22,7 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
         me.nodecontrols.push('curve');
         me.nodecontrols.push('oversample');
 
-        me.super();
+        me.great();
 
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
@@ -37,7 +37,7 @@ MEPH.define('MEPH.audio.graph.node.WaveShaperNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.oversampletypes = me.oversampletypes.select()
         me.title = 'Wave Shaper';
         me.curveTitle = 'curve';

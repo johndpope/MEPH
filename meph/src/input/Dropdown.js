@@ -52,7 +52,7 @@ MEPH.define('MEPH.input.Dropdown', {
     },
     onLoaded: function () {
         var me = this;;
-        me.super();
+        me.great();
         me.updateselectDom();
     },
     /**

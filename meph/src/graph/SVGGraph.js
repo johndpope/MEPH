@@ -6,7 +6,7 @@ MEPH.define('MEPH.graph.SVGGraph', {
     extend: 'MEPH.graph.Graph',
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
         me.on('nodeadded', function (type, evtfunc, args) {
 
             args.added.foreach(function (x) {

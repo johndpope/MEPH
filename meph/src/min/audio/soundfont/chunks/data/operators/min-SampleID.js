@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.SampleID",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.IndexOperator",statics:{},initialize:function(a){this.callParent(Operator.SAMPLE_ID,a||0)}});

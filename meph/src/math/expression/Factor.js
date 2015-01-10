@@ -129,7 +129,7 @@ MEPH.define('MEPH.math.expression.Factor', {
         getCount: function (expression) {
             switch (expression.type) {
                 case Expression.type.power:
-                    return expression.partOrDefault(Expression.function.power);
+                    return expression.partOrDefault(Expression['function'].power);
                 default:
                     return 1;
             }
@@ -142,7 +142,7 @@ MEPH.define('MEPH.math.expression.Factor', {
         getExp: function (expression) {
             switch (expression.type) {
                 case Expression.type.power:
-                    return expression.partOrDefault(Expression.function.base);
+                    return expression.partOrDefault(Expression['function'].base);
                 default:
                     return expression;
             }
@@ -210,9 +210,9 @@ MEPH.define('MEPH.math.expression.Factor', {
             var Factor = MEPH.math.expression.Factor;
             var copy = expression.copy();
             var flattenedCopy = Expression.FlattenPower(copy);
-            var power = flattenedCopy.partOrDefault(Expression.function.power);
+            var power = flattenedCopy.partOrDefault(Expression['function'].power);
             var num = Factor.getNumerical(power)
-            var factor = new Factor(flattenedCopy.partOrDefault(Expression.function.base), num);
+            var factor = new Factor(flattenedCopy.partOrDefault(Expression['function'].base), num);
             return [factor];
         },
         /**

@@ -35,7 +35,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
         me.nodecontrols.push('rolloffFactor');
         me.nodecontrols.push('panningModel');
 
-        me.super();
+        me.great();
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('coneInnerAngle', MEPH.audio.graph.node.Node.Number));
@@ -59,7 +59,7 @@ MEPH.define('MEPH.audio.graph.node.PannerNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
 
         me.title = 'Panner';
         me.distanceModelTypes = me.distanceModelTypes.select();

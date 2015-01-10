@@ -35,6 +35,21 @@ if (!String.prototype.startsWith) {
     });
 }
 
+if (!String.prototype.splitAddLast) {
+    Object.defineProperty(String.prototype, 'splitAddLast', {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: function (_str, add) {
+            var str = this;
+            var index = str.lastIndexOf(_str);
+            if (index !== -1)
+                return str.substr(0, index + 1) + add + str.substr(index + 1, str.length - index);
+            return add + str;
+        }
+    });
+}
+
 if (!String.prototype.trim)
     String.prototype.trim = function () { return this.replace(/^\s\s*/, '').replace(/\s\s*$/, ''); };
 
@@ -211,3 +226,6 @@ if (!String.prototype.nth)
             return "";
         return j + "th";
     }
+
+
+MEPH.define('MEPH.util.String', {});

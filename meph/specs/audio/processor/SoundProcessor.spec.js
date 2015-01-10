@@ -28,7 +28,7 @@
         var signal = (new Float32Array(len)).select(function (i, x) {
             return .9 * Math.cos((x / fs) * 2 * 440 * Math.PI);
         });
-        debugger
+        
         var output = MEPH.audio.processor.SoundProcessor.Process(signal);
         var resource = {
             buffer: {

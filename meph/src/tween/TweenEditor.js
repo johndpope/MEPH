@@ -66,7 +66,7 @@ MEPH.define('MEPH.tween.TweenEditor', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.renderer = new MEPH.util.SVG();
         me.renderer.setCanvas(me.svg);
         me.appendEvents();

@@ -20,7 +20,7 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
         me.nodecontrols.push('bufferinput');
         me.nodecontrols.push('normalize');
         me.nodecontrols.push('convobuffer');
-        me.super();
+        me.great();
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('normalize', MEPH.audio.graph.node.Node.Boolean));
         me.nodeInputs.push(me.createInput('convobuffer', MEPH.audio.graph.node.Node.String, { path: 'buffer' }));
@@ -46,6 +46,6 @@ MEPH.define('MEPH.audio.graph.node.Convolver', {
         me.onResourcesUpdated();
         //me.inputsy = 0;
         me.title = 'Convolver';
-        me.super();
+        me.great();
     }
 });

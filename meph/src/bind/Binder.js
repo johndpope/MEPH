@@ -458,7 +458,7 @@ MEPH.define('MEPH.bind.Binder', {
                 me.setValueOnDom(result, dom, propertyPath);
             });
         }
-        promise = promise.catch(function (error) {
+        promise = promise['catch'](function (error) {
             MEPH.Log(error);
             throw error;
         });

@@ -58,7 +58,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
         //me.nodecontrols.push('bufferinput');
         //me.nodecontrols.push('gain');
 
-        me.super();
+        me.great();
         if (input && output) {
             input.nodeInputs.foreach(function (inp) {
                 me.nodeInputs.push(me.createInput(inp.name, inp.type));
@@ -200,7 +200,7 @@ MEPH.define('MEPH.audio.graph.node.GeneratedNode', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.title = 'Generated Node';
         me.setGeneratedProperties(me.$input, me.$output);
 

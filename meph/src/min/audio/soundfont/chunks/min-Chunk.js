@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.Chunk",{requires:["MEPH.audio.soundfont.utils.SFByteArray"],extend:"MEPH.audio.soundfont.SFObject",statics:{RIFF_TAG:"RIFF",LIST_TAG:"LIST"},properties:{_format:null,_chunkSize:0},initialize:function(a,b){this.callParent(a);if(b!=null){this.parse(b)}},parse:function(a){}});

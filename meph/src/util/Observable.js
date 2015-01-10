@@ -177,7 +177,7 @@ MEPH.define('MEPH.util.Observable', {
                                     var old = change.oldValue;
                                     var value = obj[change.name];
 
-                                    this.fire('beforeset' + propName, { old: old, new: value });
+                                    this.fire('beforeset' + propName, { old: old, 'new': value });
 
                                     removeAlteredListeners(old, this);
                                     attachAlteredListeners(value, this, propName);
@@ -218,7 +218,7 @@ MEPH.define('MEPH.util.Observable', {
                                     set: function (propName, value) {
                                         var old = this[nonEnumerablePropertyPrefix + propName];
 
-                                        this.fire('beforeset' + propName, { old: old, new: value });
+                                        this.fire('beforeset' + propName, { old: old, 'new': value });
 
                                         removeAlteredListeners(old, this);
                                         attachAlteredListeners(value, this, propName);

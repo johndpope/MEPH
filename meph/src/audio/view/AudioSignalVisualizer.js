@@ -42,7 +42,7 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
         me.markerBtns = [];
         me.$signalProcessor = new SignalProcessor();;
 
@@ -619,7 +619,7 @@ MEPH.define('MEPH.audio.view.AudioSignalVisualizer', {
                         me.calculatedBpm = bpm;
                     }, 10)
                 }
-            }).catch(function (e) {
+            })['catch'](function (e) {
                 MEPH.Log(e);
             });
         }

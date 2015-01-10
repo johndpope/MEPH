@@ -165,14 +165,14 @@ MEPH.define('MEPH.remoting.RemotingController', {
             if (!me.$rtcConnections.some(function (x) { return x.remoteUser === remote.remoteUser; })) {
                 me.sendRequest(remote.remoteUser);
                 //me.$rtcConnections.push({
-                //    connectionType: MEPH.service.rtc.Connection.ConnectionType.default,
+                //    connectionType: MEPH.service.rtc.Connection.ConnectionType['default'],
                 //    remoteUser: remote.remoteUser,
                 //    state: MEPH.remoting.RemotingController.sentRequest
                 //});
                 //me.signalService.sendMessage({
                 //    type: MEPH.Constants.MAKE_RTC_CALL,
                 //    from: me.getId(),
-                //    connectionType: MEPH.service.rtc.Connection.ConnectionType.default,
+                //    connectionType: MEPH.service.rtc.Connection.ConnectionType['default'],
                 //    message: MEPH.remoting.RemotingController.REQUEST_TO_CALL,
                 //    fromName: me.getUserName()
                 //}, remote.remoteUser, MEPH.Constants.ACTIVITY_CONTROLLER_CHANNEL);
@@ -183,14 +183,14 @@ MEPH.define('MEPH.remoting.RemotingController', {
     sendRequest: function (remoteUser, type) {
         var me = this;
         me.$rtcConnections.push({
-            connectionType: type || MEPH.service.rtc.Connection.ConnectionType.default,
+            connectionType: type || MEPH.service.rtc.Connection.ConnectionType['default'],
             remoteUser: remoteUser,
             state: MEPH.remoting.RemotingController.sentRequest
         });
         me.signalService.sendMessage({
             type: MEPH.Constants.MAKE_RTC_CALL,
             from: me.getId(),
-            connectionType: type || MEPH.service.rtc.Connection.ConnectionType.default,
+            connectionType: type || MEPH.service.rtc.Connection.ConnectionType['default'],
             message: MEPH.remoting.RemotingController.REQUEST_TO_CALL,
             fromName: me.getUserName()
         }, remoteUser, MEPH.Constants.ACTIVITY_CONTROLLER_CHANNEL);
@@ -357,7 +357,7 @@ MEPH.define('MEPH.remoting.RemotingController', {
             if (result) {
                 me.remotes.push({ remoteUser: channelmessage.message.from });
             }
-        }).catch(function () {
+        })['catch'](function () {
         });
     },
     getControlAcknowledgement: function (channelmessage) {

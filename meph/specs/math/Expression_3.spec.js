@@ -30,9 +30,9 @@
     it('can flatten a power expression, from a tree', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
             var power = Expression.power(Expression.power('x', 2), 2);
-            var flattenedAddition = Expression.Flatten(power, Expression.function.power);
+            var flattenedAddition = Expression.Flatten(power, Expression['function'].power);
 
-            expect(flattenedAddition.partOrDefault(Expression.function.power).partOrDefault(Expression.type.variable) === 4).theTruth('power in correct');
+            expect(flattenedAddition.partOrDefault(Expression['function'].power).partOrDefault(Expression.type.variable) === 4).theTruth('power in correct');
 
         }).catch(function (e) {
             expect(e).caught();
@@ -45,8 +45,8 @@
     it('can flatten a power expression with (x^2)^a, from a tree', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
             var power = Expression.power(Expression.power('x', 2), 'a');
-            var flattenedAddition = Expression.Flatten(power, Expression.function.power);
-            var pow = flattenedAddition.partOrDefault(Expression.function.power);
+            var flattenedAddition = Expression.Flatten(power, Expression['function'].power);
+            var pow = flattenedAddition.partOrDefault(Expression['function'].power);
             expect(pow.type === Expression.type.multiplication).theTruth('power in correct');
             expect(pow.getParts().length === 2).toBeTruthy();
         }).catch(function (e) {
@@ -60,8 +60,8 @@
     it('can flatten a power expression with (x^a)^2, from a tree', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
             var power = Expression.power(Expression.power('x', 'a'), 2);
-            var flattenedAddition = Expression.Flatten(power, Expression.function.power);
-            var pow = flattenedAddition.partOrDefault(Expression.function.power);
+            var flattenedAddition = Expression.Flatten(power, Expression['function'].power);
+            var pow = flattenedAddition.partOrDefault(Expression['function'].power);
             expect(pow.type === Expression.type.multiplication).theTruth('power in correct');
             expect(pow.getParts().length === 2).toBeTruthy();
         }).catch(function (e) {
@@ -75,8 +75,8 @@
     it('can flatten a power expression with (((x^2)^2)^2), from a tree', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
             var power = Expression.power(Expression.power(Expression.power('x', 2), 2), 2);
-            var flattenedAddition = Expression.Flatten(power, Expression.function.power);
-            expect(flattenedAddition.partOrDefault(Expression.function.power).partOrDefault(Expression.type.variable) === 8).theTruth('power in correct');
+            var flattenedAddition = Expression.Flatten(power, Expression['function'].power);
+            expect(flattenedAddition.partOrDefault(Expression['function'].power).partOrDefault(Expression.type.variable) === 8).theTruth('power in correct');
 
         }).catch(function (e) {
             expect(e).caught();
@@ -88,8 +88,8 @@
     it('can flatten a power expression with ((x^2)^2), from a tree', function (done) {
         MEPH.requires('MEPH.math.Expression').then(function () {
             var power = Expression.power(Expression.power(Expression.variable('x'), Expression.variable('2')), Expression.variable('2'));
-            var flattenedAddition = Expression.Flatten(power, Expression.function.power);
-            expect(flattenedAddition.partOrDefault(Expression.function.power).partOrDefault(Expression.type.variable) === 4).theTruth('power in correct');
+            var flattenedAddition = Expression.Flatten(power, Expression['function'].power);
+            expect(flattenedAddition.partOrDefault(Expression['function'].power).partOrDefault(Expression.type.variable) === 4).theTruth('power in correct');
 
         }).catch(function (e) {
             expect(e).caught();

@@ -30,7 +30,7 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         me.nodecontrols.push('loopEnd');
         me.nodecontrols.push('loopStart');
         me.nodecontrols.push('playbackRate');
-        me.super();
+        me.great();
         me.nodeInputs.push(me.createInput('source', MEPH.audio.graph.node.Node.String));
         me.nodeInputs.push(me.createInput('loop', MEPH.audio.graph.node.Node.Boolean));
         me.nodeInputs.push(me.createInput('loopEnd', MEPH.audio.graph.node.Node.Number));
@@ -56,7 +56,7 @@ MEPH.define('MEPH.audio.graph.node.AudioBufferSourceNode', {
         me.audiobuffersources = MEPH.util.Observable.observable([]);
         me.subscription(MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onResourcesUpdated.bind(me)));
         me.onResourcesUpdated();
-        me.super();
+        me.great();
         me.title = 'Audio Buffer Source';
         me.hideConnector = true;
         me.sourceTitle = 'source';

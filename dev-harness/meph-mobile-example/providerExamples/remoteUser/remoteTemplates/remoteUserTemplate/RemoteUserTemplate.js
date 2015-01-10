@@ -17,7 +17,7 @@
         me.callParent.apply(me, arguments);
         MEPH.MobileServices.get('remotingController').then(function (remotingController) {
             me.remotingController = remotingController;
-        }).catch(function (error) {
+        })['catch'](function (error) {
             MEPH.Log(error);
         });
         me.on('change_data', me.handleConnection.bind(me));

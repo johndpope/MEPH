@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.StartLoopAddressOffset",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.SampleOperator",statics:{},initialize:function(a){this.callParent(Operator.START_LOOP_ADDRS_OFFSET,a||0)}});

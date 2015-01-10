@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.SampleOperator",{requires:[],extend:"MEPH.audio.soundfont.chunks.data.operators.Operator",statics:{},initialize:function(b,a){this.callParent(b,a||0)}});

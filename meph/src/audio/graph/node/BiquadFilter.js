@@ -30,7 +30,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
         me.nodecontrols.push('detune');
         me.nodecontrols.push('gain');
         me.nodecontrols.push('typeinput');
-        me.super();
+        me.great();
         var types = ['lowpass', 'highpass', 'bandpass', 'lowshelf', 'highshelf', 'peaking', 'notch', 'allpass'];
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.AudioBuffer));
         me.nodeInputs.push(me.createInput('q', MEPH.audio.graph.node.Node.Number, { path: 'Q.value' }));
@@ -45,7 +45,7 @@ MEPH.define('MEPH.audio.graph.node.BiquadFilter', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.title = 'Biquad Filter';
 
         me.qTitle = 'Q';

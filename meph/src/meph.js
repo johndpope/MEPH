@@ -88,12 +88,10 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                                     });;
             }
             if (requirements.length === 0) {
-                requirements.push(Promise.resolve());
+                //requirements.push(Promise.resolve());
             }
 
-            return Promise.all(requirements).then(function (results) {
-                return meph.beforeResourceDefined(className, results)
-            }).then(function (results) {
+            var complete = function (results) {
                 var addNoTemplateInfo = false;
                 if (results.results && results.results[0]) {
                     meph.Array(results.results)
@@ -131,18 +129,36 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                 var superclass = getExtendingClass(config);
                 var nameAndSpace = createClassPath(className);
                 nameAndSpace.previous[nameAndSpace.name] = superclass.extend(className, config);
+                config.alternateNames = config.alternateNames && Array.isArray(config.alternateNames) ? config.alternateNames : (config.alternateNames ? [config.alternateNames] : []);
+                try {
+                    addDefinedClassInformation({
+                        alias: config.alias ? config.alias.toLowerCase() : className,
+                        alternateNames: config.alternateNames,
+                        classifiedName: className,
+                        config: config
+                    });
+                }
+                catch (e) {
+                    console.log(e);
+                }
                 meph.fire(meph.events.definedClass, className);
                 meph.fire(meph.events.definedClass + className + javascriptType, className);
-                config.alternateNames = config.alternateNames && Array.isArray(config.alternateNames) ? config.alternateNames : (config.alternateNames ? [config.alternateNames] : []);
-                addDefinedClassInformation({
-                    alias: config.alias ? config.alias.toLowerCase() : className,
-                    alternateNames: config.alternateNames,
-                    classifiedName: className,
-                    config: config
-                });
 
                 return getDefinedClass(className);
-            });
+            }
+            if (requirements.length === 0) {
+                var tempres = meph.beforeResourceDefined(className, []);
+
+                var res = complete(tempres);
+                return Promise.resolve().then(function () {
+                    return res;
+                });
+            }
+            else {
+                return Promise.all(requirements).then(function (results) {
+                    return meph.beforeResourceDefined(className, results)
+                }).then(complete);
+            }
         }
         return Promise.resolve().then(function () {
             return definedClass;
@@ -287,9 +303,14 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         for (i = 0 ; i < arguments.length ; i++) {
             args.push(arguments[i]);
         }
-        return Promise.all(args.select(function (x) {
-            return meph.create(x);
-        }));
+        var res = [];
+        for (i = 0 ; i < args.length; i++) {
+            res.push(meph.create(args[i]));
+        }
+        return Promise.all(res);
+        //args.select(function (x) {
+        //    return meph.create(res);
+        //})
     }
 
     /**
@@ -372,11 +393,14 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     meph.retrieveRequiredClass = function (details) {
         var promise,
             resolutionReached,
-            retrieving = meph.Array(listeners).contains(function (x) {
+            retrieving = meph.Array(listeners).some(function (x) {
                 return x.type === meph.events.definedClass + details.classifiedName + details.type
             }),
             definedClass;
-
+        if (window.SingleFileMode) {
+            debugger
+            retrieving = true;
+        }
         if (templateType === details.type) {
             definedClass = getDefinedTemplate(details.classifiedName);
         }
@@ -433,12 +457,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      * @param {String} path
      **/
     meph.getClassPath = function (path) {
-        var closestMatch = paths.max(function (x) {
+        var closestMatch = paths.max && path.startsWith ? paths.max(function (x) {
             if (path.startsWith(x.prefix)) {
                 return x.prefix.length;
             }
             return -1;
-        }),
+        }) : paths[0],
         offset;
         offset = closestMatch.prefix.length + classPathSepartor.length;
         classPath = path.substring(offset, path.length).split('.').join(folderPathSeparator);
@@ -446,8 +470,12 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
     }
 
     meph.getSource = function (name, extension) {
-        var path = meph.getClassPath(name);
-        return meph.get(path + extension);
+        var path = meph.getSourcePath(name, extension);
+        return meph.get(path);
+    }
+    meph.getSourcePath = function (name, extension) {
+        var path = meph.getClassPath(name) + extension;
+        return path;
     }
 
     meph.emptyFunction = function () { };
@@ -529,7 +557,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
 
     meph.requestAuthentication = function (path, clientId, returnUri, scope, token, state, client_secret) {
         path = path || 'http://localhost:52154/OAuth/Authorize';
-        scope = scope || 'agresso';
+        scope = scope || 'meph';
         client_secret = client_secret || 'secret';
         token = token || 'token';
         state = state || 'state';
@@ -687,7 +715,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                         script.setAttribute(i, attributes[i] || '');
                     }
                 }
-                if (innerHTML){
+                if (innerHTML) {
                     script.innerHTML = innerHTML;
                 }
                 script.onload = callback;
@@ -807,6 +835,8 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             { type: 'self', shortCut: 'self' },
             { type: 'controller', shortCut: 'ct$' }
         ];
+
+
     meph.patternTypes = ['presenter', 'controller', 'view', 'model', 'viewmodel'];
     meph.templateType = templateType;
     meph.folderPathSeparator = folderPathSeparator;
@@ -838,7 +868,8 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
      * @param {String} prefix
      **/
     meph.setPath = function (path, prefix) {
-        meph.Array(meph.paths);
+        if (meph.Array)
+            meph.Array(meph.paths);
         if (meph.paths.length > 0) {
             meph.paths.removeWhere(function (x) { return x.prefix === prefix; });
         }
@@ -847,6 +878,9 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             prefix: prefix
         });
     };
+
+    meph.setPath($frameWorkPath, $meph);
+
     meph.setInterval = function () {
         return setInterval.apply(null, arguments);
     }
@@ -1311,6 +1345,10 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
             meph.fire(meph.events.definedTemplate, templateInfo);
         }
     }
+    meph.addTemplateBatchInfo = function (source) {
+        templates.push.apply(templates, source);
+    }
+
     var addTemplateInformation = meph.addTemplateInformation;
 
     var classes = [];
@@ -1728,7 +1766,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         var initializing = false,
             fnTest = /xyz/.test(function () {
                 xyz;
-            }) ? /\b_super\b/ : /.*/;
+            }) ? /\b_great\b/ : /.*/;
 
         // The base Class implementation (does nothing)
         this.Class = function () {
@@ -1830,13 +1868,13 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                     var nooverrides = false;
                     if (!_addsuper) {
 
-                        if ((prop.requires || []).all(function (x) {
+                        if (!(prop.requires || []).some(function (x) {
 
                             //    var re = new RegExp("\b" + x.split('.').last() + "\b/ : /.*");
                             //    var $fnTest = /xyz/.test(function () {
                             //        xyz;
                             //}) ? re : /.*/;
-                            return new RegExp(x.split('.').last()).test(prop[name])
+                            return !(new RegExp(x.split('.').last()).test(prop[name]));
                         })) {
                             nooverrides = true;
                         }
@@ -1854,7 +1892,7 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
                                     // but on the super-class
                                     this.callParent = _super[name];
                                     var theargs = arguments;
-                                    this.super = function () {
+                                    this.great = function () {
                                         return _super[name].apply(this, theargs);
 
                                     }
@@ -2030,9 +2068,19 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         if (frameworkPromise) {
             return frameworkPromise;
         }
+        //if (window.templateBatchInfo && typeof (window.templateBatchInfo) === 'function') {
+        //    window.templateBatchInfo()
+        //}
+
         frameworkPromise = new Promise(function (resolve, failed) {
             frameworkReady = resolve;
+            if (getDefinedClass('mobile.Application', meph)) {
+                meph.fire(meph.events.frameworkReady);
+
+            }
         }).then(function () {
+            window.SingleFileMode = false;
+
             meph.Array(meph.connectableTypes).foreach(function (x) {
                 meph.addBindPrefixShortCuts(x.shortCut, x.type);
             });
@@ -2051,27 +2099,38 @@ var mephFrameWork = (function ($meph, $frameWorkPath, $promise, $offset) {
         return frameworkPromise;
     }
     meph.on(meph.events.definedClass, function (className) {
-        if (getDefinedClass('util.Array', meph)) {
+        if (getDefinedClass('mobile.Application', meph)) {
             meph.fire(meph.events.frameworkReady);
             meph.removeListeners(meph.events.definedClass, meph);
         }
     }, meph);
     meph.on(meph.events.frameworkReady, function () {
-        frameworkReady();
+        if (frameworkReady)
+            frameworkReady();
     });
     var loadpromise = null;
-    if (getDefinedClass('util.Array', meph)) {
+    if (getDefinedClass('mobile.Application', meph)) {
         meph.fire(meph.events.frameworkReady);
 
     }
     else {
         meph.requiredFiles = [
-                $frameWorkPath + '/util/String.js',
                 $frameWorkPath + '/util/Array.js',
+                $frameWorkPath + '/util/String.js',
                 $frameWorkPath + '/util/Dom.js',
                 $frameWorkPath + '/util/Template.js',
                 $frameWorkPath + '/util/Observable.js'];
-        loadpromise = meph.loadScripts(meph.requiredFiles);
+        //window.SingleFileMode ? Promise.resolve() : 
+        loadpromise = meph.requires($meph + '.util.Array').then(function () {
+            return meph.requires($meph + '.util.String');
+        }).then(function () {
+            return meph.requires($meph + '.util.Dom');
+        }).then(function () {
+            return meph.requires($meph + '.util.Template');
+        }).then(function () {
+            return meph.requires($meph + '.util.Observable', $meph + '.mobile.Application');
+        });
+        //meph.loadScripts(meph.requiredFiles);
     }
 
     meph.frameWorkPath = $frameWorkPath;

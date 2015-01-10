@@ -66,7 +66,7 @@
                 me.state = 'Processing file';
                 me.processAFrame(resource.buffer.buffer.buffer.getChannelData(0));
             })
-        }).catch(function (e) {
+        }).then(null, function (e) {
             console.log(e);
         }).then(function () {
 
@@ -97,7 +97,7 @@
                 me.state = 'Processing file';
                 me.processSound(resource.buffer.buffer.buffer.getChannelData(0));
             })
-        }).catch(function (e) {
+        }).then(null, function (e) {
             console.log(e);
         }).then(function () {
 
@@ -117,7 +117,7 @@
     },
     play: function (sig) {
         var sampleRate = 44100;
-        
+
         var len = sig.length;
         var resource = {
             buffer: {

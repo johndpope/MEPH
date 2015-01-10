@@ -1,12 +1,14 @@
 ﻿var index = location.pathname.indexOf('dev-harness')
 var rel = location.pathname.substr(0, index);
 var path = rel + 'meph/src';
+var buildpath = rel + 'meph';
 var mobileexample = 'dev-harness/meph-mobile-example/';
 var MEPHControlsPath = rel + mobileexample + 'controlExamples';
 var ProvidersPath = rel + mobileexample + 'providerExamples';
 mephFrameWork('MEPH', path);
 MEPH.ready().then(function () {
     MEPH.setPath(path, 'MEPH');
+    MEPH.setPath(buildpath, 'MEPHBuild');
     MEPH.setPath(MEPHControlsPath, 'MEPHControls');
     MEPH.setPath(ProvidersPath, 'Providers');
     MEPH.setPath(rel + mobileexample + 'data', 'dataviews');

@@ -10,7 +10,7 @@
         'MEPH.audio.graph.node.AudioBufferSourceNode',
         'MEPH.audio.graph.node.ChannelMergerNode',
         'MEPH.audio.graph.node.ChannelSplitterNode',
-        'MEPH.audio.graph.node.CustomNode',
+        //'MEPH.audio.graph.node.CustomNode',
         'MEPH.audio.graph.node.DelayNode',
         'MEPH.audio.graph.node.DynamicsCompressorNode',
         'MEPH.audio.graph.node.GainNode',

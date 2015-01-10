@@ -67,7 +67,7 @@ MEPH.define('MEPH.service.rtc.Connection', {
                     .then(function () {
                         return connection;
                     })
-                    .catch(function (error) {
+                    ['catch'](function (error) {
                         MEPH.Log(error);
                         throw error;
                     });

@@ -43,7 +43,7 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
 
         svg.addEventListener('mousedown', me.onMaskMouseDown.bind(me));
         svg.addEventListener('mousemove', me.onSVGMaskMouseMove.bind(me));
-        me.super();
+        me.great();
         //me.$mask.addEventListener('mouseup', me.onMaskMouseUp.bind(me));
         //me.$mask.addEventListener('mouseout', me.onMaskMouseOut.bind(me));
         //me.$mask.addEventListener('dblclick', me.onDblClick.bind(me));
@@ -67,7 +67,7 @@ MEPH.define('MEPH.graph.SVGGraphViewPort', {
     onMaskMouseDown: function (ee) {
         if (this.getCanvas() === ee.srcElement) {
             var me = this;
-            me.super();
+            me.great();
         }
     },
     getGCanvas: function () {

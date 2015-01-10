@@ -83,7 +83,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalTrig: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var x = expression.partOrDefault(Expression.function.input);
+            var x = expression.partOrDefault(Expression['function'].input);
 
             if (Factor.isNumerical(x)) {
                 var val;
@@ -167,8 +167,8 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalLog: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var x = expression.partOrDefault(Expression.function.input);
-            var base = expression.partOrDefault(Expression.function.base);
+            var x = expression.partOrDefault(Expression['function'].input);
+            var base = expression.partOrDefault(Expression['function'].base);
 
             if (Factor.isNumerical(x) && Factor.isNumerical(base)) {
                 var val = Math.log(Factor.getNumerical(x)) / Math.log(Factor.getNumerical(base));
@@ -182,7 +182,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalSqrt: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var x = expression.partOrDefault(Expression.function.input);
+            var x = expression.partOrDefault(Expression['function'].input);
 
             if (Factor.isNumerical(x) && Factor.isNumerical(base)) {
                 var val = Math.sqrt(Factor.getNumerical(x));
@@ -200,7 +200,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalAbs: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var x = expression.partOrDefault(Expression.function.input);
+            var x = expression.partOrDefault(Expression['function'].input);
             if (Factor.isNumerical(x)) {
                 var val = Math.abs(Factor.getNumerical(x));
                 if (!isNaN(val)) {
@@ -213,7 +213,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalE: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var x = expression.partOrDefault(Expression.function.input);
+            var x = expression.partOrDefault(Expression['function'].input);
             if (Factor.isNumerical(x)) {
                 var val = Math.pow(Math.E, Factor.getNumerical(x));
                 if ((val % 1) === 0) {
@@ -227,7 +227,7 @@ MEPH.define('MEPH.math.expression.Evaluator', {
 
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var x = expression.partOrDefault(Expression.function.input);
+            var x = expression.partOrDefault(Expression['function'].input);
             if (Factor.isNumerical(x)) {
                 var val = Math.log(Factor.getNumerical(x)) / Math.log(Math.E);
                 if ((val % 1) === 0) {
@@ -244,8 +244,8 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalPower: function (expression, options) {
             var Factor = MEPH.math.expression.Factor;
             var Evaluator = MEPH.math.expression.Evaluator;
-            var base = expression.partOrDefault(Expression.function.base);
-            var exponent = expression.partOrDefault(Expression.function.power);
+            var base = expression.partOrDefault(Expression['function'].base);
+            var exponent = expression.partOrDefault(Expression['function'].power);
 
             base = Evaluator.evaluate(base, options);
             exponent = Evaluator.evaluate(exponent, options);
@@ -622,10 +622,10 @@ MEPH.define('MEPH.math.expression.Evaluator', {
         evalIntegral: function (expression, options) {
             var Evaluator = MEPH.math.expression.Evaluator;
             var Factor = MEPH.math.expression.Factor;
-            var input = expression.partOrDefault(Expression.function.input);
+            var input = expression.partOrDefault(Expression['function'].input);
             expression.remove(input);
             input = Evaluator.evaluate(input, options);
-            expression.addPart(Expression.function.input, Expression.variableOr(input));
+            expression.addPart(Expression['function'].input, Expression.variableOr(input));
 
             var rules = Expression.getMatchingRules(expression);
             var integralRules = rules.where(function (x) { return x.type === Expression.type.integral; });

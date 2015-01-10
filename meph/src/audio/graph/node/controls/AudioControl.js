@@ -15,15 +15,15 @@ MEPH.define('MEPH.audio.graph.node.controls.AudioControl', {
     },
     initialize: function () {
         var me = this;
-        me.super();
+        me.great();
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
     },
     defineTextX: function () {
         var me = this;
-        me.super();
+        me.great();
 
         MEPH.util.Observable.defineDependentProperty('dragareatransform', me, ['texttransform', 'left', 'width', 'connectorxmargin', 'radius', 'bufferx'], function () {
             var result;

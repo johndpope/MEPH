@@ -15,14 +15,14 @@ MEPH.define('MEPH.audio.graph.node.OutputNode', {
         me.nodecontrols = me.nodecontrols || [];
         me.nodecontrols.push('bufferinput');
 
-        me.super();
+        me.great();
 
         me.nodeInputs.push(me.createInput('buffer', MEPH.audio.graph.node.Node.Anything));
 
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.title = 'Outputs(s)';
 
         me.fire('altered', { path: 'nodeOutputs' })

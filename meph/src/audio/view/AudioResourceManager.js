@@ -27,11 +27,11 @@ MEPH.define('MEPH.audio.view.AudioResourceManager', {
     initialize: function () {
         var me = this;
 
-        me.super();
+        me.great();
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
 
         MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.onInjectionsComplete.bind(me));
         MEPH.subscribe('select_audio_buffer_resourcemanager', function (type, args) {

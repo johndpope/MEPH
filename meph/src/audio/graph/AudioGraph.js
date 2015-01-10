@@ -42,7 +42,7 @@ MEPH.define('MEPH.audio.graph.AudioGraph', {
         me.graph = new MEPH.graph.SVGGraph();
         MEPH.subscribe(MEPH.audio.AudioResources.RESOURCE_MANAGER_UPDATE, me.updateGraphList.bind(me));
         MEPH.subscribe('opengraphinstance', me.openGraphInstanceHandler.bind(me));;
-        me.super();
+        me.great();
     },
     statics: {
         screate: function (graph, size, selector, holder) {;

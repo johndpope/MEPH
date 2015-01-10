@@ -148,6 +148,7 @@
                         'audio/view/VisualSelector.spec.js',
                         'application/Application.spec.js',
                         'bind/Binder.spec.js',
+                        'build/MinificationBatchCreate.spec.js',
                         'button/Button.spec.js',
                         'button/IconButton.spec.js',
                         'control/Control.spec.js',

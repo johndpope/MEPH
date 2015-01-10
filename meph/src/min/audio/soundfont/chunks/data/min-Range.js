@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.Range",{requires:[],extend:"MEPH.audio.soundfont.SFObject",statics:{},properties:{low:0,high:0},initialize:function(b,a,c){this.callParent(b);this.low=a;this.high=c}});

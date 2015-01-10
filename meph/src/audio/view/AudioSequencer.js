@@ -76,7 +76,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 //return 60 / me.smallestnote / me.beatspermin;
             }
         })
-        me.super();
+        me.great();
         if (!me.sequence) {
             me.sequence = new MEPH.audio.Sequence();
         }
@@ -128,7 +128,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.beatspermin = me.defaultBpm;
         me.firstMidiNote = 0;
         me.lastMidiNote = 192;
@@ -633,7 +633,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 return me.scaleValue(result);
             }
         }
-        me.delete = {
+        me['delete'] = {
             'function': function (items) {
 
                 if (items) {
@@ -1018,7 +1018,7 @@ MEPH.define('MEPH.audio.view.AudioSequencer', {
                 me.$inj.scheduler.render().then(function (x) {
                     debugger;
                     var res = x;
-                }).catch(function (e) {
+                })['catch'](function (e) {
                     debugger
                 })
             }

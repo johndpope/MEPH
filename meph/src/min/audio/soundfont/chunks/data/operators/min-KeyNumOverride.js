@@ -1,0 +1,1 @@
+MEPH.define("MEPH.audio.soundfont.chunks.data.operators.KeyNumOverride",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.SubstitutionOperator",statics:{},initialize:function(a){if(a==undefined||a==null){a=-1}this.callParent(Operator.KEY_NUM,a)}});

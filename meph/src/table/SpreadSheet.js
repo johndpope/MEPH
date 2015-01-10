@@ -1098,8 +1098,8 @@ MEPH.define('MEPH.table.SpreadSheet', {
                         me.state === MEPH.table.SpreadSheet.states.Selecting ? me.endselect() : me.select();
                         break;
                     default:
-                        if (command.function) {
-                            command.function(evt);
+                        if (command['function']) {
+                            command['function'](evt);
                         }
                         break;
                 }

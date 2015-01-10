@@ -15,7 +15,7 @@ MEPH.define('MEPH.audio.graph.node.InOutNodeBase', {
     //    me.nodecontrols = me.nodecontrols || [];
     //    me.nodecontrols.push('bufferoutput');
 
-    //    me.super();
+    //    me.great();
 
     //    me.nodeOutputs.push(me.createOutput('buffer', MEPH.audio.graph.node.Node.Anything));
 
@@ -23,7 +23,7 @@ MEPH.define('MEPH.audio.graph.node.InOutNodeBase', {
     setupActiveZones: function (viewport, node) {
         var me = this;
         node.on('connectionadded', me.onNodeChanged.bind(me));
-        return me.super();
+        return me.great();
     },
     onConnectionChanged: function (connection, type, type2, args) {
 
@@ -65,7 +65,7 @@ MEPH.define('MEPH.audio.graph.node.InOutNodeBase', {
     },
     onLoaded: function () {
         var me = this;
-        me.super();
+        me.great();
         me.title = 'Input(s)';
 
         me.fire('altered', { path: 'nodeOutputs' })

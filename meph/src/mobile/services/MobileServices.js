@@ -21,14 +21,14 @@ MEPH.define('MEPH.mobile.services.MobileServices', {
             if (!serviceConfig) {
                 return Promise.resolve().then(function () { return null; });
             }
-            if (serviceConfig.static) {
+            if (serviceConfig['static']) {
                 result = cache.first(function (x) { return x.name === serviceName; });
                 if (result) {
                     return Promise.resolve().then(function () { return result.instance; });
                 }
             }
             return MEPH.MobileServices.createInstance(serviceConfig).then(function (instance) {
-                if (serviceConfig.static) {
+                if (serviceConfig['static']) {
                     cache.push({
                         name: serviceConfig.name,
                         config: serviceConfig.config,
