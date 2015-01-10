@@ -9916,6 +9916,16 @@ div.graphBody div:first-child {
   background-size: contain;
 }
 
+/* line 274, ../sass/meph-default/controls/view/_misc.scss */
+.hidden-header {
+  display: none;
+}
+
+/* line 278, ../sass/meph-default/controls/view/_misc.scss */
+.hidden-header + .meph-activity-view-body {
+  padding-top: 0px;
+}
+
 /* line 1, ../sass/meph-default/mobile/application/container/_mobileapplicationcontainer.scss */
 .meph-mobile-application-container,
 .meph-application-container {

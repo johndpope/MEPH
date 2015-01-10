@@ -52,13 +52,18 @@ MEPH.define('MEPH.identity.IdentityProvider', {
         }).then(function (promises) {
             promises.foreach(function (promise) {
                 promise.then(function (obj) {
-                    observableArray.removeWhere(function (x) {
-                        return x.provider === obj.provider;
+                    var objs = !Array.isArray(obj) ? [obj] : obj;
+                    objs.foreach(function (obj) {
+                        observableArray.removeWhere(function (x) {
+                            return x.provider === obj.provider;
+                        });
+                    })
+                    objs.foreach(function (obj) {
+                        if (obj.value !== null && obj.value !== undefined) {
+                            obj.label = obj.value + ' (' + obj.type + ')';
+                            observableArray.push(obj);
+                        }
                     });
-                    if (obj.value !== null && obj.value !== undefined) {
-                        obj.label = obj.value + ' (' + obj.type + ')';
-                        observableArray.push(obj);
-                    }
                 })
             })
         });

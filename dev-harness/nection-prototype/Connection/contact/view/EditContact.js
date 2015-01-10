@@ -29,6 +29,7 @@
         me.great()
         me.activityview.hideCloseBtn()
         me.initMe();
+        me.activityview.hideHeader();
     },
     onInjectionsComplete: function () {
         var me = this;

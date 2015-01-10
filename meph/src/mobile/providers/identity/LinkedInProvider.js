@@ -43,13 +43,18 @@ MEPH.define('MEPH.mobile.providers.identity.LinkedInProvider', {
             }).then(function (response) {
                 var val = null;
                 if (response) {
-
                     switch (prop) {
                         case 'headline':
                             val = response.headline;;
                             break;
                         case 'name':
                             val = response.firstName + ' ' + response.lastName;
+                            break;
+                        case 'firstname':
+                            val = response.firstName;
+                            break;
+                        case 'lastname':
+                            val = response.lastName;
                             break;
                         case 'gender':
                             break;
@@ -58,22 +63,53 @@ MEPH.define('MEPH.mobile.providers.identity.LinkedInProvider', {
                         case 'profileimage':
                             val = response.pictureUrl;
                             break;
-                        case 'occupation': 
+                        case 'occupation':
+                            var job1 = response.threeCurrentPositions.values.first();
+                            if (job1) {
+                                val = job1.title;
+                            }
+                            break;
+                        case 'company':
+                            var job1 = response.threeCurrentPositions.values.first();
+                            if (job1 && job1.company) {
+                                val = job1.company.name;
+                            }
+                            break;
+                        case 'companies':
+                            if (response.threeCurrentPositions) {
+                                val = response.threeCurrentPositions.values.select(function (x) {
+                                    return {
+                                        value: x.title + ', ' + x.company.name,
+                                        title: x.title,
+                                        company: x.company.name,
+                                        companyid: x.id,
+                                        key: LinkedInProvider.key
+                                    };
+                                });
+                            }
                             break;
                         case 'skills':
                             if (response.skills && response.skills.values)
                                 val = response.skills.values.select(function (skill) { return skill.skill.name }).join();
                             break;
-                        case 'url':
-                            break;
                     }
                 }
-                return {
-                    provider: me,
-                    type: LinkedInProvider.key,
-                    response: response,
-                    value: val
-                };
+                if (Array.isArray(val)) {
+                    return val.select(function (t) {
+                        t.provider = me;
+                        t.type = LinkedInProvider.key;
+                        t.response = response;
+                        return t;
+                    })
+                }
+                else {
+                    return {
+                        provider: me,
+                        type: LinkedInProvider.key,
+                        response: response,
+                        value: val
+                    };
+                }
             });
         });
         return me.$providerpromise;

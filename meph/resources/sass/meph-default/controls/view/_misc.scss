@@ -270,3 +270,11 @@ div.graphBody div:first-child {
     width: 50px;
     background-size: contain;
 }
+
+.hidden-header {
+    display: none;
+}
+
+.hidden-header + .meph-activity-view-body {
+    padding-top: 0px;
+}

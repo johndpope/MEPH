@@ -3,11 +3,13 @@
     templates: true,
     extend: 'MEPH.mobile.activity.container.Container',
     mixins: ['MEPH.mobile.mixins.Activity'],
-    injections: ['contactService'],
+    injections: ['contactService', 'identityProvider'],
     requires: ['MEPH.util.Observable',
+        'MEPH.input.Dropdown',
         'Connection.contact.view.contactview.ContactView',
                 'MEPH.util.Style'],
     properties: {
+        companies: null,
         contact: null
     },
     initialize: function () {
@@ -16,6 +18,7 @@
     },
     onLoaded: function () {
         var me = this;
+        me.companies = me.companies || MEPH.util.Observable.observable([]);
         me.great()
         me.activityview.hideCloseBtn()
         me.initMe();
@@ -30,6 +33,9 @@
             me.$inj.contactService.me().then(function (contact) {
                 me.contact = contact;
             });
+        }
+        if (me.$inj && me.$inj.identityProvider) {
+            me.$inj.identityProvider.get('companies', me.companies);
         }
     },
     editMe: function () {

@@ -79,7 +79,7 @@
     },
     onLoaded: function () {
         var me = this;
-        me.super()
+        me.great()
         me.name = 'First time login';
 
         me.loadProviders();

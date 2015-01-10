@@ -30,6 +30,8 @@
     },
     hideHeader: function () {
         var me = this;
+         
+        me.headerdiv.classList.add('hidden-header');
         Style.hide(me.headerdiv);
     },
     onButtonClicked: function (a, b, c, d, e, f, evt) {

@@ -9,5 +9,10 @@
         name: null,
         accounts: null,
         $promise: null
+    },
+    onLoaded: function () {
+        var me = this;
+        me.great();
+        me.activityview.hideFooter();   
     }
 });

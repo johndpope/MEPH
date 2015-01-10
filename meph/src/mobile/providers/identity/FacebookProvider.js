@@ -200,6 +200,21 @@ MEPH.define('MEPH.mobile.providers.identity.FacebookProvider', {
                             case 'name':
                                 val = response.name;
                                 break;
+                            case 'firstname':
+                                val = response.first_name;
+                                break;
+                            case 'lastname':
+                                val = response.last_name;
+                                break;
+                            case 'middlename':
+                                val = response.middle_name;
+                                break;
+                            case 'location':
+                                val = response.location.name;
+                                break;
+                            case 'languages':
+                                val = response.languages.select(function (x) { return x.name; });
+                                break;
                             case 'gender':
                                 val = response.gender;
                                 break;

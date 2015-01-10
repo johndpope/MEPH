@@ -173,18 +173,6 @@
     },
     loginBtnAttributes: function () {
         var me = this;
-        //class="g-signin"
-        //data-callback="signinCallback"
-        //data-clientid="517106140753-3vmlkec7jhi5s0bmv89tkc8kho1u21e3.apps.googleusercontent.com"
-        //data-cookiepolicy="single_host_origin"
-        //data-requestvisibleactions="http://schema.org/AddAction"
-        //data-scope="https://www.googleapis.com/auth/plus.login"
-        //var t = {
-        //    'clientid': 'xxxxxxx.apps.googleusercontent.com',
-        //    'cookiepolicy': 'single_host_origin',
-        //    'callback': 'myCallback',
-        //    'requestvisibleactions': 'http://schema.org/AddAction http://schema.org/CommentAction'
-        //};
         window.GooglePlusProviderLoginCallback = GooglePlusProvider.LoginCallback.bind(me, me);
         return {
             //'class': 'g-signin',
@@ -221,19 +209,33 @@
             }).then(function (response) {
                 var val = null;
                 if (response) {
-
                     switch (prop) {
                         case 'name':
                             val = response.displayName;
                             break;
+                        case 'firstname':
+                            val = response.name.givenName;
+                            break;
+                        case 'lastname':
+                            val = response.name.familyName;
+                            break;
                         case 'gender':
                             val = response.gender;
+                            break;
+                        case 'schools':
+                            val = response.organizations.where(function (x) { return x.type === 'school'; });
+                            break;
+                        case 'work':
+                            val = response.organizations.where(function (x) { return x.type === 'work'; });
                             break;
                         case 'link':
                             val = response.link;
                             break;
                         case 'profileimage':
                             val = response.image.url
+                            break;
+                        case 'profileimage-large':
+                            val = response.image.url.split('?')[0] + '?sz=150';
                             break;
                         case 'occupation':
                             val = response.occupation;
