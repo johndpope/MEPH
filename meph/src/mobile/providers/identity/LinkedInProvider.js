@@ -218,6 +218,7 @@ MEPH.define('MEPH.mobile.providers.identity.LinkedInProvider', {
                 ,
                 ['api_key: ' + me.args['API Key'],
                     'onLoad: LinkedInProviderCallback',
+                    'credentials_cookie: true',
                 'authorize: true'].join('\r\n')
                 );
             });
