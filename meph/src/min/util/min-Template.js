@@ -1,1 +1,0 @@
-MEPH.define("MEPH.util.Template",{statics:{commentType:8,getComments:function(b){var a=[],c=MEPH.util.Dom;if(!b){return a}if(b.nodeType===c.commentType){a.push(b)}for(i=0;i<b.childNodes.length;i++){a=a.concat(c.getComments(b.childNodes[i]))}return a}}});

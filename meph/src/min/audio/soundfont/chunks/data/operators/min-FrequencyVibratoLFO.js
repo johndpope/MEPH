@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.FrequencyVibratoLFO",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk","MEPH.audio.soundfont.chunks.data.operators.Operator"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){this.callParent(Operator.FREQ_VIB_LFO,a||0)}});

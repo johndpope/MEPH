@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.ChorusEffectsSend",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){this.callParent(Operator.CHORUS_EFFECTS_SEND,a||0)}});

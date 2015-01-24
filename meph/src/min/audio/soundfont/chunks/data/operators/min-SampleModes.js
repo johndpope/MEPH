@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.SampleModes",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.SampleOperator",statics:{},initialize:function(a){this.callParent(Operator.SAMPLE_MODES,a||0)}});

@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.SustainVolumeEnvelope",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){this.callParent(Operator.SUSTAIN_RecordL_ENV,a)}});

@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.sbsms.Slice",{statics:{},properties:{bottom:null,top:null,band:0,time:null},initialize:function(b,a){this.band=b;this.time=a;this.bottom=null;this.top=null},remove:function(b){var a=this;if(b==a.top){a.top=a.top.pp}if(b==a.bottom){a.bottom=a.bottom.pn}}});

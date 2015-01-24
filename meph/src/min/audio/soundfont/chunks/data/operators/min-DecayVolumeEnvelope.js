@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.DecayVolumeEnvelope",{requires:[],extend:"MEPH.audio.soundfont.chunks.data.operators.ValueOperator",statics:{},initialize:function(a){if(a==undefined){a=-12000}this.callParent(Operator.DECAY_RecordL_ENV,a)}});

@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.VelocityRange",{requires:["MEPH.audio.soundfont.chunks.data.GeneratorsSubchunk"],extend:"MEPH.audio.soundfont.chunks.data.operators.RangeOperator",statics:{},initialize:function(a){this.callParent(Operator.VEL_RANGE,a)}});

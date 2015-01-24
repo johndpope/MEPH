@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.operators.IndexOperator",{extend:"MEPH.audio.soundfont.chunks.data.operators.Operator",requires:[],statics:{},initialize:function(b,a){this.callParent(b,a||0)}});

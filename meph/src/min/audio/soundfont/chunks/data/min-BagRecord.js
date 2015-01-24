@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.BagRecord",{requires:[],extend:"MEPH.audio.soundfont.SFObject",statics:{},properties:{generatorIndex:0,modulatorIndex:0},initialize:function(){this.callParent("Bag")}});

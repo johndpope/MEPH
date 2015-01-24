@@ -1,1 +1,0 @@
-MEPH.define("MEPH.audio.soundfont.chunks.data.PresetRecord",{requires:[],extend:"MEPH.audio.soundfont.chunks.data.ZoneRecord",statics:{},properties:{preset:0,bank:0,library:0,genre:0,morphology:0},initialize:function(){this.callParent("PresetRecord")}});
